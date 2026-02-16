@@ -21,6 +21,7 @@ qt_add_executable(develop
   src/Domain/CounterId.hpp
   src/Domain/Command.hpp
   src/Domain/Counter.hpp src/Domain/Counter.cpp
+  src/Application/Dto/CommandResult.hpp
 )
 target_link_libraries(develop PRIVATE Qt::Core Qt::Widgets)
 

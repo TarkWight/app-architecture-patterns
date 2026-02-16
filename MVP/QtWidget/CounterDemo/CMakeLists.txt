@@ -18,6 +18,7 @@ qt_standard_project_setup()
 
 qt_add_executable(develop
   src/main.cpp
+  src/Domain/CounterId.hpp
 )
 target_link_libraries(develop PRIVATE Qt::Core Qt::Widgets)
 

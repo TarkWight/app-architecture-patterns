@@ -1,0 +1,25 @@
+# ==== Build dirs ====
+**/build/
+**/build-*/
+**/cmake-build-*/
+
+# ==== CMake ====
+**/CMakeFiles/
+**/CMakeCache.txt
+**/cmake_install.cmake
+**/compile_commands.json
+**/Makefile
+
+# ==== Qt Creator ====
+**/.qtcreator
+**/*.pro.user*
+**/*.qbs.user*
+**/*.user
+**/*.autosave
+
+# ==== OS ====
+**/.DS_Store
+**/Thumbs.db
+
+# ==== Configurations ====
+**/CMakeUserPresets.json

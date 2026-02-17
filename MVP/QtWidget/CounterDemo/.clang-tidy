@@ -35,7 +35,10 @@ CheckOptions:
   - { key: readability-identifier-length.MinimumVariableNameLength, value: 3 }
   - { key: readability-identifier-length.MinimumFunctionNameLength, value: 3 }
   - { key: readability-identifier-length.MinimumParameterNameLength, value: 3 }
-  - { key: readability-identifier-length.IgnoredVariableNames, value: 'ad;at;by;db;di;dx;dy;i;id;j;no;ok;on;op;pk;to;ui;vc;vm;x;y;z' }
+
+  - { key: readability-identifier-length.IgnoredVariableNames,  value: '^(ad|at|by|db|di|dx|dy|i|id|j|no|ok|on|op|pk|to|ui|vc|vm|x|y|z)$' }
+  - { key: readability-identifier-length.IgnoredParameterNames, value: '^(ad|at|by|db|di|dx|dy|i|id|j|no|ok|on|op|pk|to|ui|vc|vm|x|y|z)$' }
+  - { key: readability-identifier-length.IgnoredMemberNames,    value: '^(ad|at|by|db|di|dx|dy|i|id|j|no|ok|on|op|pk|to|ui|vc|vm|x|y|z)$' }
 
   - { key: readability-identifier-naming.ClassCase, value: CamelCase }
   - { key: readability-identifier-naming.StructCase, value: CamelCase }

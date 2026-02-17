@@ -16,8 +16,25 @@ set(CLANG_FORMAT_PATH "" CACHE FILEPATH "Path to clang-format executable")
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
 qt_standard_project_setup()
 
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
+
 qt_add_executable(develop
   src/main.cpp
+  src/Domain/CounterId.hpp
+  src/Domain/Command.hpp
+  src/Domain/Counter.hpp src/Domain/Counter.cpp
+  src/Application/Dto/CommandResult.hpp
+  src/Application/Ports/ILogger.hpp
+  src/Application/Ports/ICounterRepository.hpp
+  src/Application/UseCases/ExecuteCounterCommandUseCase.hpp src/Application/UseCases/ExecuteCounterCommandUseCase.cpp
+  src/Infrastructure/QtTextLogger.hpp src/Infrastructure/QtTextLogger.cpp
+  src/Infrastructure/InMemoryCounterRepository.hpp src/Infrastructure/InMemoryCounterRepository.cpp
+  src/Presentation/IMainView.hpp
+  src/Presentation/MainPresenter.hpp src/Presentation/MainPresenter.cpp
+  src/Ui/MainWindow.ui
+  src/Ui/MainWindow.hpp src/Ui/MainWindow.cpp
 )
 target_link_libraries(develop PRIVATE Qt::Core Qt::Widgets)
 

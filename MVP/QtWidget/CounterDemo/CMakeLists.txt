@@ -28,6 +28,7 @@ qt_add_executable(develop
   src/Infrastructure/QtTextLogger.hpp src/Infrastructure/QtTextLogger.cpp
   src/Infrastructure/InMemoryCounterRepository.hpp src/Infrastructure/InMemoryCounterRepository.cpp
   src/Presentation/IMainView.hpp
+  src/Presentation/MainPresenter.hpp src/Presentation/MainPresenter.cpp
 )
 target_link_libraries(develop PRIVATE Qt::Core Qt::Widgets)
 

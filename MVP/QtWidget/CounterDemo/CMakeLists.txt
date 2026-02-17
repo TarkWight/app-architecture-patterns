@@ -29,6 +29,7 @@ qt_add_executable(develop
   src/Infrastructure/InMemoryCounterRepository.hpp src/Infrastructure/InMemoryCounterRepository.cpp
   src/Presentation/IMainView.hpp
   src/Presentation/MainPresenter.hpp src/Presentation/MainPresenter.cpp
+  src/Ui/MainWindow.ui
 )
 target_link_libraries(develop PRIVATE Qt::Core Qt::Widgets)
 

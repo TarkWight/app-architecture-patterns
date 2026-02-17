@@ -25,6 +25,7 @@ qt_add_executable(develop
   src/Application/Ports/ILogger.hpp
   src/Application/Ports/ICounterRepository.hpp
   src/Application/UseCases/ExecuteCounterCommandUseCase.hpp src/Application/UseCases/ExecuteCounterCommandUseCase.cpp
+  src/Infrastructure/QtTextLogger.hpp src/Infrastructure/QtTextLogger.cpp
 )
 target_link_libraries(develop PRIVATE Qt::Core Qt::Widgets)
 

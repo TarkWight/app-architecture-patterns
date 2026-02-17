@@ -1,0 +1,92 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": { "major": 4, "minor": 2, "patch": 1 },
+
+  "configurePresets": [
+    {
+      "name": "clang-llvm-base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "CMAKE_CXX_STANDARD": "23",
+        "CMAKE_CXX_STANDARD_REQUIRED": "ON",
+        "CMAKE_CXX_EXTENSIONS": "OFF",
+
+        "ENABLE_CLANG_TIDY": "ON",
+        "ENABLE_CLANG_FORMAT_CHECK": "ON"
+      }
+    },
+
+    {
+      "name": "clang-llvm",
+      "displayName": "Clang LLVM Debug (strict)",
+      "inherits": "clang-llvm-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+
+    {
+      "name": "clang-llvm-release",
+      "displayName": "Clang LLVM Release (fast)",
+      "inherits": "clang-llvm-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "ENABLE_CLANG_TIDY": "OFF",
+        "ENABLE_CLANG_FORMAT_CHECK": "OFF"
+      }
+    },
+
+    {
+      "name": "clang-llvm-ubsan",
+      "displayName": "Clang LLVM Debug + UBSan",
+      "inherits": "clang-llvm",
+      "cacheVariables": {
+        "ENABLE_CLANG_TIDY": "OFF",
+        "ENABLE_CLANG_FORMAT_CHECK": "OFF",
+        "CMAKE_C_FLAGS": "-fsanitize=undefined -fno-omit-frame-pointer",
+        "CMAKE_CXX_FLAGS": "-fsanitize=undefined -fno-omit-frame-pointer",
+        "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=undefined",
+        "CMAKE_SHARED_LINKER_FLAGS": "-fsanitize=undefined"
+      }
+    },
+
+    {
+      "name": "clang-llvm-asan",
+      "displayName": "Clang LLVM Debug + ASan/UBSan",
+      "inherits": "clang-llvm",
+      "cacheVariables": {
+        "ENABLE_CLANG_TIDY": "OFF",
+        "ENABLE_CLANG_FORMAT_CHECK": "OFF",
+        "CMAKE_C_FLAGS": "-fsanitize=address,undefined -fno-omit-frame-pointer",
+        "CMAKE_CXX_FLAGS": "-fsanitize=address,undefined -fno-omit-frame-pointer",
+        "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address,undefined",
+        "CMAKE_SHARED_LINKER_FLAGS": "-fsanitize=address,undefined"
+      }
+    },
+
+    {
+      "name": "clang-llvm-tsan",
+      "displayName": "Clang LLVM Debug + ThreadSanitizer",
+      "inherits": "clang-llvm",
+      "cacheVariables": {
+        "ENABLE_CLANG_TIDY": "OFF",
+        "ENABLE_CLANG_FORMAT_CHECK": "OFF",
+        "CMAKE_C_FLAGS": "-fsanitize=thread -fno-omit-frame-pointer",
+        "CMAKE_CXX_FLAGS": "-fsanitize=thread -fno-omit-frame-pointer",
+        "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=thread",
+        "CMAKE_SHARED_LINKER_FLAGS": "-fsanitize=thread"
+      }
+    }
+  ],
+
+  "buildPresets": [
+    { "name": "clang-llvm", "configurePreset": "clang-llvm" },
+    { "name": "clang-llvm-release", "configurePreset": "clang-llvm-release" },
+    { "name": "clang-llvm-ubsan", "configurePreset": "clang-llvm-ubsan" },
+    { "name": "clang-llvm-asan", "configurePreset": "clang-llvm-asan" },
+    { "name": "clang-llvm-tsan", "configurePreset": "clang-llvm-tsan" }
+  ]
+}

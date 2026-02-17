@@ -6,20 +6,282 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>980</width>
+    <height>640</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>MVP Counter Demo</string>
   </property>
-  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="rootLayout">
+    <property name="spacing">
+     <number>10</number>
+    </property>
+    <property name="leftMargin">
+     <number>12</number>
+    </property>
+    <property name="topMargin">
+     <number>12</number>
+    </property>
+    <property name="rightMargin">
+     <number>12</number>
+    </property>
+    <property name="bottomMargin">
+     <number>12</number>
+    </property>
+    <item>
+     <layout class="QHBoxLayout" name="topLayout">
+      <property name="spacing">
+       <number>12</number>
+      </property>
+      <item>
+       <widget class="QGroupBox" name="groupPoem">
+        <property name="title">
+         <string>Стих</string>
+        </property>
+        <layout class="QVBoxLayout" name="poemLayout">
+         <item>
+          <widget class="QTextEdit" name="textPoem">
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+           <property name="text" stdset="0">
+            <string>Я памятник себе воздвиг нерукотворный,
+К нему не зарастёт народная тропа...
+(здесь может быть любой текст)</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="rightLayout">
+        <property name="spacing">
+         <number>10</number>
+        </property>
+        <item>
+         <layout class="QHBoxLayout" name="buttonsRow">
+          <item>
+           <spacer name="buttonsLeftSpacer">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="buttonsStack">
+            <property name="spacing">
+             <number>8</number>
+            </property>
+            <item>
+             <widget class="QPushButton" name="btnPlus">
+              <property name="text">
+               <string>+ (инкремент)</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnMinus">
+              <property name="text">
+               <string>- (декремент)</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnReset">
+              <property name="text">
+               <string>Сброс</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTabWidget" name="tabWidget">
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <widget class="QWidget" name="tabCounter1">
+           <attribute name="title">
+            <string>Счётчик +1</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="tab1Layout">
+            <item>
+             <spacer name="tab1TopSpacer">
+              <property name="orientation">
+               <enum>Qt::Orientation::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="labelCounter1">
+              <property name="styleSheet">
+               <string>font-size: 40px; font-weight: 600;</string>
+              </property>
+              <property name="text">
+               <string>0</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignmentFlag::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="tab1BottomSpacer">
+              <property name="orientation">
+               <enum>Qt::Orientation::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="tabCounter2">
+           <attribute name="title">
+            <string>Счётчик +2</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="tab2Layout">
+            <item>
+             <spacer name="tab2TopSpacer">
+              <property name="orientation">
+               <enum>Qt::Orientation::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="labelCounter2">
+              <property name="styleSheet">
+               <string>font-size: 40px; font-weight: 600;</string>
+              </property>
+              <property name="text">
+               <string>0</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignmentFlag::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="tab2BottomSpacer">
+              <property name="orientation">
+               <enum>Qt::Orientation::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="tabCounter3">
+           <attribute name="title">
+            <string>Счётчик +3</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="tab3Layout">
+            <item>
+             <spacer name="tab3TopSpacer">
+              <property name="orientation">
+               <enum>Qt::Orientation::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="labelCounter3">
+              <property name="styleSheet">
+               <string>font-size: 40px; font-weight: 600;</string>
+              </property>
+              <property name="text">
+               <string>0</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignmentFlag::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="tab3BottomSpacer">
+              <property name="orientation">
+               <enum>Qt::Orientation::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="groupCommands">
+      <property name="title">
+       <string>Команды</string>
+      </property>
+      <layout class="QVBoxLayout" name="commandsLayout">
+       <item>
+        <widget class="QPlainTextEdit" name="plainTextEditLog">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+         <property name="placeholderText">
+          <string>Здесь будут появляться события: кто и что нажал…</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>980</width>
      <height>24</height>
     </rect>
    </property>

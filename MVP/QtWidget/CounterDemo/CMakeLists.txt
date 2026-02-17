@@ -23,6 +23,7 @@ qt_add_executable(develop
   src/Domain/Counter.hpp src/Domain/Counter.cpp
   src/Application/Dto/CommandResult.hpp
   src/Application/Ports/ILogger.hpp
+  src/Application/Ports/ICounterRepository.hpp
 )
 target_link_libraries(develop PRIVATE Qt::Core Qt::Widgets)
 

@@ -102,6 +102,13 @@
               </property>
              </widget>
             </item>
+            <item>
+             <widget class="QToolButton" name="btnSwitch">
+              <property name="text">
+               <string>Общий счётчик</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </item>
          </layout>

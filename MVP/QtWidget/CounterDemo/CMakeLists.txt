@@ -22,6 +22,7 @@ set(CMAKE_AUTORCC ON)
 
 qt_add_executable(develop
   src/main.cpp
+
   src/Domain/CounterId.hpp
   src/Domain/Command.hpp
   src/Domain/Counter.hpp
@@ -29,8 +30,11 @@ qt_add_executable(develop
   src/Domain/CounterMode.hpp
 
   src/Application/Dto/CommandResult.hpp
+  src/Application/Dto/CounterSnapshot.hpp
+
   src/Application/Ports/ILogger.hpp
   src/Application/Ports/ICounterRepository.hpp
+
   src/Application/UseCases/ExecuteCounterCommandUseCase.hpp
   src/Application/UseCases/ExecuteCounterCommandUseCase.cpp
 
@@ -46,6 +50,7 @@ qt_add_executable(develop
   src/Ui/MainWindow.ui
   src/Ui/MainWindow.hpp
   src/Ui/MainWindow.cpp
+
 
 )
 target_link_libraries(develop PRIVATE Qt::Core Qt::Widgets)

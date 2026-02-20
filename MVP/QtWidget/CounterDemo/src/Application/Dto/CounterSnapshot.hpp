@@ -3,7 +3,7 @@
 
 namespace application::dto {
 
-struct CounterSnapshot final {
+struct CountersSnapshot final {
     int tab0{0};
     int tab1{0};
     int tab2{0};

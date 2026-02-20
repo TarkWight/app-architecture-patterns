@@ -2,7 +2,7 @@
 
 #include "Infrastructure/InMemoryCounterRepository.hpp"
 #include "Infrastructure/QtTextLogger.hpp"
-#include "Application/UseCases/ExecuteCounterCommandUseCase.hpp"
+#include "Application/UseCases/SwitchCounterUseCase.hpp"
 #include "Presentation/MainPresenter.hpp"
 #include "Ui/MainWindow.hpp"
 
@@ -18,8 +18,8 @@ int main(int argc, char *argv[]) {
         }
     });
 
-    application::useCases::ExecuteCounterCommandUseCase executeCommandUseCase(repository, logger);
-    presentation::MainPresenter presenter(executeCommandUseCase);
+    application::useCases::SwitchCounterUseCase executeSwitcher(repository, logger);
+    presentation::MainPresenter presenter(executeSwitcher);
 
     ui::MainWindow window(presenter);
     sink = [&window](const std::string &msg) { window.appendCommandLog(msg); };

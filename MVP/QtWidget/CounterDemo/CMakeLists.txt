@@ -37,6 +37,8 @@ qt_add_executable(develop
 
   src/Application/UseCases/ExecuteCounterCommandUseCase.hpp
   src/Application/UseCases/ExecuteCounterCommandUseCase.cpp
+  src/Application/UseCases/SwitchCounterUseCase.hpp
+  src/Application/UseCases/SwitchCounterUseCase.cpp
 
   src/Infrastructure/QtTextLogger.hpp
   src/Infrastructure/QtTextLogger.cpp
@@ -50,8 +52,6 @@ qt_add_executable(develop
   src/Ui/MainWindow.ui
   src/Ui/MainWindow.hpp
   src/Ui/MainWindow.cpp
-
-
 )
 target_link_libraries(develop PRIVATE Qt::Core Qt::Widgets)
 

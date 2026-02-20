@@ -2,16 +2,14 @@
 #define MAINPRESENTER_HPP
 
 #include "IMainView.hpp"
-#include "../Application/UseCases/ExecuteCounterCommandUseCase.hpp"
-#include "../Domain/CounterId.hpp"
-
-using namespace application;
+#include "../Application/UseCases/SwitchCounterUseCase.hpp"
+#include "../Domain/CounterMode.hpp"
 
 namespace presentation {
 
 class MainPresenter final {
   public:
-    explicit MainPresenter(useCases::ExecuteCounterCommandUseCase &executeCommandUseCase);
+    explicit MainPresenter(application::useCases::SwitchCounterUseCase &switchCounterUseCase);
 
     void attachView(IMainView &view);
     void detachView();
@@ -19,17 +17,22 @@ class MainPresenter final {
     void onViewReady();
     void onTabChanged(int tabIndex);
 
+    void onModeToggled(bool isGlobal);
+
     void onIncrementPressed();
     void onDecrementPressed();
     void onResetPressed();
 
   private:
-    domain::CounterId currentCounterId{0};
+    int activeTabIndex{0};
+    domain::CounterMode mode{domain::CounterMode::PerTab};
 
-    useCases::ExecuteCounterCommandUseCase &executor;
+    application::useCases::SwitchCounterUseCase &useCase;
     IMainView *view{nullptr};
 
-    int stepFor(domain::CounterId counterId) const;
+    int stepForTab(int tabIndex) const;
+
+    void refreshUi(const application::dto::CountersSnapshot &snapshot);
     void executeAndRefresh(const domain::CounterCommand &command, const std::string &logText);
 };
 

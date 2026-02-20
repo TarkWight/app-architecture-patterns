@@ -2,6 +2,7 @@
 #include "ui_MainWindow.h"
 
 #include <QString>
+#include <QToolButton>
 
 namespace ui {
 
@@ -27,6 +28,10 @@ void MainWindow::connectSignals() {
     connect(ui->btnMinus, &QPushButton::clicked, this, [this]() { presenter.onDecrementPressed(); });
 
     connect(ui->btnReset, &QPushButton::clicked, this, [this]() { presenter.onResetPressed(); });
+
+    ui->btnSwitch->setCheckable(true);
+
+    connect(ui->btnSwitch, &QToolButton::toggled, this, [this](bool checked) { presenter.onModeToggled(checked); });
 }
 
 void MainWindow::setCounterValue(domain::CounterId id, int value) {

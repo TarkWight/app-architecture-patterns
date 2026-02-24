@@ -30,6 +30,7 @@ qt_add_executable(develop
   src/Domain/CounterMode.hpp
   src/Domain/Plot.hpp
   src/Domain/Poem.hpp
+  src/Domain/Time.hpp
 
   src/Application/Dto/CommandResult.hpp
   src/Application/Dto/CounterSnapshot.hpp

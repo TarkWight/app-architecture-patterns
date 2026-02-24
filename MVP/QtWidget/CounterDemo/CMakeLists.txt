@@ -37,6 +37,7 @@ qt_add_executable(develop
 
   src/Application/Ports/ILogger.hpp
   src/Application/Ports/ICounterRepository.hpp
+  src/Application/Session/SessionStateData.hpp
   src/Application/Session/Subscription.hpp
   src/Application/Session/Subscription.cpp
 

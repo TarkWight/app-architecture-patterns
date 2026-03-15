@@ -28,30 +28,96 @@ qt_add_executable(develop
   src/Domain/Counter.hpp
   src/Domain/Counter.cpp
   src/Domain/CounterMode.hpp
+  src/Domain/Plot.hpp
+  src/Domain/Poem.hpp
+  src/Domain/Time.hpp
 
   src/Application/Dto/CommandResult.hpp
   src/Application/Dto/CounterSnapshot.hpp
+  src/Application/Dto/PdfDocumentModel.hpp
 
   src/Application/Ports/ILogger.hpp
   src/Application/Ports/ICounterRepository.hpp
+  src/Application/Ports/IFunctionEngine.hpp
+  src/Application/Ports/ITimerService.hpp
+  src/Application/Ports/IPdfExporter.hpp
+
+  src/Application/Session/SessionState.hpp
+  src/Application/Session/SessionState.cpp
+  src/Application/Session/SessionStateData.hpp
+  src/Application/Session/Subscription.hpp
+  src/Application/Session/Subscription.cpp
 
   src/Application/UseCases/ExecuteCounterCommandUseCase.hpp
   src/Application/UseCases/ExecuteCounterCommandUseCase.cpp
+  src/Application/UseCases/BuildFormulaPlotUseCase.hpp
+  src/Application/UseCases/BuildFormulaPlotUseCase.cpp
   src/Application/UseCases/SwitchCounterUseCase.hpp
   src/Application/UseCases/SwitchCounterUseCase.cpp
+  src/Application/UseCases/GenerateStairPlotUseCase.hpp
+  src/Application/UseCases/GenerateStairPlotUseCase.cpp
+  src/Application/UseCases/StartTimerUseCase.hpp
+  src/Application/UseCases/StartTimerUseCase.cpp
+  src/Application/UseCases/StopTimerUseCase.hpp
+  src/Application/UseCases/StopTimerUseCase.cpp
+  src/Application/UseCases/ExportPdfUseCase.hpp
+  src/Application/UseCases/ExportPdfUseCase.cpp
+  src/Application/UseCases/SetFunctionExpressionUseCase.hpp
+  src/Application/UseCases/SetFunctionExpressionUseCase.cpp
+  src/Application/UseCases/SetLineColorUseCase.hpp
+  src/Application/UseCases/SetLineColorUseCase.cpp
+  src/Application/UseCases/SetTimerDurationUseCase.hpp
+  src/Application/UseCases/SetTimerDurationUseCase.cpp
+  src/Application/UseCases/UpdatePoemUseCase.hpp
+  src/Application/UseCases/UpdatePoemUseCase.cpp
+  src/Application/UseCases/SetTab2MinutesUseCase.hpp
+  src/Application/UseCases/SetTab2MinutesUseCase.cpp
+
 
   src/Infrastructure/QtTextLogger.hpp
   src/Infrastructure/QtTextLogger.cpp
   src/Infrastructure/InMemoryCounterRepository.hpp
   src/Infrastructure/InMemoryCounterRepository.cpp
+  src/Infrastructure/SimpleFunctionEngineStub.hpp
+  src/Infrastructure/QtTimerService.hpp
+  src/Infrastructure/QtTimerService.cpp
+  src/Infrastructure/SessionStateQtAdapter.hpp
+  src/Infrastructure/SessionStateQtAdapter.cpp
+  src/Infrastructure/QtPdfExporter.hpp
+  src/Infrastructure/QtPdfExporter.cpp
 
   src/Presentation/IMainView.hpp
   src/Presentation/MainPresenter.hpp
   src/Presentation/MainPresenter.cpp
+  src/Presentation/IShellView.hpp
+  src/Presentation/Tab1/ITab1View.hpp
+  src/Presentation/Tab2/ITab2View.hpp
+  src/Presentation/Tab3/ITab3View.hpp
+  src/Presentation/ShellPresenter.hpp
+  src/Presentation/ShellPresenter.cpp
+  src/Presentation/Tab1/Tab1Presenter.hpp
+  src/Presentation/Tab1/Tab1Presenter.cpp
+  src/Presentation/Tab2/Tab2Presenter.hpp
+  src/Presentation/Tab2/Tab2Presenter.cpp
+  src/Presentation/Tab3/Tab3Presenter.hpp
+  src/Presentation/Tab3/Tab3Presenter.cpp
 
-  src/Ui/MainWindow.ui
+  src/Ui/MainWindowUiAdapter.hpp
+  src/Ui/MainWindowUiAdapter.cpp
+  src/Ui/Tab1Widget.hpp
+  src/Ui/Tab1Widget.cpp
+  src/Ui/Tab2Widget.hpp
+  src/Ui/Tab2Widget.cpp
+  src/Ui/Tab3Widget.hpp
+  src/Ui/Tab3Widget.cpp
   src/Ui/MainWindow.hpp
   src/Ui/MainWindow.cpp
+
+  src/Ui/MainWindow.ui
+  src/Ui/Tab1Widget.ui
+  src/Ui/Tab2Widget.ui
+  src/Ui/Tab3Widget.ui
+  src/Application/ApplicationContext.hpp
 )
 target_link_libraries(develop PRIVATE Qt::Core Qt::Widgets)
 

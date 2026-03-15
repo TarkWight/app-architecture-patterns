@@ -11,7 +11,7 @@ class ICounterRepository {
   public:
     virtual ~ICounterRepository() = default;
 
-    virtual std::optional<domain::Counter> getId(domain::CounterId id) = 0;
+    virtual std::optional<domain::Counter> getById(domain::CounterId id) = 0;
     virtual void save(const domain::Counter &counter) = 0;
 };
 

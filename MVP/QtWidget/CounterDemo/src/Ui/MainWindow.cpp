@@ -1,56 +1,108 @@
 #include "MainWindow.hpp"
+
+#include "MainWindowUiAdapter.hpp"
+#include "Tab1Widget.hpp"
+#include "Tab2Widget.hpp"
+#include "Tab3Widget.hpp"
 #include "ui_MainWindow.h"
 
+#include <QColorDialog>
 #include <QString>
-#include <QToolButton>
 
 namespace ui {
 
-MainWindow::MainWindow(presentation::MainPresenter &presenter, QWidget *parent)
-    : QMainWindow(parent), ui(std::make_unique<Ui::MainWindow>()), presenter(presenter) {
+MainWindow::MainWindow(Dependencies deps, QWidget *parent)
+    : QMainWindow(parent), ui(std::make_unique<Ui::MainWindow>()), shellPresenter(deps.shellPresenter),
+      tab1Presenter(deps.tab1Presenter), tab2Presenter(deps.tab2Presenter), tab3Presenter(deps.tab3Presenter),
+      sessionAdapter(deps.sessionAdapter) {
     ui->setupUi(this);
 
-    presenter.attachView(*this);
-    connectSignals();
-    presenter.onViewReady();
+    shellPresenter.attachView(*this);
+
+    setupTabs();
+    connectShellSignals();
+    connectSessionSignals();
+
+    shellPresenter.onViewReady();
+    tab1Presenter.onViewReady();
+    tab2Presenter.onViewReady();
+    tab3Presenter.onViewReady();
 }
 
 MainWindow::~MainWindow() {
-    presenter.detachView();
+    shellPresenter.detachView();
 }
 
-void MainWindow::connectSignals() {
-
-    connect(ui->tabWidget, &QTabWidget::currentChanged, this, [this](int index) { presenter.onTabChanged(index); });
-
-    connect(ui->btnPlus, &QPushButton::clicked, this, [this]() { presenter.onIncrementPressed(); });
-
-    connect(ui->btnMinus, &QPushButton::clicked, this, [this]() { presenter.onDecrementPressed(); });
-
-    connect(ui->btnReset, &QPushButton::clicked, this, [this]() { presenter.onResetPressed(); });
-
-    ui->btnSwitch->setCheckable(true);
-
-    connect(ui->btnSwitch, &QToolButton::toggled, this, [this](bool checked) { presenter.onModeToggled(checked); });
+void MainWindow::setTimerText(const std::string &text) {
+    ui->labelTimerValue->setText(QString::fromStdString(text));
 }
 
-void MainWindow::setCounterValue(domain::CounterId id, int value) {
+void MainWindow::setStartEnabled(bool enabled) {
+    ui->buttonStart->setEnabled(enabled);
+}
 
-    switch (id.getValue()) {
-    case 0:
-        ui->labelCounter1->setText(QString::number(value));
-        break;
-    case 1:
-        ui->labelCounter2->setText(QString::number(value));
-        break;
-    case 2:
-        ui->labelCounter3->setText(QString::number(value));
-        break;
+void MainWindow::setStopEnabled(bool enabled) {
+    ui->buttonStop->setEnabled(enabled);
+}
+
+void MainWindow::setFunctionExpression(const std::string &expression) {
+    if (ui->lineEditFormula->text().toStdString() == expression) {
+        return;
     }
+
+    ui->lineEditFormula->setText(QString::fromStdString(expression));
 }
 
-void MainWindow::appendCommandLog(const std::string &text) {
+void MainWindow::appendLog(const std::string &text) {
     ui->plainTextEditLog->appendPlainText(QString::fromStdString(text));
+}
+
+void MainWindow::setupTabs() {
+    tab1Widget = new Tab1Widget(tab1Presenter, sessionAdapter, this);
+    tab2Widget = new Tab2Widget(tab2Presenter, sessionAdapter, this);
+    tab3Widget = new Tab3Widget(tab3Presenter, sessionAdapter, this);
+
+    ui->tabWidget->clear();
+    ui->tabWidget->addTab(tab1Widget, QStringLiteral("Вкладка 1"));
+    ui->tabWidget->addTab(tab2Widget, QStringLiteral("Вкладка 2"));
+    ui->tabWidget->addTab(tab3Widget, QStringLiteral("Вкладка 3"));
+}
+
+void MainWindow::connectShellSignals() {
+    QObject::connect(ui->buttonStart, &QPushButton::clicked, this, [this]() { shellPresenter.onStartPressed(); });
+
+    QObject::connect(ui->buttonStop, &QPushButton::clicked, this, [this]() { shellPresenter.onStopPressed(); });
+
+    QObject::connect(ui->buttonCalculate, &QPushButton::clicked, this,
+                     [this]() { shellPresenter.onCalculatePressed(); });
+
+    QObject::connect(ui->lineEditFormula, &QLineEdit::editingFinished, this,
+                     [this]() { shellPresenter.onFunctionEdited(ui->lineEditFormula->text().toStdString()); });
+
+    QObject::connect(ui->buttonPickColor, &QPushButton::clicked, this, [this]() {
+        const QColor color = QColorDialog::getColor(Qt::red, this);
+        if (!color.isValid()) {
+            return;
+        }
+
+        shellPresenter.onLineColorSelected(MainWindowUiAdapter::toDomainColor(color));
+    });
+}
+
+void MainWindow::connectSessionSignals() {
+    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::timerChanged, this,
+                     [this](int elapsedSeconds, bool /*running*/) {
+                         setTimerText(MainWindowUiAdapter::formatElapsed(elapsedSeconds));
+                     });
+
+    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::functionExpressionChanged, this,
+                     [this](const QString &expression) {
+                         if (ui->lineEditFormula->text() == expression) {
+                             return;
+                         }
+
+                         ui->lineEditFormula->setText(expression);
+                     });
 }
 
 } // namespace ui

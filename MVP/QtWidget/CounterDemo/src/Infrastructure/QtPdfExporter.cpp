@@ -52,18 +52,12 @@ void QtPdfExporter::exportDocument(const application::dto::PdfDocumentModel &doc
         return;
     }
 
-    // constexpr int left = 100;
-    // constexpr int pageWidth = 2200;
-    // int top = 120;
-
     VerticalCursor cursor{.left = 100, .top = 120, .width = 2200};
 
-    // Title
     QFont titleFont("Times New Roman", 18, QFont::Bold);
     painter.setFont(titleFont);
     drawParagraph(painter, cursor, toQString(document.title), 40);
 
-    // First stanza
     QFont textFont("Times New Roman", 12);
     painter.setFont(textFont);
 
@@ -73,26 +67,21 @@ void QtPdfExporter::exportDocument(const application::dto::PdfDocumentModel &doc
         firstStanza += "\n";
     }
 
-    drawParagraph(painter, cursor, toQString(document.title), 40);
+    drawParagraph(painter, cursor, firstStanza, 30);
 
-    // Plot 1 placeholder
     drawPlotPlaceholder(painter, cursor, 500, QStringLiteral("Graph 1 placeholder"));
+    drawParagraph(painter, cursor, toQString(document.plot1Caption), 40);
 
-    drawParagraph(painter, cursor, toQString(document.title), 40);
-
-    // Plot 2 placeholder
     drawPlotPlaceholder(painter, cursor, 500, QStringLiteral("Graph 2 placeholder"));
+    drawParagraph(painter, cursor, toQString(document.plot2Caption), 40);
 
-    drawParagraph(painter, cursor, toQString(document.title), 40);
-
-    // Second stanza
     QString secondStanza;
     for (const auto &line : document.secondStanza) {
         secondStanza += toQString(line);
         secondStanza += "\n";
     }
 
-    drawParagraph(painter, cursor, toQString(document.title), 40);
+    drawParagraph(painter, cursor, secondStanza, 30);
 
     painter.end();
 }

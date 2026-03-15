@@ -30,4 +30,8 @@ void SessionStateQtAdapter::emitState(const application::session::SessionStateDa
     emit plot2Changed();
 }
 
+const application::session::SessionState &SessionStateQtAdapter::getState() const {
+    return state;
+}
+
 } // namespace infrastructure

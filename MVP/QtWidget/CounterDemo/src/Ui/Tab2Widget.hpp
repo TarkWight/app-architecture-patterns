@@ -6,6 +6,7 @@
 #include "../Infrastructure/SessionStateQtAdapter.hpp"
 #include "../Presentation/Tab2/ITab2View.hpp"
 #include "../Presentation/Tab2/Tab2Presenter.hpp"
+#include "PlotWidget.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -32,6 +33,7 @@ class Tab2Widget final : public QWidget, public presentation::tab2::ITab2View {
     Ui::Tab2Widget *ui;
     presentation::tab2::Tab2Presenter &presenter;
     infrastructure::SessionStateQtAdapter &sessionAdapter;
+    PlotWidget *plotWidget{nullptr};
 
     void connectSignals();
     void connectSessionSignals();

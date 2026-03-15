@@ -10,6 +10,10 @@ Tab1Widget::Tab1Widget(presentation::tab1::Tab1Presenter &presenter,
     : QWidget(parent), ui(new Ui::Tab1Widget), presenter(presenter), sessionAdapter(sessionAdapter) {
     ui->setupUi(this);
 
+    plotWidget = new PlotWidget(this);
+    ui->verticalLayoutPlot->replaceWidget(ui->labelPlotState, plotWidget);
+    ui->labelPlotState->hide();
+
     presenter.attachView(*this);
 
     connectSignals();
@@ -26,8 +30,7 @@ void Tab1Widget::setCounterValue(int value) {
 }
 
 void Tab1Widget::refreshPlot() {
-    // Здесь позже будет реальная интеграция с Qt Graphs
-    ui->labelPlotState->setText(QStringLiteral("Plot refreshed"));
+    plotWidget->setPlot(sessionAdapter.getState().get().plot1);
 }
 
 void Tab1Widget::appendLog(const std::string &text) {

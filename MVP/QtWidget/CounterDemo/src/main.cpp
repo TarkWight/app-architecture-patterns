@@ -1,29 +1,21 @@
 #include <QApplication>
 
-#include "Infrastructure/InMemoryCounterRepository.hpp"
-#include "Infrastructure/QtTextLogger.hpp"
-#include "Application/UseCases/SwitchCounterUseCase.hpp"
-#include "Presentation/MainPresenter.hpp"
+#include "Application/ApplicationContext.hpp"
+
 #include "Ui/MainWindow.hpp"
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
-    infrastructure::InMemoryCounterRepository repository;
+    ApplicationContext context;
 
-    std::function<void(const std::string &)> sink;
-    infrastructure::QtTextLogger logger([&sink](const std::string &msg) {
-        if (sink) {
-            sink(msg);
-        }
-    });
-
-    application::useCases::SwitchCounterUseCase executeSwitcher(repository, logger);
-    presentation::MainPresenter presenter(executeSwitcher);
-
-    ui::MainWindow window(presenter);
-    sink = [&window](const std::string &msg) { window.appendCommandLog(msg); };
+    ui::MainWindow window{ui::MainWindow::Dependencies{.shellPresenter = context.shellPresenter,
+                                                       .tab1Presenter = context.tab1Presenter,
+                                                       .tab2Presenter = context.tab2Presenter,
+                                                       .tab3Presenter = context.tab3Presenter,
+                                                       .sessionAdapter = context.sessionAdapter}};
 
     window.show();
+
     return app.exec();
 }

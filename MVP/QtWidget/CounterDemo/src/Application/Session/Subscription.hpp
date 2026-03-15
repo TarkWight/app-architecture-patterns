@@ -1,5 +1,5 @@
-#ifndef SUBSCRIPTION_H
-#define SUBSCRIPTION_H
+#ifndef SUBSCRIPTION_HPP
+#define SUBSCRIPTION_HPP
 
 #include <functional>
 
@@ -27,4 +27,4 @@ class Subscription {
 
 } // namespace application::session
 
-#endif // SUBSCRIPTION_H
+#endif // SUBSCRIPTION_HPP

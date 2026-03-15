@@ -9,7 +9,7 @@ InMemoryCounterRepository::InMemoryCounterRepository() {
     counters.try_emplace(domain::CounterId{3}, domain::Counter{domain::CounterId{3}});
 }
 
-std::optional<domain::Counter> InMemoryCounterRepository::getId(domain::CounterId id) {
+std::optional<domain::Counter> InMemoryCounterRepository::getById(domain::CounterId id) {
     const auto counter = counters.find(id);
     if (counter == counters.end()) {
         return std::nullopt;

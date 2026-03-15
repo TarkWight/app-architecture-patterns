@@ -17,7 +17,7 @@ domain::CounterId SwitchCounterUseCase::globalId() const {
 }
 
 int SwitchCounterUseCase::loadValue(domain::CounterId id) {
-    auto counterOpt = repository.getId(id);
+    auto counterOpt = repository.getById(id);
     if (!counterOpt.has_value()) {
         throw std::runtime_error("Counter not found");
     }
@@ -35,7 +35,7 @@ dto::CountersSnapshot SwitchCounterUseCase::execute(domain::CounterMode mode, in
                                                     const domain::CounterCommand &command) {
     const auto targetId = (mode == domain::CounterMode::Global) ? globalId() : tabId(activeTabIndex);
 
-    auto counterOpt = repository.getId(targetId);
+    auto counterOpt = repository.getById(targetId);
     if (!counterOpt.has_value()) {
         throw std::runtime_error("Counter not found");
     }

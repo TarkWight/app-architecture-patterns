@@ -16,6 +16,8 @@ class SessionStateQtAdapter final : public QObject {
     explicit SessionStateQtAdapter(application::session::SessionState &state, QObject *parent = nullptr);
     ~SessionStateQtAdapter() override = default;
 
+    const application::session::SessionState &getState() const;
+
   signals:
     void timerChanged(int elapsedSeconds, bool running);
     void timerDurationChanged(int minutes);

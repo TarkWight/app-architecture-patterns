@@ -10,6 +10,10 @@ Tab2Widget::Tab2Widget(presentation::tab2::Tab2Presenter &presenter,
     : QWidget(parent), ui(new Ui::Tab2Widget), presenter(presenter), sessionAdapter(sessionAdapter) {
     ui->setupUi(this);
 
+    plotWidget = new PlotWidget(this);
+    ui->verticalLayoutPlot->replaceWidget(ui->labelPlotState, plotWidget);
+    ui->labelPlotState->hide();
+
     presenter.attachView(*this);
 
     connectSignals();
@@ -30,7 +34,7 @@ void Tab2Widget::setMinutes(int minutes) {
 }
 
 void Tab2Widget::refreshPlot() {
-    ui->labelPlotState->setText(QStringLiteral("Formula plot refreshed"));
+    plotWidget->setPlot(sessionAdapter.getState().get().plot2);
 }
 
 void Tab2Widget::appendLog(const std::string &text) {

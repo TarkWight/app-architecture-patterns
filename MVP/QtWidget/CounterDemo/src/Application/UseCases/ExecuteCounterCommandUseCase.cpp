@@ -11,7 +11,7 @@ ExecuteCounterCommandUseCase::ExecuteCounterCommandUseCase(ports::ICounterReposi
 
 dto::CommandResult ExecuteCounterCommandUseCase::execute(domain::CounterId counterId,
                                                          const domain::CounterCommand &command) {
-    auto counterOpt = repository.getId(counterId);
+    auto counterOpt = repository.getById(counterId);
     if (!counterOpt.has_value()) {
         throw std::runtime_error("Counter not found");
     }

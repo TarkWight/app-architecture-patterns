@@ -88,8 +88,8 @@ void Tab3Widget::connectSignals() {
     QObject::connect(ui->spinBoxTimerMinutes, qOverload<int>(&QSpinBox::valueChanged), this,
                      [this](int value) { presenter.onTimerDurationChanged(value); });
 
-    QObject::connect(ui->lineEditTitle, &QLineEdit::editingFinished, this,
-                     [this]() { presenter.onPoemTitleChanged(ui->lineEditTitle->text().toStdString()); });
+    QObject::connect(ui->lineEditTitle, &QLineEdit::textChanged, this,
+                     [this](const QString &text) { presenter.onPoemTitleChanged(text.toStdString()); });
 
     for (int i = 0; i < 8; ++i) {
         auto *lineEdit = lineEditByIndex(ui, i);
@@ -97,8 +97,8 @@ void Tab3Widget::connectSignals() {
             continue;
         }
 
-        QObject::connect(lineEdit, &QLineEdit::editingFinished, this,
-                         [this, lineEdit, i]() { presenter.onPoemLineChanged(i, lineEdit->text().toStdString()); });
+        QObject::connect(lineEdit, &QLineEdit::textChanged, this,
+                         [this, i](const QString &text) { presenter.onPoemLineChanged(i, text.toStdString()); });
     }
 
     QObject::connect(ui->buttonExportPdf, &QPushButton::clicked, this, [this]() {

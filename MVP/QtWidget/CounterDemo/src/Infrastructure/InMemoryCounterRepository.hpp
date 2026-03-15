@@ -14,7 +14,7 @@ class InMemoryCounterRepository final : public application::ports::ICounterRepos
   public:
     InMemoryCounterRepository();
 
-    std::optional<domain::Counter> getId(domain::CounterId counterId) override;
+    std::optional<domain::Counter> getById(domain::CounterId counterId) override;
     void save(const domain::Counter &counter) override;
 
   private:

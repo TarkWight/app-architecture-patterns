@@ -37,6 +37,13 @@ qt_add_executable(develop
 
   src/Application/Ports/ILogger.hpp
   src/Application/Ports/ICounterRepository.hpp
+  src/Application/Ports/IFunctionEngine.hpp
+
+  src/Application/Session/SessionState.hpp
+  src/Application/Session/SessionState.cpp
+  src/Application/Session/SessionStateData.hpp
+  src/Application/Session/Subscription.hpp
+  src/Application/Session/Subscription.cpp
 
   src/Application/UseCases/ExecuteCounterCommandUseCase.hpp
   src/Application/UseCases/ExecuteCounterCommandUseCase.cpp

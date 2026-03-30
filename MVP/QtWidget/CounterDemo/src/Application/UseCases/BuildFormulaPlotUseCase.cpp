@@ -1,12 +1,15 @@
 #include "BuildFormulaPlotUseCase.hpp"
 
+#include <algorithm>
+#include <cmath>
+
 namespace application::useCases {
 
 BuildFormulaPlotUseCase::BuildFormulaPlotUseCase(session::SessionState &state, const ports::IFunctionEngine &engine)
     : state(state), engine(engine) {
 }
 
-domain::PlotModel application::useCases::BuildFormulaPlotUseCase::execute() {
+domain::PlotModel BuildFormulaPlotUseCase::execute() {
     const auto &stateData = state.get();
 
     domain::PlotModel plot{};
@@ -14,18 +17,23 @@ domain::PlotModel application::useCases::BuildFormulaPlotUseCase::execute() {
     plot.color = stateData.lineColor;
 
     const int minutes = stateData.tab2Minutes.value > 0 ? stateData.tab2Minutes.value : 20;
+
     plot.x = domain::AxisSpec{0.0, static_cast<double>(minutes), 1.0, "minutes"};
 
     plot.y = domain::AxisSpec{0.0, 7.5, 0.5, "Y"};
 
-    plot.series.points.reserve(static_cast<std::size_t>(minutes) + 1);
+    constexpr double sampleStep = 0.1;
+    const int sampleCount = static_cast<int>(std::floor(static_cast<double>(minutes) / sampleStep));
 
-    for (int time = 0; time <= minutes; ++time) {
-        const double x = static_cast<double>(time);
+    plot.series.points.reserve(static_cast<std::size_t>(sampleCount) + 1);
+
+    for (int index = 0; index <= sampleCount; ++index) {
+        const double x = static_cast<double>(index) * sampleStep;
         const double yRaw = engine.eval(stateData.functionExpression, x);
 
-        const double y = (yRaw < plot.y.min) ? plot.y.min : (yRaw > plot.y.max ? plot.y.max : yRaw);
-        plot.series.points.push_back(domain::Point{x, y});
+        const double y = std::clamp(yRaw, plot.y.min, plot.y.max);
+
+        plot.series.points.push_back(domain::Point{.x = x, .y = y});
     }
 
     state.setPlot2(plot);

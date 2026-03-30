@@ -1,5 +1,7 @@
 #include "QtPdfExporter.hpp"
 
+#include "../Ui/Render/PlotRenderer.hpp"
+
 #include <QFont>
 #include <QFontMetrics>
 #include <QPageSize>
@@ -29,12 +31,9 @@ void drawParagraph(QPainter &painter, VerticalCursor &cursor, const QString &tex
     cursor.top += usedRect.height() + lineSpacing;
 }
 
-void drawPlotPlaceholder(QPainter &painter, VerticalCursor &cursor, int height, const QString &title) {
+void drawPlot(QPainter &painter, VerticalCursor &cursor, int height, const domain::PlotModel &plot) {
     const QRect rect(cursor.left, cursor.top, cursor.width, height);
-
-    painter.drawRect(rect);
-    painter.drawText(rect, Qt::AlignCenter, title);
-
+    ui::render::PlotRenderer::drawPlot(painter, rect, plot);
     cursor.top += height + 20;
 }
 
@@ -66,13 +65,12 @@ void QtPdfExporter::exportDocument(const application::dto::PdfDocumentModel &doc
         firstStanza += toQString(line);
         firstStanza += "\n";
     }
-
     drawParagraph(painter, cursor, firstStanza, 30);
 
-    drawPlotPlaceholder(painter, cursor, 500, QStringLiteral("Graph 1 placeholder"));
+    drawPlot(painter, cursor, 500, document.plot1);
     drawParagraph(painter, cursor, toQString(document.plot1Caption), 40);
 
-    drawPlotPlaceholder(painter, cursor, 500, QStringLiteral("Graph 2 placeholder"));
+    drawPlot(painter, cursor, 500, document.plot2);
     drawParagraph(painter, cursor, toQString(document.plot2Caption), 40);
 
     QString secondStanza;
@@ -80,7 +78,6 @@ void QtPdfExporter::exportDocument(const application::dto::PdfDocumentModel &doc
         secondStanza += toQString(line);
         secondStanza += "\n";
     }
-
     drawParagraph(painter, cursor, secondStanza, 30);
 
     painter.end();

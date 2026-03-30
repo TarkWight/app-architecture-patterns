@@ -119,6 +119,7 @@ qt_add_executable(develop
   src/Ui/Tab3Widget.ui
   src/Application/ApplicationContext.hpp
   src/Ui/PlotWidget.hpp src/Ui/PlotWidget.cpp
+  src/Ui/Render/PlotRenderer.hpp src/Ui/Render/PlotRenderer.cpp
 )
 target_link_libraries(develop PRIVATE Qt::Core Qt::Widgets)
 

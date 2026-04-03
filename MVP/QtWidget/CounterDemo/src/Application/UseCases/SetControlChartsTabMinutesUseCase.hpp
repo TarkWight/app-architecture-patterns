@@ -5,9 +5,9 @@
 
 namespace application::useCases {
 
-class SetTab2MinutesUseCase final {
+class SetControlChartsTabMinutesUseCase final {
   public:
-    explicit SetTab2MinutesUseCase(application::session::SessionState &state);
+    explicit SetControlChartsTabMinutesUseCase(application::session::SessionState &state);
 
     void execute(int minutes);
 

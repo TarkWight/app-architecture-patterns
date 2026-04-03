@@ -16,7 +16,7 @@ domain::PlotModel BuildFormulaPlotUseCase::execute() {
     plot.title = "Formula plot";
     plot.color = stateData.lineColor;
 
-    const int minutes = stateData.tab2Minutes.value > 0 ? stateData.tab2Minutes.value : 20;
+    const int minutes = stateData.controlChartsTabMinutes.value > 0 ? stateData.controlChartsTabMinutes.value : 20;
 
     plot.x = domain::AxisSpec{0.0, static_cast<double>(minutes), 1.0, "minutes"};
 

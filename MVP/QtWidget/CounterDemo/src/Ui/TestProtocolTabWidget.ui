@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Tab3Widget</class>
- <widget class="QWidget" name="Tab3Widget">
+ <class>TestProtocolTabWidget</class>
+ <widget class="QWidget" name="TestProtocolTabWidget">
   <property name="geometry">
    <rect>
     <x>0</x>

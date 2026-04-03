@@ -2,8 +2,8 @@
 
 #include "MainWindowUiAdapter.hpp"
 #include "TelemetryChartsTabWidget.hpp"
-#include "Tab2Widget.hpp"
-#include "Tab3Widget.hpp"
+#include "ControlChartsTabWidget.hpp"
+#include "TestProtocolTabWidget.hpp"
 #include "ui_MainWindow.h"
 
 #include <QColorDialog>
@@ -13,8 +13,9 @@ namespace ui {
 
 MainWindow::MainWindow(Dependencies deps, QWidget *parent)
     : QMainWindow(parent), ui(std::make_unique<Ui::MainWindow>()), shellPresenter(deps.shellPresenter),
-      telemetryChartsTabPresenter(deps.tab1Presenter), tab2Presenter(deps.tab2Presenter),
-      tab3Presenter(deps.tab3Presenter), sessionAdapter(deps.sessionAdapter) {
+      telemetryChartsTabPresenter(deps.telemetryChartsTabPresenter),
+      controlChartsTabPresenter(deps.controlChartsTabPresenter),
+      testProtocolTabPresenter(deps.testProtocolTabPresenter), sessionAdapter(deps.sessionAdapter) {
     ui->setupUi(this);
 
     shellPresenter.attachView(*this);
@@ -25,8 +26,8 @@ MainWindow::MainWindow(Dependencies deps, QWidget *parent)
 
     shellPresenter.onViewReady();
     telemetryChartsTabPresenter.onViewReady();
-    tab2Presenter.onViewReady();
-    tab3Presenter.onViewReady();
+    controlChartsTabPresenter.onViewReady();
+    testProtocolTabPresenter.onViewReady();
 }
 
 MainWindow::~MainWindow() {
@@ -59,13 +60,13 @@ void MainWindow::appendLog(const std::string &text) {
 
 void MainWindow::setupTabs() {
     telemetryChartsTabWidget = new TelemetryChartsTabWidget(telemetryChartsTabPresenter, sessionAdapter, this);
-    tab2Widget = new Tab2Widget(tab2Presenter, sessionAdapter, this);
-    tab3Widget = new Tab3Widget(tab3Presenter, sessionAdapter, this);
+    controlChartsTabWidget = new ControlChartsTabWidget(controlChartsTabPresenter, sessionAdapter, this);
+    testProtocolTabWidget = new TestProtocolTabWidget(testProtocolTabPresenter, sessionAdapter, this);
 
     ui->tabWidget->clear();
     ui->tabWidget->addTab(telemetryChartsTabWidget, QStringLiteral("Вкладка 1"));
-    ui->tabWidget->addTab(tab2Widget, QStringLiteral("Вкладка 2"));
-    ui->tabWidget->addTab(tab3Widget, QStringLiteral("Вкладка 3"));
+    ui->tabWidget->addTab(controlChartsTabWidget, QStringLiteral("Вкладка 2"));
+    ui->tabWidget->addTab(testProtocolTabWidget, QStringLiteral("Вкладка 3"));
 }
 
 void MainWindow::connectShellSignals() {

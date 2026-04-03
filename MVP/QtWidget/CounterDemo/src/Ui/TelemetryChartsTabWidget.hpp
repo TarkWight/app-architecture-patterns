@@ -4,8 +4,8 @@
 #include <QWidget>
 
 #include "../Infrastructure/SessionStateQtAdapter.hpp"
-#include "../Presentation/Tab1/ITelemetryChartsTabView.hpp"
-#include "../Presentation/Tab1/TelemetryChartsTabPresenter.hpp"
+#include "../Presentation/TelemetryChartsTab/ITelemetryChartsTabView.hpp"
+#include "../Presentation/TelemetryChartsTab/TelemetryChartsTabPresenter.hpp"
 
 #include "PlotWidget.hpp"
 

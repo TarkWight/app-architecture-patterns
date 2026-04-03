@@ -1,13 +1,13 @@
-#include "Tab2Widget.hpp"
-#include "ui_Tab2Widget.h"
+#include "ControlChartsTabWidget.hpp"
+#include "ui_ControlChartsTabWidget.h"
 
 #include <QString>
 
 namespace ui {
 
-Tab2Widget::Tab2Widget(presentation::tab2::Tab2Presenter &presenter,
-                       infrastructure::SessionStateQtAdapter &sessionAdapter, QWidget *parent)
-    : QWidget(parent), ui(new Ui::Tab2Widget), presenter(presenter), sessionAdapter(sessionAdapter) {
+ControlChartsTabWidget::ControlChartsTabWidget(presentation::controlChartsTab::ControlChartsTabPresenter &presenter,
+                                               infrastructure::SessionStateQtAdapter &sessionAdapter, QWidget *parent)
+    : QWidget(parent), ui(new Ui::ControlChartsTabWidget), presenter(presenter), sessionAdapter(sessionAdapter) {
     ui->setupUi(this);
 
     plotWidget = new PlotWidget(this);
@@ -20,24 +20,24 @@ Tab2Widget::Tab2Widget(presentation::tab2::Tab2Presenter &presenter,
     connectSessionSignals();
 }
 
-Tab2Widget::~Tab2Widget() {
+ControlChartsTabWidget::~ControlChartsTabWidget() {
     presenter.detachView();
     delete ui;
 }
 
-void Tab2Widget::setMinutes(int minutes) {
+void ControlChartsTabWidget::setMinutes(int minutes) {
     ui->spinBoxMinutes->setValue(minutes);
 }
 
-void Tab2Widget::refreshPlot() {
+void ControlChartsTabWidget::refreshPlot() {
     plotWidget->setPlot(sessionAdapter.getState().get().plot2);
 }
 
-void Tab2Widget::appendLog(const std::string &text) {
+void ControlChartsTabWidget::appendLog(const std::string &text) {
     ui->plainTextEditLog->appendPlainText(QString::fromStdString(text));
 }
 
-void Tab2Widget::connectSignals() {
+void ControlChartsTabWidget::connectSignals() {
     QObject::connect(ui->buttonRebuildPlot, &QPushButton::clicked, this,
                      [this]() { presenter.onRebuildPlotPressed(); });
 
@@ -45,8 +45,8 @@ void Tab2Widget::connectSignals() {
                      [this](int value) { presenter.onMinutesChanged(value); });
 }
 
-void Tab2Widget::connectSessionSignals() {
-    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::tab2MinutesChanged, this,
+void ControlChartsTabWidget::connectSessionSignals() {
+    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::controlChartsTabMinutesChanged, this,
                      [this](int minutes) {
                          if (ui->spinBoxMinutes->value() == minutes) {
                              return;

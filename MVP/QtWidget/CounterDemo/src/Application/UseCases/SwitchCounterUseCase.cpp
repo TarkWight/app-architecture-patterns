@@ -26,8 +26,8 @@ int SwitchCounterUseCase::loadValue(domain::CounterId id) {
 
 application::dto::CountersSnapshot SwitchCounterUseCase::snapshot() {
     return dto::CountersSnapshot{.tab0 = loadValue(tabId(0)),
-                                 .tab1 = loadValue(tabId(1)),
-                                 .tab2 = loadValue(tabId(2)),
+                                 .telemetryChartsTab = loadValue(tabId(1)),
+                                 .controlChartsTab = loadValue(tabId(2)),
                                  .global = loadValue(globalId())};
 }
 

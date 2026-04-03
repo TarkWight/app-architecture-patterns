@@ -6,13 +6,13 @@
 #include "../../Application/UseCases/UpdatePoemUseCase.hpp"
 #include "../../Application/Session/SessionState.hpp"
 
-#include "ITab3View.hpp"
+#include "ITestProtocolTabView.hpp"
 
 #include <string>
 
-namespace presentation::tab3 {
+namespace presentation::testProtocolTab {
 
-class Tab3Presenter final {
+class TestProtocolTabPresenter final {
   public:
     struct Dependencies {
         application::session::SessionState &state;
@@ -21,9 +21,9 @@ class Tab3Presenter final {
         application::useCases::ExportPdfUseCase &exportPdfUseCase;
     };
 
-    explicit Tab3Presenter(Dependencies deps);
+    explicit TestProtocolTabPresenter(Dependencies deps);
 
-    void attachView(ITab3View &view);
+    void attachView(ITestProtocolTabView &view);
     void detachView();
 
     void onViewReady();
@@ -41,9 +41,9 @@ class Tab3Presenter final {
     application::useCases::UpdatePoemUseCase &updatePoemUseCase;
     application::useCases::ExportPdfUseCase &exportPdfUseCase;
 
-    ITab3View *view{nullptr};
+    ITestProtocolTabView *view{nullptr};
 };
 
-} // namespace presentation::tab3
+} // namespace presentation::testProtocolTab
 
 #endif // TAB3PRESENTER_HPP

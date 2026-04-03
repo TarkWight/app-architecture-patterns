@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Tab2Widget</class>
- <widget class="QWidget" name="Tab2Widget">
+ <class>ControlChartsTabWidget</class>
+ <widget class="QWidget" name="ControlChartsTabWidget">
   <property name="geometry">
    <rect>
     <x>0</x>

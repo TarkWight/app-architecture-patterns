@@ -13,7 +13,7 @@ struct SessionStateData {
     bool timerRunning{false};
     std::string functionExpression{"sin(x)"};
     domain::RgbColor lineColor{255, 0, 0};
-    domain::DurationMinutes tab2Minutes{20};
+    domain::DurationMinutes controlChartsTabMinutes{20};
     domain::Poem poem{};
     domain::PlotModel plot1{};
     domain::PlotModel plot2{};

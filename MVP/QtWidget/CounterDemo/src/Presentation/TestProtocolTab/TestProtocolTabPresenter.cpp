@@ -1,21 +1,21 @@
-#include "Tab3Presenter.hpp"
+#include "TestProtocolTabPresenter.hpp"
 
-namespace presentation::tab3 {
+namespace presentation::testProtocolTab {
 
-Tab3Presenter::Tab3Presenter(Dependencies deps)
+TestProtocolTabPresenter::TestProtocolTabPresenter(Dependencies deps)
     : state(deps.state), setTimerDurationUseCase(deps.setTimerDurationUseCase),
       updatePoemUseCase(deps.updatePoemUseCase), exportPdfUseCase(deps.exportPdfUseCase) {
 }
 
-void Tab3Presenter::attachView(ITab3View &view) {
+void TestProtocolTabPresenter::attachView(ITestProtocolTabView &view) {
     this->view = &view;
 }
 
-void Tab3Presenter::detachView() {
+void TestProtocolTabPresenter::detachView() {
     view = nullptr;
 }
 
-void Tab3Presenter::onViewReady() {
+void TestProtocolTabPresenter::onViewReady() {
     if (view == nullptr) {
         return;
     }
@@ -30,7 +30,7 @@ void Tab3Presenter::onViewReady() {
     }
 }
 
-void Tab3Presenter::onTimerDurationChanged(int minutes) {
+void TestProtocolTabPresenter::onTimerDurationChanged(int minutes) {
     setTimerDurationUseCase.execute(minutes);
 
     if (view != nullptr) {
@@ -38,7 +38,7 @@ void Tab3Presenter::onTimerDurationChanged(int minutes) {
     }
 }
 
-void Tab3Presenter::onPoemTitleChanged(std::string title) {
+void TestProtocolTabPresenter::onPoemTitleChanged(std::string title) {
     updatePoemUseCase.updateTitle(std::move(title));
 
     if (view != nullptr) {
@@ -46,7 +46,7 @@ void Tab3Presenter::onPoemTitleChanged(std::string title) {
     }
 }
 
-void Tab3Presenter::onPoemLineChanged(int index, std::string line) {
+void TestProtocolTabPresenter::onPoemLineChanged(int index, std::string line) {
     updatePoemUseCase.updateLine(index, std::move(line));
 
     if (view != nullptr) {
@@ -54,7 +54,7 @@ void Tab3Presenter::onPoemLineChanged(int index, std::string line) {
     }
 }
 
-void Tab3Presenter::onExportPdfPressed(const std::string &filePath) {
+void TestProtocolTabPresenter::onExportPdfPressed(const std::string &filePath) {
     exportPdfUseCase.execute(filePath);
 
     if (view != nullptr) {
@@ -63,4 +63,4 @@ void Tab3Presenter::onExportPdfPressed(const std::string &filePath) {
     }
 }
 
-} // namespace presentation::tab3
+} // namespace presentation::testProtocolTab

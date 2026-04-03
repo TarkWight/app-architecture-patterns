@@ -1,12 +1,12 @@
-#include "Tab3Widget.hpp"
-#include "ui_Tab3Widget.h"
+#include "TestProtocolTabWidget.hpp"
+#include "ui_TestProtocolTabWidget.h"
 
 #include <QFileDialog>
 #include <QString>
 
 namespace {
 
-QLineEdit *lineEditByIndex(Ui::Tab3Widget *ui, int index) {
+QLineEdit *lineEditByIndex(Ui::TestProtocolTabWidget *ui, int index) {
     switch (index) {
     case 0:
         return ui->lineEditLine0;
@@ -33,9 +33,9 @@ QLineEdit *lineEditByIndex(Ui::Tab3Widget *ui, int index) {
 
 namespace ui {
 
-Tab3Widget::Tab3Widget(presentation::tab3::Tab3Presenter &presenter,
-                       infrastructure::SessionStateQtAdapter &sessionAdapter, QWidget *parent)
-    : QWidget(parent), ui(new Ui::Tab3Widget), presenter(presenter), sessionAdapter(sessionAdapter) {
+TestProtocolTabWidget::TestProtocolTabWidget(presentation::testProtocolTab::TestProtocolTabPresenter &presenter,
+                                             infrastructure::SessionStateQtAdapter &sessionAdapter, QWidget *parent)
+    : QWidget(parent), ui(new Ui::TestProtocolTabWidget), presenter(presenter), sessionAdapter(sessionAdapter) {
     ui->setupUi(this);
 
     presenter.attachView(*this);
@@ -44,20 +44,20 @@ Tab3Widget::Tab3Widget(presentation::tab3::Tab3Presenter &presenter,
     connectSessionSignals();
 }
 
-Tab3Widget::~Tab3Widget() {
+TestProtocolTabWidget::~TestProtocolTabWidget() {
     presenter.detachView();
     delete ui;
 }
 
-void Tab3Widget::setTimerDurationMinutes(int minutes) {
+void TestProtocolTabWidget::setTimerDurationMinutes(int minutes) {
     ui->spinBoxTimerMinutes->setValue(minutes);
 }
 
-void Tab3Widget::setPoemTitle(const std::string &title) {
+void TestProtocolTabWidget::setPoemTitle(const std::string &title) {
     ui->lineEditTitle->setText(QString::fromStdString(title));
 }
 
-void Tab3Widget::setPoemLine(int index, const std::string &line) {
+void TestProtocolTabWidget::setPoemLine(int index, const std::string &line) {
     auto *lineEdit = lineEditByIndex(ui, index);
     if (lineEdit == nullptr) {
         return;
@@ -66,15 +66,15 @@ void Tab3Widget::setPoemLine(int index, const std::string &line) {
     lineEdit->setText(QString::fromStdString(line));
 }
 
-void Tab3Widget::showExportSuccess(const std::string &filePath) {
+void TestProtocolTabWidget::showExportSuccess(const std::string &filePath) {
     ui->labelExportStatus->setText(QStringLiteral("Exported: %1").arg(QString::fromStdString(filePath)));
 }
 
-void Tab3Widget::appendLog(const std::string &text) {
+void TestProtocolTabWidget::appendLog(const std::string &text) {
     ui->plainTextEditLog->appendPlainText(QString::fromStdString(text));
 }
 
-void Tab3Widget::connectSignals() {
+void TestProtocolTabWidget::connectSignals() {
     QObject::connect(ui->spinBoxTimerMinutes, qOverload<int>(&QSpinBox::valueChanged), this,
                      [this](int value) { presenter.onTimerDurationChanged(value); });
 
@@ -103,7 +103,7 @@ void Tab3Widget::connectSignals() {
     });
 }
 
-void Tab3Widget::connectSessionSignals() {
+void TestProtocolTabWidget::connectSessionSignals() {
     QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::timerDurationChanged, this,
                      [this](int minutes) {
                          if (ui->spinBoxTimerMinutes->value() == minutes) {

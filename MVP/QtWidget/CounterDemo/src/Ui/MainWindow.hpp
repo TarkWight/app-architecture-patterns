@@ -7,9 +7,9 @@
 #include "../Infrastructure/SessionStateQtAdapter.hpp"
 #include "../Presentation/IShellView.hpp"
 #include "../Presentation/ShellPresenter.hpp"
-#include "../Presentation/Tab1/TelemetryChartsTabPresenter.hpp"
-#include "../Presentation/Tab2/Tab2Presenter.hpp"
-#include "../Presentation/Tab3/Tab3Presenter.hpp"
+#include "../Presentation/TelemetryChartsTab/TelemetryChartsTabPresenter.hpp"
+#include "../Presentation/ControlChartsTab/ControlChartsTabPresenter.hpp"
+#include "../Presentation/TestProtocolTab/TestProtocolTabPresenter.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -20,8 +20,8 @@ QT_END_NAMESPACE
 namespace ui {
 
 class TelemetryChartsTabWidget;
-class Tab2Widget;
-class Tab3Widget;
+class ControlChartsTabWidget;
+class TestProtocolTabWidget;
 
 class MainWindow final : public QMainWindow, public presentation::IShellView {
     Q_OBJECT
@@ -29,9 +29,9 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
   public:
     struct Dependencies {
         presentation::ShellPresenter &shellPresenter;
-        presentation::telemetryChartsTab::TelemetryChartsTabPresenter &tab1Presenter;
-        presentation::tab2::Tab2Presenter &tab2Presenter;
-        presentation::tab3::Tab3Presenter &tab3Presenter;
+        presentation::telemetryChartsTab::TelemetryChartsTabPresenter &telemetryChartsTabPresenter;
+        presentation::controlChartsTab::ControlChartsTabPresenter &controlChartsTabPresenter;
+        presentation::testProtocolTab::TestProtocolTabPresenter &testProtocolTabPresenter;
         infrastructure::SessionStateQtAdapter &sessionAdapter;
     };
 
@@ -49,13 +49,13 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
 
     presentation::ShellPresenter &shellPresenter;
     presentation::telemetryChartsTab::TelemetryChartsTabPresenter &telemetryChartsTabPresenter;
-    presentation::tab2::Tab2Presenter &tab2Presenter;
-    presentation::tab3::Tab3Presenter &tab3Presenter;
+    presentation::controlChartsTab::ControlChartsTabPresenter &controlChartsTabPresenter;
+    presentation::testProtocolTab::TestProtocolTabPresenter &testProtocolTabPresenter;
     infrastructure::SessionStateQtAdapter &sessionAdapter;
 
     TelemetryChartsTabWidget *telemetryChartsTabWidget{nullptr};
-    Tab2Widget *tab2Widget{nullptr};
-    Tab3Widget *tab3Widget{nullptr};
+    ControlChartsTabWidget *controlChartsTabWidget{nullptr};
+    TestProtocolTabWidget *testProtocolTabWidget{nullptr};
 
     void setupTabs();
     void connectShellSignals();

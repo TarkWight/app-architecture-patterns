@@ -25,7 +25,7 @@ class SessionState {
 
     void setLineColor(domain::RgbColor color);
 
-    void setTab2Minutes(int minutes);
+    void setControlChartsTabMinutes(int minutes);
 
     void setTimerDurationMinutes(int minutes);
 

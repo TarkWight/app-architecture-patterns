@@ -25,7 +25,7 @@ class SessionStateQtAdapter final : public QObject {
     void functionExpressionChanged(const QString &expression);
     void lineColorChanged(const QColor &color);
 
-    void tab2MinutesChanged(int minutes);
+    void controlChartsTabMinutesChanged(int minutes);
 
     void poemTitleChanged(const QString &title);
     void poemLineChanged(int index, const QString &line);

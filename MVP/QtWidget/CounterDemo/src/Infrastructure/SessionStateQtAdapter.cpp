@@ -18,7 +18,7 @@ void SessionStateQtAdapter::emitState(const application::session::SessionStateDa
     emit functionExpressionChanged(QString::fromStdString(data.functionExpression));
     emit lineColorChanged(toQColor(data.lineColor));
 
-    emit tab2MinutesChanged(data.tab2Minutes.value);
+    emit controlChartsTabMinutesChanged(data.controlChartsTabMinutes.value);
 
     emit poemTitleChanged(QString::fromStdString(data.poem.title));
 

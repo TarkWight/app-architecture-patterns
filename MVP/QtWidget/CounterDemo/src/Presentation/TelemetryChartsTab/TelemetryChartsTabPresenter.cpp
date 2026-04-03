@@ -24,7 +24,7 @@ void TelemetryChartsTabPresenter::onRebuildPlotPressed() {
 
     if (view != nullptr) {
         view->refreshPlot();
-        view->appendLog("Tab1 stair plot rebuilt");
+        view->appendLog("TelemetryChartsTab stair plot rebuilt");
     }
 }
 

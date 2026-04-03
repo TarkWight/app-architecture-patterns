@@ -3,17 +3,17 @@
 
 #include <string>
 
-namespace presentation::tab2 {
+namespace presentation::controlChartsTab {
 
-class ITab2View {
+class IControlChartsTabView {
   public:
-    virtual ~ITab2View() = default;
+    virtual ~IControlChartsTabView() = default;
 
     virtual void setMinutes(int minutes) = 0;
     virtual void refreshPlot() = 0;
     virtual void appendLog(const std::string &text) = 0;
 };
 
-} // namespace presentation::tab2
+} // namespace presentation::controlChartsTab
 
 #endif // ITAB2VIEW_HPP

@@ -2,23 +2,23 @@
 #define TAB2PRESENTER_HPP
 
 #include "../../Application/UseCases/BuildFormulaPlotUseCase.hpp"
-#include "../../Application/UseCases/SetTab2MinutesUseCase.hpp"
+#include "../../Application/UseCases/SetControlChartsTabMinutesUseCase.hpp"
 
-#include "ITab2View.hpp"
+#include "IControlChartsTabView.hpp"
 
-namespace presentation::tab2 {
+namespace presentation::controlChartsTab {
 
-class Tab2Presenter final {
+class ControlChartsTabPresenter final {
   public:
     struct Dependencies {
         application::session::SessionState &state;
-        application::useCases::SetTab2MinutesUseCase &setTab2MinutesUseCase;
+        application::useCases::SetControlChartsTabMinutesUseCase &setControlChartsTabMinutesUseCase;
         application::useCases::BuildFormulaPlotUseCase &buildFormulaPlotUseCase;
     };
 
-    explicit Tab2Presenter(Dependencies deps);
+    explicit ControlChartsTabPresenter(Dependencies deps);
 
-    void attachView(ITab2View &view);
+    void attachView(IControlChartsTabView &view);
     void detachView();
 
     void onViewReady();
@@ -28,12 +28,12 @@ class Tab2Presenter final {
 
   private:
     application::session::SessionState &state;
-    application::useCases::SetTab2MinutesUseCase &setTab2MinutesUseCase;
+    application::useCases::SetControlChartsTabMinutesUseCase &setControlChartsTabMinutesUseCase;
     application::useCases::BuildFormulaPlotUseCase &buildFormulaPlotUseCase;
 
-    ITab2View *view{nullptr};
+    IControlChartsTabView *view{nullptr};
 };
 
-} // namespace presentation::tab2
+} // namespace presentation::controlChartsTab
 
 #endif // TAB2PRESENTER_HPP

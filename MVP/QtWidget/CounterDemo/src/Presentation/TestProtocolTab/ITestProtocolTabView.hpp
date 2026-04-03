@@ -3,11 +3,11 @@
 
 #include <string>
 
-namespace presentation::tab3 {
+namespace presentation::testProtocolTab {
 
-class ITab3View {
+class ITestProtocolTabView {
   public:
-    virtual ~ITab3View() = default;
+    virtual ~ITestProtocolTabView() = default;
 
     virtual void setTimerDurationMinutes(int minutes) = 0;
 
@@ -18,6 +18,6 @@ class ITab3View {
     virtual void appendLog(const std::string &text) = 0;
 };
 
-} // namespace presentation::tab3
+} // namespace presentation::testProtocolTab
 
 #endif // ITAB3VIEW_HPP

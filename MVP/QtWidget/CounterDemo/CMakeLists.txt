@@ -70,8 +70,8 @@ qt_add_executable(develop
   src/Application/UseCases/SetTimerDurationUseCase.cpp
   src/Application/UseCases/UpdatePoemUseCase.hpp
   src/Application/UseCases/UpdatePoemUseCase.cpp
-  src/Application/UseCases/SetTab2MinutesUseCase.hpp
-  src/Application/UseCases/SetTab2MinutesUseCase.cpp
+  src/Application/UseCases/SetControlChartsTabMinutesUseCase.hpp
+  src/Application/UseCases/SetControlChartsTabMinutesUseCase.cpp
 
 
   src/Infrastructure/QtTextLogger.hpp
@@ -90,33 +90,33 @@ qt_add_executable(develop
 
 
   src/Presentation/IShellView.hpp
-  src/Presentation/Tab1/ITelemetryChartsTabView.hpp
-  src/Presentation/Tab2/ITab2View.hpp
-  src/Presentation/Tab3/ITab3View.hpp
+  src/Presentation/TelemetryChartsTab/ITelemetryChartsTabView.hpp
+  src/Presentation/ControlChartsTab/IControlChartsTabView.hpp
+  src/Presentation/TestProtocolTab/ITestProtocolTabView.hpp
   src/Presentation/ShellPresenter.hpp
   src/Presentation/ShellPresenter.cpp
-  src/Presentation/Tab1/TelemetryChartsTabPresenter.hpp
-  src/Presentation/Tab1/TelemetryChartsTabPresenter.cpp
-  src/Presentation/Tab2/Tab2Presenter.hpp
-  src/Presentation/Tab2/Tab2Presenter.cpp
-  src/Presentation/Tab3/Tab3Presenter.hpp
-  src/Presentation/Tab3/Tab3Presenter.cpp
+  src/Presentation/TelemetryChartsTab/TelemetryChartsTabPresenter.hpp
+  src/Presentation/TelemetryChartsTab/TelemetryChartsTabPresenter.cpp
+  src/Presentation/ControlChartsTab/ControlChartsTabPresenter.hpp
+  src/Presentation/ControlChartsTab/ControlChartsTabPresenter.cpp
+  src/Presentation/TestProtocolTab/TestProtocolTabPresenter.hpp
+  src/Presentation/TestProtocolTab/TestProtocolTabPresenter.cpp
 
   src/Ui/MainWindowUiAdapter.hpp
   src/Ui/MainWindowUiAdapter.cpp
   src/Ui/TelemetryChartsTabWidget.hpp
   src/Ui/TelemetryChartsTabWidget.cpp
-  src/Ui/Tab2Widget.hpp
-  src/Ui/Tab2Widget.cpp
-  src/Ui/Tab3Widget.hpp
-  src/Ui/Tab3Widget.cpp
+  src/Ui/ControlChartsTabWidget.hpp
+  src/Ui/ControlChartsTabWidget.cpp
+  src/Ui/TestProtocolTabWidget.hpp
+  src/Ui/TestProtocolTabWidget.cpp
   src/Ui/MainWindow.hpp
   src/Ui/MainWindow.cpp
 
   src/Ui/MainWindow.ui
   src/Ui/TelemetryChartsTabWidget.ui
-  src/Ui/Tab2Widget.ui
-  src/Ui/Tab3Widget.ui
+  src/Ui/ControlChartsTabWidget.ui
+  src/Ui/TestProtocolTabWidget.ui
   src/Application/ApplicationContext.hpp
   src/Ui/PlotWidget.hpp src/Ui/PlotWidget.cpp
   src/Ui/Render/PlotRenderer.hpp src/Ui/Render/PlotRenderer.cpp

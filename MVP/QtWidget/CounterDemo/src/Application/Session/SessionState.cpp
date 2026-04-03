@@ -34,7 +34,12 @@ Subscription application::session::SessionState::subscribe(Listener listener) {
 }
 
 void application::session::SessionState::setFunctionExpression(std::string expr) {
-    data.functionExpression = std::move(expr);
+    data.functionExpression.value = std::move(expr);
+    notify();
+}
+
+void application::session::SessionState::setWindProfile(domain::WindProfile profile) {
+    data.windProfile = std::move(profile);
     notify();
 }
 

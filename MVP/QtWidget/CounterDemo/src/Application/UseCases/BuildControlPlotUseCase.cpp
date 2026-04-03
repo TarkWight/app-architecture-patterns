@@ -29,7 +29,7 @@ domain::PlotModel BuildControlPlotUseCase::execute() {
 
     for (int index = 0; index <= sampleCount; ++index) {
         const double x = static_cast<double>(index) * sampleStep;
-        const double yRaw = engine.eval(stateData.functionExpression, x);
+        const double yRaw = engine.eval(stateData.functionExpression.value, x);
 
         const double y = std::clamp(yRaw, plot.y.min, plot.y.max);
 

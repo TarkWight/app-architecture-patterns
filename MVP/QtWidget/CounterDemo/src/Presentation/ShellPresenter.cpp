@@ -81,7 +81,7 @@ void ShellPresenter::refreshFromState() {
     view->setTimerText(formatTimerText(session.elapsed.value));
     view->setStartEnabled(!session.timerRunning);
     view->setStopEnabled(session.timerRunning);
-    view->setFunctionExpression(session.functionExpression);
+    view->setFunctionExpression(session.functionExpression.value);
 }
 
 } // namespace presentation

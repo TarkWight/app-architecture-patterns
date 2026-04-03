@@ -15,7 +15,7 @@ void SessionStateQtAdapter::emitState(const application::session::SessionStateDa
     emit timerChanged(data.elapsed.value, data.timerRunning);
     emit timerDurationChanged(data.timerDuration.value);
 
-    emit functionExpressionChanged(QString::fromStdString(data.functionExpression));
+    emit functionExpressionChanged(QString::fromStdString(data.functionExpression.value));
     emit lineColorChanged(toQColor(data.lineColor));
 
     emit controlChartsTabMinutesChanged(data.controlChartsTabMinutes.value);

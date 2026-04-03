@@ -23,6 +23,8 @@ class SessionState {
 
     void setFunctionExpression(std::string expr);
 
+    void setWindProfile(domain::WindProfile profile);
+
     void setLineColor(domain::RgbColor color);
 
     void setControlChartsTabMinutes(int minutes);

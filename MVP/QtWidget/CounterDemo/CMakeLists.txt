@@ -90,7 +90,7 @@ qt_add_executable(develop
 
 
   src/Presentation/IShellView.hpp
-  src/Presentation/Tab1/ITab1View.hpp
+  src/Presentation/Tab1/ITelemetryChartsTabView.hpp
   src/Presentation/Tab2/ITab2View.hpp
   src/Presentation/Tab3/ITab3View.hpp
   src/Presentation/ShellPresenter.hpp

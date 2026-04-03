@@ -1,13 +1,13 @@
-#ifndef ITAB1VIEW_HPP
-#define ITAB1VIEW_HPP
+#ifndef ITELEMETRYCHARTSTABVIEW_H
+#define ITELEMETRYCHARTSTABVIEW_H
 
 #include <string>
 
 namespace presentation::tab1 {
 
-class ITab1View {
+class ITelemetryChartsTabView {
   public:
-    virtual ~ITab1View() = default;
+    virtual ~ITelemetryChartsTabView() = default;
 
     virtual void refreshPlot() = 0;
     virtual void appendLog(const std::string &text) = 0;
@@ -15,4 +15,4 @@ class ITab1View {
 
 } // namespace presentation::tab1
 
-#endif // ITAB1VIEW_HPP
+#endif // ITELEMETRYCHARTSTABVIEW_H

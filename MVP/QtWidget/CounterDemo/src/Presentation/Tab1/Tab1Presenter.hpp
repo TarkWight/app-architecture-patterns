@@ -2,7 +2,7 @@
 #define TAB1PRESENTER_HPP
 
 #include "../../Application/UseCases/GenerateStairPlotUseCase.hpp"
-#include "ITab1View.hpp"
+#include "ITelemetryChartsTabView.hpp"
 
 namespace presentation::tab1 {
 
@@ -10,7 +10,7 @@ class Tab1Presenter final {
   public:
     Tab1Presenter(application::useCases::GenerateStairPlotUseCase &generateStairPlotUseCase);
 
-    void attachView(ITab1View &view);
+    void attachView(ITelemetryChartsTabView &view);
     void detachView();
 
     void onViewReady();
@@ -20,7 +20,7 @@ class Tab1Presenter final {
   private:
     application::useCases::GenerateStairPlotUseCase &generateStairPlotUseCase;
 
-    ITab1View *view{nullptr};
+    ITelemetryChartsTabView *view{nullptr};
 };
 
 } // namespace presentation::tab1

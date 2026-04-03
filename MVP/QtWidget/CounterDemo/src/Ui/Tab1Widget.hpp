@@ -4,7 +4,7 @@
 #include <QWidget>
 
 #include "../Infrastructure/SessionStateQtAdapter.hpp"
-#include "../Presentation/Tab1/ITab1View.hpp"
+#include "../Presentation/Tab1/ITelemetryChartsTabView.hpp"
 #include "../Presentation/Tab1/Tab1Presenter.hpp"
 
 #include "PlotWidget.hpp"
@@ -17,7 +17,7 @@ QT_END_NAMESPACE
 
 namespace ui {
 
-class Tab1Widget final : public QWidget, public presentation::tab1::ITab1View {
+class Tab1Widget final : public QWidget, public presentation::tab1::ITelemetryChartsTabView {
     Q_OBJECT
 
   public:

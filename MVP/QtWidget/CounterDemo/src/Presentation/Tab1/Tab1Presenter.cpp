@@ -6,7 +6,7 @@ Tab1Presenter::Tab1Presenter(application::useCases::GenerateStairPlotUseCase &ge
     : generateStairPlotUseCase(generateStairPlotUseCase) {
 }
 
-void Tab1Presenter::attachView(ITab1View &view) {
+void Tab1Presenter::attachView(ITelemetryChartsTabView &view) {
     this->view = &view;
 }
 

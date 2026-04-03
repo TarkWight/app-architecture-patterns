@@ -27,7 +27,7 @@ TelemetryChartsTabWidget::~TelemetryChartsTabWidget() {
 }
 
 void TelemetryChartsTabWidget::refreshPlot() {
-    plotWidget->setPlot(sessionAdapter.getState().get().plot1);
+    plotWidget->setPlot(sessionAdapter.getState().get().telemetryPlot);
 }
 
 void TelemetryChartsTabWidget::appendLog(const std::string &text) {
@@ -40,7 +40,7 @@ void TelemetryChartsTabWidget::connectSignals() {
 }
 
 void TelemetryChartsTabWidget::connectSessionSignals() {
-    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::plot1Changed, this,
+    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::telemetryPlotChanged, this,
                      [this]() { refreshPlot(); });
 }
 

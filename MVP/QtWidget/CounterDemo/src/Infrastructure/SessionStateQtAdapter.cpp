@@ -26,8 +26,8 @@ void SessionStateQtAdapter::emitState(const application::session::SessionStateDa
         emit poemLineChanged(i, QString::fromStdString(data.poem.lines[static_cast<std::size_t>(i)]));
     }
 
-    emit plot1Changed();
-    emit plot2Changed();
+    emit telemetryPlotChanged();
+    emit controlPlotChanged();
 }
 
 const application::session::SessionState &SessionStateQtAdapter::getState() const {

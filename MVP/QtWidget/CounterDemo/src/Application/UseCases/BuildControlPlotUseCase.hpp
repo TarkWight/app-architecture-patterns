@@ -1,5 +1,5 @@
-#ifndef BUILDFORMULAPLOTUSECASE_HPP
-#define BUILDFORMULAPLOTUSECASE_HPP
+#ifndef BUILDCONTROLPLOTUSECASE_HPP
+#define BUILDCONTROLPLOTUSECASE_HPP
 
 #include "../Ports/IFunctionEngine.hpp"
 #include "../Session/SessionState.hpp"
@@ -21,4 +21,4 @@ class BuildControlPlotUseCase final {
 
 } // namespace application::useCases
 
-#endif // BUILDFORMULAPLOTUSECASE_HPP
+#endif // BUILDCONTROLPLOTUSECASE_HPP

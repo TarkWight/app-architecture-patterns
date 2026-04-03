@@ -30,7 +30,7 @@ void ControlChartsTabWidget::setMinutes(int minutes) {
 }
 
 void ControlChartsTabWidget::refreshPlot() {
-    plotWidget->setPlot(sessionAdapter.getState().get().plot2);
+    plotWidget->setPlot(sessionAdapter.getState().get().controlPlot);
 }
 
 void ControlChartsTabWidget::appendLog(const std::string &text) {
@@ -55,7 +55,7 @@ void ControlChartsTabWidget::connectSessionSignals() {
                          ui->spinBoxMinutes->setValue(minutes);
                      });
 
-    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::plot2Changed, this,
+    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::controlPlotChanged, this,
                      [this]() { refreshPlot(); });
 }
 

@@ -30,8 +30,8 @@ class SessionStateQtAdapter final : public QObject {
     void poemTitleChanged(const QString &title);
     void poemLineChanged(int index, const QString &line);
 
-    void plot1Changed();
-    void plot2Changed();
+    void telemetryPlotChanged();
+    void controlPlotChanged();
 
   private:
     application::session::SessionState &state;

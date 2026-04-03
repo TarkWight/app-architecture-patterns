@@ -13,7 +13,7 @@ domain::PlotModel BuildControlPlotUseCase::execute() {
     const auto &stateData = state.get();
 
     domain::PlotModel plot{};
-    plot.title = "Formula plot";
+    plot.title = "Control chart";
     plot.color = stateData.lineColor;
 
     const int minutes = stateData.controlChartsTabMinutes.value > 0 ? stateData.controlChartsTabMinutes.value : 20;
@@ -27,16 +27,24 @@ domain::PlotModel BuildControlPlotUseCase::execute() {
 
     plot.series.points.reserve(static_cast<std::size_t>(sampleCount) + 1);
 
+    const double beaufort = stateData.windProfile.beaufort;
+    const double angleOfAttack = stateData.windProfile.angleOfAttack;
+
+    const double windFactor = 1.0 + (beaufort * 0.05);
+    const double attackOffset = angleOfAttack * 0.01;
+
     for (int index = 0; index <= sampleCount; ++index) {
         const double x = static_cast<double>(index) * sampleStep;
-        const double yRaw = engine.eval(stateData.functionExpression.value, x);
 
+        const double baseValue = engine.eval(stateData.functionExpression.value, x);
+
+        const double yRaw = (baseValue * windFactor) + attackOffset;
         const double y = std::clamp(yRaw, plot.y.min, plot.y.max);
 
         plot.series.points.push_back(domain::Point{.x = x, .y = y});
     }
 
-    state.setPlot2(plot);
+    state.setControlPlot(plot);
     return plot;
 }
 

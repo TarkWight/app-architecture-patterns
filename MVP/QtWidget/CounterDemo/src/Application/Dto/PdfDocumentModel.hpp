@@ -12,11 +12,11 @@ struct PdfDocumentModel final {
     std::string title{};
 
     std::array<std::string, 4> firstStanza{};
-    domain::PlotModel plot1{};
-    std::string plot1Caption{"Рисунок 1"};
+    domain::PlotModel telemetryPlot{};
+    std::string telemetryPlotCaption{"Рисунок 1"};
 
-    domain::PlotModel plot2{};
-    std::string plot2Caption{"Рисунок 2"};
+    domain::PlotModel controlPlot{};
+    std::string controlPlotCaption{"Рисунок 2"};
     std::array<std::string, 4> secondStanza{};
 };
 

@@ -38,7 +38,7 @@ domain::PlotModel GenerateStairPlotUseCase::execute() {
         }
     }
 
-    state.setPlot1(plot);
+    state.setTelemetryPlot(plot);
     return plot;
 }
 

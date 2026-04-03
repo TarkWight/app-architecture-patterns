@@ -17,11 +17,11 @@ application::dto::PdfDocumentModel ExportPdfUseCase::buildDocument() const {
         document.firstStanza[static_cast<std::size_t>(i)] = session.poem.lines[static_cast<std::size_t>(i)];
     }
 
-    document.plot1 = session.plot1;
-    document.plot1Caption = "Рисунок 1";
+    document.telemetryPlot = session.telemetryPlot;
+    document.telemetryPlotCaption = "Рисунок 1";
 
-    document.plot2 = session.plot2;
-    document.plot2Caption = "Рисунок 2";
+    document.controlPlot = session.controlPlot;
+    document.controlPlotCaption = "Рисунок 2";
 
     for (std::size_t i = 0; i < 4; ++i) {
         document.secondStanza[i] = session.poem.lines[i + 4];

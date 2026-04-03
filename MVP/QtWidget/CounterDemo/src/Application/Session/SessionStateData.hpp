@@ -23,8 +23,8 @@ struct SessionStateData {
 
     domain::Poem poem{};
 
-    domain::PlotModel plot1{};
-    domain::PlotModel plot2{};
+    domain::PlotModel telemetryPlot{};
+    domain::PlotModel controlPlot{};
 };
 
 } // namespace application::session

@@ -35,9 +35,9 @@ class SessionState {
 
     void setTimerRunning(bool running);
 
-    void setPlot1(domain::PlotModel plot);
+    void setTelemetryPlot(domain::PlotModel plot);
 
-    void setPlot2(domain::PlotModel plot);
+    void setControlPlot(domain::PlotModel plot);
 
     void setPoemTitle(std::string title);
 

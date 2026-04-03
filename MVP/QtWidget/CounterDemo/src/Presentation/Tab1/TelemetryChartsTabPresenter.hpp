@@ -1,14 +1,14 @@
-#ifndef TAB1PRESENTER_HPP
-#define TAB1PRESENTER_HPP
+#ifndef TELEMETRYCHARTSTABPRESENTER_H
+#define TELEMETRYCHARTSTABPRESENTER_H
 
 #include "../../Application/UseCases/GenerateStairPlotUseCase.hpp"
 #include "ITelemetryChartsTabView.hpp"
 
 namespace presentation::tab1 {
 
-class Tab1Presenter final {
+class TelemetryChartsTabPresenter final {
   public:
-    Tab1Presenter(application::useCases::GenerateStairPlotUseCase &generateStairPlotUseCase);
+    TelemetryChartsTabPresenter(application::useCases::GenerateStairPlotUseCase &generateStairPlotUseCase);
 
     void attachView(ITelemetryChartsTabView &view);
     void detachView();
@@ -25,4 +25,4 @@ class Tab1Presenter final {
 
 } // namespace presentation::tab1
 
-#endif // TAB1PRESENTER_HPP
+#endif // TELEMETRYCHARTSTABPRESENTER_H

@@ -95,8 +95,8 @@ qt_add_executable(develop
   src/Presentation/Tab3/ITab3View.hpp
   src/Presentation/ShellPresenter.hpp
   src/Presentation/ShellPresenter.cpp
-  src/Presentation/Tab1/Tab1Presenter.hpp
-  src/Presentation/Tab1/Tab1Presenter.cpp
+  src/Presentation/Tab1/TelemetryChartsTabPresenter.hpp
+  src/Presentation/Tab1/TelemetryChartsTabPresenter.cpp
   src/Presentation/Tab2/Tab2Presenter.hpp
   src/Presentation/Tab2/Tab2Presenter.cpp
   src/Presentation/Tab3/Tab3Presenter.hpp

@@ -21,7 +21,7 @@
 #include "../Infrastructure/SimpleFunctionEngineStub.hpp"
 
 #include "../Presentation/ShellPresenter.hpp"
-#include "../Presentation/Tab1/Tab1Presenter.hpp"
+#include "../Presentation/Tab1/TelemetryChartsTabPresenter.hpp"
 #include "../Presentation/Tab2/Tab2Presenter.hpp"
 #include "../Presentation/Tab3/Tab3Presenter.hpp"
 
@@ -63,7 +63,7 @@ struct ApplicationContext {
                                                    .setLineColorUseCase = setLineColorUseCase,
                                                    .buildFormulaPlotUseCase = buildFormulaPlotUseCase}};
 
-    presentation::tab1::Tab1Presenter tab1Presenter{generateStairPlotUseCase};
+    presentation::tab1::TelemetryChartsTabPresenter tab1Presenter{generateStairPlotUseCase};
 
     presentation::tab2::Tab2Presenter tab2Presenter{
         presentation::tab2::Tab2Presenter::Dependencies{.state = sessionState,

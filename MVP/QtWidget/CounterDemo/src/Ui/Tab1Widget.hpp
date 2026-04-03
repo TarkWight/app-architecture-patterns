@@ -5,7 +5,7 @@
 
 #include "../Infrastructure/SessionStateQtAdapter.hpp"
 #include "../Presentation/Tab1/ITelemetryChartsTabView.hpp"
-#include "../Presentation/Tab1/Tab1Presenter.hpp"
+#include "../Presentation/Tab1/TelemetryChartsTabPresenter.hpp"
 
 #include "PlotWidget.hpp"
 
@@ -21,7 +21,7 @@ class Tab1Widget final : public QWidget, public presentation::tab1::ITelemetryCh
     Q_OBJECT
 
   public:
-    explicit Tab1Widget(presentation::tab1::Tab1Presenter &presenter,
+    explicit Tab1Widget(presentation::tab1::TelemetryChartsTabPresenter &presenter,
                         infrastructure::SessionStateQtAdapter &sessionAdapter, QWidget *parent = nullptr);
     ~Tab1Widget() override;
 
@@ -30,7 +30,7 @@ class Tab1Widget final : public QWidget, public presentation::tab1::ITelemetryCh
 
   private:
     Ui::Tab1Widget *ui;
-    presentation::tab1::Tab1Presenter &presenter;
+    presentation::tab1::TelemetryChartsTabPresenter &presenter;
     infrastructure::SessionStateQtAdapter &sessionAdapter;
     PlotWidget *plotWidget{nullptr};
 

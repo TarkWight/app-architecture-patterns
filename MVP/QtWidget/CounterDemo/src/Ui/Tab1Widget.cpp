@@ -5,7 +5,7 @@
 
 namespace ui {
 
-Tab1Widget::Tab1Widget(presentation::tab1::Tab1Presenter &presenter,
+Tab1Widget::Tab1Widget(presentation::tab1::TelemetryChartsTabPresenter &presenter,
                        infrastructure::SessionStateQtAdapter &sessionAdapter, QWidget *parent)
     : QWidget(parent), ui(new Ui::Tab1Widget), presenter(presenter), sessionAdapter(sessionAdapter) {
     ui->setupUi(this);

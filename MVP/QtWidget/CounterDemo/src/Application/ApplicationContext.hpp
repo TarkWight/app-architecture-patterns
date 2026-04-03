@@ -4,7 +4,6 @@
 #include "Session/SessionState.hpp"
 
 #include "UseCases/BuildFormulaPlotUseCase.hpp"
-#include "UseCases/ExecuteCounterCommandUseCase.hpp"
 #include "UseCases/ExportPdfUseCase.hpp"
 #include "UseCases/GenerateStairPlotUseCase.hpp"
 #include "UseCases/SetFunctionExpressionUseCase.hpp"
@@ -15,7 +14,6 @@
 #include "UseCases/StopTimerUseCase.hpp"
 #include "UseCases/UpdatePoemUseCase.hpp"
 
-#include "../Infrastructure/InMemoryCounterRepository.hpp"
 #include "../Infrastructure/QtPdfExporter.hpp"
 #include "../Infrastructure/QtTextLogger.hpp"
 #include "../Infrastructure/QtTimerService.hpp"
@@ -30,16 +28,12 @@
 struct ApplicationContext {
     application::session::SessionState sessionState;
 
-    infrastructure::InMemoryCounterRepository repository;
-
     infrastructure::QtTextLogger logger{[](const std::string &) {}};
 
     infrastructure::SimpleFunctionEngineStub functionEngine;
     infrastructure::QtTimerService timerService;
     infrastructure::QtPdfExporter pdfExporter;
     infrastructure::SessionStateQtAdapter sessionAdapter{sessionState};
-
-    application::useCases::ExecuteCounterCommandUseCase executeCounterCommandUseCase{repository, logger};
 
     application::useCases::GenerateStairPlotUseCase generateStairPlotUseCase{sessionState};
 
@@ -69,17 +63,15 @@ struct ApplicationContext {
                                                    .setLineColorUseCase = setLineColorUseCase,
                                                    .buildFormulaPlotUseCase = buildFormulaPlotUseCase}};
 
-    presentation::tab1::Tab1Presenter tab1Presenter{executeCounterCommandUseCase, generateStairPlotUseCase};
+    presentation::tab1::Tab1Presenter tab1Presenter{generateStairPlotUseCase};
 
     presentation::tab2::Tab2Presenter tab2Presenter{
         presentation::tab2::Tab2Presenter::Dependencies{.state = sessionState,
-                                                        .executeCounterCommandUseCase = executeCounterCommandUseCase,
                                                         .setTab2MinutesUseCase = setTab2MinutesUseCase,
                                                         .buildFormulaPlotUseCase = buildFormulaPlotUseCase}};
 
     presentation::tab3::Tab3Presenter tab3Presenter{
         presentation::tab3::Tab3Presenter::Dependencies{.state = sessionState,
-                                                        .executeCounterCommandUseCase = executeCounterCommandUseCase,
                                                         .setTimerDurationUseCase = setTimerDurationUseCase,
                                                         .updatePoemUseCase = updatePoemUseCase,
                                                         .exportPdfUseCase = exportPdfUseCase}};

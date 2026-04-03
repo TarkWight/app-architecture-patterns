@@ -49,10 +49,6 @@ Tab3Widget::~Tab3Widget() {
     delete ui;
 }
 
-void Tab3Widget::setCounterValue(int value) {
-    ui->labelCounterValue->setText(QString::number(value));
-}
-
 void Tab3Widget::setTimerDurationMinutes(int minutes) {
     ui->spinBoxTimerMinutes->setValue(minutes);
 }
@@ -79,12 +75,6 @@ void Tab3Widget::appendLog(const std::string &text) {
 }
 
 void Tab3Widget::connectSignals() {
-    QObject::connect(ui->buttonIncrement, &QPushButton::clicked, this, [this]() { presenter.onIncrementPressed(); });
-
-    QObject::connect(ui->buttonDecrement, &QPushButton::clicked, this, [this]() { presenter.onDecrementPressed(); });
-
-    QObject::connect(ui->buttonReset, &QPushButton::clicked, this, [this]() { presenter.onResetPressed(); });
-
     QObject::connect(ui->spinBoxTimerMinutes, qOverload<int>(&QSpinBox::valueChanged), this,
                      [this](int value) { presenter.onTimerDurationChanged(value); });
 

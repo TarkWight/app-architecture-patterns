@@ -9,7 +9,6 @@ class ITab1View {
   public:
     virtual ~ITab1View() = default;
 
-    virtual void setCounterValue(int value) = 0;
     virtual void refreshPlot() = 0;
     virtual void appendLog(const std::string &text) = 0;
 };

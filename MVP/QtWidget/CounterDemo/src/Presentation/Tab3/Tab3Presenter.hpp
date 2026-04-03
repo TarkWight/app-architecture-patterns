@@ -1,13 +1,10 @@
 #ifndef TAB3PRESENTER_HPP
 #define TAB3PRESENTER_HPP
 
-#include "../../Application/UseCases/ExecuteCounterCommandUseCase.hpp"
 #include "../../Application/UseCases/ExportPdfUseCase.hpp"
 #include "../../Application/UseCases/SetTimerDurationUseCase.hpp"
 #include "../../Application/UseCases/UpdatePoemUseCase.hpp"
 #include "../../Application/Session/SessionState.hpp"
-#include "../../Domain/Command.hpp"
-#include "../../Domain/CounterId.hpp"
 
 #include "ITab3View.hpp"
 
@@ -19,7 +16,6 @@ class Tab3Presenter final {
   public:
     struct Dependencies {
         application::session::SessionState &state;
-        application::useCases::ExecuteCounterCommandUseCase &executeCounterCommandUseCase;
         application::useCases::SetTimerDurationUseCase &setTimerDurationUseCase;
         application::useCases::UpdatePoemUseCase &updatePoemUseCase;
         application::useCases::ExportPdfUseCase &exportPdfUseCase;
@@ -32,10 +28,6 @@ class Tab3Presenter final {
 
     void onViewReady();
 
-    void onIncrementPressed();
-    void onDecrementPressed();
-    void onResetPressed();
-
     void onTimerDurationChanged(int minutes);
 
     void onPoemTitleChanged(std::string title);
@@ -44,17 +36,12 @@ class Tab3Presenter final {
     void onExportPdfPressed(const std::string &filePath);
 
   private:
-    static constexpr domain::CounterId counterId{2};
-
     application::session::SessionState &state;
-    application::useCases::ExecuteCounterCommandUseCase &executeCounterCommandUseCase;
     application::useCases::SetTimerDurationUseCase &setTimerDurationUseCase;
     application::useCases::UpdatePoemUseCase &updatePoemUseCase;
     application::useCases::ExportPdfUseCase &exportPdfUseCase;
 
     ITab3View *view{nullptr};
-
-    void executeCommand(const domain::CounterCommand &command, const std::string &logText);
 };
 
 } // namespace presentation::tab3

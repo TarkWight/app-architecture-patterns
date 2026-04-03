@@ -12,46 +12,6 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayoutRoot">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayoutCounter">
-     <item>
-      <widget class="QLabel" name="labelCounterCaption">
-       <property name="text">
-        <string>Счётчик:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="labelCounterValue">
-       <property name="text">
-        <string>0</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="buttonIncrement">
-       <property name="text">
-        <string>+</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="buttonDecrement">
-       <property name="text">
-        <string>-</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="buttonReset">
-       <property name="text">
-        <string>Сброс</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-
-   <item>
     <layout class="QHBoxLayout" name="horizontalLayoutTimer">
      <item>
       <widget class="QLabel" name="labelTimerMinutesCaption">
@@ -75,7 +35,6 @@
      </item>
     </layout>
    </item>
-
    <item>
     <widget class="QLineEdit" name="lineEditTitle">
      <property name="placeholderText">
@@ -83,7 +42,6 @@
      </property>
     </widget>
    </item>
-
    <item>
     <layout class="QGridLayout" name="gridLayoutPoem">
      <item row="0" column="0">
@@ -144,7 +102,6 @@
      </item>
     </layout>
    </item>
-
    <item>
     <layout class="QHBoxLayout" name="horizontalLayoutExport">
      <item>
@@ -163,7 +120,6 @@
      </item>
     </layout>
    </item>
-
    <item>
     <widget class="QPlainTextEdit" name="plainTextEditLog">
      <property name="readOnly">

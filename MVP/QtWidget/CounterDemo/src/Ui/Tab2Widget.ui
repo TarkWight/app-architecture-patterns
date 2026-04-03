@@ -12,46 +12,6 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayoutRoot">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayoutCounter">
-     <item>
-      <widget class="QLabel" name="labelCounterCaption">
-       <property name="text">
-        <string>Счётчик:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="labelCounterValue">
-       <property name="text">
-        <string>0</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="buttonIncrement">
-       <property name="text">
-        <string>+</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="buttonDecrement">
-       <property name="text">
-        <string>-</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="buttonReset">
-       <property name="text">
-        <string>Сброс</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-
-   <item>
     <layout class="QHBoxLayout" name="horizontalLayoutMinutes">
      <item>
       <widget class="QLabel" name="labelMinutesCaption">
@@ -83,7 +43,7 @@
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -95,11 +55,10 @@
      </item>
     </layout>
    </item>
-
    <item>
     <widget class="QFrame" name="framePlotArea">
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::Shape::StyledPanel</enum>
      </property>
      <layout class="QVBoxLayout" name="verticalLayoutPlot">
       <item>
@@ -110,18 +69,17 @@
           <height>220</height>
          </size>
         </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
         <property name="text">
          <string>Здесь будет график 2</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignCenter</set>
         </property>
        </widget>
       </item>
      </layout>
     </widget>
    </item>
-
    <item>
     <widget class="QPlainTextEdit" name="plainTextEditLog">
      <property name="readOnly">

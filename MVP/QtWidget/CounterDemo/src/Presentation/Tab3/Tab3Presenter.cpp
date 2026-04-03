@@ -3,9 +3,8 @@
 namespace presentation::tab3 {
 
 Tab3Presenter::Tab3Presenter(Dependencies deps)
-    : state(deps.state), executeCounterCommandUseCase(deps.executeCounterCommandUseCase),
-      setTimerDurationUseCase(deps.setTimerDurationUseCase), updatePoemUseCase(deps.updatePoemUseCase),
-      exportPdfUseCase(deps.exportPdfUseCase) {
+    : state(deps.state), setTimerDurationUseCase(deps.setTimerDurationUseCase),
+      updatePoemUseCase(deps.updatePoemUseCase), exportPdfUseCase(deps.exportPdfUseCase) {
 }
 
 void Tab3Presenter::attachView(ITab3View &view) {
@@ -29,20 +28,6 @@ void Tab3Presenter::onViewReady() {
     for (int i = 0; i < 8; ++i) {
         view->setPoemLine(i, session.poem.lines[static_cast<std::size_t>(i)]);
     }
-}
-
-void Tab3Presenter::onIncrementPressed() {
-    executeCommand(domain::CounterCommand{.kind = domain::CounterCommandKind::Increment, .delta = 1},
-                   "Tab3 counter increment");
-}
-
-void Tab3Presenter::onDecrementPressed() {
-    executeCommand(domain::CounterCommand{.kind = domain::CounterCommandKind::Decrement, .delta = 1},
-                   "Tab3 counter decrement");
-}
-
-void Tab3Presenter::onResetPressed() {
-    executeCommand(domain::CounterCommand{.kind = domain::CounterCommandKind::Reset, .delta = 0}, "Tab3 counter reset");
 }
 
 void Tab3Presenter::onTimerDurationChanged(int minutes) {
@@ -75,15 +60,6 @@ void Tab3Presenter::onExportPdfPressed(const std::string &filePath) {
     if (view != nullptr) {
         view->showExportSuccess(filePath);
         view->appendLog("PDF exported");
-    }
-}
-
-void Tab3Presenter::executeCommand(const domain::CounterCommand &command, const std::string &logText) {
-    const auto result = executeCounterCommandUseCase.execute(counterId, command);
-
-    if (view != nullptr) {
-        view->setCounterValue(result.newValue);
-        view->appendLog(logText);
     }
 }
 

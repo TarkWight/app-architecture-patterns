@@ -23,21 +23,21 @@ set(CMAKE_AUTORCC ON)
 qt_add_executable(develop
   src/main.cpp
 
-  src/Domain/CounterId.hpp
-  src/Domain/Command.hpp
-  src/Domain/Counter.hpp
-  src/Domain/Counter.cpp
-  src/Domain/CounterMode.hpp
+
+
+
+
+
   src/Domain/Plot.hpp
   src/Domain/Poem.hpp
   src/Domain/Time.hpp
 
-  src/Application/Dto/CommandResult.hpp
-  src/Application/Dto/CounterSnapshot.hpp
+
+
   src/Application/Dto/PdfDocumentModel.hpp
 
   src/Application/Ports/ILogger.hpp
-  src/Application/Ports/ICounterRepository.hpp
+
   src/Application/Ports/IFunctionEngine.hpp
   src/Application/Ports/ITimerService.hpp
   src/Application/Ports/IPdfExporter.hpp
@@ -48,12 +48,12 @@ qt_add_executable(develop
   src/Application/Session/Subscription.hpp
   src/Application/Session/Subscription.cpp
 
-  src/Application/UseCases/ExecuteCounterCommandUseCase.hpp
-  src/Application/UseCases/ExecuteCounterCommandUseCase.cpp
+
+
   src/Application/UseCases/BuildFormulaPlotUseCase.hpp
   src/Application/UseCases/BuildFormulaPlotUseCase.cpp
-  src/Application/UseCases/SwitchCounterUseCase.hpp
-  src/Application/UseCases/SwitchCounterUseCase.cpp
+
+
   src/Application/UseCases/GenerateStairPlotUseCase.hpp
   src/Application/UseCases/GenerateStairPlotUseCase.cpp
   src/Application/UseCases/StartTimerUseCase.hpp
@@ -76,8 +76,8 @@ qt_add_executable(develop
 
   src/Infrastructure/QtTextLogger.hpp
   src/Infrastructure/QtTextLogger.cpp
-  src/Infrastructure/InMemoryCounterRepository.hpp
-  src/Infrastructure/InMemoryCounterRepository.cpp
+
+
   src/Infrastructure/SimpleFunctionEngineStub.hpp
   src/Infrastructure/QtTimerService.hpp
   src/Infrastructure/QtTimerService.cpp
@@ -86,9 +86,9 @@ qt_add_executable(develop
   src/Infrastructure/QtPdfExporter.hpp
   src/Infrastructure/QtPdfExporter.cpp
 
-  src/Presentation/IMainView.hpp
-  src/Presentation/MainPresenter.hpp
-  src/Presentation/MainPresenter.cpp
+
+
+
   src/Presentation/IShellView.hpp
   src/Presentation/Tab1/ITab1View.hpp
   src/Presentation/Tab2/ITab2View.hpp

@@ -23,7 +23,6 @@ class Tab3Widget final : public QWidget, public presentation::tab3::ITab3View {
                         infrastructure::SessionStateQtAdapter &sessionAdapter, QWidget *parent = nullptr);
     ~Tab3Widget() override;
 
-    void setCounterValue(int value) override;
     void setTimerDurationMinutes(int minutes) override;
     void setPoemTitle(const std::string &title) override;
     void setPoemLine(int index, const std::string &line) override;

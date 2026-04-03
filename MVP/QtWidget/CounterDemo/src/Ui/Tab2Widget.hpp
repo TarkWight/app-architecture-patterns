@@ -24,7 +24,6 @@ class Tab2Widget final : public QWidget, public presentation::tab2::ITab2View {
                         infrastructure::SessionStateQtAdapter &sessionAdapter, QWidget *parent = nullptr);
     ~Tab2Widget() override;
 
-    void setCounterValue(int value) override;
     void setMinutes(int minutes) override;
     void refreshPlot() override;
     void appendLog(const std::string &text) override;

@@ -25,10 +25,6 @@ Tab1Widget::~Tab1Widget() {
     delete ui;
 }
 
-void Tab1Widget::setCounterValue(int value) {
-    ui->labelCounterValue->setText(QString::number(value));
-}
-
 void Tab1Widget::refreshPlot() {
     plotWidget->setPlot(sessionAdapter.getState().get().plot1);
 }
@@ -38,12 +34,6 @@ void Tab1Widget::appendLog(const std::string &text) {
 }
 
 void Tab1Widget::connectSignals() {
-    QObject::connect(ui->buttonIncrement, &QPushButton::clicked, this, [this]() { presenter.onIncrementPressed(); });
-
-    QObject::connect(ui->buttonDecrement, &QPushButton::clicked, this, [this]() { presenter.onDecrementPressed(); });
-
-    QObject::connect(ui->buttonReset, &QPushButton::clicked, this, [this]() { presenter.onResetPressed(); });
-
     QObject::connect(ui->buttonRebuildPlot, &QPushButton::clicked, this,
                      [this]() { presenter.onRebuildPlotPressed(); });
 }

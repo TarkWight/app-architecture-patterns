@@ -9,7 +9,6 @@ class ITab3View {
   public:
     virtual ~ITab3View() = default;
 
-    virtual void setCounterValue(int value) = 0;
     virtual void setTimerDurationMinutes(int minutes) = 0;
 
     virtual void setPoemTitle(const std::string &title) = 0;

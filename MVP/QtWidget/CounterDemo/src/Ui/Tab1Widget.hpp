@@ -25,7 +25,6 @@ class Tab1Widget final : public QWidget, public presentation::tab1::ITab1View {
                         infrastructure::SessionStateQtAdapter &sessionAdapter, QWidget *parent = nullptr);
     ~Tab1Widget() override;
 
-    void setCounterValue(int value) override;
     void refreshPlot() override;
     void appendLog(const std::string &text) override;
 

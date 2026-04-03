@@ -25,10 +25,6 @@ Tab2Widget::~Tab2Widget() {
     delete ui;
 }
 
-void Tab2Widget::setCounterValue(int value) {
-    ui->labelCounterValue->setText(QString::number(value));
-}
-
 void Tab2Widget::setMinutes(int minutes) {
     ui->spinBoxMinutes->setValue(minutes);
 }
@@ -42,12 +38,6 @@ void Tab2Widget::appendLog(const std::string &text) {
 }
 
 void Tab2Widget::connectSignals() {
-    QObject::connect(ui->buttonIncrement, &QPushButton::clicked, this, [this]() { presenter.onIncrementPressed(); });
-
-    QObject::connect(ui->buttonDecrement, &QPushButton::clicked, this, [this]() { presenter.onDecrementPressed(); });
-
-    QObject::connect(ui->buttonReset, &QPushButton::clicked, this, [this]() { presenter.onResetPressed(); });
-
     QObject::connect(ui->buttonRebuildPlot, &QPushButton::clicked, this,
                      [this]() { presenter.onRebuildPlotPressed(); });
 

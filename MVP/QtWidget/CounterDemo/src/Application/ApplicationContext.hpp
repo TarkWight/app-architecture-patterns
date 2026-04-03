@@ -63,7 +63,7 @@ struct ApplicationContext {
                                                    .setLineColorUseCase = setLineColorUseCase,
                                                    .buildFormulaPlotUseCase = buildFormulaPlotUseCase}};
 
-    presentation::tab1::TelemetryChartsTabPresenter tab1Presenter{generateStairPlotUseCase};
+    presentation::telemetryChartsTab::TelemetryChartsTabPresenter tab1Presenter{generateStairPlotUseCase};
 
     presentation::tab2::Tab2Presenter tab2Presenter{
         presentation::tab2::Tab2Presenter::Dependencies{.state = sessionState,

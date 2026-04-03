@@ -1,13 +1,14 @@
-#include "Tab1Widget.hpp"
-#include "ui_Tab1Widget.h"
+#include "TelemetryChartsTabWidget.hpp"
+#include "ui_TelemetryChartsTabWidget.h"
 
 #include <QString>
 
 namespace ui {
 
-Tab1Widget::Tab1Widget(presentation::tab1::TelemetryChartsTabPresenter &presenter,
-                       infrastructure::SessionStateQtAdapter &sessionAdapter, QWidget *parent)
-    : QWidget(parent), ui(new Ui::Tab1Widget), presenter(presenter), sessionAdapter(sessionAdapter) {
+TelemetryChartsTabWidget::TelemetryChartsTabWidget(
+    presentation::telemetryChartsTab::TelemetryChartsTabPresenter &presenter,
+    infrastructure::SessionStateQtAdapter &sessionAdapter, QWidget *parent)
+    : QWidget(parent), ui(new Ui::TelemetryChartsTabWidget), presenter(presenter), sessionAdapter(sessionAdapter) {
     ui->setupUi(this);
 
     plotWidget = new PlotWidget(this);
@@ -20,25 +21,25 @@ Tab1Widget::Tab1Widget(presentation::tab1::TelemetryChartsTabPresenter &presente
     connectSessionSignals();
 }
 
-Tab1Widget::~Tab1Widget() {
+TelemetryChartsTabWidget::~TelemetryChartsTabWidget() {
     presenter.detachView();
     delete ui;
 }
 
-void Tab1Widget::refreshPlot() {
+void TelemetryChartsTabWidget::refreshPlot() {
     plotWidget->setPlot(sessionAdapter.getState().get().plot1);
 }
 
-void Tab1Widget::appendLog(const std::string &text) {
+void TelemetryChartsTabWidget::appendLog(const std::string &text) {
     ui->plainTextEditLog->appendPlainText(QString::fromStdString(text));
 }
 
-void Tab1Widget::connectSignals() {
+void TelemetryChartsTabWidget::connectSignals() {
     QObject::connect(ui->buttonRebuildPlot, &QPushButton::clicked, this,
                      [this]() { presenter.onRebuildPlotPressed(); });
 }
 
-void Tab1Widget::connectSessionSignals() {
+void TelemetryChartsTabWidget::connectSessionSignals() {
     QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::plot1Changed, this,
                      [this]() { refreshPlot(); });
 }

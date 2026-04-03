@@ -104,8 +104,8 @@ qt_add_executable(develop
 
   src/Ui/MainWindowUiAdapter.hpp
   src/Ui/MainWindowUiAdapter.cpp
-  src/Ui/Tab1Widget.hpp
-  src/Ui/Tab1Widget.cpp
+  src/Ui/TelemetryChartsTabWidget.hpp
+  src/Ui/TelemetryChartsTabWidget.cpp
   src/Ui/Tab2Widget.hpp
   src/Ui/Tab2Widget.cpp
   src/Ui/Tab3Widget.hpp
@@ -114,7 +114,7 @@ qt_add_executable(develop
   src/Ui/MainWindow.cpp
 
   src/Ui/MainWindow.ui
-  src/Ui/Tab1Widget.ui
+  src/Ui/TelemetryChartsTabWidget.ui
   src/Ui/Tab2Widget.ui
   src/Ui/Tab3Widget.ui
   src/Application/ApplicationContext.hpp

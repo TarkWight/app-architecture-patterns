@@ -1,6 +1,6 @@
 #include "TelemetryChartsTabPresenter.hpp"
 
-namespace presentation::tab1 {
+namespace presentation::telemetryChartsTab {
 
 TelemetryChartsTabPresenter::TelemetryChartsTabPresenter(
     application::useCases::GenerateStairPlotUseCase &generateStairPlotUseCase)
@@ -28,4 +28,4 @@ void TelemetryChartsTabPresenter::onRebuildPlotPressed() {
     }
 }
 
-} // namespace presentation::tab1
+} // namespace presentation::telemetryChartsTab

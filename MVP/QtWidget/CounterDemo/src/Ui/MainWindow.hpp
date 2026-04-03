@@ -19,7 +19,7 @@ QT_END_NAMESPACE
 
 namespace ui {
 
-class Tab1Widget;
+class TelemetryChartsTabWidget;
 class Tab2Widget;
 class Tab3Widget;
 
@@ -29,7 +29,7 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
   public:
     struct Dependencies {
         presentation::ShellPresenter &shellPresenter;
-        presentation::tab1::TelemetryChartsTabPresenter &tab1Presenter;
+        presentation::telemetryChartsTab::TelemetryChartsTabPresenter &tab1Presenter;
         presentation::tab2::Tab2Presenter &tab2Presenter;
         presentation::tab3::Tab3Presenter &tab3Presenter;
         infrastructure::SessionStateQtAdapter &sessionAdapter;
@@ -48,12 +48,12 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     std::unique_ptr<Ui::MainWindow> ui;
 
     presentation::ShellPresenter &shellPresenter;
-    presentation::tab1::TelemetryChartsTabPresenter &tab1Presenter;
+    presentation::telemetryChartsTab::TelemetryChartsTabPresenter &telemetryChartsTabPresenter;
     presentation::tab2::Tab2Presenter &tab2Presenter;
     presentation::tab3::Tab3Presenter &tab3Presenter;
     infrastructure::SessionStateQtAdapter &sessionAdapter;
 
-    Tab1Widget *tab1Widget{nullptr};
+    TelemetryChartsTabWidget *telemetryChartsTabWidget{nullptr};
     Tab2Widget *tab2Widget{nullptr};
     Tab3Widget *tab3Widget{nullptr};
 

@@ -4,7 +4,7 @@
 #include "../../Application/UseCases/GenerateStairPlotUseCase.hpp"
 #include "ITelemetryChartsTabView.hpp"
 
-namespace presentation::tab1 {
+namespace presentation::telemetryChartsTab {
 
 class TelemetryChartsTabPresenter final {
   public:
@@ -23,6 +23,6 @@ class TelemetryChartsTabPresenter final {
     ITelemetryChartsTabView *view{nullptr};
 };
 
-} // namespace presentation::tab1
+} // namespace presentation::telemetryChartsTab
 
 #endif // TELEMETRYCHARTSTABPRESENTER_H

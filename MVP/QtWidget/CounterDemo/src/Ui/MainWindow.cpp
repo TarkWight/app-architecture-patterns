@@ -1,7 +1,7 @@
 #include "MainWindow.hpp"
 
 #include "MainWindowUiAdapter.hpp"
-#include "Tab1Widget.hpp"
+#include "TelemetryChartsTabWidget.hpp"
 #include "Tab2Widget.hpp"
 #include "Tab3Widget.hpp"
 #include "ui_MainWindow.h"
@@ -13,8 +13,8 @@ namespace ui {
 
 MainWindow::MainWindow(Dependencies deps, QWidget *parent)
     : QMainWindow(parent), ui(std::make_unique<Ui::MainWindow>()), shellPresenter(deps.shellPresenter),
-      tab1Presenter(deps.tab1Presenter), tab2Presenter(deps.tab2Presenter), tab3Presenter(deps.tab3Presenter),
-      sessionAdapter(deps.sessionAdapter) {
+      telemetryChartsTabPresenter(deps.tab1Presenter), tab2Presenter(deps.tab2Presenter),
+      tab3Presenter(deps.tab3Presenter), sessionAdapter(deps.sessionAdapter) {
     ui->setupUi(this);
 
     shellPresenter.attachView(*this);
@@ -24,7 +24,7 @@ MainWindow::MainWindow(Dependencies deps, QWidget *parent)
     connectSessionSignals();
 
     shellPresenter.onViewReady();
-    tab1Presenter.onViewReady();
+    telemetryChartsTabPresenter.onViewReady();
     tab2Presenter.onViewReady();
     tab3Presenter.onViewReady();
 }
@@ -58,12 +58,12 @@ void MainWindow::appendLog(const std::string &text) {
 }
 
 void MainWindow::setupTabs() {
-    tab1Widget = new Tab1Widget(tab1Presenter, sessionAdapter, this);
+    telemetryChartsTabWidget = new TelemetryChartsTabWidget(telemetryChartsTabPresenter, sessionAdapter, this);
     tab2Widget = new Tab2Widget(tab2Presenter, sessionAdapter, this);
     tab3Widget = new Tab3Widget(tab3Presenter, sessionAdapter, this);
 
     ui->tabWidget->clear();
-    ui->tabWidget->addTab(tab1Widget, QStringLiteral("Вкладка 1"));
+    ui->tabWidget->addTab(telemetryChartsTabWidget, QStringLiteral("Вкладка 1"));
     ui->tabWidget->addTab(tab2Widget, QStringLiteral("Вкладка 2"));
     ui->tabWidget->addTab(tab3Widget, QStringLiteral("Вкладка 3"));
 }

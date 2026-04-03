@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace presentation::tab1 {
+namespace presentation::telemetryChartsTab {
 
 class ITelemetryChartsTabView {
   public:
@@ -13,6 +13,6 @@ class ITelemetryChartsTabView {
     virtual void appendLog(const std::string &text) = 0;
 };
 
-} // namespace presentation::tab1
+} // namespace presentation::telemetryChartsTab
 
 #endif // ITELEMETRYCHARTSTABVIEW_H

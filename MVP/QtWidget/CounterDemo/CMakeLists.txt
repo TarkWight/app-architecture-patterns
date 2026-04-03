@@ -120,6 +120,8 @@ qt_add_executable(develop
   src/Application/ApplicationContext.hpp
   src/Ui/PlotWidget.hpp src/Ui/PlotWidget.cpp
   src/Ui/Render/PlotRenderer.hpp src/Ui/Render/PlotRenderer.cpp
+  src/Domain/FormulaExpression.hpp
+  src/Domain/WindProfile.hpp
 )
 target_link_libraries(develop PRIVATE Qt::Core Qt::Widgets)
 

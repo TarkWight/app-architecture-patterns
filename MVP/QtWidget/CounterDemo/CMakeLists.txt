@@ -50,8 +50,8 @@ qt_add_executable(develop
 
 
 
-  src/Application/UseCases/BuildFormulaPlotUseCase.hpp
-  src/Application/UseCases/BuildFormulaPlotUseCase.cpp
+  src/Application/UseCases/BuildControlPlotUseCase.hpp
+  src/Application/UseCases/BuildControlPlotUseCase.cpp
 
 
   src/Application/UseCases/GenerateStairPlotUseCase.hpp
@@ -120,6 +120,9 @@ qt_add_executable(develop
   src/Application/ApplicationContext.hpp
   src/Ui/PlotWidget.hpp src/Ui/PlotWidget.cpp
   src/Ui/Render/PlotRenderer.hpp src/Ui/Render/PlotRenderer.cpp
+  src/Domain/FormulaExpression.hpp
+  src/Domain/WindProfile.hpp
+  src/Application/UseCases/SetWindProfileUseCase.hpp src/Application/UseCases/SetWindProfileUseCase.cpp
 )
 target_link_libraries(develop PRIVATE Qt::Core Qt::Widgets)
 

@@ -3,7 +3,7 @@
 
 #include "Session/SessionState.hpp"
 
-#include "UseCases/BuildFormulaPlotUseCase.hpp"
+#include "UseCases/BuildControlPlotUseCase.hpp"
 #include "UseCases/ExportPdfUseCase.hpp"
 #include "UseCases/GenerateStairPlotUseCase.hpp"
 #include "UseCases/SetFunctionExpressionUseCase.hpp"
@@ -13,6 +13,7 @@
 #include "UseCases/StartTimerUseCase.hpp"
 #include "UseCases/StopTimerUseCase.hpp"
 #include "UseCases/UpdatePoemUseCase.hpp"
+#include "UseCases/SetWindProfileUseCase.hpp"
 
 #include "../Infrastructure/QtPdfExporter.hpp"
 #include "../Infrastructure/QtTextLogger.hpp"
@@ -37,7 +38,7 @@ struct ApplicationContext {
 
     application::useCases::GenerateStairPlotUseCase generateStairPlotUseCase{sessionState};
 
-    application::useCases::BuildFormulaPlotUseCase buildFormulaPlotUseCase{sessionState, functionEngine};
+    application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{sessionState, functionEngine};
 
     application::useCases::StartTimerUseCase startTimerUseCase{sessionState, timerService};
 
@@ -48,6 +49,8 @@ struct ApplicationContext {
     application::useCases::SetLineColorUseCase setLineColorUseCase{sessionState};
 
     application::useCases::SetControlChartsTabMinutesUseCase setControlChartsTabMinutesUseCase{sessionState};
+
+    application::useCases::SetWindProfileUseCase setWindProfileUseCase{sessionState};
 
     application::useCases::SetTimerDurationUseCase setTimerDurationUseCase{sessionState};
 
@@ -61,7 +64,7 @@ struct ApplicationContext {
                                                    .stopTimerUseCase = stopTimerUseCase,
                                                    .setFunctionExpressionUseCase = setFunctionExpressionUseCase,
                                                    .setLineColorUseCase = setLineColorUseCase,
-                                                   .buildFormulaPlotUseCase = buildFormulaPlotUseCase}};
+                                                   .buildControlPlotUseCase = buildControlPlotUseCase}};
 
     presentation::telemetryChartsTab::TelemetryChartsTabPresenter telemetryChartsTabPresenter{generateStairPlotUseCase};
 
@@ -69,7 +72,8 @@ struct ApplicationContext {
         presentation::controlChartsTab::ControlChartsTabPresenter::Dependencies{
             .state = sessionState,
             .setControlChartsTabMinutesUseCase = setControlChartsTabMinutesUseCase,
-            .buildFormulaPlotUseCase = buildFormulaPlotUseCase}};
+            .setWindProfileUseCase = setWindProfileUseCase,
+            .buildControlPlotUseCase = buildControlPlotUseCase}};
 
     presentation::testProtocolTab::TestProtocolTabPresenter testProtocolTabPresenter{
         presentation::testProtocolTab::TestProtocolTabPresenter::Dependencies{.state = sessionState,

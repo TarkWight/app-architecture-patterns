@@ -1,8 +1,9 @@
-#ifndef TAB2PRESENTER_HPP
-#define TAB2PRESENTER_HPP
+#ifndef CONTROLCHARTSPRESENTER_HPP
+#define CONTROLCHARTSPRESENTER_HPP
 
-#include "../../Application/UseCases/BuildFormulaPlotUseCase.hpp"
+#include "../../Application/UseCases/BuildControlPlotUseCase.hpp"
 #include "../../Application/UseCases/SetControlChartsTabMinutesUseCase.hpp"
+#include "../../Application/UseCases/SetWindProfileUseCase.hpp"
 
 #include "IControlChartsTabView.hpp"
 
@@ -13,7 +14,8 @@ class ControlChartsTabPresenter final {
     struct Dependencies {
         application::session::SessionState &state;
         application::useCases::SetControlChartsTabMinutesUseCase &setControlChartsTabMinutesUseCase;
-        application::useCases::BuildFormulaPlotUseCase &buildFormulaPlotUseCase;
+        application::useCases::SetWindProfileUseCase &setWindProfileUseCase;
+        application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
     };
 
     explicit ControlChartsTabPresenter(Dependencies deps);
@@ -24,16 +26,24 @@ class ControlChartsTabPresenter final {
     void onViewReady();
 
     void onMinutesChanged(int minutes);
+
+    void onBeaufortChanged(double value);
+    void onDirectionChanged(double value);
+    void onAngleOfAttackChanged(double value);
+
     void onRebuildPlotPressed();
 
   private:
     application::session::SessionState &state;
     application::useCases::SetControlChartsTabMinutesUseCase &setControlChartsTabMinutesUseCase;
-    application::useCases::BuildFormulaPlotUseCase &buildFormulaPlotUseCase;
+    application::useCases::SetWindProfileUseCase &setWindProfileUseCase;
+    application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
 
     IControlChartsTabView *view{nullptr};
+
+    void updateWindProfile(double beaufort, double direction, double angleOfAttack);
 };
 
 } // namespace presentation::controlChartsTab
 
-#endif // TAB2PRESENTER_HPP
+#endif // CONTROLCHARTSPRESENTER_HPP

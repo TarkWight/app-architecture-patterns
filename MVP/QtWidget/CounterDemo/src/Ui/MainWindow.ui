@@ -6,86 +6,159 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1000</width>
-    <height>700</height>
+    <width>1100</width>
+    <height>760</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Multi-Tab Demo</string>
+   <string>Test Stand Control System</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayoutRoot">
+    <property name="spacing">
+     <number>8</number>
+    </property>
+    <property name="leftMargin">
+     <number>8</number>
+    </property>
+    <property name="topMargin">
+     <number>8</number>
+    </property>
+    <property name="rightMargin">
+     <number>8</number>
+    </property>
+    <property name="bottomMargin">
+     <number>8</number>
+    </property>
+
     <item>
-     <layout class="QGridLayout" name="gridLayoutTopPanel">
-      <item row="0" column="0">
-       <widget class="QLabel" name="labelTimerCaption">
-        <property name="text">
-         <string>Таймер:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLabel" name="labelTimerValue">
-        <property name="text">
-         <string>0:00</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QPushButton" name="buttonStart">
-        <property name="text">
-         <string>Старт</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="3">
-       <widget class="QPushButton" name="buttonStop">
-        <property name="text">
-         <string>Стоп</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="4">
-       <widget class="QPushButton" name="buttonCalculate">
-        <property name="text">
-         <string>Рассчёт</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="labelFormulaCaption">
-        <property name="text">
-         <string>Формула:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1" colspan="3">
-       <widget class="QLineEdit" name="lineEditFormula">
-        <property name="text">
-         <string>sin(x)</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="4">
-       <widget class="QPushButton" name="buttonPickColor">
-        <property name="text">
-         <string>Цвет линии</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     <widget class="QFrame" name="frameShellPanel">
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <layout class="QGridLayout" name="gridLayoutTopPanel">
+       <property name="horizontalSpacing">
+        <number>8</number>
+       </property>
+       <property name="verticalSpacing">
+        <number>6</number>
+       </property>
+
+       <item row="0" column="0">
+        <widget class="QLabel" name="labelTimerCaption">
+         <property name="text">
+          <string>Таймер:</string>
+         </property>
+        </widget>
+       </item>
+
+       <item row="0" column="1">
+        <widget class="QLabel" name="labelTimerValue">
+         <property name="minimumSize">
+          <size>
+           <width>70</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>0:00</string>
+         </property>
+        </widget>
+       </item>
+
+       <item row="0" column="2">
+        <widget class="QPushButton" name="buttonStart">
+         <property name="text">
+          <string>Старт</string>
+         </property>
+        </widget>
+       </item>
+
+       <item row="0" column="3">
+        <widget class="QPushButton" name="buttonStop">
+         <property name="text">
+          <string>Стоп</string>
+         </property>
+        </widget>
+       </item>
+
+       <item row="0" column="4">
+        <widget class="QPushButton" name="buttonCalculate">
+         <property name="text">
+          <string>Рассчёт</string>
+         </property>
+        </widget>
+       </item>
+
+       <item row="0" column="5">
+        <spacer name="horizontalSpacerTop">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+
+       <item row="1" column="0">
+        <widget class="QLabel" name="labelFormulaCaption">
+         <property name="text">
+          <string>Формула:</string>
+         </property>
+        </widget>
+       </item>
+
+       <item row="1" column="1" colspan="4">
+        <widget class="QLineEdit" name="lineEditFormula">
+         <property name="text">
+          <string>sin(x)</string>
+         </property>
+         <property name="placeholderText">
+          <string>Введите формулу управляющего воздействия</string>
+         </property>
+        </widget>
+       </item>
+
+       <item row="1" column="5">
+        <widget class="QPushButton" name="buttonPickColor">
+         <property name="text">
+          <string>Цвет линии</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </item>
+
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="font">
        <font>
         <family>.AppleSystemUIFont</family>
+        <pointsize>13</pointsize>
        </font>
+      </property>
+      <property name="tabPosition">
+       <enum>QTabWidget::North</enum>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
       </property>
      </widget>
     </item>
+
     <item>
      <widget class="QPlainTextEdit" name="plainTextEditLog">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>120</height>
+       </size>
+      </property>
       <property name="readOnly">
        <bool>true</bool>
       </property>
@@ -94,6 +167,7 @@
       </property>
      </widget>
     </item>
+
    </layout>
   </widget>
  </widget>

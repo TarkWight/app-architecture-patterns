@@ -1,5 +1,5 @@
-#ifndef ITAB2VIEW_HPP
-#define ITAB2VIEW_HPP
+#ifndef ICONTROLCHARTSTABVIEW_HPP
+#define ICONTROLCHARTSTABVIEW_HPP
 
 #include <string>
 
@@ -10,10 +10,15 @@ class IControlChartsTabView {
     virtual ~IControlChartsTabView() = default;
 
     virtual void setMinutes(int minutes) = 0;
+
+    virtual void setBeaufort(double value) = 0;
+    virtual void setDirection(double value) = 0;
+    virtual void setAngleOfAttack(double value) = 0;
+
     virtual void refreshPlot() = 0;
     virtual void appendLog(const std::string &text) = 0;
 };
 
 } // namespace presentation::controlChartsTab
 
-#endif // ITAB2VIEW_HPP
+#endif // ICONTROLCHARTSTABVIEW_HPP

@@ -15,10 +15,14 @@ void SessionStateQtAdapter::emitState(const application::session::SessionStateDa
     emit timerChanged(data.elapsed.value, data.timerRunning);
     emit timerDurationChanged(data.timerDuration.value);
 
-    emit functionExpressionChanged(QString::fromStdString(data.functionExpression));
+    emit functionExpressionChanged(QString::fromStdString(data.functionExpression.value));
     emit lineColorChanged(toQColor(data.lineColor));
 
     emit controlChartsTabMinutesChanged(data.controlChartsTabMinutes.value);
+
+    emit beaufortChanged(data.windProfile.beaufort);
+    emit directionChanged(data.windProfile.direction);
+    emit angleOfAttackChanged(data.windProfile.angleOfAttack);
 
     emit poemTitleChanged(QString::fromStdString(data.poem.title));
 
@@ -26,8 +30,8 @@ void SessionStateQtAdapter::emitState(const application::session::SessionStateDa
         emit poemLineChanged(i, QString::fromStdString(data.poem.lines[static_cast<std::size_t>(i)]));
     }
 
-    emit plot1Changed();
-    emit plot2Changed();
+    emit telemetryPlotChanged();
+    emit controlPlotChanged();
 }
 
 const application::session::SessionState &SessionStateQtAdapter::getState() const {

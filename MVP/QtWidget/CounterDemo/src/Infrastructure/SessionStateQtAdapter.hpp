@@ -27,11 +27,15 @@ class SessionStateQtAdapter final : public QObject {
 
     void controlChartsTabMinutesChanged(int minutes);
 
+    void beaufortChanged(double value);
+    void directionChanged(double value);
+    void angleOfAttackChanged(double value);
+
     void poemTitleChanged(const QString &title);
     void poemLineChanged(int index, const QString &line);
 
-    void plot1Changed();
-    void plot2Changed();
+    void telemetryPlotChanged();
+    void controlPlotChanged();
 
   private:
     application::session::SessionState &state;

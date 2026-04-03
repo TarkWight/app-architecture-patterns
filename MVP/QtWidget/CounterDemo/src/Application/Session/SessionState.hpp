@@ -22,23 +22,15 @@ class SessionState {
     Subscription subscribe(Listener listener);
 
     void setFunctionExpression(std::string expr);
-
+    void setWindProfile(domain::WindProfile profile);
     void setLineColor(domain::RgbColor color);
-
     void setControlChartsTabMinutes(int minutes);
-
     void setTimerDurationMinutes(int minutes);
-
     void setElapsedSeconds(int seconds);
-
     void setTimerRunning(bool running);
-
-    void setPlot1(domain::PlotModel plot);
-
-    void setPlot2(domain::PlotModel plot);
-
+    void setTelemetryPlot(domain::PlotModel plot);
+    void setControlPlot(domain::PlotModel plot);
     void setPoemTitle(std::string title);
-
     void setPoemLine(int idx, std::string line);
 
   private:

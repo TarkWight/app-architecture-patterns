@@ -2,7 +2,7 @@
 #define SHELLPRESENTER_HPP
 
 #include "../Application/Session/SessionState.hpp"
-#include "../Application/UseCases/BuildFormulaPlotUseCase.hpp"
+#include "../Application/UseCases/BuildControlPlotUseCase.hpp"
 #include "../Application/UseCases/SetFunctionExpressionUseCase.hpp"
 #include "../Application/UseCases/SetLineColorUseCase.hpp"
 #include "../Application/UseCases/StartTimerUseCase.hpp"
@@ -21,7 +21,7 @@ class ShellPresenter final {
         application::useCases::StopTimerUseCase &stopTimerUseCase;
         application::useCases::SetFunctionExpressionUseCase &setFunctionExpressionUseCase;
         application::useCases::SetLineColorUseCase &setLineColorUseCase;
-        application::useCases::BuildFormulaPlotUseCase &buildFormulaPlotUseCase;
+        application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
     };
 
     explicit ShellPresenter(Dependencies deps);
@@ -43,7 +43,7 @@ class ShellPresenter final {
     application::useCases::StopTimerUseCase &stopTimerUseCase;
     application::useCases::SetFunctionExpressionUseCase &setFunctionExpressionUseCase;
     application::useCases::SetLineColorUseCase &setLineColorUseCase;
-    application::useCases::BuildFormulaPlotUseCase &buildFormulaPlotUseCase;
+    application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
 
     IShellView *view{nullptr};
 

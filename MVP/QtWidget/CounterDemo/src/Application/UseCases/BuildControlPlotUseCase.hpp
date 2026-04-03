@@ -1,5 +1,5 @@
-#ifndef BUILDFORMULAPLOTUSECASE_HPP
-#define BUILDFORMULAPLOTUSECASE_HPP
+#ifndef BUILDCONTROLPLOTUSECASE_HPP
+#define BUILDCONTROLPLOTUSECASE_HPP
 
 #include "../Ports/IFunctionEngine.hpp"
 #include "../Session/SessionState.hpp"
@@ -7,9 +7,9 @@
 
 namespace application::useCases {
 
-class BuildFormulaPlotUseCase final {
+class BuildControlPlotUseCase final {
   public:
-    BuildFormulaPlotUseCase(application::session::SessionState &state,
+    BuildControlPlotUseCase(application::session::SessionState &state,
                             const application::ports::IFunctionEngine &engine);
 
     domain::PlotModel execute();
@@ -21,4 +21,4 @@ class BuildFormulaPlotUseCase final {
 
 } // namespace application::useCases
 
-#endif // BUILDFORMULAPLOTUSECASE_HPP
+#endif // BUILDCONTROLPLOTUSECASE_HPP

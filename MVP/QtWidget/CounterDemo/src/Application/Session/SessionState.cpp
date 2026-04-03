@@ -34,7 +34,12 @@ Subscription application::session::SessionState::subscribe(Listener listener) {
 }
 
 void application::session::SessionState::setFunctionExpression(std::string expr) {
-    data.functionExpression = std::move(expr);
+    data.functionExpression.value = std::move(expr);
+    notify();
+}
+
+void application::session::SessionState::setWindProfile(domain::WindProfile profile) {
+    data.windProfile = std::move(profile);
     notify();
 }
 
@@ -63,13 +68,13 @@ void application::session::SessionState::setTimerRunning(bool running) {
     notify();
 }
 
-void application::session::SessionState::setPlot1(domain::PlotModel plot) {
-    data.plot1 = std::move(plot);
+void application::session::SessionState::setTelemetryPlot(domain::PlotModel plot) {
+    data.telemetryPlot = std::move(plot);
     notify();
 }
 
-void application::session::SessionState::setPlot2(domain::PlotModel plot) {
-    data.plot2 = std::move(plot);
+void application::session::SessionState::setControlPlot(domain::PlotModel plot) {
+    data.controlPlot = std::move(plot);
     notify();
 }
 

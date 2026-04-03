@@ -67,11 +67,11 @@ void QtPdfExporter::exportDocument(const application::dto::PdfDocumentModel &doc
     }
     drawParagraph(painter, cursor, firstStanza, 30);
 
-    drawPlot(painter, cursor, 500, document.plot1);
-    drawParagraph(painter, cursor, toQString(document.plot1Caption), 40);
+    drawPlot(painter, cursor, 500, document.telemetryPlot);
+    drawParagraph(painter, cursor, toQString(document.telemetryPlotCaption), 40);
 
-    drawPlot(painter, cursor, 500, document.plot2);
-    drawParagraph(painter, cursor, toQString(document.plot2Caption), 40);
+    drawPlot(painter, cursor, 500, document.controlPlot);
+    drawParagraph(painter, cursor, toQString(document.controlPlotCaption), 40);
 
     QString secondStanza;
     for (const auto &line : document.secondStanza) {

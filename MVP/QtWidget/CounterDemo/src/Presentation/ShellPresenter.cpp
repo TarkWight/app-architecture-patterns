@@ -5,7 +5,7 @@ namespace presentation {
 ShellPresenter::ShellPresenter(Dependencies deps)
     : state(deps.state), startTimerUseCase(deps.startTimerUseCase), stopTimerUseCase(deps.stopTimerUseCase),
       setFunctionExpressionUseCase(deps.setFunctionExpressionUseCase), setLineColorUseCase(deps.setLineColorUseCase),
-      buildFormulaPlotUseCase(deps.buildFormulaPlotUseCase) {
+      buildControlPlotUseCase(deps.buildControlPlotUseCase) {
 }
 
 void ShellPresenter::attachView(IShellView &view) {
@@ -39,7 +39,7 @@ void ShellPresenter::onStopPressed() {
 }
 
 void ShellPresenter::onCalculatePressed() {
-    buildFormulaPlotUseCase.execute();
+    buildControlPlotUseCase.execute();
 
     if (view != nullptr) {
         view->appendLog("Formula plot rebuilt");

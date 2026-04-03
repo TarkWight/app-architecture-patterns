@@ -1,7 +1,7 @@
 #ifndef TAB2PRESENTER_HPP
 #define TAB2PRESENTER_HPP
 
-#include "../../Application/UseCases/BuildFormulaPlotUseCase.hpp"
+#include "../../Application/UseCases/BuildControlPlotUseCase.hpp"
 #include "../../Application/UseCases/SetControlChartsTabMinutesUseCase.hpp"
 
 #include "IControlChartsTabView.hpp"
@@ -13,7 +13,7 @@ class ControlChartsTabPresenter final {
     struct Dependencies {
         application::session::SessionState &state;
         application::useCases::SetControlChartsTabMinutesUseCase &setControlChartsTabMinutesUseCase;
-        application::useCases::BuildFormulaPlotUseCase &buildFormulaPlotUseCase;
+        application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
     };
 
     explicit ControlChartsTabPresenter(Dependencies deps);
@@ -29,7 +29,7 @@ class ControlChartsTabPresenter final {
   private:
     application::session::SessionState &state;
     application::useCases::SetControlChartsTabMinutesUseCase &setControlChartsTabMinutesUseCase;
-    application::useCases::BuildFormulaPlotUseCase &buildFormulaPlotUseCase;
+    application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
 
     IControlChartsTabView *view{nullptr};
 };

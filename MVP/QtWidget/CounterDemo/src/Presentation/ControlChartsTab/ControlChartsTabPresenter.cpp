@@ -4,7 +4,7 @@ namespace presentation::controlChartsTab {
 
 ControlChartsTabPresenter::ControlChartsTabPresenter(Dependencies deps)
     : state(deps.state), setControlChartsTabMinutesUseCase(deps.setControlChartsTabMinutesUseCase),
-      buildFormulaPlotUseCase(deps.buildFormulaPlotUseCase) {
+      buildControlPlotUseCase(deps.buildControlPlotUseCase) {
 }
 
 void ControlChartsTabPresenter::attachView(IControlChartsTabView &view) {
@@ -32,7 +32,7 @@ void ControlChartsTabPresenter::onMinutesChanged(int minutes) {
 }
 
 void ControlChartsTabPresenter::onRebuildPlotPressed() {
-    buildFormulaPlotUseCase.execute();
+    buildControlPlotUseCase.execute();
 
     if (view != nullptr) {
         view->refreshPlot();

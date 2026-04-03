@@ -50,8 +50,8 @@ qt_add_executable(develop
 
 
 
-  src/Application/UseCases/BuildFormulaPlotUseCase.hpp
-  src/Application/UseCases/BuildFormulaPlotUseCase.cpp
+  src/Application/UseCases/BuildControlPlotUseCase.hpp
+  src/Application/UseCases/BuildControlPlotUseCase.cpp
 
 
   src/Application/UseCases/GenerateStairPlotUseCase.hpp

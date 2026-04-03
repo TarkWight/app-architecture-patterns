@@ -7,9 +7,9 @@
 
 namespace application::useCases {
 
-class BuildFormulaPlotUseCase final {
+class BuildControlPlotUseCase final {
   public:
-    BuildFormulaPlotUseCase(application::session::SessionState &state,
+    BuildControlPlotUseCase(application::session::SessionState &state,
                             const application::ports::IFunctionEngine &engine);
 
     domain::PlotModel execute();

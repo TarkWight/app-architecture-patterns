@@ -1,15 +1,15 @@
-#include "BuildFormulaPlotUseCase.hpp"
+#include "BuildControlPlotUseCase.hpp"
 
 #include <algorithm>
 #include <cmath>
 
 namespace application::useCases {
 
-BuildFormulaPlotUseCase::BuildFormulaPlotUseCase(session::SessionState &state, const ports::IFunctionEngine &engine)
+BuildControlPlotUseCase::BuildControlPlotUseCase(session::SessionState &state, const ports::IFunctionEngine &engine)
     : state(state), engine(engine) {
 }
 
-domain::PlotModel BuildFormulaPlotUseCase::execute() {
+domain::PlotModel BuildControlPlotUseCase::execute() {
     const auto &stateData = state.get();
 
     domain::PlotModel plot{};

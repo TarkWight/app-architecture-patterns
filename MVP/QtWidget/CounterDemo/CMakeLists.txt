@@ -29,7 +29,7 @@ qt_add_executable(develop
 
 
   src/Domain/Plot.hpp
-  src/Domain/Poem.hpp
+  src/Domain/TestProtocol.hpp
   src/Domain/Time.hpp
 
 
@@ -68,8 +68,8 @@ qt_add_executable(develop
   src/Application/UseCases/SetLineColorUseCase.cpp
   src/Application/UseCases/SetTimerDurationUseCase.hpp
   src/Application/UseCases/SetTimerDurationUseCase.cpp
-  src/Application/UseCases/UpdatePoemUseCase.hpp
-  src/Application/UseCases/UpdatePoemUseCase.cpp
+  src/Application/UseCases/UpdateTestProtocolUseCase.hpp
+  src/Application/UseCases/UpdateTestProtocolUseCase.cpp
   src/Application/UseCases/SetControlChartsTabMinutesUseCase.hpp
   src/Application/UseCases/SetControlChartsTabMinutesUseCase.cpp
 

@@ -11,10 +11,10 @@ application::dto::PdfDocumentModel ExportPdfUseCase::buildDocument() const {
     const auto &session = state.get();
 
     application::dto::PdfDocumentModel document{};
-    document.title = session.poem.title;
+    document.title = session.testProtocol.title;
 
     for (int i = 0; i < 4; ++i) {
-        document.firstStanza[static_cast<std::size_t>(i)] = session.poem.lines[static_cast<std::size_t>(i)];
+        document.firstStanza[static_cast<std::size_t>(i)] = session.testProtocol.lines[static_cast<std::size_t>(i)];
     }
 
     document.telemetryPlot = session.telemetryPlot;
@@ -24,7 +24,7 @@ application::dto::PdfDocumentModel ExportPdfUseCase::buildDocument() const {
     document.controlPlotCaption = "Рисунок 2";
 
     for (std::size_t i = 0; i < 4; ++i) {
-        document.secondStanza[i] = session.poem.lines[i + 4];
+        document.secondStanza[i] = session.testProtocol.lines[i + 4];
     }
 
     return document;

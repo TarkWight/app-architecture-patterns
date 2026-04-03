@@ -12,7 +12,7 @@
 #include "UseCases/SetTimerDurationUseCase.hpp"
 #include "UseCases/StartTimerUseCase.hpp"
 #include "UseCases/StopTimerUseCase.hpp"
-#include "UseCases/UpdatePoemUseCase.hpp"
+#include "UseCases/UpdateTestProtocolUseCase.hpp"
 #include "UseCases/SetWindProfileUseCase.hpp"
 
 #include "../Infrastructure/QtPdfExporter.hpp"
@@ -54,7 +54,7 @@ struct ApplicationContext {
 
     application::useCases::SetTimerDurationUseCase setTimerDurationUseCase{sessionState};
 
-    application::useCases::UpdatePoemUseCase updatePoemUseCase{sessionState};
+    application::useCases::UpdateTestProtocolUseCase updateTestProtocolUseCase{sessionState};
 
     application::useCases::ExportPdfUseCase exportPdfUseCase{sessionState, pdfExporter};
 
@@ -76,11 +76,11 @@ struct ApplicationContext {
             .buildControlPlotUseCase = buildControlPlotUseCase}};
 
     presentation::testProtocolTab::TestProtocolTabPresenter testProtocolTabPresenter{
-        presentation::testProtocolTab::TestProtocolTabPresenter::Dependencies{.state = sessionState,
-                                                                              .setTimerDurationUseCase =
-                                                                                  setTimerDurationUseCase,
-                                                                              .updatePoemUseCase = updatePoemUseCase,
-                                                                              .exportPdfUseCase = exportPdfUseCase}};
+        presentation::testProtocolTab::TestProtocolTabPresenter::Dependencies{
+            .state = sessionState,
+            .setTimerDurationUseCase = setTimerDurationUseCase,
+            .updateTestProtocolUseCase = updateTestProtocolUseCase,
+            .exportPdfUseCase = exportPdfUseCase}};
 };
 
 #endif // APPLICATIONCONTEXT_HPP

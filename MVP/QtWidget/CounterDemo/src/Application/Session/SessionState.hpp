@@ -30,8 +30,8 @@ class SessionState {
     void setTimerRunning(bool running);
     void setTelemetryPlot(domain::PlotModel plot);
     void setControlPlot(domain::PlotModel plot);
-    void setPoemTitle(std::string title);
-    void setPoemLine(int idx, std::string line);
+    void setTestProtocolTitle(std::string title);
+    void setTestProtocolLine(int idx, std::string line);
 
   private:
     SessionStateData data{};

@@ -3,7 +3,7 @@
 
 #include "../../Domain/FormulaExpression.hpp"
 #include "../../Domain/Plot.hpp"
-#include "../../Domain/Poem.hpp"
+#include "../../Domain/TestProtocol.hpp"
 #include "../../Domain/Time.hpp"
 #include "../../Domain/WindProfile.hpp"
 
@@ -21,7 +21,7 @@ struct SessionStateData {
 
     domain::WindProfile windProfile{};
 
-    domain::Poem poem{};
+    domain::TestProtocol testProtocol{};
 
     domain::PlotModel telemetryPlot{};
     domain::PlotModel controlPlot{};

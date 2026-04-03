@@ -24,8 +24,8 @@ class TestProtocolTabWidget final : public QWidget, public presentation::testPro
     ~TestProtocolTabWidget() override;
 
     void setTimerDurationMinutes(int minutes) override;
-    void setPoemTitle(const std::string &title) override;
-    void setPoemLine(int index, const std::string &line) override;
+    void setTestProtocolTitle(const std::string &title) override;
+    void setTestProtocolLine(int index, const std::string &line) override;
     void showExportSuccess(const std::string &filePath) override;
     void appendLog(const std::string &text) override;
 

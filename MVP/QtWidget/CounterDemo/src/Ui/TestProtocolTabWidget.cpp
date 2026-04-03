@@ -53,11 +53,11 @@ void TestProtocolTabWidget::setTimerDurationMinutes(int minutes) {
     ui->spinBoxTimerMinutes->setValue(minutes);
 }
 
-void TestProtocolTabWidget::setPoemTitle(const std::string &title) {
+void TestProtocolTabWidget::setTestProtocolTitle(const std::string &title) {
     ui->lineEditTitle->setText(QString::fromStdString(title));
 }
 
-void TestProtocolTabWidget::setPoemLine(int index, const std::string &line) {
+void TestProtocolTabWidget::setTestProtocolLine(int index, const std::string &line) {
     auto *lineEdit = lineEditByIndex(ui, index);
     if (lineEdit == nullptr) {
         return;
@@ -79,7 +79,7 @@ void TestProtocolTabWidget::connectSignals() {
                      [this](int value) { presenter.onTimerDurationChanged(value); });
 
     QObject::connect(ui->lineEditTitle, &QLineEdit::textChanged, this,
-                     [this](const QString &text) { presenter.onPoemTitleChanged(text.toStdString()); });
+                     [this](const QString &text) { presenter.onTestProtocolTitleChanged(text.toStdString()); });
 
     for (int i = 0; i < 8; ++i) {
         auto *lineEdit = lineEditByIndex(ui, i);
@@ -87,13 +87,15 @@ void TestProtocolTabWidget::connectSignals() {
             continue;
         }
 
-        QObject::connect(lineEdit, &QLineEdit::textChanged, this,
-                         [this, i](const QString &text) { presenter.onPoemLineChanged(i, text.toStdString()); });
+        QObject::connect(lineEdit, &QLineEdit::textChanged, this, [this, i](const QString &text) {
+            presenter.onTestProtocolLineChanged(i, text.toStdString());
+        });
     }
 
     QObject::connect(ui->buttonExportPdf, &QPushButton::clicked, this, [this]() {
-        const QString filePath = QFileDialog::getSaveFileName(
-            this, QStringLiteral("Export PDF"), QStringLiteral("poem-report.pdf"), QStringLiteral("PDF Files (*.pdf)"));
+        const QString filePath =
+            QFileDialog::getSaveFileName(this, QStringLiteral("Export PDF"), QStringLiteral("testProtocol-report.pdf"),
+                                         QStringLiteral("PDF Files (*.pdf)"));
 
         if (filePath.isEmpty()) {
             return;
@@ -113,7 +115,7 @@ void TestProtocolTabWidget::connectSessionSignals() {
                          ui->spinBoxTimerMinutes->setValue(minutes);
                      });
 
-    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::poemTitleChanged, this,
+    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testProtocolTitleChanged, this,
                      [this](const QString &title) {
                          if (ui->lineEditTitle->text() == title) {
                              return;
@@ -122,7 +124,7 @@ void TestProtocolTabWidget::connectSessionSignals() {
                          ui->lineEditTitle->setText(title);
                      });
 
-    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::poemLineChanged, this,
+    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testProtocolLineChanged, this,
                      [this](int index, const QString &line) {
                          auto *lineEdit = lineEditByIndex(ui, index);
                          if (lineEdit == nullptr) {

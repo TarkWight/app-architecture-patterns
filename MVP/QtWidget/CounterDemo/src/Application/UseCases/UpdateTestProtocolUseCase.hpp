@@ -7,9 +7,9 @@
 
 namespace application::useCases {
 
-class UpdatePoemUseCase final {
+class UpdateTestProtocolUseCase final {
   public:
-    explicit UpdatePoemUseCase(application::session::SessionState &state);
+    explicit UpdateTestProtocolUseCase(application::session::SessionState &state);
 
     void updateTitle(std::string title);
     void updateLine(int index, std::string line);

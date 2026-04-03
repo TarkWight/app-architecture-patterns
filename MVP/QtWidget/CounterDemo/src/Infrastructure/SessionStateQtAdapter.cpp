@@ -24,10 +24,10 @@ void SessionStateQtAdapter::emitState(const application::session::SessionStateDa
     emit directionChanged(data.windProfile.direction);
     emit angleOfAttackChanged(data.windProfile.angleOfAttack);
 
-    emit poemTitleChanged(QString::fromStdString(data.poem.title));
+    emit testProtocolTitleChanged(QString::fromStdString(data.testProtocol.title));
 
     for (int i = 0; i < 8; ++i) {
-        emit poemLineChanged(i, QString::fromStdString(data.poem.lines[static_cast<std::size_t>(i)]));
+        emit testProtocolLineChanged(i, QString::fromStdString(data.testProtocol.lines[static_cast<std::size_t>(i)]));
     }
 
     emit telemetryPlotChanged();

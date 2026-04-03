@@ -4,7 +4,7 @@ namespace presentation::testProtocolTab {
 
 TestProtocolTabPresenter::TestProtocolTabPresenter(Dependencies deps)
     : state(deps.state), setTimerDurationUseCase(deps.setTimerDurationUseCase),
-      updatePoemUseCase(deps.updatePoemUseCase), exportPdfUseCase(deps.exportPdfUseCase) {
+      updateTestProtocolUseCase(deps.updateTestProtocolUseCase), exportPdfUseCase(deps.exportPdfUseCase) {
 }
 
 void TestProtocolTabPresenter::attachView(ITestProtocolTabView &view) {
@@ -23,10 +23,10 @@ void TestProtocolTabPresenter::onViewReady() {
     const auto &session = state.get();
 
     view->setTimerDurationMinutes(session.timerDuration.value);
-    view->setPoemTitle(session.poem.title);
+    view->setTestProtocolTitle(session.testProtocol.title);
 
     for (int i = 0; i < 8; ++i) {
-        view->setPoemLine(i, session.poem.lines[static_cast<std::size_t>(i)]);
+        view->setTestProtocolLine(i, session.testProtocol.lines[static_cast<std::size_t>(i)]);
     }
 }
 
@@ -38,19 +38,19 @@ void TestProtocolTabPresenter::onTimerDurationChanged(int minutes) {
     }
 }
 
-void TestProtocolTabPresenter::onPoemTitleChanged(std::string title) {
-    updatePoemUseCase.updateTitle(std::move(title));
+void TestProtocolTabPresenter::onTestProtocolTitleChanged(std::string title) {
+    updateTestProtocolUseCase.updateTitle(std::move(title));
 
     if (view != nullptr) {
-        view->appendLog("Poem title updated");
+        view->appendLog("TestProtocol title updated");
     }
 }
 
-void TestProtocolTabPresenter::onPoemLineChanged(int index, std::string line) {
-    updatePoemUseCase.updateLine(index, std::move(line));
+void TestProtocolTabPresenter::onTestProtocolLineChanged(int index, std::string line) {
+    updateTestProtocolUseCase.updateLine(index, std::move(line));
 
     if (view != nullptr) {
-        view->appendLog("Poem line updated");
+        view->appendLog("TestProtocol line updated");
     }
 }
 

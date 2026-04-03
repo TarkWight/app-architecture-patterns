@@ -1,16 +1,16 @@
-#ifndef POEM_HPP
-#define POEM_HPP
+#ifndef TESTPROTOCOL_HPP
+#define TESTPROTOCOL_HPP
 
 #include <array>
 #include <string>
 
 namespace domain {
 
-struct Poem {
+struct TestProtocol {
     std::string title{};
     std::array<std::string, 8> lines{};
 };
 
 } // namespace domain
 
-#endif // POEM_HPP
+#endif // TESTPROTOCOL_HPP

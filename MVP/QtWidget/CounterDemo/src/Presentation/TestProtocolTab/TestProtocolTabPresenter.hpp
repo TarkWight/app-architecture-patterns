@@ -3,7 +3,7 @@
 
 #include "../../Application/UseCases/ExportPdfUseCase.hpp"
 #include "../../Application/UseCases/SetTimerDurationUseCase.hpp"
-#include "../../Application/UseCases/UpdatePoemUseCase.hpp"
+#include "../../Application/UseCases/UpdateTestProtocolUseCase.hpp"
 #include "../../Application/Session/SessionState.hpp"
 
 #include "ITestProtocolTabView.hpp"
@@ -17,7 +17,7 @@ class TestProtocolTabPresenter final {
     struct Dependencies {
         application::session::SessionState &state;
         application::useCases::SetTimerDurationUseCase &setTimerDurationUseCase;
-        application::useCases::UpdatePoemUseCase &updatePoemUseCase;
+        application::useCases::UpdateTestProtocolUseCase &updateTestProtocolUseCase;
         application::useCases::ExportPdfUseCase &exportPdfUseCase;
     };
 
@@ -30,15 +30,15 @@ class TestProtocolTabPresenter final {
 
     void onTimerDurationChanged(int minutes);
 
-    void onPoemTitleChanged(std::string title);
-    void onPoemLineChanged(int index, std::string line);
+    void onTestProtocolTitleChanged(std::string title);
+    void onTestProtocolLineChanged(int index, std::string line);
 
     void onExportPdfPressed(const std::string &filePath);
 
   private:
     application::session::SessionState &state;
     application::useCases::SetTimerDurationUseCase &setTimerDurationUseCase;
-    application::useCases::UpdatePoemUseCase &updatePoemUseCase;
+    application::useCases::UpdateTestProtocolUseCase &updateTestProtocolUseCase;
     application::useCases::ExportPdfUseCase &exportPdfUseCase;
 
     ITestProtocolTabView *view{nullptr};

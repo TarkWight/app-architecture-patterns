@@ -43,7 +43,7 @@
     </widget>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayoutPoem">
+    <layout class="QGridLayout" name="gridLayoutTestProtocol">
      <item row="0" column="0">
       <widget class="QLineEdit" name="lineEditLine0">
        <property name="placeholderText">

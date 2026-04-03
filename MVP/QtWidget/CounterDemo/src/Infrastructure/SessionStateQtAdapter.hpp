@@ -31,8 +31,8 @@ class SessionStateQtAdapter final : public QObject {
     void directionChanged(double value);
     void angleOfAttackChanged(double value);
 
-    void poemTitleChanged(const QString &title);
-    void poemLineChanged(int index, const QString &line);
+    void testProtocolTitleChanged(const QString &title);
+    void testProtocolLineChanged(int index, const QString &line);
 
     void telemetryPlotChanged();
     void controlPlotChanged();

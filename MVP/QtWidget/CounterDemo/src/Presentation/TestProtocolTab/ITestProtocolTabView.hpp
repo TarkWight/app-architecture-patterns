@@ -11,8 +11,8 @@ class ITestProtocolTabView {
 
     virtual void setTimerDurationMinutes(int minutes) = 0;
 
-    virtual void setPoemTitle(const std::string &title) = 0;
-    virtual void setPoemLine(int index, const std::string &line) = 0;
+    virtual void setTestProtocolTitle(const std::string &title) = 0;
+    virtual void setTestProtocolLine(int index, const std::string &line) = 0;
 
     virtual void showExportSuccess(const std::string &filePath) = 0;
     virtual void appendLog(const std::string &text) = 0;

@@ -1,7 +1,7 @@
 #include "SessionState.hpp"
 
 #include "../../Domain/Plot.hpp"
-#include "../../Domain/Poem.hpp"
+#include "../../Domain/TestProtocol.hpp"
 #include "../../Domain/Time.hpp"
 
 #include "SessionStateData.hpp"
@@ -78,16 +78,16 @@ void application::session::SessionState::setControlPlot(domain::PlotModel plot) 
     notify();
 }
 
-void application::session::SessionState::setPoemTitle(std::string title) {
-    data.poem.title = std::move(title);
+void application::session::SessionState::setTestProtocolTitle(std::string title) {
+    data.testProtocol.title = std::move(title);
     notify();
 }
 
-void application::session::SessionState::setPoemLine(int idx, std::string line) {
+void application::session::SessionState::setTestProtocolLine(int idx, std::string line) {
     if (idx < 0 || idx >= 8) {
         return;
     }
-    data.poem.lines[static_cast<std::size_t>(idx)] = std::move(line);
+    data.testProtocol.lines[static_cast<std::size_t>(idx)] = std::move(line);
     notify();
 }
 

@@ -13,6 +13,7 @@
 #include "UseCases/StartTimerUseCase.hpp"
 #include "UseCases/StopTimerUseCase.hpp"
 #include "UseCases/UpdatePoemUseCase.hpp"
+#include "UseCases/SetWindProfileUseCase.hpp"
 
 #include "../Infrastructure/QtPdfExporter.hpp"
 #include "../Infrastructure/QtTextLogger.hpp"
@@ -49,6 +50,8 @@ struct ApplicationContext {
 
     application::useCases::SetControlChartsTabMinutesUseCase setControlChartsTabMinutesUseCase{sessionState};
 
+    application::useCases::SetWindProfileUseCase setWindProfileUseCase{sessionState};
+
     application::useCases::SetTimerDurationUseCase setTimerDurationUseCase{sessionState};
 
     application::useCases::UpdatePoemUseCase updatePoemUseCase{sessionState};
@@ -69,6 +72,7 @@ struct ApplicationContext {
         presentation::controlChartsTab::ControlChartsTabPresenter::Dependencies{
             .state = sessionState,
             .setControlChartsTabMinutesUseCase = setControlChartsTabMinutesUseCase,
+            .setWindProfileUseCase = setWindProfileUseCase,
             .buildControlPlotUseCase = buildControlPlotUseCase}};
 
     presentation::testProtocolTab::TestProtocolTabPresenter testProtocolTabPresenter{

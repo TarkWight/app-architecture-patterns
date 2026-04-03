@@ -25,6 +25,9 @@ class ControlChartsTabWidget final : public QWidget, public presentation::contro
     ~ControlChartsTabWidget() override;
 
     void setMinutes(int minutes) override;
+    void setBeaufort(double value) override;
+    void setDirection(double value) override;
+    void setAngleOfAttack(double value) override;
     void refreshPlot() override;
     void appendLog(const std::string &text) override;
 

@@ -29,6 +29,18 @@ void ControlChartsTabWidget::setMinutes(int minutes) {
     ui->spinBoxMinutes->setValue(minutes);
 }
 
+void ControlChartsTabWidget::setBeaufort(double value) {
+    ui->doubleSpinBoxBeaufort->setValue(value);
+}
+
+void ControlChartsTabWidget::setDirection(double value) {
+    ui->doubleSpinBoxDirection->setValue(value);
+}
+
+void ControlChartsTabWidget::setAngleOfAttack(double value) {
+    ui->doubleSpinBoxAngleOfAttack->setValue(value);
+}
+
 void ControlChartsTabWidget::refreshPlot() {
     plotWidget->setPlot(sessionAdapter.getState().get().controlPlot);
 }

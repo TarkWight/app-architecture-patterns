@@ -20,6 +20,10 @@ void SessionStateQtAdapter::emitState(const application::session::SessionStateDa
 
     emit controlChartsTabMinutesChanged(data.controlChartsTabMinutes.value);
 
+    emit beaufortChanged(data.windProfile.beaufort);
+    emit directionChanged(data.windProfile.direction);
+    emit angleOfAttackChanged(data.windProfile.angleOfAttack);
+
     emit poemTitleChanged(QString::fromStdString(data.poem.title));
 
     for (int i = 0; i < 8; ++i) {

@@ -23,21 +23,17 @@ set(CMAKE_AUTORCC ON)
 qt_add_executable(develop
   src/main.cpp
 
-
-
-
-
-
   src/Domain/Plot.hpp
   src/Domain/TestProtocol.hpp
   src/Domain/Time.hpp
-
+  src/Domain/FormulaExpression.hpp
+  src/Domain/WindProfile.hpp
+  src/Domain/AxisState.hpp
 
 
   src/Application/Dto/PdfDocumentModel.hpp
 
   src/Application/Ports/ILogger.hpp
-
   src/Application/Ports/IFunctionEngine.hpp
   src/Application/Ports/ITimerService.hpp
   src/Application/Ports/IPdfExporter.hpp
@@ -49,11 +45,8 @@ qt_add_executable(develop
   src/Application/Session/Subscription.cpp
 
 
-
   src/Application/UseCases/BuildControlPlotUseCase.hpp
   src/Application/UseCases/BuildControlPlotUseCase.cpp
-
-
   src/Application/UseCases/GenerateStairPlotUseCase.hpp
   src/Application/UseCases/GenerateStairPlotUseCase.cpp
   src/Application/UseCases/StartTimerUseCase.hpp
@@ -72,12 +65,12 @@ qt_add_executable(develop
   src/Application/UseCases/UpdateTestProtocolUseCase.cpp
   src/Application/UseCases/SetControlChartsTabMinutesUseCase.hpp
   src/Application/UseCases/SetControlChartsTabMinutesUseCase.cpp
-
+  src/Application/UseCases/SetWindProfileUseCase.hpp
+  src/Application/UseCases/SetWindProfileUseCase.cpp
+  src/Application/ApplicationContext.hpp
 
   src/Infrastructure/QtTextLogger.hpp
   src/Infrastructure/QtTextLogger.cpp
-
-
   src/Infrastructure/SimpleFunctionEngineStub.hpp
   src/Infrastructure/QtTimerService.hpp
   src/Infrastructure/QtTimerService.cpp
@@ -85,9 +78,6 @@ qt_add_executable(develop
   src/Infrastructure/SessionStateQtAdapter.cpp
   src/Infrastructure/QtPdfExporter.hpp
   src/Infrastructure/QtPdfExporter.cpp
-
-
-
 
   src/Presentation/IShellView.hpp
   src/Presentation/TelemetryChartsTab/ITelemetryChartsTabView.hpp
@@ -112,17 +102,15 @@ qt_add_executable(develop
   src/Ui/TestProtocolTabWidget.cpp
   src/Ui/MainWindow.hpp
   src/Ui/MainWindow.cpp
-
   src/Ui/MainWindow.ui
   src/Ui/TelemetryChartsTabWidget.ui
   src/Ui/ControlChartsTabWidget.ui
   src/Ui/TestProtocolTabWidget.ui
-  src/Application/ApplicationContext.hpp
-  src/Ui/PlotWidget.hpp src/Ui/PlotWidget.cpp
-  src/Ui/Render/PlotRenderer.hpp src/Ui/Render/PlotRenderer.cpp
-  src/Domain/FormulaExpression.hpp
-  src/Domain/WindProfile.hpp
-  src/Application/UseCases/SetWindProfileUseCase.hpp src/Application/UseCases/SetWindProfileUseCase.cpp
+  src/Ui/PlotWidget.hpp
+  src/Ui/PlotWidget.cpp
+  src/Ui/Render/PlotRenderer.hpp
+  src/Ui/Render/PlotRenderer.cpp
+
 )
 target_link_libraries(develop PRIVATE Qt::Core Qt::Widgets)
 

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.2.1)
+cmake_minimum_required(VERSION 4.0.1)
 project("MVP - Counter" LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
@@ -29,13 +29,14 @@ qt_add_executable(develop
   src/Domain/FormulaExpression.hpp
   src/Domain/WindProfile.hpp
   src/Domain/AxisState.hpp
-
+  src/Domain/TestExecutionStatus.hpp
+  src/Domain/TelemetryStatus.hpp
 
   src/Application/Dto/PdfDocumentModel.hpp
 
   src/Application/Ports/ILogger.hpp
   src/Application/Ports/IFunctionEngine.hpp
-  src/Application/Ports/ITimerService.hpp
+  src/Application/Ports/ITestExecutionScheduler.hpp
   src/Application/Ports/IPdfExporter.hpp
 
   src/Application/Session/SessionState.hpp
@@ -49,10 +50,10 @@ qt_add_executable(develop
   src/Application/UseCases/BuildControlPlotUseCase.cpp
   src/Application/UseCases/GenerateStairPlotUseCase.hpp
   src/Application/UseCases/GenerateStairPlotUseCase.cpp
-  src/Application/UseCases/StartTimerUseCase.hpp
-  src/Application/UseCases/StartTimerUseCase.cpp
-  src/Application/UseCases/StopTimerUseCase.hpp
-  src/Application/UseCases/StopTimerUseCase.cpp
+  src/Application/UseCases/StartTestExecutionUseCase.hpp
+  src/Application/UseCases/StartTestExecutionUseCase.cpp
+  src/Application/UseCases/StopTestExecutionUseCase.hpp
+  src/Application/UseCases/StopTestExecutionUseCase.cpp
   src/Application/UseCases/ExportPdfUseCase.hpp
   src/Application/UseCases/ExportPdfUseCase.cpp
   src/Application/UseCases/SetFunctionExpressionUseCase.hpp
@@ -67,13 +68,18 @@ qt_add_executable(develop
   src/Application/UseCases/SetControlChartsTabMinutesUseCase.cpp
   src/Application/UseCases/SetWindProfileUseCase.hpp
   src/Application/UseCases/SetWindProfileUseCase.cpp
+  src/Application/UseCases/PauseTestExecutionUseCase.hpp
+  src/Application/UseCases/PauseTestExecutionUseCase.cpp
+  src/Application/UseCases/ResumeTestExecutionUseCase.hpp
+  src/Application/UseCases/ResumeTestExecutionUseCase.cpp
+
   src/Application/ApplicationContext.hpp
 
   src/Infrastructure/QtTextLogger.hpp
   src/Infrastructure/QtTextLogger.cpp
   src/Infrastructure/SimpleFunctionEngineStub.hpp
-  src/Infrastructure/QtTimerService.hpp
-  src/Infrastructure/QtTimerService.cpp
+  src/Infrastructure/QtTestExecutionScheduler.hpp
+  src/Infrastructure/QtTestExecutionScheduler.cpp
   src/Infrastructure/SessionStateQtAdapter.hpp
   src/Infrastructure/SessionStateQtAdapter.cpp
   src/Infrastructure/QtPdfExporter.hpp
@@ -110,9 +116,6 @@ qt_add_executable(develop
   src/Ui/PlotWidget.cpp
   src/Ui/Render/PlotRenderer.hpp
   src/Ui/Render/PlotRenderer.cpp
-  src/Domain/TestExecutionStatus.hpp
-  src/Domain/TelemetryStatus.hpp
-
 )
 target_link_libraries(develop PRIVATE Qt::Core Qt::Widgets)
 

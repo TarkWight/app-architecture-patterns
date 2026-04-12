@@ -2,6 +2,7 @@
 #define SESSIONSTATE_HPP
 
 #include "../../Domain/Plot.hpp"
+#include "../../Domain/TestExecutionStatus.hpp"
 
 #include "SessionStateData.hpp"
 #include "Subscription.hpp"
@@ -27,6 +28,7 @@ class SessionState {
     void setControlChartsTabMinutes(int minutes);
     void setTimerDurationMinutes(int minutes);
     void setElapsedSeconds(int seconds);
+    void setTestExecutionStatus(domain::TestExecutionStatus status);
     void setTimerRunning(bool running);
     void setTelemetryPlot(domain::PlotModel plot);
     void setControlPlot(domain::PlotModel plot);

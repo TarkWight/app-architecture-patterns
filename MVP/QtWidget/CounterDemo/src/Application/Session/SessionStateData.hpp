@@ -1,6 +1,7 @@
 #ifndef SESSIONSTATEDATA_HPP
 #define SESSIONSTATEDATA_HPP
 
+#include "../../Domain/TestExecutionStatus.hpp"
 #include "../../Domain/FormulaExpression.hpp"
 #include "../../Domain/Plot.hpp"
 #include "../../Domain/TestProtocol.hpp"
@@ -10,6 +11,8 @@
 namespace application::session {
 
 struct SessionStateData {
+    domain::TestExecutionStatus testExecutionStatus{domain::TestExecutionStatus::Idle};
+
     domain::DurationMinutes timerDuration{20};
     domain::ElapsedSeconds elapsed{0};
     bool timerRunning{false};

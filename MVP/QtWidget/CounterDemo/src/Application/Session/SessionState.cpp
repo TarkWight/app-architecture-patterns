@@ -63,6 +63,11 @@ void application::session::SessionState::setElapsedSeconds(int seconds) {
     notify();
 }
 
+void application::session::SessionState::setTestExecutionStatus(domain::TestExecutionStatus status) {
+    data.testExecutionStatus = status;
+    notify();
+}
+
 void application::session::SessionState::setTimerRunning(bool running) {
     data.timerRunning = running;
     notify();

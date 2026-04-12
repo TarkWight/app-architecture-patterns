@@ -10,14 +10,14 @@
 #include "UseCases/SetLineColorUseCase.hpp"
 #include "UseCases/SetControlChartsTabMinutesUseCase.hpp"
 #include "UseCases/SetTimerDurationUseCase.hpp"
-#include "UseCases/StartTimerUseCase.hpp"
-#include "UseCases/StopTimerUseCase.hpp"
+#include "UseCases/StartTestExecutionUseCase.hpp"
+#include "UseCases/StopTestExecutionUseCase.hpp"
 #include "UseCases/UpdateTestProtocolUseCase.hpp"
 #include "UseCases/SetWindProfileUseCase.hpp"
 
 #include "../Infrastructure/QtPdfExporter.hpp"
 #include "../Infrastructure/QtTextLogger.hpp"
-#include "../Infrastructure/QtTimerService.hpp"
+#include "../Infrastructure/QtTestExecutionScheduler.hpp"
 #include "../Infrastructure/SessionStateQtAdapter.hpp"
 #include "../Infrastructure/SimpleFunctionEngineStub.hpp"
 
@@ -32,7 +32,7 @@ struct ApplicationContext {
     infrastructure::QtTextLogger logger{[](const std::string &) {}};
 
     infrastructure::SimpleFunctionEngineStub functionEngine;
-    infrastructure::QtTimerService timerService;
+    infrastructure::QtTestExecutionScheduler testExecutionScheduler;
     infrastructure::QtPdfExporter pdfExporter;
     infrastructure::SessionStateQtAdapter sessionAdapter{sessionState};
 
@@ -40,9 +40,9 @@ struct ApplicationContext {
 
     application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{sessionState, functionEngine};
 
-    application::useCases::StartTimerUseCase startTimerUseCase{sessionState, timerService};
+    application::useCases::StartTestExecutionUseCase startTimerUseCase{sessionState, testExecutionScheduler};
 
-    application::useCases::StopTimerUseCase stopTimerUseCase{sessionState, timerService};
+    application::useCases::StopTestExecutionUseCase stopTimerUseCase{sessionState, testExecutionScheduler};
 
     application::useCases::SetFunctionExpressionUseCase setFunctionExpressionUseCase{sessionState};
 

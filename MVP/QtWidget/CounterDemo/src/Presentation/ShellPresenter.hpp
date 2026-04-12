@@ -5,8 +5,8 @@
 #include "../Application/UseCases/BuildControlPlotUseCase.hpp"
 #include "../Application/UseCases/SetFunctionExpressionUseCase.hpp"
 #include "../Application/UseCases/SetLineColorUseCase.hpp"
-#include "../Application/UseCases/StartTimerUseCase.hpp"
-#include "../Application/UseCases/StopTimerUseCase.hpp"
+#include "../Application/UseCases/StartTestExecutionUseCase.hpp"
+#include "../Application/UseCases/StopTestExecutionUseCase.hpp"
 #include "../Domain/Plot.hpp"
 
 #include "IShellView.hpp"
@@ -17,8 +17,8 @@ class ShellPresenter final {
   public:
     struct Dependencies {
         application::session::SessionState &state;
-        application::useCases::StartTimerUseCase &startTimerUseCase;
-        application::useCases::StopTimerUseCase &stopTimerUseCase;
+        application::useCases::StartTestExecutionUseCase &startTimerUseCase;
+        application::useCases::StopTestExecutionUseCase &stopTimerUseCase;
         application::useCases::SetFunctionExpressionUseCase &setFunctionExpressionUseCase;
         application::useCases::SetLineColorUseCase &setLineColorUseCase;
         application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
@@ -39,8 +39,8 @@ class ShellPresenter final {
 
   private:
     application::session::SessionState &state;
-    application::useCases::StartTimerUseCase &startTimerUseCase;
-    application::useCases::StopTimerUseCase &stopTimerUseCase;
+    application::useCases::StartTestExecutionUseCase &startTimerUseCase;
+    application::useCases::StopTestExecutionUseCase &stopTimerUseCase;
     application::useCases::SetFunctionExpressionUseCase &setFunctionExpressionUseCase;
     application::useCases::SetLineColorUseCase &setLineColorUseCase;
     application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;

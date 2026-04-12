@@ -41,7 +41,11 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     void setTimerText(const std::string &text) override;
     void setStartEnabled(bool enabled) override;
     void setStopEnabled(bool enabled) override;
+    void setPauseEnabled(bool enabled) override;
+    void setResumeEnabled(bool enabled) override;
+
     void setFunctionExpression(const std::string &expression) override;
+
     void appendLog(const std::string &text) override;
 
   private:

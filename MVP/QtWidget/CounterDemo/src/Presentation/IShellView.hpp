@@ -12,6 +12,8 @@ class IShellView {
     virtual void setTimerText(const std::string &text) = 0;
     virtual void setStartEnabled(bool enabled) = 0;
     virtual void setStopEnabled(bool enabled) = 0;
+    virtual void setPauseEnabled(bool enabled) = 0;
+    virtual void setResumeEnabled(bool enabled) = 0;
 
     virtual void setFunctionExpression(const std::string &expression) = 0;
 

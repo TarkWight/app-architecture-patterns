@@ -6,6 +6,8 @@
 #include "UseCases/BuildControlPlotUseCase.hpp"
 #include "UseCases/ExportPdfUseCase.hpp"
 #include "UseCases/GenerateStairPlotUseCase.hpp"
+#include "UseCases/PauseTestExecutionUseCase.hpp"
+#include "UseCases/ResumeTestExecutionUseCase.hpp"
 #include "UseCases/SetFunctionExpressionUseCase.hpp"
 #include "UseCases/SetLineColorUseCase.hpp"
 #include "UseCases/SetControlChartsTabMinutesUseCase.hpp"
@@ -43,6 +45,12 @@ struct ApplicationContext {
     application::useCases::StartTestExecutionUseCase startTestExecutionUseCase{
                                                                                sessionState, testExecutionScheduler};
 
+    application::useCases::PauseTestExecutionUseCase pauseTestExecutionUseCase{
+                                                                               sessionState, testExecutionScheduler};
+
+    application::useCases::ResumeTestExecutionUseCase resumeTestExecutionUseCase{
+                                                                                 sessionState, testExecutionScheduler};
+
     application::useCases::StopTestExecutionUseCase stopTestExecutionUseCase{
                                                                              sessionState, testExecutionScheduler};
 
@@ -64,6 +72,8 @@ struct ApplicationContext {
         presentation::ShellPresenter::Dependencies{
             .state = sessionState,
             .startTestExecutionUseCase = startTestExecutionUseCase,
+            .pauseTestExecutionUseCase = pauseTestExecutionUseCase,
+            .resumeTestExecutionUseCase = resumeTestExecutionUseCase,
             .stopTestExecutionUseCase = stopTestExecutionUseCase,
             .setFunctionExpressionUseCase = setFunctionExpressionUseCase,
             .setLineColorUseCase = setLineColorUseCase,

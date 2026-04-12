@@ -46,6 +46,14 @@ void MainWindow::setStopEnabled(bool enabled) {
     ui->buttonStop->setEnabled(enabled);
 }
 
+void MainWindow::setPauseEnabled(bool enabled) {
+    ui->buttonPause->setEnabled(enabled);
+}
+
+void MainWindow::setResumeEnabled(bool enabled) {
+    ui->buttonResume->setEnabled(enabled);
+}
+
 void MainWindow::setFunctionExpression(const std::string &expression) {
     if (ui->lineEditFormula->text().toStdString() == expression) {
         return;
@@ -72,13 +80,15 @@ void MainWindow::setupTabs() {
 void MainWindow::connectShellSignals() {
     QObject::connect(ui->buttonStart, &QPushButton::clicked, this, [this]() { shellPresenter.onStartPressed(); });
 
+    QObject::connect(ui->buttonPause, &QPushButton::clicked, this, [this]() { shellPresenter.onPausePressed(); });
+
+    QObject::connect(ui->buttonResume, &QPushButton::clicked, this, [this]() { shellPresenter.onResumePressed(); });
+
     QObject::connect(ui->buttonStop, &QPushButton::clicked, this, [this]() { shellPresenter.onStopPressed(); });
 
-    QObject::connect(ui->buttonCalculate, &QPushButton::clicked, this,
-                     [this]() { shellPresenter.onCalculatePressed(); });
+    QObject::connect(ui->buttonCalculate, &QPushButton::clicked, this, [this]() { shellPresenter.onCalculatePressed(); });
 
-    QObject::connect(ui->lineEditFormula, &QLineEdit::editingFinished, this,
-                     [this]() { shellPresenter.onFunctionEdited(ui->lineEditFormula->text().toStdString()); });
+    QObject::connect(ui->lineEditFormula, &QLineEdit::editingFinished, this, [this]() { shellPresenter.onFunctionEdited(ui->lineEditFormula->text().toStdString()); });
 
     QObject::connect(ui->buttonPickColor, &QPushButton::clicked, this, [this]() {
         const QColor color = QColorDialog::getColor(Qt::red, this);

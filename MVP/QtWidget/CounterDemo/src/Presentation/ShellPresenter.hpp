@@ -6,6 +6,8 @@
 #include "../Application/UseCases/SetFunctionExpressionUseCase.hpp"
 #include "../Application/UseCases/SetLineColorUseCase.hpp"
 #include "../Application/UseCases/StartTestExecutionUseCase.hpp"
+#include "../Application/UseCases/PauseTestExecutionUseCase.hpp"
+#include "../Application/UseCases/ResumeTestExecutionUseCase.hpp"
 #include "../Application/UseCases/StopTestExecutionUseCase.hpp"
 #include "../Domain/Plot.hpp"
 #include "../Domain/TestExecutionStatus.hpp"
@@ -19,6 +21,8 @@ class ShellPresenter final {
     struct Dependencies {
         application::session::SessionState &state;
         application::useCases::StartTestExecutionUseCase &startTestExecutionUseCase;
+        application::useCases::PauseTestExecutionUseCase &pauseTestExecutionUseCase;
+        application::useCases::ResumeTestExecutionUseCase &resumeTestExecutionUseCase;
         application::useCases::StopTestExecutionUseCase &stopTestExecutionUseCase;
         application::useCases::SetFunctionExpressionUseCase &setFunctionExpressionUseCase;
         application::useCases::SetLineColorUseCase &setLineColorUseCase;
@@ -33,6 +37,8 @@ class ShellPresenter final {
     void onViewReady();
     void onStartPressed();
     void onStateChanged();
+    void onPausePressed();
+    void onResumePressed();
     void onStopPressed();
     void onCalculatePressed();
 
@@ -42,6 +48,8 @@ class ShellPresenter final {
   private:
     application::session::SessionState &state;
     application::useCases::StartTestExecutionUseCase &startTestExecutionUseCase;
+    application::useCases::PauseTestExecutionUseCase &pauseTestExecutionUseCase;
+    application::useCases::ResumeTestExecutionUseCase &resumeTestExecutionUseCase;
     application::useCases::StopTestExecutionUseCase &stopTestExecutionUseCase;
     application::useCases::SetFunctionExpressionUseCase &setFunctionExpressionUseCase;
     application::useCases::SetLineColorUseCase &setLineColorUseCase;
@@ -51,6 +59,8 @@ class ShellPresenter final {
 
     static std::string formatTimerText(int elapsedSeconds);
     static bool canStart(domain::TestExecutionStatus status);
+    static bool canPause(domain::TestExecutionStatus status);
+    static bool canResume(domain::TestExecutionStatus status);
     static bool canStop(domain::TestExecutionStatus status);
 
     void refreshFromState();

@@ -5,6 +5,8 @@ namespace presentation {
 ShellPresenter::ShellPresenter(Dependencies deps)
     : state(deps.state),
       startTestExecutionUseCase(deps.startTestExecutionUseCase),
+      pauseTestExecutionUseCase(deps.pauseTestExecutionUseCase),
+      resumeTestExecutionUseCase(deps.resumeTestExecutionUseCase),
       stopTestExecutionUseCase(deps.stopTestExecutionUseCase),
       setFunctionExpressionUseCase(deps.setFunctionExpressionUseCase),
       setLineColorUseCase(deps.setLineColorUseCase),
@@ -33,6 +35,24 @@ void ShellPresenter::onStartPressed() {
 
     if (view != nullptr) {
         view->appendLog("Test execution started");
+    }
+}
+
+void ShellPresenter::onPausePressed() {
+    pauseTestExecutionUseCase.execute();
+    refreshFromState();
+
+    if (view != nullptr) {
+        view->appendLog("Test execution paused");
+    }
+}
+
+void ShellPresenter::onResumePressed() {
+    resumeTestExecutionUseCase.execute();
+    refreshFromState();
+
+    if (view != nullptr) {
+        view->appendLog("Test execution resumed");
     }
 }
 
@@ -95,6 +115,40 @@ bool ShellPresenter::canStart(domain::TestExecutionStatus status) {
     return false;
 }
 
+bool ShellPresenter::canPause(domain::TestExecutionStatus status) {
+    switch (status) {
+    case domain::TestExecutionStatus::Running:
+        return true;
+
+    case domain::TestExecutionStatus::Idle:
+    case domain::TestExecutionStatus::Ready:
+    case domain::TestExecutionStatus::Paused:
+    case domain::TestExecutionStatus::Completed:
+    case domain::TestExecutionStatus::Aborted:
+    case domain::TestExecutionStatus::Failed:
+        return false;
+    }
+
+    return false;
+}
+
+bool ShellPresenter::canResume(domain::TestExecutionStatus status) {
+    switch (status) {
+    case domain::TestExecutionStatus::Paused:
+        return true;
+
+    case domain::TestExecutionStatus::Idle:
+    case domain::TestExecutionStatus::Ready:
+    case domain::TestExecutionStatus::Running:
+    case domain::TestExecutionStatus::Completed:
+    case domain::TestExecutionStatus::Aborted:
+    case domain::TestExecutionStatus::Failed:
+        return false;
+    }
+
+    return false;
+}
+
 bool ShellPresenter::canStop(domain::TestExecutionStatus status) {
     switch (status) {
         case domain::TestExecutionStatus::Running:
@@ -119,6 +173,8 @@ void ShellPresenter::refreshFromState() {
 
     view->setTimerText(formatTimerText(session.elapsed.value));
     view->setStartEnabled(canStart(session.testExecutionStatus));
+    view->setPauseEnabled(canPause(session.testExecutionStatus));
+    view->setResumeEnabled(canResume(session.testExecutionStatus));
     view->setStopEnabled(canStop(session.testExecutionStatus));
     view->setFunctionExpression(session.functionExpression.value);
 }

@@ -111,6 +111,7 @@ qt_add_executable(develop
   src/Ui/Render/PlotRenderer.hpp
   src/Ui/Render/PlotRenderer.cpp
   src/Domain/TestExecutionStatus.hpp
+  src/Domain/TelemetryStatus.hpp
 
 )
 target_link_libraries(develop PRIVATE Qt::Core Qt::Widgets)

@@ -91,9 +91,9 @@ void MainWindow::connectShellSignals() {
 }
 
 void MainWindow::connectSessionSignals() {
-    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::timerChanged, this,
-                     [this](int elapsedSeconds, bool /*running*/) {
-                         setTimerText(MainWindowUiAdapter::formatElapsed(elapsedSeconds));
+    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testExecutionChanged, this,
+                     [this](int /*elapsedSeconds*/, domain::TestExecutionStatus /*status*/) {
+                         shellPresenter.onStateChanged();
                      });
 
     QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::functionExpressionChanged, this,

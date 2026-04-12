@@ -8,6 +8,7 @@
 #include "../Application/UseCases/StartTestExecutionUseCase.hpp"
 #include "../Application/UseCases/StopTestExecutionUseCase.hpp"
 #include "../Domain/Plot.hpp"
+#include "../Domain/TestExecutionStatus.hpp"
 
 #include "IShellView.hpp"
 
@@ -17,8 +18,8 @@ class ShellPresenter final {
   public:
     struct Dependencies {
         application::session::SessionState &state;
-        application::useCases::StartTestExecutionUseCase &startTimerUseCase;
-        application::useCases::StopTestExecutionUseCase &stopTimerUseCase;
+        application::useCases::StartTestExecutionUseCase &startTestExecutionUseCase;
+        application::useCases::StopTestExecutionUseCase &stopTestExecutionUseCase;
         application::useCases::SetFunctionExpressionUseCase &setFunctionExpressionUseCase;
         application::useCases::SetLineColorUseCase &setLineColorUseCase;
         application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
@@ -31,6 +32,7 @@ class ShellPresenter final {
 
     void onViewReady();
     void onStartPressed();
+    void onStateChanged();
     void onStopPressed();
     void onCalculatePressed();
 
@@ -39,8 +41,8 @@ class ShellPresenter final {
 
   private:
     application::session::SessionState &state;
-    application::useCases::StartTestExecutionUseCase &startTimerUseCase;
-    application::useCases::StopTestExecutionUseCase &stopTimerUseCase;
+    application::useCases::StartTestExecutionUseCase &startTestExecutionUseCase;
+    application::useCases::StopTestExecutionUseCase &stopTestExecutionUseCase;
     application::useCases::SetFunctionExpressionUseCase &setFunctionExpressionUseCase;
     application::useCases::SetLineColorUseCase &setLineColorUseCase;
     application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
@@ -48,8 +50,12 @@ class ShellPresenter final {
     IShellView *view{nullptr};
 
     static std::string formatTimerText(int elapsedSeconds);
+    static bool canStart(domain::TestExecutionStatus status);
+    static bool canStop(domain::TestExecutionStatus status);
+
     void refreshFromState();
 };
+
 } // namespace presentation
 
 #endif // SHELLPRESENTER_HPP

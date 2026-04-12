@@ -12,7 +12,7 @@ QColor SessionStateQtAdapter::toQColor(domain::RgbColor color) {
 }
 
 void SessionStateQtAdapter::emitState(const application::session::SessionStateData &data) {
-    emit timerChanged(data.elapsed.value, data.timerRunning);
+    emit testExecutionChanged(data.elapsed.value, data.testExecutionStatus);
     emit timerDurationChanged(data.timerDuration.value);
 
     emit functionExpressionChanged(QString::fromStdString(data.functionExpression.value));

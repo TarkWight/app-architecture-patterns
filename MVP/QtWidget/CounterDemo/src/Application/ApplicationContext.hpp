@@ -40,9 +40,11 @@ struct ApplicationContext {
 
     application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{sessionState, functionEngine};
 
-    application::useCases::StartTestExecutionUseCase startTimerUseCase{sessionState, testExecutionScheduler};
+    application::useCases::StartTestExecutionUseCase startTestExecutionUseCase{
+                                                                               sessionState, testExecutionScheduler};
 
-    application::useCases::StopTestExecutionUseCase stopTimerUseCase{sessionState, testExecutionScheduler};
+    application::useCases::StopTestExecutionUseCase stopTestExecutionUseCase{
+                                                                             sessionState, testExecutionScheduler};
 
     application::useCases::SetFunctionExpressionUseCase setFunctionExpressionUseCase{sessionState};
 
@@ -59,28 +61,36 @@ struct ApplicationContext {
     application::useCases::ExportPdfUseCase exportPdfUseCase{sessionState, pdfExporter};
 
     presentation::ShellPresenter shellPresenter{
-        presentation::ShellPresenter::Dependencies{.state = sessionState,
-                                                   .startTimerUseCase = startTimerUseCase,
-                                                   .stopTimerUseCase = stopTimerUseCase,
-                                                   .setFunctionExpressionUseCase = setFunctionExpressionUseCase,
-                                                   .setLineColorUseCase = setLineColorUseCase,
-                                                   .buildControlPlotUseCase = buildControlPlotUseCase}};
+        presentation::ShellPresenter::Dependencies{
+            .state = sessionState,
+            .startTestExecutionUseCase = startTestExecutionUseCase,
+            .stopTestExecutionUseCase = stopTestExecutionUseCase,
+            .setFunctionExpressionUseCase = setFunctionExpressionUseCase,
+            .setLineColorUseCase = setLineColorUseCase,
+            .buildControlPlotUseCase = buildControlPlotUseCase
+        }
+    };
 
-    presentation::telemetryChartsTab::TelemetryChartsTabPresenter telemetryChartsTabPresenter{generateStairPlotUseCase};
+    presentation::telemetryChartsTab::TelemetryChartsTabPresenter telemetryChartsTabPresenter{
+                                                                                              generateStairPlotUseCase};
 
     presentation::controlChartsTab::ControlChartsTabPresenter controlChartsTabPresenter{
         presentation::controlChartsTab::ControlChartsTabPresenter::Dependencies{
             .state = sessionState,
             .setControlChartsTabMinutesUseCase = setControlChartsTabMinutesUseCase,
             .setWindProfileUseCase = setWindProfileUseCase,
-            .buildControlPlotUseCase = buildControlPlotUseCase}};
+            .buildControlPlotUseCase = buildControlPlotUseCase
+        }
+    };
 
     presentation::testProtocolTab::TestProtocolTabPresenter testProtocolTabPresenter{
         presentation::testProtocolTab::TestProtocolTabPresenter::Dependencies{
             .state = sessionState,
             .setTimerDurationUseCase = setTimerDurationUseCase,
             .updateTestProtocolUseCase = updateTestProtocolUseCase,
-            .exportPdfUseCase = exportPdfUseCase}};
+            .exportPdfUseCase = exportPdfUseCase
+        }
+    };
 };
 
 #endif // APPLICATIONCONTEXT_HPP

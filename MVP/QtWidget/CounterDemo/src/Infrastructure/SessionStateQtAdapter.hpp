@@ -6,6 +6,7 @@
 #include <QColor>
 
 #include "../Application/Session/SessionState.hpp"
+#include "../Domain/TestExecutionStatus.hpp"
 
 namespace infrastructure {
 
@@ -19,7 +20,7 @@ class SessionStateQtAdapter final : public QObject {
     const application::session::SessionState &getState() const;
 
   signals:
-    void timerChanged(int elapsedSeconds, bool running);
+    void testExecutionChanged(int elapsedSeconds, domain::TestExecutionStatus status);
     void timerDurationChanged(int minutes);
 
     void functionExpressionChanged(const QString &expression);

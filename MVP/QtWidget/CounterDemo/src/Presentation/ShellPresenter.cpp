@@ -3,8 +3,11 @@
 namespace presentation {
 
 ShellPresenter::ShellPresenter(Dependencies deps)
-    : state(deps.state), startTimerUseCase(deps.startTimerUseCase), stopTimerUseCase(deps.stopTimerUseCase),
-      setFunctionExpressionUseCase(deps.setFunctionExpressionUseCase), setLineColorUseCase(deps.setLineColorUseCase),
+    : state(deps.state),
+      startTestExecutionUseCase(deps.startTestExecutionUseCase),
+      stopTestExecutionUseCase(deps.stopTestExecutionUseCase),
+      setFunctionExpressionUseCase(deps.setFunctionExpressionUseCase),
+      setLineColorUseCase(deps.setLineColorUseCase),
       buildControlPlotUseCase(deps.buildControlPlotUseCase) {
 }
 
@@ -20,21 +23,25 @@ void ShellPresenter::onViewReady() {
     refreshFromState();
 }
 
+void ShellPresenter::onStateChanged() {
+    refreshFromState();
+}
+
 void ShellPresenter::onStartPressed() {
-    startTimerUseCase.execute();
+    startTestExecutionUseCase.execute();
     refreshFromState();
 
     if (view != nullptr) {
-        view->appendLog("Timer started");
+        view->appendLog("Test execution started");
     }
 }
 
 void ShellPresenter::onStopPressed() {
-    stopTimerUseCase.execute();
+    stopTestExecutionUseCase.execute();
     refreshFromState();
 
     if (view != nullptr) {
-        view->appendLog("Timer stopped");
+        view->appendLog("Test execution stopped");
     }
 }
 
@@ -66,9 +73,41 @@ std::string ShellPresenter::formatTimerText(int elapsedSeconds) {
     const int minutes = elapsedSeconds / 60;
     const int seconds = elapsedSeconds % 60;
 
-    std::string secondsText = (seconds < 10) ? "0" + std::to_string(seconds) : std::to_string(seconds);
+    const std::string secondsText = (seconds < 10)
+        ? "0" + std::to_string(seconds)
+        : std::to_string(seconds);
 
     return std::to_string(minutes) + ":" + secondsText;
+}
+
+bool ShellPresenter::canStart(domain::TestExecutionStatus status) {
+    switch (status) {
+        case domain::TestExecutionStatus::Idle:
+        case domain::TestExecutionStatus::Ready:
+        case domain::TestExecutionStatus::Completed:
+        case domain::TestExecutionStatus::Aborted:
+        case domain::TestExecutionStatus::Failed:
+            return true;
+        case domain::TestExecutionStatus::Running:
+        case domain::TestExecutionStatus::Paused:
+            return false;
+    }
+    return false;
+}
+
+bool ShellPresenter::canStop(domain::TestExecutionStatus status) {
+    switch (status) {
+        case domain::TestExecutionStatus::Running:
+        case domain::TestExecutionStatus::Paused:
+            return true;
+        case domain::TestExecutionStatus::Idle:
+        case domain::TestExecutionStatus::Ready:
+        case domain::TestExecutionStatus::Completed:
+        case domain::TestExecutionStatus::Aborted:
+        case domain::TestExecutionStatus::Failed:
+            return false;
+    }
+    return false;
 }
 
 void ShellPresenter::refreshFromState() {
@@ -79,8 +118,8 @@ void ShellPresenter::refreshFromState() {
     const auto &session = state.get();
 
     view->setTimerText(formatTimerText(session.elapsed.value));
-    view->setStartEnabled(!session.timerRunning);
-    view->setStopEnabled(session.timerRunning);
+    view->setStartEnabled(canStart(session.testExecutionStatus));
+    view->setStopEnabled(canStop(session.testExecutionStatus));
     view->setFunctionExpression(session.functionExpression.value);
 }
 

@@ -21,7 +21,7 @@ class SessionStateQtAdapter final : public QObject {
 
   signals:
     void testExecutionChanged(int elapsedSeconds, domain::TestExecutionStatus status);
-    void timerDurationChanged(int minutes);
+    void operatorTestDurationChanged(int minutes);
 
     void functionExpressionChanged(const QString &expression);
     void lineColorChanged(const QColor &color);

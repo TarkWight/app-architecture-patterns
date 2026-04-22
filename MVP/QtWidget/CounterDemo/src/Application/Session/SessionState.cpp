@@ -7,7 +7,6 @@
 #include "SessionStateData.hpp"
 #include "Subscription.hpp"
 
-#include <array>
 #include <functional>
 #include <mutex>
 #include <string>
@@ -53,8 +52,33 @@ void application::session::SessionState::setControlChartsTabMinutes(int minutes)
     notify();
 }
 
-void application::session::SessionState::setTimerDurationMinutes(int minutes) {
-    data.timerDuration.value = minutes;
+void application::session::SessionState::setTestExecutionStatus(domain::TestExecutionStatus status) {
+    data.testExecutionStatus = status;
+    notify();
+}
+
+void application::session::SessionState::setTestTimeSource(domain::TestTimeSource source) {
+    data.testTimeSource = source;
+    notify();
+}
+
+void application::session::SessionState::setTestTimeDirection(domain::TestTimeDirection direction) {
+    data.testTimeDirection = direction;
+    notify();
+}
+
+void application::session::SessionState::setEstimatedTestDurationMinutes(int minutes) {
+    data.estimatedTestDuration.value = minutes;
+    notify();
+}
+
+void application::session::SessionState::setOperatorTestDurationMinutes(int minutes) {
+    data.operatorTestDuration.value = minutes;
+    notify();
+}
+
+void application::session::SessionState::setActiveTestDurationMinutes(int minutes) {
+    data.activeTestDuration.value = minutes;
     notify();
 }
 
@@ -63,13 +87,8 @@ void application::session::SessionState::setElapsedSeconds(int seconds) {
     notify();
 }
 
-void application::session::SessionState::setTestExecutionStatus(domain::TestExecutionStatus status) {
-    data.testExecutionStatus = status;
-    notify();
-}
-
-void application::session::SessionState::setTimerRunning(bool running) {
-    data.timerRunning = running;
+void application::session::SessionState::setRemainingSeconds(int seconds) {
+    data.remaining.value = seconds;
     notify();
 }
 
@@ -92,7 +111,23 @@ void application::session::SessionState::setTestProtocolLine(int idx, std::strin
     if (idx < 0 || idx >= 8) {
         return;
     }
+
     data.testProtocol.lines[static_cast<std::size_t>(idx)] = std::move(line);
+    notify();
+}
+
+void application::session::SessionState::setAxis1State(domain::AxisState stateValue) {
+    data.axis1State = stateValue;
+    notify();
+}
+
+void application::session::SessionState::setAxis2State(domain::AxisState stateValue) {
+    data.axis2State = stateValue;
+    notify();
+}
+
+void application::session::SessionState::setTelemetryStatus(domain::TelemetryStatus status) {
+    data.telemetryStatus = status;
     notify();
 }
 
@@ -102,6 +137,7 @@ void application::session::SessionState::notify() {
         std::lock_guard lock(mu);
         copy = listeners;
     }
+
     for (auto &[id, listener] : copy) {
         listener(data);
     }

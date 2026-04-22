@@ -3,6 +3,8 @@
 
 #include "../../Domain/Plot.hpp"
 #include "../../Domain/TestExecutionStatus.hpp"
+#include "../../Domain/TestTimeDirection.hpp"
+#include "../../Domain/TestTimeSource.hpp"
 
 #include "SessionStateData.hpp"
 #include "Subscription.hpp"
@@ -15,7 +17,7 @@
 namespace application::session {
 
 class SessionState {
-  public:
+public:
     using Listener = std::function<void(const SessionStateData &)>;
 
     const SessionStateData &get() const;
@@ -26,16 +28,30 @@ class SessionState {
     void setWindProfile(domain::WindProfile profile);
     void setLineColor(domain::RgbColor color);
     void setControlChartsTabMinutes(int minutes);
-    void setTimerDurationMinutes(int minutes);
-    void setElapsedSeconds(int seconds);
+
     void setTestExecutionStatus(domain::TestExecutionStatus status);
-    void setTimerRunning(bool running);
+
+    void setTestTimeSource(domain::TestTimeSource source);
+    void setTestTimeDirection(domain::TestTimeDirection direction);
+
+    void setEstimatedTestDurationMinutes(int minutes);
+    void setOperatorTestDurationMinutes(int minutes);
+    void setActiveTestDurationMinutes(int minutes);
+
+    void setElapsedSeconds(int seconds);
+    void setRemainingSeconds(int seconds);
+
     void setTelemetryPlot(domain::PlotModel plot);
     void setControlPlot(domain::PlotModel plot);
+
     void setTestProtocolTitle(std::string title);
     void setTestProtocolLine(int idx, std::string line);
 
-  private:
+    void setAxis1State(domain::AxisState state);
+    void setAxis2State(domain::AxisState state);
+    void setTelemetryStatus(domain::TelemetryStatus status);
+
+private:
     SessionStateData data{};
 
     mutable std::mutex mu{};

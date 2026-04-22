@@ -11,7 +11,7 @@
 #include "UseCases/SetFunctionExpressionUseCase.hpp"
 #include "UseCases/SetLineColorUseCase.hpp"
 #include "UseCases/SetControlChartsTabMinutesUseCase.hpp"
-#include "UseCases/SetTimerDurationUseCase.hpp"
+#include "UseCases/SetOperatorTestDurationUseCase.hpp"
 #include "UseCases/StartTestExecutionUseCase.hpp"
 #include "UseCases/StopTestExecutionUseCase.hpp"
 #include "UseCases/UpdateTestProtocolUseCase.hpp"
@@ -62,7 +62,7 @@ struct ApplicationContext {
 
     application::useCases::SetWindProfileUseCase setWindProfileUseCase{sessionState};
 
-    application::useCases::SetTimerDurationUseCase setTimerDurationUseCase{sessionState};
+    application::useCases::SetOperatorTestDurationUseCase setTimerDurationUseCase{sessionState};
 
     application::useCases::UpdateTestProtocolUseCase updateTestProtocolUseCase{sessionState};
 

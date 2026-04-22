@@ -2,7 +2,7 @@
 #define TAB3PRESENTER_HPP
 
 #include "../../Application/UseCases/ExportPdfUseCase.hpp"
-#include "../../Application/UseCases/SetTimerDurationUseCase.hpp"
+#include "../../Application/UseCases/SetOperatorTestDurationUseCase.hpp"
 #include "../../Application/UseCases/UpdateTestProtocolUseCase.hpp"
 #include "../../Application/Session/SessionState.hpp"
 
@@ -16,7 +16,7 @@ class TestProtocolTabPresenter final {
   public:
     struct Dependencies {
         application::session::SessionState &state;
-        application::useCases::SetTimerDurationUseCase &setTimerDurationUseCase;
+        application::useCases::SetOperatorTestDurationUseCase &setTimerDurationUseCase;
         application::useCases::UpdateTestProtocolUseCase &updateTestProtocolUseCase;
         application::useCases::ExportPdfUseCase &exportPdfUseCase;
     };
@@ -28,7 +28,7 @@ class TestProtocolTabPresenter final {
 
     void onViewReady();
 
-    void onTimerDurationChanged(int minutes);
+    void onOperatorTestDurationChanged(int minutes);
 
     void onTestProtocolTitleChanged(std::string title);
     void onTestProtocolLineChanged(int index, std::string line);
@@ -37,7 +37,7 @@ class TestProtocolTabPresenter final {
 
   private:
     application::session::SessionState &state;
-    application::useCases::SetTimerDurationUseCase &setTimerDurationUseCase;
+    application::useCases::SetOperatorTestDurationUseCase &setTimerDurationUseCase;
     application::useCases::UpdateTestProtocolUseCase &updateTestProtocolUseCase;
     application::useCases::ExportPdfUseCase &exportPdfUseCase;
 

@@ -9,7 +9,7 @@ class ITestProtocolTabView {
   public:
     virtual ~ITestProtocolTabView() = default;
 
-    virtual void setTimerDurationMinutes(int minutes) = 0;
+    virtual void setOperatorTestDurationMinutes(int minutes) = 0;
 
     virtual void setTestProtocolTitle(const std::string &title) = 0;
     virtual void setTestProtocolLine(int index, const std::string &line) = 0;

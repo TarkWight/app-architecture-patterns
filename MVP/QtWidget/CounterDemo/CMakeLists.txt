@@ -26,7 +26,7 @@ qt_add_executable(develop
   src/Domain/Plot.hpp
   src/Domain/TestProtocol.hpp
   src/Domain/Time.hpp
-  src/Domain/FormulaExpression.hpp
+  src/Domain/Expression.hpp
   src/Domain/WindProfile.hpp
   src/Domain/AxisState.hpp
   src/Domain/TestExecutionStatus.hpp
@@ -60,8 +60,8 @@ qt_add_executable(develop
   src/Application/UseCases/SetFunctionExpressionUseCase.cpp
   src/Application/UseCases/SetLineColorUseCase.hpp
   src/Application/UseCases/SetLineColorUseCase.cpp
-  src/Application/UseCases/SetTimerDurationUseCase.hpp
-  src/Application/UseCases/SetTimerDurationUseCase.cpp
+  src/Application/UseCases/SetOperatorTestDurationUseCase.hpp
+  src/Application/UseCases/SetOperatorTestDurationUseCase.cpp
   src/Application/UseCases/UpdateTestProtocolUseCase.hpp
   src/Application/UseCases/UpdateTestProtocolUseCase.cpp
   src/Application/UseCases/SetControlChartsTabMinutesUseCase.hpp
@@ -116,6 +116,8 @@ qt_add_executable(develop
   src/Ui/PlotWidget.cpp
   src/Ui/Render/PlotRenderer.hpp
   src/Ui/Render/PlotRenderer.cpp
+  src/Domain/TestTimeSource.hpp
+  src/Domain/TestTimeDirection.hpp
 )
 target_link_libraries(develop PRIVATE Qt::Core Qt::Widgets)
 

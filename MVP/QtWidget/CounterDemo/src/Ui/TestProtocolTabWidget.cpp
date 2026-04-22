@@ -49,7 +49,7 @@ TestProtocolTabWidget::~TestProtocolTabWidget() {
     delete ui;
 }
 
-void TestProtocolTabWidget::setTimerDurationMinutes(int minutes) {
+void TestProtocolTabWidget::setOperatorTestDurationMinutes(int minutes) {
     ui->spinBoxTimerMinutes->setValue(minutes);
 }
 
@@ -76,7 +76,7 @@ void TestProtocolTabWidget::appendLog(const std::string &text) {
 
 void TestProtocolTabWidget::connectSignals() {
     QObject::connect(ui->spinBoxTimerMinutes, qOverload<int>(&QSpinBox::valueChanged), this,
-                     [this](int value) { presenter.onTimerDurationChanged(value); });
+                     [this](int value) { presenter.onOperatorTestDurationChanged(value); });
 
     QObject::connect(ui->lineEditTitle, &QLineEdit::textChanged, this,
                      [this](const QString &text) { presenter.onTestProtocolTitleChanged(text.toStdString()); });
@@ -106,7 +106,7 @@ void TestProtocolTabWidget::connectSignals() {
 }
 
 void TestProtocolTabWidget::connectSessionSignals() {
-    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::timerDurationChanged, this,
+    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::operatorTestDurationChanged, this,
                      [this](int minutes) {
                          if (ui->spinBoxTimerMinutes->value() == minutes) {
                              return;

@@ -5,9 +5,9 @@
 
 namespace application::useCases {
 
-class SetTimerDurationUseCase final {
+class SetOperatorTestDurationUseCase final {
   public:
-    explicit SetTimerDurationUseCase(application::session::SessionState &state);
+    explicit SetOperatorTestDurationUseCase(application::session::SessionState &state);
 
     void execute(int minutes);
 

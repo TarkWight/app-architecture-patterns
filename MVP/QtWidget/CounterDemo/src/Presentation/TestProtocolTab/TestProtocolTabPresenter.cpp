@@ -22,7 +22,7 @@ void TestProtocolTabPresenter::onViewReady() {
 
     const auto &session = state.get();
 
-    view->setTimerDurationMinutes(session.timerDuration.value);
+    view->setOperatorTestDurationMinutes(session.operatorTestDuration.value);
     view->setTestProtocolTitle(session.testProtocol.title);
 
     for (int i = 0; i < 8; ++i) {
@@ -30,7 +30,7 @@ void TestProtocolTabPresenter::onViewReady() {
     }
 }
 
-void TestProtocolTabPresenter::onTimerDurationChanged(int minutes) {
+void TestProtocolTabPresenter::onOperatorTestDurationChanged(int minutes) {
     setTimerDurationUseCase.execute(minutes);
 
     if (view != nullptr) {

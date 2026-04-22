@@ -23,7 +23,7 @@ class TestProtocolTabWidget final : public QWidget, public presentation::testPro
                                    infrastructure::SessionStateQtAdapter &sessionAdapter, QWidget *parent = nullptr);
     ~TestProtocolTabWidget() override;
 
-    void setTimerDurationMinutes(int minutes) override;
+    void setOperatorTestDurationMinutes(int minutes) override;
     void setTestProtocolTitle(const std::string &title) override;
     void setTestProtocolLine(int index, const std::string &line) override;
     void showExportSuccess(const std::string &filePath) override;

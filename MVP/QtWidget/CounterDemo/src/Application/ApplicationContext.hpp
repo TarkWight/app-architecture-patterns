@@ -62,7 +62,7 @@ struct ApplicationContext {
 
     application::useCases::SetWindProfileUseCase setWindProfileUseCase{sessionState};
 
-    application::useCases::SetOperatorTestDurationUseCase setTimerDurationUseCase{sessionState};
+    application::useCases::SetOperatorTestDurationUseCase setOperatorTestDurationUseCase{sessionState};
 
     application::useCases::UpdateTestProtocolUseCase updateTestProtocolUseCase{sessionState};
 
@@ -96,7 +96,7 @@ struct ApplicationContext {
     presentation::testProtocolTab::TestProtocolTabPresenter testProtocolTabPresenter{
         presentation::testProtocolTab::TestProtocolTabPresenter::Dependencies{
             .state = sessionState,
-            .setTimerDurationUseCase = setTimerDurationUseCase,
+            .setOperatorTestDurationUseCase  = setOperatorTestDurationUseCase,
             .updateTestProtocolUseCase = updateTestProtocolUseCase,
             .exportPdfUseCase = exportPdfUseCase
         }

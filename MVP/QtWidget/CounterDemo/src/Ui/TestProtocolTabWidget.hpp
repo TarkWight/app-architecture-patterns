@@ -18,7 +18,7 @@ namespace ui {
 class TestProtocolTabWidget final : public QWidget, public presentation::testProtocolTab::ITestProtocolTabView {
     Q_OBJECT
 
-  public:
+public:
     explicit TestProtocolTabWidget(presentation::testProtocolTab::TestProtocolTabPresenter &presenter,
                                    infrastructure::SessionStateQtAdapter &sessionAdapter, QWidget *parent = nullptr);
     ~TestProtocolTabWidget() override;
@@ -29,7 +29,7 @@ class TestProtocolTabWidget final : public QWidget, public presentation::testPro
     void showExportSuccess(const std::string &filePath) override;
     void appendLog(const std::string &text) override;
 
-  private:
+private:
     Ui::TestProtocolTabWidget *ui;
     presentation::testProtocolTab::TestProtocolTabPresenter &presenter;
     infrastructure::SessionStateQtAdapter &sessionAdapter;

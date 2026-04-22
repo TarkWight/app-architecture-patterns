@@ -1,5 +1,6 @@
 #include "MainWindow.hpp"
 
+#include "../Presentation/ViewModels/TestTimeViewModel.hpp"
 #include "MainWindowUiAdapter.hpp"
 #include "TelemetryChartsTabWidget.hpp"
 #include "ControlChartsTabWidget.hpp"
@@ -101,8 +102,8 @@ void MainWindow::connectShellSignals() {
 }
 
 void MainWindow::connectSessionSignals() {
-    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testExecutionChanged, this,
-                     [this](int /*elapsedSeconds*/, domain::TestExecutionStatus /*status*/) {
+    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testTimeModelChanged, this,
+                     [this](const presentation::viewModels::TestTimeViewModel & /*model*/) {
                          shellPresenter.onStateChanged();
                      });
 

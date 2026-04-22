@@ -6,22 +6,21 @@
 #include <QColor>
 
 #include "../Application/Session/SessionState.hpp"
-#include "../Domain/TestExecutionStatus.hpp"
+#include "../Presentation/ViewModels/TestTimeViewModel.hpp"
 
 namespace infrastructure {
 
 class SessionStateQtAdapter final : public QObject {
     Q_OBJECT
 
-  public:
+public:
     explicit SessionStateQtAdapter(application::session::SessionState &state, QObject *parent = nullptr);
     ~SessionStateQtAdapter() override = default;
 
     const application::session::SessionState &getState() const;
 
-  signals:
-    void testExecutionChanged(int elapsedSeconds, domain::TestExecutionStatus status);
-    void operatorTestDurationChanged(int minutes);
+signals:
+    void testTimeModelChanged(const presentation::viewModels::TestTimeViewModel &model);
 
     void functionExpressionChanged(const QString &expression);
     void lineColorChanged(const QColor &color);
@@ -38,11 +37,12 @@ class SessionStateQtAdapter final : public QObject {
     void telemetryPlotChanged();
     void controlPlotChanged();
 
-  private:
+private:
     application::session::SessionState &state;
     application::session::Subscription subscription;
 
     static QColor toQColor(domain::RgbColor color);
+    static presentation::viewModels::TestTimeViewModel toTestTimeViewModel(const application::session::SessionStateData &data);
     void emitState(const application::session::SessionStateData &data);
 };
 

@@ -106,13 +106,13 @@ void TestProtocolTabWidget::connectSignals() {
 }
 
 void TestProtocolTabWidget::connectSessionSignals() {
-    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::operatorTestDurationChanged, this,
-                     [this](int minutes) {
-                         if (ui->spinBoxTimerMinutes->value() == minutes) {
+    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testTimeModelChanged, this,
+                     [this](const presentation::viewModels::TestTimeViewModel &model) {
+                         if (ui->spinBoxTimerMinutes->value() == model.operatorDurationMinutes) {
                              return;
                          }
 
-                         ui->spinBoxTimerMinutes->setValue(minutes);
+                         ui->spinBoxTimerMinutes->setValue(model.operatorDurationMinutes);
                      });
 
     QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testProtocolTitleChanged, this,

@@ -3,8 +3,10 @@
 namespace presentation::testProtocolTab {
 
 TestProtocolTabPresenter::TestProtocolTabPresenter(Dependencies deps)
-    : state(deps.state), setTimerDurationUseCase(deps.setTimerDurationUseCase),
-      updateTestProtocolUseCase(deps.updateTestProtocolUseCase), exportPdfUseCase(deps.exportPdfUseCase) {
+    : state(deps.state),
+      setOperatorTestDurationUseCase(deps.setOperatorTestDurationUseCase),
+      updateTestProtocolUseCase(deps.updateTestProtocolUseCase),
+      exportPdfUseCase(deps.exportPdfUseCase) {
 }
 
 void TestProtocolTabPresenter::attachView(ITestProtocolTabView &view) {
@@ -31,10 +33,10 @@ void TestProtocolTabPresenter::onViewReady() {
 }
 
 void TestProtocolTabPresenter::onOperatorTestDurationChanged(int minutes) {
-    setTimerDurationUseCase.execute(minutes);
+    setOperatorTestDurationUseCase.execute(minutes);
 
     if (view != nullptr) {
-        view->appendLog("Timer duration updated");
+        view->appendLog("Operator test duration updated");
     }
 }
 
@@ -42,7 +44,7 @@ void TestProtocolTabPresenter::onTestProtocolTitleChanged(std::string title) {
     updateTestProtocolUseCase.updateTitle(std::move(title));
 
     if (view != nullptr) {
-        view->appendLog("TestProtocol title updated");
+        view->appendLog("Test protocol title updated");
     }
 }
 
@@ -50,7 +52,7 @@ void TestProtocolTabPresenter::onTestProtocolLineChanged(int index, std::string 
     updateTestProtocolUseCase.updateLine(index, std::move(line));
 
     if (view != nullptr) {
-        view->appendLog("TestProtocol line updated");
+        view->appendLog("Test protocol line updated");
     }
 }
 

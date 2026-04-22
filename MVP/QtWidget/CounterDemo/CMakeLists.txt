@@ -118,6 +118,8 @@ qt_add_executable(develop
   src/Ui/Render/PlotRenderer.cpp
   src/Domain/TestTimeSource.hpp
   src/Domain/TestTimeDirection.hpp
+  src/Application/UseCases/SetTestTimeSourceUseCase.hpp src/Application/UseCases/SetTestTimeSourceUseCase.cpp
+  src/Presentation/ViewModels/TestTimeViewModel.hpp
 )
 target_link_libraries(develop PRIVATE Qt::Core Qt::Widgets)
 

@@ -12,6 +12,7 @@
 #include "UseCases/SetLineColorUseCase.hpp"
 #include "UseCases/SetControlChartsTabMinutesUseCase.hpp"
 #include "UseCases/SetOperatorTestDurationUseCase.hpp"
+#include "UseCases/SetTestTimeSourceUseCase.hpp"
 #include "UseCases/StartTestExecutionUseCase.hpp"
 #include "UseCases/StopTestExecutionUseCase.hpp"
 #include "UseCases/UpdateTestProtocolUseCase.hpp"
@@ -54,6 +55,8 @@ struct ApplicationContext {
     application::useCases::StopTestExecutionUseCase stopTestExecutionUseCase{
                                                                              sessionState, testExecutionScheduler};
 
+    application::useCases::SetTestTimeSourceUseCase setTestTimeSourceUseCase{sessionState};
+
     application::useCases::SetFunctionExpressionUseCase setFunctionExpressionUseCase{sessionState};
 
     application::useCases::SetLineColorUseCase setLineColorUseCase{sessionState};
@@ -75,6 +78,7 @@ struct ApplicationContext {
             .pauseTestExecutionUseCase = pauseTestExecutionUseCase,
             .resumeTestExecutionUseCase = resumeTestExecutionUseCase,
             .stopTestExecutionUseCase = stopTestExecutionUseCase,
+            .setTestTimeSourceUseCase = setTestTimeSourceUseCase,
             .setFunctionExpressionUseCase = setFunctionExpressionUseCase,
             .setLineColorUseCase = setLineColorUseCase,
             .buildControlPlotUseCase = buildControlPlotUseCase
@@ -96,7 +100,7 @@ struct ApplicationContext {
     presentation::testProtocolTab::TestProtocolTabPresenter testProtocolTabPresenter{
         presentation::testProtocolTab::TestProtocolTabPresenter::Dependencies{
             .state = sessionState,
-            .setOperatorTestDurationUseCase  = setOperatorTestDurationUseCase,
+            .setOperatorTestDurationUseCase = setOperatorTestDurationUseCase,
             .updateTestProtocolUseCase = updateTestProtocolUseCase,
             .exportPdfUseCase = exportPdfUseCase
         }

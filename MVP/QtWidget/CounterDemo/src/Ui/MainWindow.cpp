@@ -19,6 +19,10 @@ MainWindow::MainWindow(Dependencies deps, QWidget *parent)
       testProtocolTabPresenter(deps.testProtocolTabPresenter), sessionAdapter(deps.sessionAdapter) {
     ui->setupUi(this);
 
+    ui->comboBoxTestTimeSource->addItem(QStringLiteral("Авторасчёт"));
+    ui->comboBoxTestTimeSource->addItem(QStringLiteral("Время оператора"));
+    ui->comboBoxTestTimeSource->addItem(QStringLiteral("Свободный режим"));
+
     shellPresenter.attachView(*this);
 
     setupTabs();
@@ -99,6 +103,27 @@ void MainWindow::connectShellSignals() {
 
         shellPresenter.onLineColorSelected(MainWindowUiAdapter::toDomainColor(color));
     });
+
+    QObject::connect(ui->comboBoxTestTimeSource, &QComboBox::currentIndexChanged, this,
+                     [this](int index) {
+                         domain::TestTimeSource source = domain::TestTimeSource::AutoCalculated;
+
+                         switch (index) {
+                             case 0:
+                                 source = domain::TestTimeSource::AutoCalculated;
+                                 break;
+                             case 1:
+                                 source = domain::TestTimeSource::OperatorDefined;
+                                 break;
+                             case 2:
+                                 source = domain::TestTimeSource::FreeRun;
+                                 break;
+                             default:
+                                 return;
+                         }
+
+                         shellPresenter.onTestTimeSourceChanged(source);
+                     });
 }
 
 void MainWindow::connectSessionSignals() {
@@ -115,6 +140,26 @@ void MainWindow::connectSessionSignals() {
 
                          ui->lineEditFormula->setText(expression);
                      });
+}
+
+void MainWindow::setTestTimeSource(domain::TestTimeSource source) {
+    int index = 0;
+
+    switch (source) {
+        case domain::TestTimeSource::AutoCalculated:
+            index = 0;
+            break;
+        case domain::TestTimeSource::OperatorDefined:
+            index = 1;
+            break;
+        case domain::TestTimeSource::FreeRun:
+            index = 2;
+            break;
+    }
+
+    if (ui->comboBoxTestTimeSource->currentIndex() != index) {
+        ui->comboBoxTestTimeSource->setCurrentIndex(index);
+    }
 }
 
 } // namespace ui

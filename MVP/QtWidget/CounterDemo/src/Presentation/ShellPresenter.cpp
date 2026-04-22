@@ -1,5 +1,8 @@
 #include "ShellPresenter.hpp"
 
+#include "../Domain/TestTimeSource.hpp"
+#include "../Domain/TestTimeDirection.hpp"
+
 namespace presentation {
 
 ShellPresenter::ShellPresenter(Dependencies deps)
@@ -10,7 +13,8 @@ ShellPresenter::ShellPresenter(Dependencies deps)
       stopTestExecutionUseCase(deps.stopTestExecutionUseCase),
       setFunctionExpressionUseCase(deps.setFunctionExpressionUseCase),
       setLineColorUseCase(deps.setLineColorUseCase),
-      buildControlPlotUseCase(deps.buildControlPlotUseCase) {
+      buildControlPlotUseCase(deps.buildControlPlotUseCase),
+      setTestTimeSourceUseCase(deps.setTestTimeSourceUseCase) {
 }
 
 void ShellPresenter::attachView(IShellView &view) {
@@ -182,6 +186,16 @@ void ShellPresenter::refreshFromState() {
     view->setResumeEnabled(canResume(session.testExecutionStatus));
     view->setStopEnabled(canStop(session.testExecutionStatus));
     view->setFunctionExpression(session.functionExpression.value);
+    view->setTestTimeSource(session.testTimeSource);
+}
+
+void ShellPresenter::onTestTimeSourceChanged(domain::TestTimeSource source) {
+    setTestTimeSourceUseCase.execute(source);
+    refreshFromState();
+
+    if (view != nullptr) {
+        view->appendLog("Test time source updated");
+    }
 }
 
 } // namespace presentation

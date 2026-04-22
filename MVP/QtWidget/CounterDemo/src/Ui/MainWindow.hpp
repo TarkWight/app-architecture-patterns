@@ -10,6 +10,7 @@
 #include "../Presentation/TelemetryChartsTab/TelemetryChartsTabPresenter.hpp"
 #include "../Presentation/ControlChartsTab/ControlChartsTabPresenter.hpp"
 #include "../Presentation/TestProtocolTab/TestProtocolTabPresenter.hpp"
+#include "../Domain/TestTimeSource.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -43,6 +44,7 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     void setStopEnabled(bool enabled) override;
     void setPauseEnabled(bool enabled) override;
     void setResumeEnabled(bool enabled) override;
+    void setTestTimeSource(domain::TestTimeSource source) override;
 
     void setFunctionExpression(const std::string &expression) override;
 

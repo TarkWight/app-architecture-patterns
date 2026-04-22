@@ -11,6 +11,7 @@
 #include "../Application/UseCases/StopTestExecutionUseCase.hpp"
 #include "../Domain/Plot.hpp"
 #include "../Domain/TestExecutionStatus.hpp"
+#include "../Application/UseCases/SetTestTimeSourceUseCase.hpp"
 
 #include "IShellView.hpp"
 
@@ -24,6 +25,7 @@ class ShellPresenter final {
         application::useCases::PauseTestExecutionUseCase &pauseTestExecutionUseCase;
         application::useCases::ResumeTestExecutionUseCase &resumeTestExecutionUseCase;
         application::useCases::StopTestExecutionUseCase &stopTestExecutionUseCase;
+        application::useCases::SetTestTimeSourceUseCase &setTestTimeSourceUseCase;
         application::useCases::SetFunctionExpressionUseCase &setFunctionExpressionUseCase;
         application::useCases::SetLineColorUseCase &setLineColorUseCase;
         application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
@@ -44,6 +46,7 @@ class ShellPresenter final {
 
     void onFunctionEdited(std::string expression);
     void onLineColorSelected(domain::RgbColor color);
+    void onTestTimeSourceChanged(domain::TestTimeSource source);
 
   private:
     application::session::SessionState &state;
@@ -54,6 +57,7 @@ class ShellPresenter final {
     application::useCases::SetFunctionExpressionUseCase &setFunctionExpressionUseCase;
     application::useCases::SetLineColorUseCase &setLineColorUseCase;
     application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
+    application::useCases::SetTestTimeSourceUseCase &setTestTimeSourceUseCase;
 
     IShellView *view{nullptr};
 

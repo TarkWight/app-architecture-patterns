@@ -89,9 +89,9 @@ void ShellPresenter::onLineColorSelected(domain::RgbColor color) {
     }
 }
 
-std::string ShellPresenter::formatTimerText(int elapsedSeconds) {
-    const int minutes = elapsedSeconds / 60;
-    const int seconds = elapsedSeconds % 60;
+std::string ShellPresenter::formatTimerText(int secondsValue) {
+    const int minutes = secondsValue / 60;
+    const int seconds = secondsValue % 60;
 
     const std::string secondsText = (seconds < 10)
         ? "0" + std::to_string(seconds)
@@ -171,7 +171,12 @@ void ShellPresenter::refreshFromState() {
 
     const auto &session = state.get();
 
-    view->setTimerText(formatTimerText(session.elapsed.value));
+    const int displayedSeconds =
+        (session.testTimeDirection == domain::TestTimeDirection::CountDown)
+            ? session.remaining.value
+            : session.elapsed.value;
+
+    view->setTimerText(formatTimerText(displayedSeconds));
     view->setStartEnabled(canStart(session.testExecutionStatus));
     view->setPauseEnabled(canPause(session.testExecutionStatus));
     view->setResumeEnabled(canResume(session.testExecutionStatus));

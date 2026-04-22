@@ -57,7 +57,7 @@ class ShellPresenter final {
 
     IShellView *view{nullptr};
 
-    static std::string formatTimerText(int elapsedSeconds);
+    static std::string formatTimerText(int secondsValue);
     static bool canStart(domain::TestExecutionStatus status);
     static bool canPause(domain::TestExecutionStatus status);
     static bool canResume(domain::TestExecutionStatus status);

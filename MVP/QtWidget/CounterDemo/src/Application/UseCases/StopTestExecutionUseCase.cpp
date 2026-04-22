@@ -1,6 +1,7 @@
 #include "StopTestExecutionUseCase.hpp"
 
 #include "../../Domain/TestExecutionStatus.hpp"
+#include "../../Domain/TestTimeDirection.hpp"
 
 namespace application::useCases {
 
@@ -12,7 +13,18 @@ StopTestExecutionUseCase::StopTestExecutionUseCase(
 
 void StopTestExecutionUseCase::execute() {
     testExecutionScheduler.stop();
-    state.setTestExecutionStatus(domain::TestExecutionStatus::Aborted);
+
+    const auto &session = state.get();
+
+    state.setElapsedSeconds(0);
+
+    if (session.testTimeDirection == domain::TestTimeDirection::CountDown) {
+        state.setRemainingSeconds(session.activeTestDuration.value * 60);
+    } else {
+        state.setRemainingSeconds(0);
+    }
+
+    state.setTestExecutionStatus(domain::TestExecutionStatus::Ready);
 }
 
 } // namespace application::useCases

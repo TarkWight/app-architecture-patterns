@@ -5,8 +5,8 @@ namespace application::dto {
 
 struct CountersSnapshot final {
     int tab0{0};
-    int tab1{0};
-    int tab2{0};
+    int telemetryChartsTab{0};
+    int controlChartsTab{0};
     int global{0};
 };
 

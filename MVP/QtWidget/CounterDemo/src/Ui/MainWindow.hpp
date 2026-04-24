@@ -4,32 +4,68 @@
 #include <QMainWindow>
 #include <memory>
 
-#include "../Presentation/IMainView.hpp"
-#include "../Presentation/MainPresenter.hpp"
+#include "../Infrastructure/SessionStateQtAdapter.hpp"
+#include "../Presentation/IShellView.hpp"
+#include "../Presentation/ShellPresenter.hpp"
+#include "../Presentation/TelemetryChartsTab/TelemetryChartsTabPresenter.hpp"
+#include "../Presentation/ControlChartsTab/ControlChartsTabPresenter.hpp"
+#include "../Presentation/TestProtocolTab/TestProtocolTabPresenter.hpp"
+#include "../Domain/TestTimeSource.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
-} // namespace Ui
+}
 QT_END_NAMESPACE
 
 namespace ui {
 
-class MainWindow final : public QMainWindow, public presentation::IMainView {
+class TelemetryChartsTabWidget;
+class ControlChartsTabWidget;
+class TestProtocolTabWidget;
+
+class MainWindow final : public QMainWindow, public presentation::IShellView {
     Q_OBJECT
 
   public:
-    explicit MainWindow(presentation::MainPresenter &presenter, QWidget *parent = nullptr);
-    ~MainWindow();
+    struct Dependencies {
+        presentation::ShellPresenter &shellPresenter;
+        presentation::telemetryChartsTab::TelemetryChartsTabPresenter &telemetryChartsTabPresenter;
+        presentation::controlChartsTab::ControlChartsTabPresenter &controlChartsTabPresenter;
+        presentation::testProtocolTab::TestProtocolTabPresenter &testProtocolTabPresenter;
+        infrastructure::SessionStateQtAdapter &sessionAdapter;
+    };
 
-    void setCounterValue(domain::CounterId counterId, int value) override;
-    void appendCommandLog(const std::string &text) override;
+    explicit MainWindow(Dependencies deps, QWidget *parent = nullptr);
+    ~MainWindow() override;
+
+    void setTimerText(const std::string &text) override;
+    void setStartEnabled(bool enabled) override;
+    void setStopEnabled(bool enabled) override;
+    void setPauseEnabled(bool enabled) override;
+    void setResumeEnabled(bool enabled) override;
+    void setTestTimeSource(domain::TestTimeSource source) override;
+
+    void setFunctionExpression(const std::string &expression) override;
+
+    void appendLog(const std::string &text) override;
 
   private:
     std::unique_ptr<Ui::MainWindow> ui;
-    presentation::MainPresenter &presenter;
 
-    void connectSignals();
+    presentation::ShellPresenter &shellPresenter;
+    presentation::telemetryChartsTab::TelemetryChartsTabPresenter &telemetryChartsTabPresenter;
+    presentation::controlChartsTab::ControlChartsTabPresenter &controlChartsTabPresenter;
+    presentation::testProtocolTab::TestProtocolTabPresenter &testProtocolTabPresenter;
+    infrastructure::SessionStateQtAdapter &sessionAdapter;
+
+    TelemetryChartsTabWidget *telemetryChartsTabWidget{nullptr};
+    ControlChartsTabWidget *controlChartsTabWidget{nullptr};
+    TestProtocolTabWidget *testProtocolTabWidget{nullptr};
+
+    void setupTabs();
+    void connectShellSignals();
+    void connectSessionSignals();
 };
 
 } // namespace ui

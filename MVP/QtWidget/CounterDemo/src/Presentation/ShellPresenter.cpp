@@ -1,11 +1,20 @@
 #include "ShellPresenter.hpp"
 
+#include "../Domain/TestTimeSource.hpp"
+#include "../Domain/TestTimeDirection.hpp"
+
 namespace presentation {
 
 ShellPresenter::ShellPresenter(Dependencies deps)
-    : state(deps.state), startTimerUseCase(deps.startTimerUseCase), stopTimerUseCase(deps.stopTimerUseCase),
-      setFunctionExpressionUseCase(deps.setFunctionExpressionUseCase), setLineColorUseCase(deps.setLineColorUseCase),
-      buildFormulaPlotUseCase(deps.buildFormulaPlotUseCase) {
+    : state(deps.state),
+      startTestExecutionUseCase(deps.startTestExecutionUseCase),
+      pauseTestExecutionUseCase(deps.pauseTestExecutionUseCase),
+      resumeTestExecutionUseCase(deps.resumeTestExecutionUseCase),
+      stopTestExecutionUseCase(deps.stopTestExecutionUseCase),
+      setFunctionExpressionUseCase(deps.setFunctionExpressionUseCase),
+      setLineColorUseCase(deps.setLineColorUseCase),
+      buildControlPlotUseCase(deps.buildControlPlotUseCase),
+      setTestTimeSourceUseCase(deps.setTestTimeSourceUseCase) {
 }
 
 void ShellPresenter::attachView(IShellView &view) {
@@ -20,26 +29,48 @@ void ShellPresenter::onViewReady() {
     refreshFromState();
 }
 
+void ShellPresenter::onStateChanged() {
+    refreshFromState();
+}
+
 void ShellPresenter::onStartPressed() {
-    startTimerUseCase.execute();
+    startTestExecutionUseCase.execute();
     refreshFromState();
 
     if (view != nullptr) {
-        view->appendLog("Timer started");
+        view->appendLog("Test execution started");
+    }
+}
+
+void ShellPresenter::onPausePressed() {
+    pauseTestExecutionUseCase.execute();
+    refreshFromState();
+
+    if (view != nullptr) {
+        view->appendLog("Test execution paused");
+    }
+}
+
+void ShellPresenter::onResumePressed() {
+    resumeTestExecutionUseCase.execute();
+    refreshFromState();
+
+    if (view != nullptr) {
+        view->appendLog("Test execution resumed");
     }
 }
 
 void ShellPresenter::onStopPressed() {
-    stopTimerUseCase.execute();
+    stopTestExecutionUseCase.execute();
     refreshFromState();
 
     if (view != nullptr) {
-        view->appendLog("Timer stopped");
+        view->appendLog("Test execution stopped");
     }
 }
 
 void ShellPresenter::onCalculatePressed() {
-    buildFormulaPlotUseCase.execute();
+    buildControlPlotUseCase.execute();
 
     if (view != nullptr) {
         view->appendLog("Formula plot rebuilt");
@@ -62,13 +93,79 @@ void ShellPresenter::onLineColorSelected(domain::RgbColor color) {
     }
 }
 
-std::string ShellPresenter::formatTimerText(int elapsedSeconds) {
-    const int minutes = elapsedSeconds / 60;
-    const int seconds = elapsedSeconds % 60;
+std::string ShellPresenter::formatTimerText(int secondsValue) {
+    const int minutes = secondsValue / 60;
+    const int seconds = secondsValue % 60;
 
-    std::string secondsText = (seconds < 10) ? "0" + std::to_string(seconds) : std::to_string(seconds);
+    const std::string secondsText = (seconds < 10)
+        ? "0" + std::to_string(seconds)
+        : std::to_string(seconds);
 
     return std::to_string(minutes) + ":" + secondsText;
+}
+
+bool ShellPresenter::canStart(domain::TestExecutionStatus status) {
+    switch (status) {
+        case domain::TestExecutionStatus::Idle:
+        case domain::TestExecutionStatus::Ready:
+        case domain::TestExecutionStatus::Completed:
+        case domain::TestExecutionStatus::Aborted:
+        case domain::TestExecutionStatus::Failed:
+            return true;
+        case domain::TestExecutionStatus::Running:
+        case domain::TestExecutionStatus::Paused:
+            return false;
+    }
+    return false;
+}
+
+bool ShellPresenter::canPause(domain::TestExecutionStatus status) {
+    switch (status) {
+    case domain::TestExecutionStatus::Running:
+        return true;
+
+    case domain::TestExecutionStatus::Idle:
+    case domain::TestExecutionStatus::Ready:
+    case domain::TestExecutionStatus::Paused:
+    case domain::TestExecutionStatus::Completed:
+    case domain::TestExecutionStatus::Aborted:
+    case domain::TestExecutionStatus::Failed:
+        return false;
+    }
+
+    return false;
+}
+
+bool ShellPresenter::canResume(domain::TestExecutionStatus status) {
+    switch (status) {
+    case domain::TestExecutionStatus::Paused:
+        return true;
+
+    case domain::TestExecutionStatus::Idle:
+    case domain::TestExecutionStatus::Ready:
+    case domain::TestExecutionStatus::Running:
+    case domain::TestExecutionStatus::Completed:
+    case domain::TestExecutionStatus::Aborted:
+    case domain::TestExecutionStatus::Failed:
+        return false;
+    }
+
+    return false;
+}
+
+bool ShellPresenter::canStop(domain::TestExecutionStatus status) {
+    switch (status) {
+        case domain::TestExecutionStatus::Running:
+        case domain::TestExecutionStatus::Paused:
+            return true;
+        case domain::TestExecutionStatus::Idle:
+        case domain::TestExecutionStatus::Ready:
+        case domain::TestExecutionStatus::Completed:
+        case domain::TestExecutionStatus::Aborted:
+        case domain::TestExecutionStatus::Failed:
+            return false;
+    }
+    return false;
 }
 
 void ShellPresenter::refreshFromState() {
@@ -78,10 +175,27 @@ void ShellPresenter::refreshFromState() {
 
     const auto &session = state.get();
 
-    view->setTimerText(formatTimerText(session.elapsed.value));
-    view->setStartEnabled(!session.timerRunning);
-    view->setStopEnabled(session.timerRunning);
-    view->setFunctionExpression(session.functionExpression);
+    const int displayedSeconds =
+        (session.testTimeDirection == domain::TestTimeDirection::CountDown)
+            ? session.remaining.value
+            : session.elapsed.value;
+
+    view->setTimerText(formatTimerText(displayedSeconds));
+    view->setStartEnabled(canStart(session.testExecutionStatus));
+    view->setPauseEnabled(canPause(session.testExecutionStatus));
+    view->setResumeEnabled(canResume(session.testExecutionStatus));
+    view->setStopEnabled(canStop(session.testExecutionStatus));
+    view->setFunctionExpression(session.functionExpression.value);
+    view->setTestTimeSource(session.testTimeSource);
+}
+
+void ShellPresenter::onTestTimeSourceChanged(domain::TestTimeSource source) {
+    setTestTimeSourceUseCase.execute(source);
+    refreshFromState();
+
+    if (view != nullptr) {
+        view->appendLog("Test time source updated");
+    }
 }
 
 } // namespace presentation

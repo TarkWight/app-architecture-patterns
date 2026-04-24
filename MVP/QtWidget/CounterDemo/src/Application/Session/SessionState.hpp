@@ -2,6 +2,9 @@
 #define SESSIONSTATE_HPP
 
 #include "../../Domain/Plot.hpp"
+#include "../../Domain/TestExecutionStatus.hpp"
+#include "../../Domain/TestTimeDirection.hpp"
+#include "../../Domain/TestTimeSource.hpp"
 
 #include "SessionStateData.hpp"
 #include "Subscription.hpp"
@@ -14,7 +17,7 @@
 namespace application::session {
 
 class SessionState {
-  public:
+public:
     using Listener = std::function<void(const SessionStateData &)>;
 
     const SessionStateData &get() const;
@@ -22,26 +25,33 @@ class SessionState {
     Subscription subscribe(Listener listener);
 
     void setFunctionExpression(std::string expr);
-
+    void setWindProfile(domain::WindProfile profile);
     void setLineColor(domain::RgbColor color);
+    void setControlChartsTabMinutes(int minutes);
 
-    void setTab2Minutes(int minutes);
+    void setTestExecutionStatus(domain::TestExecutionStatus status);
 
-    void setTimerDurationMinutes(int minutes);
+    void setTestTimeSource(domain::TestTimeSource source);
+    void setTestTimeDirection(domain::TestTimeDirection direction);
+
+    void setEstimatedTestDurationMinutes(int minutes);
+    void setOperatorTestDurationMinutes(int minutes);
+    void setActiveTestDurationMinutes(int minutes);
 
     void setElapsedSeconds(int seconds);
+    void setRemainingSeconds(int seconds);
 
-    void setTimerRunning(bool running);
+    void setTelemetryPlot(domain::PlotModel plot);
+    void setControlPlot(domain::PlotModel plot);
 
-    void setPlot1(domain::PlotModel plot);
+    void setTestProtocolTitle(std::string title);
+    void setTestProtocolLine(int idx, std::string line);
 
-    void setPlot2(domain::PlotModel plot);
+    void setAxis1State(domain::AxisState state);
+    void setAxis2State(domain::AxisState state);
+    void setTelemetryStatus(domain::TelemetryStatus status);
 
-    void setPoemTitle(std::string title);
-
-    void setPoemLine(int idx, std::string line);
-
-  private:
+private:
     SessionStateData data{};
 
     mutable std::mutex mu{};

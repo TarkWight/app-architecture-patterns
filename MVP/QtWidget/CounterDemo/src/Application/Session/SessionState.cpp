@@ -1,13 +1,12 @@
 #include "SessionState.hpp"
 
 #include "../../Domain/Plot.hpp"
-#include "../../Domain/Poem.hpp"
+#include "../../Domain/TestProtocol.hpp"
 #include "../../Domain/Time.hpp"
 
 #include "SessionStateData.hpp"
 #include "Subscription.hpp"
 
-#include <array>
 #include <functional>
 #include <mutex>
 #include <string>
@@ -34,7 +33,12 @@ Subscription application::session::SessionState::subscribe(Listener listener) {
 }
 
 void application::session::SessionState::setFunctionExpression(std::string expr) {
-    data.functionExpression = std::move(expr);
+    data.functionExpression.value = std::move(expr);
+    notify();
+}
+
+void application::session::SessionState::setWindProfile(domain::WindProfile profile) {
+    data.windProfile = std::move(profile);
     notify();
 }
 
@@ -43,13 +47,38 @@ void application::session::SessionState::setLineColor(domain::RgbColor color) {
     notify();
 }
 
-void application::session::SessionState::setTab2Minutes(int minutes) {
-    data.tab2Minutes.value = minutes;
+void application::session::SessionState::setControlChartsTabMinutes(int minutes) {
+    data.controlChartsTabMinutes.value = minutes;
     notify();
 }
 
-void application::session::SessionState::setTimerDurationMinutes(int minutes) {
-    data.timerDuration.value = minutes;
+void application::session::SessionState::setTestExecutionStatus(domain::TestExecutionStatus status) {
+    data.testExecutionStatus = status;
+    notify();
+}
+
+void application::session::SessionState::setTestTimeSource(domain::TestTimeSource source) {
+    data.testTimeSource = source;
+    notify();
+}
+
+void application::session::SessionState::setTestTimeDirection(domain::TestTimeDirection direction) {
+    data.testTimeDirection = direction;
+    notify();
+}
+
+void application::session::SessionState::setEstimatedTestDurationMinutes(int minutes) {
+    data.estimatedTestDuration.value = minutes;
+    notify();
+}
+
+void application::session::SessionState::setOperatorTestDurationMinutes(int minutes) {
+    data.operatorTestDuration.value = minutes;
+    notify();
+}
+
+void application::session::SessionState::setActiveTestDurationMinutes(int minutes) {
+    data.activeTestDuration.value = minutes;
     notify();
 }
 
@@ -58,31 +87,47 @@ void application::session::SessionState::setElapsedSeconds(int seconds) {
     notify();
 }
 
-void application::session::SessionState::setTimerRunning(bool running) {
-    data.timerRunning = running;
+void application::session::SessionState::setRemainingSeconds(int seconds) {
+    data.remaining.value = seconds;
     notify();
 }
 
-void application::session::SessionState::setPlot1(domain::PlotModel plot) {
-    data.plot1 = std::move(plot);
+void application::session::SessionState::setTelemetryPlot(domain::PlotModel plot) {
+    data.telemetryPlot = std::move(plot);
     notify();
 }
 
-void application::session::SessionState::setPlot2(domain::PlotModel plot) {
-    data.plot2 = std::move(plot);
+void application::session::SessionState::setControlPlot(domain::PlotModel plot) {
+    data.controlPlot = std::move(plot);
     notify();
 }
 
-void application::session::SessionState::setPoemTitle(std::string title) {
-    data.poem.title = std::move(title);
+void application::session::SessionState::setTestProtocolTitle(std::string title) {
+    data.testProtocol.title = std::move(title);
     notify();
 }
 
-void application::session::SessionState::setPoemLine(int idx, std::string line) {
+void application::session::SessionState::setTestProtocolLine(int idx, std::string line) {
     if (idx < 0 || idx >= 8) {
         return;
     }
-    data.poem.lines[static_cast<std::size_t>(idx)] = std::move(line);
+
+    data.testProtocol.lines[static_cast<std::size_t>(idx)] = std::move(line);
+    notify();
+}
+
+void application::session::SessionState::setAxis1State(domain::AxisState stateValue) {
+    data.axis1State = stateValue;
+    notify();
+}
+
+void application::session::SessionState::setAxis2State(domain::AxisState stateValue) {
+    data.axis2State = stateValue;
+    notify();
+}
+
+void application::session::SessionState::setTelemetryStatus(domain::TelemetryStatus status) {
+    data.telemetryStatus = status;
     notify();
 }
 
@@ -92,6 +137,7 @@ void application::session::SessionState::notify() {
         std::lock_guard lock(mu);
         copy = listeners;
     }
+
     for (auto &[id, listener] : copy) {
         listener(data);
     }

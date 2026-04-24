@@ -4,30 +4,60 @@ namespace infrastructure {
 
 SessionStateQtAdapter::SessionStateQtAdapter(application::session::SessionState &state, QObject *parent)
     : QObject(parent), state(state) {
-    subscription = state.subscribe([this](const application::session::SessionStateData &data) { emitState(data); });
+    subscription = state.subscribe([this](const application::session::SessionStateData &data) {
+        emitState(data);
+    });
 }
 
 QColor SessionStateQtAdapter::toQColor(domain::RgbColor color) {
     return QColor(static_cast<int>(color.r), static_cast<int>(color.g), static_cast<int>(color.b));
 }
 
-void SessionStateQtAdapter::emitState(const application::session::SessionStateData &data) {
-    emit timerChanged(data.elapsed.value, data.timerRunning);
-    emit timerDurationChanged(data.timerDuration.value);
+presentation::viewModels::TestTimeViewModel SessionStateQtAdapter::toTestTimeViewModel(
+    const application::session::SessionStateData &data) {
 
-    emit functionExpressionChanged(QString::fromStdString(data.functionExpression));
+    presentation::viewModels::TestTimeViewModel model{};
+    model.executionStatus = data.testExecutionStatus;
+    model.timeSource = data.testTimeSource;
+    model.timeDirection = data.testTimeDirection;
+
+    model.estimatedDurationMinutes = data.estimatedTestDuration.value;
+    model.operatorDurationMinutes = data.operatorTestDuration.value;
+    model.activeDurationMinutes = data.activeTestDuration.value;
+
+    model.elapsedSeconds = data.elapsed.value;
+    model.remainingSeconds = data.remaining.value;
+
+    model.displayedSeconds =
+        (data.testTimeDirection == domain::TestTimeDirection::CountDown)
+            ? data.remaining.value
+            : data.elapsed.value;
+
+    return model;
+}
+
+void SessionStateQtAdapter::emitState(const application::session::SessionStateData &data) {
+    emit testTimeModelChanged(toTestTimeViewModel(data));
+
+    emit functionExpressionChanged(QString::fromStdString(data.functionExpression.value));
     emit lineColorChanged(toQColor(data.lineColor));
 
-    emit tab2MinutesChanged(data.tab2Minutes.value);
+    emit controlChartsTabMinutesChanged(data.controlChartsTabMinutes.value);
 
-    emit poemTitleChanged(QString::fromStdString(data.poem.title));
+    emit beaufortChanged(data.windProfile.beaufort);
+    emit directionChanged(data.windProfile.direction);
+    emit angleOfAttackChanged(data.windProfile.angleOfAttack);
+
+    emit testProtocolTitleChanged(QString::fromStdString(data.testProtocol.title));
 
     for (int i = 0; i < 8; ++i) {
-        emit poemLineChanged(i, QString::fromStdString(data.poem.lines[static_cast<std::size_t>(i)]));
+        emit testProtocolLineChanged(
+            i,
+            QString::fromStdString(data.testProtocol.lines[static_cast<std::size_t>(i)]));
     }
 
-    emit plot1Changed();
-    emit plot2Changed();
+    emit telemetryPlotChanged();
+    emit controlPlotChanged();
 }
 
 const application::session::SessionState &SessionStateQtAdapter::getState() const {

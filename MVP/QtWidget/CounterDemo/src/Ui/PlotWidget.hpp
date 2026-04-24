@@ -16,15 +16,11 @@ class PlotWidget final : public QWidget {
     void setPlot(domain::PlotModel plot);
     const domain::PlotModel &getPlot() const;
 
-    static double normalize(double value, double min, double max);
-
   protected:
     void paintEvent(QPaintEvent *event) override;
 
   private:
     domain::PlotModel plot{};
-
-    static bool hasRenderablePlot(const domain::PlotModel &plotModel);
 };
 
 } // namespace ui

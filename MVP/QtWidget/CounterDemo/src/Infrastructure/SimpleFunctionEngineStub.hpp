@@ -26,6 +26,15 @@ class SimpleFunctionEngineStub final : public application::ports::IFunctionEngin
             const int value = static_cast<int>(x) % 8;
             return static_cast<double>(value);
         }
+        if (expr == "test 1") {
+            return 0;
+        }
+        if (expr == "test 2") {
+            return (60 * std::sin(0.0053 * x));
+        }
+        if (expr == "test 3") {
+            return (std::sin(x) * (6.9 * std::sin(10 * x)));
+        }
 
         return std::sin(x);
     }

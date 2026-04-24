@@ -1,5 +1,4 @@
-#ifndef TIME_HPP
-#define TIME_HPP
+#pragma once
 
 namespace domain {
 
@@ -11,6 +10,8 @@ struct ElapsedSeconds {
     int value{0};
 };
 
-} // namespace domain
+struct RemainingSeconds {
+    int value{0};
+};
 
-#endif // TIME_HPP
+} // namespace domain

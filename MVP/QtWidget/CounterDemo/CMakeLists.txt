@@ -95,6 +95,8 @@ qt_add_executable(develop
   src/Infrastructure/SessionStateQtAdapter.cpp
   src/Infrastructure/QtPdfExporter.hpp
   src/Infrastructure/QtPdfExporter.cpp
+  src/Infrastructure/AxisTcp/LegacyAxisProtocolCodec.hpp
+  src/Infrastructure/AxisTcp/LegacyAxisProtocolCodec.cpp
 
   src/Presentation/IShellView.hpp
   src/Presentation/TelemetryChartsTab/ITelemetryChartsTabView.hpp

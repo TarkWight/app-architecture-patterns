@@ -11,8 +11,8 @@ struct AxisIdTag final {};
 
 using AxisId = Id<AxisIdTag, std::uint8_t>;
 
-inline constexpr AxisId Axis0{0};
-inline constexpr AxisId Axis1{1};
+inline constexpr AxisId axis0{0};
+inline constexpr AxisId axis1{1};
 
 } // namespace domain
 

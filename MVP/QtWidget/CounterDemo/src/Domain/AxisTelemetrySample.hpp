@@ -6,7 +6,7 @@
 namespace domain {
 
 struct AxisTelemetrySample {
-    AxisId axisId{Axis0};
+    AxisId axisId{axis0};
 
     double timestampSeconds{0.0};
 

@@ -46,6 +46,7 @@ qt_add_executable(develop
   src/Application/Ports/ITestExecutionScheduler.hpp
   src/Application/Ports/IPdfExporter.hpp
   src/Application/Ports/ITelemetryClient.hpp
+  src/Application/Ports/IAxisProtocolCodec.hpp
 
   src/Application/Session/SessionState.hpp
   src/Application/Session/SessionState.cpp

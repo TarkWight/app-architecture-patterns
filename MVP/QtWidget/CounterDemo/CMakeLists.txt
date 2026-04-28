@@ -31,6 +31,13 @@ qt_add_executable(develop
   src/Domain/AxisState.hpp
   src/Domain/TestExecutionStatus.hpp
   src/Domain/TelemetryStatus.hpp
+  src/Domain/TestTimeSource.hpp
+  src/Domain/TestTimeDirection.hpp
+  src/Domain/Id.hpp
+  src/Domain/AxisId.hpp
+  src/Domain/AxisTelemetrySample.hpp
+  src/Domain/AxisControlCommand.hpp
+  src/Domain/TelemetryConnectionStatus.hpp
 
   src/Application/Dto/PdfDocumentModel.hpp
 
@@ -72,6 +79,8 @@ qt_add_executable(develop
   src/Application/UseCases/PauseTestExecutionUseCase.cpp
   src/Application/UseCases/ResumeTestExecutionUseCase.hpp
   src/Application/UseCases/ResumeTestExecutionUseCase.cpp
+  src/Application/UseCases/SetTestTimeSourceUseCase.hpp
+  src/Application/UseCases/SetTestTimeSourceUseCase.cpp
 
   src/Application/ApplicationContext.hpp
 
@@ -97,6 +106,7 @@ qt_add_executable(develop
   src/Presentation/ControlChartsTab/ControlChartsTabPresenter.cpp
   src/Presentation/TestProtocolTab/TestProtocolTabPresenter.hpp
   src/Presentation/TestProtocolTab/TestProtocolTabPresenter.cpp
+  src/Presentation/ViewModels/TestTimeViewModel.hpp
 
   src/Ui/MainWindowUiAdapter.hpp
   src/Ui/MainWindowUiAdapter.cpp
@@ -116,10 +126,6 @@ qt_add_executable(develop
   src/Ui/PlotWidget.cpp
   src/Ui/Render/PlotRenderer.hpp
   src/Ui/Render/PlotRenderer.cpp
-  src/Domain/TestTimeSource.hpp
-  src/Domain/TestTimeDirection.hpp
-  src/Application/UseCases/SetTestTimeSourceUseCase.hpp src/Application/UseCases/SetTestTimeSourceUseCase.cpp
-  src/Presentation/ViewModels/TestTimeViewModel.hpp
 )
 target_link_libraries(develop PRIVATE Qt::Core Qt::Widgets)
 

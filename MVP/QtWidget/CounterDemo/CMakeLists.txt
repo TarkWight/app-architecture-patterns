@@ -20,6 +20,14 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
+include(FetchContent)
+FetchContent_Declare(
+    tomlplusplus
+    GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
+    GIT_TAG v3.4.0
+)
+FetchContent_MakeAvailable(tomlplusplus)
+
 qt_add_executable(develop
   src/main.cpp
 
@@ -40,6 +48,8 @@ qt_add_executable(develop
   src/Domain/TelemetryConnectionStatus.hpp
 
   src/Application/Dto/PdfDocumentModel.hpp
+  src/Application/Dto/TelemetryConfig.hpp
+  src/Application/Dto/AxisEndpointConfig.hpp
 
   src/Application/Ports/ILogger.hpp
   src/Application/Ports/IFunctionEngine.hpp
@@ -47,6 +57,7 @@ qt_add_executable(develop
   src/Application/Ports/IPdfExporter.hpp
   src/Application/Ports/ITelemetryClient.hpp
   src/Application/Ports/IAxisProtocolCodec.hpp
+  src/Application/Ports/IConfigRepository.hpp
 
   src/Application/Session/SessionState.hpp
   src/Application/Session/SessionState.cpp
@@ -54,6 +65,10 @@ qt_add_executable(develop
   src/Application/Session/Subscription.hpp
   src/Application/Session/Subscription.cpp
 
+  src/Infrastructure/Config/TomlConfigRepository.hpp
+  src/Infrastructure/Config/TomlConfigRepository.cpp
+
+  src/Application/ApplicationContext.hpp
 
   src/Application/UseCases/BuildControlPlotUseCase.hpp
   src/Application/UseCases/BuildControlPlotUseCase.cpp
@@ -83,8 +98,8 @@ qt_add_executable(develop
   src/Application/UseCases/ResumeTestExecutionUseCase.cpp
   src/Application/UseCases/SetTestTimeSourceUseCase.hpp
   src/Application/UseCases/SetTestTimeSourceUseCase.cpp
-
-  src/Application/ApplicationContext.hpp
+  src/Application/UseCases/ConfigureTelemetryUseCase.hpp
+  src/Application/UseCases/ConfigureTelemetryUseCase.cpp
 
   src/Infrastructure/QtTextLogger.hpp
   src/Infrastructure/QtTextLogger.cpp
@@ -131,7 +146,13 @@ qt_add_executable(develop
   src/Ui/Render/PlotRenderer.hpp
   src/Ui/Render/PlotRenderer.cpp
 )
-target_link_libraries(develop PRIVATE Qt::Core Qt::Widgets)
+
+target_link_libraries(develop
+  PRIVATE
+  Qt::Core
+  Qt::Widgets
+  tomlplusplus::tomlplusplus
+)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(CodeQuality)

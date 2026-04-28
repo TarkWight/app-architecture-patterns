@@ -13,7 +13,7 @@ option(ENABLE_CLANG_FORMAT_CHECK "Enable clang-format check" ON)
 set(CLANG_TIDY_PATH "" CACHE FILEPATH "Path to clang-tidy executable")
 set(CLANG_FORMAT_PATH "" CACHE FILEPATH "Path to clang-format executable")
 
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Network)
 qt_standard_project_setup()
 
 set(CMAKE_AUTOMOC ON)
@@ -110,8 +110,11 @@ qt_add_executable(develop
   src/Infrastructure/SessionStateQtAdapter.cpp
   src/Infrastructure/QtPdfExporter.hpp
   src/Infrastructure/QtPdfExporter.cpp
+
   src/Infrastructure/AxisTcp/LegacyAxisProtocolCodec.hpp
   src/Infrastructure/AxisTcp/LegacyAxisProtocolCodec.cpp
+  src/Infrastructure/AxisTcp/QtTcpTelemetryClient.hpp
+  src/Infrastructure/AxisTcp/QtTcpTelemetryClient.cpp
 
   src/Presentation/IShellView.hpp
   src/Presentation/TelemetryChartsTab/ITelemetryChartsTabView.hpp
@@ -151,6 +154,7 @@ target_link_libraries(develop
   PRIVATE
   Qt::Core
   Qt::Widgets
+  Qt::Network
   tomlplusplus::tomlplusplus
 )
 

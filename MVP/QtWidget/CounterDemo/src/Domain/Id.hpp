@@ -3,8 +3,10 @@
 
 #include <cstdint>
 #include <compare> // for <=>
+#include <functional>
 
 namespace domain {
+
 
 template <typename Tag, typename Rep = std::uint32_t>
 class Id final {
@@ -26,6 +28,12 @@ private:
     Rep value{};
 };
 
+template <typename Tag, typename Rep>
+struct IdHash final {
+    std::size_t operator()(const Id<Tag, Rep> &id) const noexcept {
+        return std::hash<Rep>{}(id.getValue());
+    }
+};
 } // namespace domain
 
 #endif // ID_HPP

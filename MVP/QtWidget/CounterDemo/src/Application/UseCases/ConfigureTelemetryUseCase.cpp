@@ -29,6 +29,7 @@ void ConfigureTelemetryUseCase::execute(const std::string &configPath) {
         );
     }
 
+    telemetryClient.connectAll();
     telemetryClient.startPolling(config.pollIntervalMs);
 }
 

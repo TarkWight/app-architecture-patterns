@@ -17,6 +17,12 @@
 #include "UseCases/StopTestExecutionUseCase.hpp"
 #include "UseCases/UpdateTestProtocolUseCase.hpp"
 #include "UseCases/SetWindProfileUseCase.hpp"
+#include "UseCases/ConfigureTelemetryUseCase.hpp"
+
+#include "../Infrastructure/Config/TomlConfigRepository.hpp"
+
+#include "../Infrastructure/AxisTcp/LegacyAxisProtocolCodec.hpp"
+#include "../Infrastructure/AxisTcp/QtTcpTelemetryClient.hpp"
 
 #include "../Infrastructure/QtPdfExporter.hpp"
 #include "../Infrastructure/QtTextLogger.hpp"
@@ -38,6 +44,16 @@ struct ApplicationContext {
     infrastructure::QtTestExecutionScheduler testExecutionScheduler;
     infrastructure::QtPdfExporter pdfExporter;
     infrastructure::SessionStateQtAdapter sessionAdapter{sessionState};
+    infrastructure::config::TomlConfigRepository configRepository;
+
+    infrastructure::axisTcp::LegacyAxisProtocolCodec axisProtocolCodec;
+
+    infrastructure::axisTcp::QtTcpTelemetryClient telemetryClient{axisProtocolCodec};
+
+    application::useCases::ConfigureTelemetryUseCase configureTelemetryUseCase{
+        configRepository,
+        telemetryClient
+    };
 
     application::useCases::GenerateStairPlotUseCase generateStairPlotUseCase{sessionState};
 
@@ -81,7 +97,8 @@ struct ApplicationContext {
             .setTestTimeSourceUseCase = setTestTimeSourceUseCase,
             .setFunctionExpressionUseCase = setFunctionExpressionUseCase,
             .setLineColorUseCase = setLineColorUseCase,
-            .buildControlPlotUseCase = buildControlPlotUseCase
+            .buildControlPlotUseCase = buildControlPlotUseCase,
+            .configureTelemetryUseCase = configureTelemetryUseCase
         }
     };
 

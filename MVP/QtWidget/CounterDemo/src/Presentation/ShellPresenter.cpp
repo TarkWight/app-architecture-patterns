@@ -2,6 +2,7 @@
 
 #include "../Domain/TestTimeSource.hpp"
 #include "../Domain/TestTimeDirection.hpp"
+#include <exception>
 
 namespace presentation {
 
@@ -14,7 +15,8 @@ ShellPresenter::ShellPresenter(Dependencies deps)
       setFunctionExpressionUseCase(deps.setFunctionExpressionUseCase),
       setLineColorUseCase(deps.setLineColorUseCase),
       buildControlPlotUseCase(deps.buildControlPlotUseCase),
-      setTestTimeSourceUseCase(deps.setTestTimeSourceUseCase) {
+      setTestTimeSourceUseCase(deps.setTestTimeSourceUseCase),
+      configureTelemetryUseCase(deps.configureTelemetryUseCase) {
 }
 
 void ShellPresenter::attachView(IShellView &view) {
@@ -195,6 +197,20 @@ void ShellPresenter::onTestTimeSourceChanged(domain::TestTimeSource source) {
 
     if (view != nullptr) {
         view->appendLog("Test time source updated");
+    }
+}
+
+void ShellPresenter::onConnectTelemetryPressed(std::string configPath) {
+    try {
+        configureTelemetryUseCase.execute(configPath);
+
+        if (view != nullptr) {
+            view->appendLog("Telemetry connection started");
+        }
+    } catch (const std::exception &e) {
+        if (view != nullptr) {
+            view->appendLog(std::string{"Telemetry connection failed: "} + e.what());
+        }
     }
 }
 

@@ -124,6 +124,10 @@ void MainWindow::connectShellSignals() {
 
                          shellPresenter.onTestTimeSourceChanged(source);
                      });
+
+    QObject::connect(ui->buttonConnectTelemetry, &QPushButton::clicked, this, [this]() {
+        shellPresenter.onConnectTelemetryPressed("telemetry.toml");
+    });
 }
 
 void MainWindow::connectSessionSignals() {

@@ -12,6 +12,7 @@
 #include "../Domain/Plot.hpp"
 #include "../Domain/TestExecutionStatus.hpp"
 #include "../Application/UseCases/SetTestTimeSourceUseCase.hpp"
+#include "../Application/UseCases/ConfigureTelemetryUseCase.hpp"
 
 #include "IShellView.hpp"
 
@@ -29,6 +30,7 @@ class ShellPresenter final {
         application::useCases::SetFunctionExpressionUseCase &setFunctionExpressionUseCase;
         application::useCases::SetLineColorUseCase &setLineColorUseCase;
         application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
+        application::useCases::ConfigureTelemetryUseCase &configureTelemetryUseCase;
     };
 
     explicit ShellPresenter(Dependencies deps);
@@ -47,6 +49,7 @@ class ShellPresenter final {
     void onFunctionEdited(std::string expression);
     void onLineColorSelected(domain::RgbColor color);
     void onTestTimeSourceChanged(domain::TestTimeSource source);
+    void onConnectTelemetryPressed(std::string configPath);
 
   private:
     application::session::SessionState &state;
@@ -58,6 +61,7 @@ class ShellPresenter final {
     application::useCases::SetLineColorUseCase &setLineColorUseCase;
     application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
     application::useCases::SetTestTimeSourceUseCase &setTestTimeSourceUseCase;
+    application::useCases::ConfigureTelemetryUseCase &configureTelemetryUseCase;
 
     IShellView *view{nullptr};
 

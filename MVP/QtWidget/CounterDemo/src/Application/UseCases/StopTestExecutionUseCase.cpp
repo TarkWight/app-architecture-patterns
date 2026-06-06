@@ -1,17 +1,21 @@
 #include "StopTestExecutionUseCase.hpp"
 
 #include "../../Domain/TestExecutionStatus.hpp"
+#include "../../Domain/TestExecutionTransitions.hpp"
 #include "../../Domain/TestTimeDirection.hpp"
 
 namespace application::useCases {
 
-StopTestExecutionUseCase::StopTestExecutionUseCase(
-    application::session::SessionState &state,
-    application::ports::ITestExecutionScheduler &testExecutionScheduler)
+StopTestExecutionUseCase::StopTestExecutionUseCase(application::session::SessionState &state,
+                                                   application::ports::ITestExecutionScheduler &testExecutionScheduler)
     : state(state), testExecutionScheduler(testExecutionScheduler) {
 }
 
 void StopTestExecutionUseCase::execute() {
+    if (!domain::canStop(state.get().testExecutionStatus)) {
+        return;
+    }
+
     testExecutionScheduler.stop();
 
     const auto &session = state.get();

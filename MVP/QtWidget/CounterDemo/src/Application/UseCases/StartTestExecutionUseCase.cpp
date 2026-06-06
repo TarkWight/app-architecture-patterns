@@ -1,38 +1,41 @@
 #include "StartTestExecutionUseCase.hpp"
 
 #include "../../Domain/TestExecutionStatus.hpp"
+#include "../../Domain/TestExecutionTransitions.hpp"
 #include "../../Domain/TestTimeDirection.hpp"
 #include "../../Domain/TestTimeSource.hpp"
 
 namespace application::useCases {
 
 StartTestExecutionUseCase::StartTestExecutionUseCase(
-    application::session::SessionState &state,
-    application::ports::ITestExecutionScheduler &testExecutionScheduler)
+    application::session::SessionState &state, application::ports::ITestExecutionScheduler &testExecutionScheduler)
     : state(state), testExecutionScheduler(testExecutionScheduler) {
 }
 
 void StartTestExecutionUseCase::execute() {
     const auto &session = state.get();
+    if (!domain::canStart(session.testExecutionStatus)) {
+        return;
+    }
 
     int activeDurationMinutes = 0;
     domain::TestTimeDirection direction = domain::TestTimeDirection::CountUp;
 
     switch (session.testTimeSource) {
-        case domain::TestTimeSource::AutoCalculated:
-            activeDurationMinutes = session.estimatedTestDuration.value;
-            direction = domain::TestTimeDirection::CountDown;
-            break;
+    case domain::TestTimeSource::AutoCalculated:
+        activeDurationMinutes = session.estimatedTestDuration.value;
+        direction = domain::TestTimeDirection::CountDown;
+        break;
 
-        case domain::TestTimeSource::OperatorDefined:
-            activeDurationMinutes = session.operatorTestDuration.value;
-            direction = domain::TestTimeDirection::CountDown;
-            break;
+    case domain::TestTimeSource::OperatorDefined:
+        activeDurationMinutes = session.operatorTestDuration.value;
+        direction = domain::TestTimeDirection::CountDown;
+        break;
 
-        case domain::TestTimeSource::FreeRun:
-            activeDurationMinutes = 0;
-            direction = domain::TestTimeDirection::CountUp;
-            break;
+    case domain::TestTimeSource::FreeRun:
+        activeDurationMinutes = 0;
+        direction = domain::TestTimeDirection::CountUp;
+        break;
     }
 
     state.setActiveTestDurationMinutes(activeDurationMinutes);
@@ -54,9 +57,7 @@ void StartTestExecutionUseCase::execute() {
 
         if (current.testTimeDirection == domain::TestTimeDirection::CountDown) {
             const int totalSeconds = current.activeTestDuration.value * 60;
-            const int remainingSeconds = (elapsedSeconds < totalSeconds)
-                                             ? (totalSeconds - elapsedSeconds)
-                                             : 0;
+            const int remainingSeconds = (elapsedSeconds < totalSeconds) ? (totalSeconds - elapsedSeconds) : 0;
 
             state.setRemainingSeconds(remainingSeconds);
 

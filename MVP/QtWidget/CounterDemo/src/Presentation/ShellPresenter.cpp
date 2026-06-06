@@ -1,5 +1,7 @@
 #include "ShellPresenter.hpp"
 
+#include "../Domain/StandConnectionStatus.hpp"
+#include "../Domain/TestExecutionTransitions.hpp"
 #include "../Domain/TestTimeSource.hpp"
 #include "../Domain/TestTimeDirection.hpp"
 #include <exception>
@@ -7,16 +9,14 @@
 namespace presentation {
 
 ShellPresenter::ShellPresenter(Dependencies deps)
-    : state(deps.state),
-      startTestExecutionUseCase(deps.startTestExecutionUseCase),
+    : state(deps.state), startTestExecutionUseCase(deps.startTestExecutionUseCase),
       pauseTestExecutionUseCase(deps.pauseTestExecutionUseCase),
       resumeTestExecutionUseCase(deps.resumeTestExecutionUseCase),
       stopTestExecutionUseCase(deps.stopTestExecutionUseCase),
-      setFunctionExpressionUseCase(deps.setFunctionExpressionUseCase),
-      setLineColorUseCase(deps.setLineColorUseCase),
-      buildControlPlotUseCase(deps.buildControlPlotUseCase),
-      setTestTimeSourceUseCase(deps.setTestTimeSourceUseCase),
-      configureTelemetryUseCase(deps.configureTelemetryUseCase) {
+      setFunctionExpressionUseCase(deps.setFunctionExpressionUseCase), setLineColorUseCase(deps.setLineColorUseCase),
+      buildControlPlotUseCase(deps.buildControlPlotUseCase), setTestTimeSourceUseCase(deps.setTestTimeSourceUseCase),
+      configureTelemetryUseCase(deps.configureTelemetryUseCase), connectStandUseCase(deps.connectStandUseCase),
+      disconnectStandUseCase(deps.disconnectStandUseCase) {
 }
 
 void ShellPresenter::attachView(IShellView &view) {
@@ -99,75 +99,25 @@ std::string ShellPresenter::formatTimerText(int secondsValue) {
     const int minutes = secondsValue / 60;
     const int seconds = secondsValue % 60;
 
-    const std::string secondsText = (seconds < 10)
-        ? "0" + std::to_string(seconds)
-        : std::to_string(seconds);
+    const std::string secondsText = (seconds < 10) ? "0" + std::to_string(seconds) : std::to_string(seconds);
 
     return std::to_string(minutes) + ":" + secondsText;
 }
 
 bool ShellPresenter::canStart(domain::TestExecutionStatus status) {
-    switch (status) {
-        case domain::TestExecutionStatus::Idle:
-        case domain::TestExecutionStatus::Ready:
-        case domain::TestExecutionStatus::Completed:
-        case domain::TestExecutionStatus::Aborted:
-        case domain::TestExecutionStatus::Failed:
-            return true;
-        case domain::TestExecutionStatus::Running:
-        case domain::TestExecutionStatus::Paused:
-            return false;
-    }
-    return false;
+    return domain::canStart(status);
 }
 
 bool ShellPresenter::canPause(domain::TestExecutionStatus status) {
-    switch (status) {
-    case domain::TestExecutionStatus::Running:
-        return true;
-
-    case domain::TestExecutionStatus::Idle:
-    case domain::TestExecutionStatus::Ready:
-    case domain::TestExecutionStatus::Paused:
-    case domain::TestExecutionStatus::Completed:
-    case domain::TestExecutionStatus::Aborted:
-    case domain::TestExecutionStatus::Failed:
-        return false;
-    }
-
-    return false;
+    return domain::canPause(status);
 }
 
 bool ShellPresenter::canResume(domain::TestExecutionStatus status) {
-    switch (status) {
-    case domain::TestExecutionStatus::Paused:
-        return true;
-
-    case domain::TestExecutionStatus::Idle:
-    case domain::TestExecutionStatus::Ready:
-    case domain::TestExecutionStatus::Running:
-    case domain::TestExecutionStatus::Completed:
-    case domain::TestExecutionStatus::Aborted:
-    case domain::TestExecutionStatus::Failed:
-        return false;
-    }
-
-    return false;
+    return domain::canResume(status);
 }
 
 bool ShellPresenter::canStop(domain::TestExecutionStatus status) {
-    switch (status) {
-        case domain::TestExecutionStatus::Running:
-        case domain::TestExecutionStatus::Paused:
-            return true;
-        case domain::TestExecutionStatus::Idle:
-        case domain::TestExecutionStatus::Ready:
-        case domain::TestExecutionStatus::Completed:
-        case domain::TestExecutionStatus::Aborted:
-        case domain::TestExecutionStatus::Failed:
-            return false;
-    }
-    return false;
+    return domain::canStop(status);
 }
 
 void ShellPresenter::refreshFromState() {
@@ -177,10 +127,9 @@ void ShellPresenter::refreshFromState() {
 
     const auto &session = state.get();
 
-    const int displayedSeconds =
-        (session.testTimeDirection == domain::TestTimeDirection::CountDown)
-            ? session.remaining.value
-            : session.elapsed.value;
+    const int displayedSeconds = (session.testTimeDirection == domain::TestTimeDirection::CountDown)
+                                     ? session.remaining.value
+                                     : session.elapsed.value;
 
     view->setTimerText(formatTimerText(displayedSeconds));
     view->setStartEnabled(canStart(session.testExecutionStatus));
@@ -189,6 +138,7 @@ void ShellPresenter::refreshFromState() {
     view->setStopEnabled(canStop(session.testExecutionStatus));
     view->setFunctionExpression(session.functionExpression.value);
     view->setTestTimeSource(session.testTimeSource);
+    refreshStandConnectionButton();
 }
 
 void ShellPresenter::onTestTimeSourceChanged(domain::TestTimeSource source) {
@@ -202,15 +152,53 @@ void ShellPresenter::onTestTimeSourceChanged(domain::TestTimeSource source) {
 
 void ShellPresenter::onConnectTelemetryPressed(std::string configPath) {
     try {
-        configureTelemetryUseCase.execute(configPath);
+        const auto status = state.get().standConnectionStatus;
+
+        if (status == domain::StandConnectionStatus::Polling || status == domain::StandConnectionStatus::Connecting) {
+            disconnectStandUseCase.execute();
+
+            if (view != nullptr) {
+                view->appendLog("Stand connection stopped");
+            }
+
+            refreshFromState();
+            return;
+        }
+
+        if (status == domain::StandConnectionStatus::Disconnected || status == domain::StandConnectionStatus::Error) {
+            configureTelemetryUseCase.execute(configPath);
+        }
+
+        connectStandUseCase.execute();
 
         if (view != nullptr) {
-            view->appendLog("Telemetry connection started");
+            view->appendLog("Stand connection started");
         }
+
+        refreshFromState();
     } catch (const std::exception &e) {
         if (view != nullptr) {
-            view->appendLog(std::string{"Telemetry connection failed: "} + e.what());
+            view->appendLog(std::string{"Stand connection failed: "} + e.what());
         }
+    }
+}
+
+void ShellPresenter::refreshStandConnectionButton() {
+    if (view == nullptr) {
+        return;
+    }
+
+    switch (state.get().standConnectionStatus) {
+    case domain::StandConnectionStatus::Disconnected:
+    case domain::StandConnectionStatus::Configured:
+    case domain::StandConnectionStatus::Error:
+        view->setStandConnectionButtonText("Подключить стенд");
+        break;
+    case domain::StandConnectionStatus::Connecting:
+    case domain::StandConnectionStatus::Polling:
+    case domain::StandConnectionStatus::Disconnecting:
+        view->setStandConnectionButtonText("Отключить стенд");
+        break;
     }
 }
 

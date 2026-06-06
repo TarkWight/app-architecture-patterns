@@ -3,10 +3,12 @@
 #include "../../Domain/Plot.hpp"
 #include "../../Domain/TestProtocol.hpp"
 #include "../../Domain/Time.hpp"
+#include "../../Domain/WindProfile.hpp"
 
 #include "SessionStateData.hpp"
 #include "Subscription.hpp"
 
+#include <algorithm>
 #include <functional>
 #include <mutex>
 #include <string>
@@ -38,7 +40,7 @@ void application::session::SessionState::setFunctionExpression(std::string expr)
 }
 
 void application::session::SessionState::setWindProfile(domain::WindProfile profile) {
-    data.windProfile = std::move(profile);
+    data.windProfile = domain::sanitize(std::move(profile));
     notify();
 }
 
@@ -48,7 +50,7 @@ void application::session::SessionState::setLineColor(domain::RgbColor color) {
 }
 
 void application::session::SessionState::setControlChartsTabMinutes(int minutes) {
-    data.controlChartsTabMinutes.value = minutes;
+    data.controlChartsTabMinutes.value = std::clamp(minutes, 1, 24 * 60);
     notify();
 }
 
@@ -68,27 +70,27 @@ void application::session::SessionState::setTestTimeDirection(domain::TestTimeDi
 }
 
 void application::session::SessionState::setEstimatedTestDurationMinutes(int minutes) {
-    data.estimatedTestDuration.value = minutes;
+    data.estimatedTestDuration.value = std::clamp(minutes, 1, 24 * 60);
     notify();
 }
 
 void application::session::SessionState::setOperatorTestDurationMinutes(int minutes) {
-    data.operatorTestDuration.value = minutes;
+    data.operatorTestDuration.value = std::clamp(minutes, 1, 24 * 60);
     notify();
 }
 
 void application::session::SessionState::setActiveTestDurationMinutes(int minutes) {
-    data.activeTestDuration.value = minutes;
+    data.activeTestDuration.value = std::clamp(minutes, 0, 24 * 60);
     notify();
 }
 
 void application::session::SessionState::setElapsedSeconds(int seconds) {
-    data.elapsed.value = seconds;
+    data.elapsed.value = std::max(0, seconds);
     notify();
 }
 
 void application::session::SessionState::setRemainingSeconds(int seconds) {
-    data.remaining.value = seconds;
+    data.remaining.value = std::max(0, seconds);
     notify();
 }
 
@@ -128,6 +130,16 @@ void application::session::SessionState::setAxis2State(domain::AxisState stateVa
 
 void application::session::SessionState::setTelemetryStatus(domain::TelemetryStatus status) {
     data.telemetryStatus = status;
+    notify();
+}
+
+void application::session::SessionState::setStandConnectionStatus(domain::StandConnectionStatus status) {
+    data.standConnectionStatus = status;
+    notify();
+}
+
+void application::session::SessionState::setTelemetryPollIntervalMs(int intervalMs) {
+    data.telemetryPollIntervalMs = std::clamp(intervalMs, 20, 60'000);
     notify();
 }
 

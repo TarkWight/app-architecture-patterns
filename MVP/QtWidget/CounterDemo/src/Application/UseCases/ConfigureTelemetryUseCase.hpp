@@ -3,18 +3,20 @@
 
 #include "../Ports/IConfigRepository.hpp"
 #include "../Ports/ITelemetryClient.hpp"
+#include "../Session/SessionState.hpp"
 
 namespace application::useCases {
 
 class ConfigureTelemetryUseCase {
-public:
-    ConfigureTelemetryUseCase(
-        application::ports::IConfigRepository &configRepository,
-        application::ports::ITelemetryClient &telemetryClient
-        );
+  public:
+    ConfigureTelemetryUseCase(application::session::SessionState &state,
+                              application::ports::IConfigRepository &configRepository,
+                              application::ports::ITelemetryClient &telemetryClient);
 
     void execute(const std::string &configPath);
-private:
+
+  private:
+    application::session::SessionState &state;
     application::ports::IConfigRepository &configRepository;
     application::ports::ITelemetryClient &telemetryClient;
 };

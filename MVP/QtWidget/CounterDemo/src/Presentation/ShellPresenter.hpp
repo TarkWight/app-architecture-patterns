@@ -13,6 +13,8 @@
 #include "../Domain/TestExecutionStatus.hpp"
 #include "../Application/UseCases/SetTestTimeSourceUseCase.hpp"
 #include "../Application/UseCases/ConfigureTelemetryUseCase.hpp"
+#include "../Application/UseCases/ConnectStandUseCase.hpp"
+#include "../Application/UseCases/DisconnectStandUseCase.hpp"
 
 #include "IShellView.hpp"
 
@@ -31,6 +33,8 @@ class ShellPresenter final {
         application::useCases::SetLineColorUseCase &setLineColorUseCase;
         application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
         application::useCases::ConfigureTelemetryUseCase &configureTelemetryUseCase;
+        application::useCases::ConnectStandUseCase &connectStandUseCase;
+        application::useCases::DisconnectStandUseCase &disconnectStandUseCase;
     };
 
     explicit ShellPresenter(Dependencies deps);
@@ -62,6 +66,8 @@ class ShellPresenter final {
     application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
     application::useCases::SetTestTimeSourceUseCase &setTestTimeSourceUseCase;
     application::useCases::ConfigureTelemetryUseCase &configureTelemetryUseCase;
+    application::useCases::ConnectStandUseCase &connectStandUseCase;
+    application::useCases::DisconnectStandUseCase &disconnectStandUseCase;
 
     IShellView *view{nullptr};
 
@@ -72,6 +78,7 @@ class ShellPresenter final {
     static bool canStop(domain::TestExecutionStatus status);
 
     void refreshFromState();
+    void refreshStandConnectionButton();
 };
 
 } // namespace presentation

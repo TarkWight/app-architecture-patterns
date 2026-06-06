@@ -38,7 +38,9 @@ qt_add_executable(develop
   src/Domain/WindProfile.hpp
   src/Domain/AxisState.hpp
   src/Domain/TestExecutionStatus.hpp
+  src/Domain/TestExecutionTransitions.hpp
   src/Domain/TelemetryStatus.hpp
+  src/Domain/StandConnectionStatus.hpp
   src/Domain/TestTimeSource.hpp
   src/Domain/TestTimeDirection.hpp
   src/Domain/Id.hpp
@@ -100,6 +102,10 @@ qt_add_executable(develop
   src/Application/UseCases/SetTestTimeSourceUseCase.cpp
   src/Application/UseCases/ConfigureTelemetryUseCase.hpp
   src/Application/UseCases/ConfigureTelemetryUseCase.cpp
+  src/Application/UseCases/ConnectStandUseCase.hpp
+  src/Application/UseCases/ConnectStandUseCase.cpp
+  src/Application/UseCases/DisconnectStandUseCase.hpp
+  src/Application/UseCases/DisconnectStandUseCase.cpp
 
   src/Infrastructure/QtTextLogger.hpp
   src/Infrastructure/QtTextLogger.cpp

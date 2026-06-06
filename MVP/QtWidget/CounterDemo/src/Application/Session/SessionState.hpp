@@ -2,6 +2,7 @@
 #define SESSIONSTATE_HPP
 
 #include "../../Domain/Plot.hpp"
+#include "../../Domain/StandConnectionStatus.hpp"
 #include "../../Domain/TestExecutionStatus.hpp"
 #include "../../Domain/TestTimeDirection.hpp"
 #include "../../Domain/TestTimeSource.hpp"
@@ -17,7 +18,7 @@
 namespace application::session {
 
 class SessionState {
-public:
+  public:
     using Listener = std::function<void(const SessionStateData &)>;
 
     const SessionStateData &get() const;
@@ -50,8 +51,10 @@ public:
     void setAxis1State(domain::AxisState state);
     void setAxis2State(domain::AxisState state);
     void setTelemetryStatus(domain::TelemetryStatus status);
+    void setStandConnectionStatus(domain::StandConnectionStatus status);
+    void setTelemetryPollIntervalMs(int intervalMs);
 
-private:
+  private:
     SessionStateData data{};
 
     mutable std::mutex mu{};

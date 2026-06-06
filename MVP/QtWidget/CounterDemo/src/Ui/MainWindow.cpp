@@ -59,6 +59,10 @@ void MainWindow::setResumeEnabled(bool enabled) {
     ui->buttonResume->setEnabled(enabled);
 }
 
+void MainWindow::setStandConnectionButtonText(const std::string &text) {
+    ui->buttonConnectTelemetry->setText(QString::fromStdString(text));
+}
+
 void MainWindow::setFunctionExpression(const std::string &expression) {
     if (ui->lineEditFormula->text().toStdString() == expression) {
         return;
@@ -91,9 +95,11 @@ void MainWindow::connectShellSignals() {
 
     QObject::connect(ui->buttonStop, &QPushButton::clicked, this, [this]() { shellPresenter.onStopPressed(); });
 
-    QObject::connect(ui->buttonCalculate, &QPushButton::clicked, this, [this]() { shellPresenter.onCalculatePressed(); });
+    QObject::connect(ui->buttonCalculate, &QPushButton::clicked, this,
+                     [this]() { shellPresenter.onCalculatePressed(); });
 
-    QObject::connect(ui->lineEditFormula, &QLineEdit::editingFinished, this, [this]() { shellPresenter.onFunctionEdited(ui->lineEditFormula->text().toStdString()); });
+    QObject::connect(ui->lineEditFormula, &QLineEdit::editingFinished, this,
+                     [this]() { shellPresenter.onFunctionEdited(ui->lineEditFormula->text().toStdString()); });
 
     QObject::connect(ui->buttonPickColor, &QPushButton::clicked, this, [this]() {
         const QColor color = QColorDialog::getColor(Qt::red, this);
@@ -104,37 +110,36 @@ void MainWindow::connectShellSignals() {
         shellPresenter.onLineColorSelected(MainWindowUiAdapter::toDomainColor(color));
     });
 
-    QObject::connect(ui->comboBoxTestTimeSource, &QComboBox::currentIndexChanged, this,
-                     [this](int index) {
-                         domain::TestTimeSource source = domain::TestTimeSource::AutoCalculated;
+    QObject::connect(ui->comboBoxTestTimeSource, &QComboBox::currentIndexChanged, this, [this](int index) {
+        domain::TestTimeSource source = domain::TestTimeSource::AutoCalculated;
 
-                         switch (index) {
-                             case 0:
-                                 source = domain::TestTimeSource::AutoCalculated;
-                                 break;
-                             case 1:
-                                 source = domain::TestTimeSource::OperatorDefined;
-                                 break;
-                             case 2:
-                                 source = domain::TestTimeSource::FreeRun;
-                                 break;
-                             default:
-                                 return;
-                         }
+        switch (index) {
+        case 0:
+            source = domain::TestTimeSource::AutoCalculated;
+            break;
+        case 1:
+            source = domain::TestTimeSource::OperatorDefined;
+            break;
+        case 2:
+            source = domain::TestTimeSource::FreeRun;
+            break;
+        default:
+            return;
+        }
 
-                         shellPresenter.onTestTimeSourceChanged(source);
-                     });
+        shellPresenter.onTestTimeSourceChanged(source);
+    });
 
     QObject::connect(ui->buttonConnectTelemetry, &QPushButton::clicked, this, [this]() {
-        shellPresenter.onConnectTelemetryPressed("telemetry.toml");
+        shellPresenter.onConnectTelemetryPressed(
+            "/Users/tarkwight/Documents/Development/app-architecture-patterns/MVP/QtWidget/CounterDemo/telemetry.toml");
     });
 }
 
 void MainWindow::connectSessionSignals() {
-    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testTimeModelChanged, this,
-                     [this](const presentation::viewModels::TestTimeViewModel & /*model*/) {
-                         shellPresenter.onStateChanged();
-                     });
+    QObject::connect(
+        &sessionAdapter, &infrastructure::SessionStateQtAdapter::testTimeModelChanged, this,
+        [this](const presentation::viewModels::TestTimeViewModel & /*model*/) { shellPresenter.onStateChanged(); });
 
     QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::functionExpressionChanged, this,
                      [this](const QString &expression) {
@@ -150,15 +155,15 @@ void MainWindow::setTestTimeSource(domain::TestTimeSource source) {
     int index = 0;
 
     switch (source) {
-        case domain::TestTimeSource::AutoCalculated:
-            index = 0;
-            break;
-        case domain::TestTimeSource::OperatorDefined:
-            index = 1;
-            break;
-        case domain::TestTimeSource::FreeRun:
-            index = 2;
-            break;
+    case domain::TestTimeSource::AutoCalculated:
+        index = 0;
+        break;
+    case domain::TestTimeSource::OperatorDefined:
+        index = 1;
+        break;
+    case domain::TestTimeSource::FreeRun:
+        index = 2;
+        break;
     }
 
     if (ui->comboBoxTestTimeSource->currentIndex() != index) {

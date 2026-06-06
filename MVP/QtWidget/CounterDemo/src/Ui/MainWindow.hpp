@@ -62,11 +62,13 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     void setPauseEnabled(bool enabled) override;
     void setResumeEnabled(bool enabled) override;
     void setStandConnectionButtonText(const std::string &text) override;
+    void setStandConnectionStatusText(const std::string &text) override;
     void setTestTimeSource(domain::TestTimeSource source) override;
 
     void setFunctionExpression(const std::string &expression) override;
 
     void appendLog(const std::string &text) override;
+    void showOperatorWarning(const std::string &title, const std::string &message) override;
 
   private:
     std::unique_ptr<Ui::MainWindow> ui;
@@ -93,8 +95,10 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     QLineEdit *controlFormulaLineEdit{nullptr};
     QTimer *standImpactTransitionTimer{nullptr};
     QPushButton *standApplyButton{nullptr};
+    QLabel *standConnectionStatusLabel{nullptr};
 
     void setupTabs();
+    void setupStandConnectionStatusIndicator();
     void setupMainContentLayout();
     QWidget *createStandControlPanel();
     QWidget *createControlFormulaPanel();

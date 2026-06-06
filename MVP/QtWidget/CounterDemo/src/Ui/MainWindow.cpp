@@ -9,6 +9,7 @@
 
 #include "../Domain/AxisId.hpp"
 #include "../Domain/StandControlMode.hpp"
+#include "../Domain/WindProfile.hpp"
 
 #include <QCheckBox>
 #include <QColorDialog>
@@ -19,6 +20,7 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QSignalBlocker>
 #include <QString>
@@ -73,6 +75,7 @@ MainWindow::MainWindow(Dependencies deps, QWidget *parent)
 
     shellPresenter.attachView(*this);
 
+    setupStandConnectionStatusIndicator();
     setupTabs();
     setupMainContentLayout();
     connectShellSignals();
@@ -112,6 +115,14 @@ void MainWindow::setStandConnectionButtonText(const std::string &text) {
     ui->buttonConnectTelemetry->setText(QString::fromStdString(text));
 }
 
+void MainWindow::setStandConnectionStatusText(const std::string &text) {
+    if (standConnectionStatusLabel == nullptr) {
+        return;
+    }
+
+    standConnectionStatusLabel->setText(QString::fromStdString(text));
+}
+
 void MainWindow::setFunctionExpression(const std::string &expression) {
     if (controlFormulaLineEdit == nullptr || controlFormulaLineEdit->text().toStdString() == expression) {
         return;
@@ -124,6 +135,10 @@ void MainWindow::appendLog(const std::string &text) {
     ui->plainTextEditLog->appendPlainText(QString::fromStdString(text));
 }
 
+void MainWindow::showOperatorWarning(const std::string &title, const std::string &message) {
+    QMessageBox::warning(this, QString::fromStdString(title), QString::fromStdString(message));
+}
+
 void MainWindow::setupTabs() {
     telemetryChartsTabWidget = new TelemetryChartsTabWidget(telemetryChartsTabPresenter, sessionAdapter, this);
     controlChartsTabWidget = new ControlChartsTabWidget(controlChartsTabPresenter, sessionAdapter, this);
@@ -133,6 +148,13 @@ void MainWindow::setupTabs() {
     ui->tabWidget->addTab(telemetryChartsTabWidget, QStringLiteral("Вкладка 1"));
     ui->tabWidget->addTab(controlChartsTabWidget, QStringLiteral("Вкладка 2"));
     ui->tabWidget->addTab(testProtocolTabWidget, QStringLiteral("Вкладка 3"));
+}
+
+void MainWindow::setupStandConnectionStatusIndicator() {
+    standConnectionStatusLabel = new QLabel(QStringLiteral("Стенд: отключен"), this);
+    standConnectionStatusLabel->setMinimumWidth(170);
+    standConnectionStatusLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    ui->gridLayoutTopPanel->addWidget(standConnectionStatusLabel, 1, 7, 1, 4);
 }
 
 void MainWindow::setupMainContentLayout() {
@@ -196,7 +218,7 @@ void MainWindow::addStandImpactRows(QFormLayout &form, QWidget &parent) {
 
     standBeaufortSpinBox = new QDoubleSpinBox(&parent);
     standBeaufortSpinBox->setDecimals(1);
-    standBeaufortSpinBox->setRange(0.0, 12.0);
+    standBeaufortSpinBox->setRange(domain::minOperationalBeaufort, domain::maxOperationalBeaufort);
     standBeaufortSpinBox->setSingleStep(0.1);
     form.addRow(QStringLiteral("Бофорт"), standBeaufortSpinBox);
 
@@ -393,7 +415,9 @@ void MainWindow::setTestTimeSource(domain::TestTimeSource source) {
 void MainWindow::applyStandInputs() {
     const auto &stateData = sessionAdapter.getState().get();
     if (stateData.standControlMode != domain::StandControlMode::Manual) {
-        appendLog("Manual stand control is disabled for this test mode");
+        const std::string message = "Manual stand control is disabled for this test mode";
+        appendLog(message);
+        showOperatorWarning("Ручное управление заблокировано", message);
         return;
     }
 

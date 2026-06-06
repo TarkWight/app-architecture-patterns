@@ -139,6 +139,7 @@ void ShellPresenter::refreshFromState() {
     view->setFunctionExpression(session.functionExpression.value);
     view->setTestTimeSource(session.testTimeSource);
     refreshStandConnectionButton();
+    refreshStandConnectionStatusText();
     notifyStandConnectionStatusChanged(session.standConnectionStatus);
 }
 
@@ -155,7 +156,8 @@ void ShellPresenter::onConnectTelemetryPressed(std::string configPath) {
     try {
         const auto status = state.get().standConnectionStatus;
 
-        if (status == domain::StandConnectionStatus::Polling || status == domain::StandConnectionStatus::Connecting) {
+        if (status == domain::StandConnectionStatus::Polling || status == domain::StandConnectionStatus::Connecting ||
+            status == domain::StandConnectionStatus::Error) {
             disconnectStandUseCase.execute();
 
             if (view != nullptr) {
@@ -179,7 +181,10 @@ void ShellPresenter::onConnectTelemetryPressed(std::string configPath) {
         refreshFromState();
     } catch (const std::exception &e) {
         if (view != nullptr) {
-            view->appendLog(std::string{"Stand connection failed: "} + e.what());
+            const std::string message = std::string{"Stand connection failed: "} + e.what();
+            view->appendLog(message);
+            view->showOperatorWarning("Ошибка подключения стенда",
+                                      std::string{"Не удалось подключиться к стенду: "} + e.what());
         }
     }
 }
@@ -192,13 +197,40 @@ void ShellPresenter::refreshStandConnectionButton() {
     switch (state.get().standConnectionStatus) {
     case domain::StandConnectionStatus::Disconnected:
     case domain::StandConnectionStatus::Configured:
-    case domain::StandConnectionStatus::Error:
         view->setStandConnectionButtonText("Подключить стенд");
         break;
     case domain::StandConnectionStatus::Connecting:
     case domain::StandConnectionStatus::Polling:
     case domain::StandConnectionStatus::Disconnecting:
+    case domain::StandConnectionStatus::Error:
         view->setStandConnectionButtonText("Отключить стенд");
+        break;
+    }
+}
+
+void ShellPresenter::refreshStandConnectionStatusText() {
+    if (view == nullptr) {
+        return;
+    }
+
+    switch (state.get().standConnectionStatus) {
+    case domain::StandConnectionStatus::Disconnected:
+        view->setStandConnectionStatusText("Стенд: отключен");
+        break;
+    case domain::StandConnectionStatus::Configured:
+        view->setStandConnectionStatusText("Стенд: настроен");
+        break;
+    case domain::StandConnectionStatus::Connecting:
+        view->setStandConnectionStatusText("Стенд: подключение");
+        break;
+    case domain::StandConnectionStatus::Polling:
+        view->setStandConnectionStatusText("Стенд: обмен активен");
+        break;
+    case domain::StandConnectionStatus::Disconnecting:
+        view->setStandConnectionStatusText("Стенд: отключение");
+        break;
+    case domain::StandConnectionStatus::Error:
+        view->setStandConnectionStatusText("Стенд: ошибка связи");
         break;
     }
 }
@@ -208,8 +240,19 @@ void ShellPresenter::notifyStandConnectionStatusChanged(domain::StandConnectionS
         return;
     }
 
-    if (status == domain::StandConnectionStatus::Error && view != nullptr) {
-        view->appendLog("Stand connection lost");
+    if (status == domain::StandConnectionStatus::Polling || status == domain::StandConnectionStatus::Disconnected) {
+        standConnectionWarningShown = false;
+    }
+
+    if (status == domain::StandConnectionStatus::Error && view != nullptr && !standConnectionWarningShown) {
+        standConnectionWarningShown = true;
+        lastStandConnectionStatus = status;
+
+        const std::string message = "Stand connection lost";
+        view->appendLog(message);
+        view->showOperatorWarning("Связь со стендом потеряна",
+                                  "Обмен телеметрией остановлен. Проверьте питание стенда, сеть и состояние mock/real "
+                                  "server.");
     }
 
     lastStandConnectionStatus = status;

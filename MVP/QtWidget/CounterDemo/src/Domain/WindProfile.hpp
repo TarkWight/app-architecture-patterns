@@ -8,6 +8,9 @@
 
 namespace domain {
 
+constexpr double minOperationalBeaufort = 0.0;
+constexpr double maxOperationalBeaufort = 7.0;
+
 struct WindProfile {
     double beaufort{0.0};
     double direction{0.0};
@@ -16,7 +19,7 @@ struct WindProfile {
 };
 
 inline WindProfile sanitize(WindProfile profile) {
-    profile.beaufort = std::clamp(profile.beaufort, 0.0, 12.0);
+    profile.beaufort = std::clamp(profile.beaufort, minOperationalBeaufort, maxOperationalBeaufort);
 
     profile.direction = std::fmod(profile.direction, 360.0);
     if (profile.direction < 0.0) {

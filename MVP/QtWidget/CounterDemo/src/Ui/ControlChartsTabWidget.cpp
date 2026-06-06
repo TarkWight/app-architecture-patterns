@@ -1,6 +1,8 @@
 #include "ControlChartsTabWidget.hpp"
 #include "ui_ControlChartsTabWidget.h"
 
+#include "../Domain/WindProfile.hpp"
+
 #include <QString>
 
 namespace ui {
@@ -9,6 +11,7 @@ ControlChartsTabWidget::ControlChartsTabWidget(presentation::controlChartsTab::C
                                                infrastructure::SessionStateQtAdapter &sessionAdapter, QWidget *parent)
     : QWidget(parent), ui(new Ui::ControlChartsTabWidget), presenter(presenter), sessionAdapter(sessionAdapter) {
     ui->setupUi(this);
+    ui->doubleSpinBoxBeaufort->setRange(domain::minOperationalBeaufort, domain::maxOperationalBeaufort);
 
     ui->labelBeaufortCaption->hide();
     ui->doubleSpinBoxBeaufort->hide();

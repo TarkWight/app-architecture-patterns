@@ -72,6 +72,7 @@ class ShellPresenter final {
 
     IShellView *view{nullptr};
     domain::StandConnectionStatus lastStandConnectionStatus{domain::StandConnectionStatus::Disconnected};
+    bool standConnectionWarningShown{false};
 
     static std::string formatTimerText(int secondsValue);
     static bool canStart(domain::TestExecutionStatus status);
@@ -81,6 +82,7 @@ class ShellPresenter final {
 
     void refreshFromState();
     void refreshStandConnectionButton();
+    void refreshStandConnectionStatusText();
     void notifyStandConnectionStatusChanged(domain::StandConnectionStatus status);
 };
 

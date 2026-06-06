@@ -49,6 +49,7 @@ class TestProtocolTabWidget final : public QWidget, public presentation::testPro
 
     void connectSignals();
     void connectSessionSignals();
+    void setupScrollableContent();
     void setupReportFormLabels();
     void setupTestSelectionControls();
     void setupDroneParametersEditor();

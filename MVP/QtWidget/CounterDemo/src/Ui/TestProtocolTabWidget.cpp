@@ -4,10 +4,13 @@
 #include <QComboBox>
 #include <QGridLayout>
 #include <QFileDialog>
+#include <QFrame>
 #include <QGroupBox>
 #include <QLabel>
 #include <QLineEdit>
+#include <QScrollArea>
 #include <QSignalBlocker>
+#include <QSizePolicy>
 #include <QString>
 #include <QVBoxLayout>
 
@@ -46,6 +49,7 @@ TestProtocolTabWidget::TestProtocolTabWidget(presentation::testProtocolTab::Test
                                              infrastructure::SessionStateQtAdapter &sessionAdapter, QWidget *parent)
     : QWidget(parent), ui(new Ui::TestProtocolTabWidget), presenter(presenter), sessionAdapter(sessionAdapter) {
     ui->setupUi(this);
+    setupScrollableContent();
     setupReportFormLabels();
     setupTestSelectionControls();
     setupDroneParametersEditor();
@@ -113,7 +117,7 @@ void TestProtocolTabWidget::setTestProtocolDroneParameters(
 
     droneParameterEdits.clear();
 
-    constexpr int columns = 3;
+    constexpr int columns = 4;
     for (int index = 0; index < static_cast<int>(parameters.size()); ++index) {
         const int row = index / columns;
         const int column = (index % columns) * 2;
@@ -138,6 +142,21 @@ void TestProtocolTabWidget::showExportSuccess(const std::string &filePath) {
 
 void TestProtocolTabWidget::appendLog(const std::string &text) {
     ui->plainTextEditLog->appendPlainText(QString::fromStdString(text));
+}
+
+void TestProtocolTabWidget::setupScrollableContent() {
+    auto *contentWidget = new QWidget(this);
+    contentWidget->setLayout(ui->verticalLayoutRoot);
+    contentWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
+
+    auto *scrollArea = new QScrollArea(this);
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setWidget(contentWidget);
+    scrollArea->setFrameShape(QFrame::NoFrame);
+
+    auto *rootLayout = new QVBoxLayout(this);
+    rootLayout->setContentsMargins(0, 0, 0, 0);
+    rootLayout->addWidget(scrollArea);
 }
 
 void TestProtocolTabWidget::setupReportFormLabels() {

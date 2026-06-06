@@ -147,6 +147,17 @@ void application::session::SessionState::followTelemetryTail() {
     notify();
 }
 
+void application::session::SessionState::setTelemetryAxisColor(domain::AxisId axisId, domain::RgbColor color) {
+    if (axisId == domain::axis0) {
+        data.telemetryAxisYColor = color;
+    } else if (axisId == domain::axis1) {
+        data.telemetryAxisZColor = color;
+    }
+
+    rebuildTelemetryPlot();
+    notify();
+}
+
 void application::session::SessionState::setControlPlot(domain::PlotModel plot) {
     data.controlPlot = std::move(plot);
     notify();
@@ -218,11 +229,11 @@ void application::session::SessionState::rebuildTelemetryPlot() {
 
     domain::NamedSeries axisY{};
     axisY.label = "Ось Y / тангаж";
-    axisY.color = domain::RgbColor{220, 60, 50};
+    axisY.color = data.telemetryAxisYColor;
 
     domain::NamedSeries axisZ{};
     axisZ.label = "Ось Z / направление";
-    axisZ.color = domain::RgbColor{40, 110, 210};
+    axisZ.color = data.telemetryAxisZColor;
 
     if (!data.telemetryHistory.empty()) {
         const double baseTimestamp = data.telemetryHistory.front().timestampSeconds;

@@ -31,6 +31,8 @@ class ControlChartsTabWidget final : public QWidget, public presentation::contro
     void refreshPlot() override;
     void appendLog(const std::string &text) override;
 
+    void insertTopPanel(QWidget &panel);
+
   private:
     Ui::ControlChartsTabWidget *ui;
     presentation::controlChartsTab::ControlChartsTabPresenter &presenter;

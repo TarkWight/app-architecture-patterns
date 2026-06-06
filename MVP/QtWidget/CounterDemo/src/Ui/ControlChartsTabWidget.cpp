@@ -10,6 +10,13 @@ ControlChartsTabWidget::ControlChartsTabWidget(presentation::controlChartsTab::C
     : QWidget(parent), ui(new Ui::ControlChartsTabWidget), presenter(presenter), sessionAdapter(sessionAdapter) {
     ui->setupUi(this);
 
+    ui->labelBeaufortCaption->hide();
+    ui->doubleSpinBoxBeaufort->hide();
+    ui->labelDirectionCaption->hide();
+    ui->doubleSpinBoxDirection->hide();
+    ui->labelAngleOfAttackCaption->hide();
+    ui->doubleSpinBoxAngleOfAttack->hide();
+
     plotWidget = new PlotWidget(this);
     ui->verticalLayoutPlot->replaceWidget(ui->labelPlotState, plotWidget);
     ui->labelPlotState->hide();
@@ -47,6 +54,10 @@ void ControlChartsTabWidget::refreshPlot() {
 
 void ControlChartsTabWidget::appendLog(const std::string &text) {
     ui->plainTextEditLog->appendPlainText(QString::fromStdString(text));
+}
+
+void ControlChartsTabWidget::insertTopPanel(QWidget &panel) {
+    ui->verticalLayoutRoot->insertWidget(0, &panel);
 }
 
 void ControlChartsTabWidget::connectSignals() {

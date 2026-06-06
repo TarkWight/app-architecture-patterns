@@ -47,6 +47,8 @@ struct SessionStateData {
     double telemetryWindowSeconds{60.0};
     double telemetryWindowEndSeconds{0.0};
     bool telemetryFollowTail{true};
+    domain::RgbColor telemetryAxisYColor{220, 60, 50};
+    domain::RgbColor telemetryAxisZColor{40, 110, 210};
 
     // ===== Protocol / report =====
     domain::TestProtocol testProtocol{};

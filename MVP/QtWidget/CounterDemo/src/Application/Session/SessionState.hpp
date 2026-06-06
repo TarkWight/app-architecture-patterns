@@ -48,6 +48,7 @@ class SessionState {
     void appendTelemetrySample(domain::AxisTelemetrySample sample);
     void setTelemetryWindowEndSeconds(double endSeconds);
     void followTelemetryTail();
+    void setTelemetryAxisColor(domain::AxisId axisId, domain::RgbColor color);
 
     void setTestProtocolTitle(std::string title);
     void setTestProtocolLine(int idx, std::string line);

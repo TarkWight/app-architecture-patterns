@@ -2,9 +2,9 @@
 
 namespace presentation::telemetryChartsTab {
 
-TelemetryChartsTabPresenter::TelemetryChartsTabPresenter(
-    application::useCases::SetTelemetryWindowUseCase &setTelemetryWindowUseCase)
-    : setTelemetryWindowUseCase(setTelemetryWindowUseCase) {
+TelemetryChartsTabPresenter::TelemetryChartsTabPresenter(Dependencies deps)
+    : setTelemetryWindowUseCase(deps.setTelemetryWindowUseCase),
+      setTelemetryAxisColorUseCase(deps.setTelemetryAxisColorUseCase) {
 }
 
 void TelemetryChartsTabPresenter::attachView(ITelemetryChartsTabView &view) {
@@ -32,6 +32,14 @@ void TelemetryChartsTabPresenter::onRebuildPlotPressed() {
 
 void TelemetryChartsTabPresenter::onTelemetryWindowChanged(int windowEndSeconds) {
     setTelemetryWindowUseCase.execute(static_cast<double>(windowEndSeconds));
+
+    if (view != nullptr) {
+        view->refreshPlot();
+    }
+}
+
+void TelemetryChartsTabPresenter::onTelemetryAxisColorSelected(domain::AxisId axisId, domain::RgbColor color) {
+    setTelemetryAxisColorUseCase.execute(axisId, color);
 
     if (view != nullptr) {
         view->refreshPlot();

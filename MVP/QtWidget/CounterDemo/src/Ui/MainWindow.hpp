@@ -12,6 +12,12 @@
 #include "../Presentation/TestProtocolTab/TestProtocolTabPresenter.hpp"
 #include "../Domain/TestTimeSource.hpp"
 
+class QComboBox;
+class QDoubleSpinBox;
+class QLineEdit;
+class QPushButton;
+class QWidget;
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -64,9 +70,21 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     ControlChartsTabWidget *controlChartsTabWidget{nullptr};
     TestProtocolTabWidget *testProtocolTabWidget{nullptr};
 
+    QDoubleSpinBox *standBeaufortSpinBox{nullptr};
+    QDoubleSpinBox *standAngleOfAttackSpinBox{nullptr};
+    QComboBox *standDirectionComboBox{nullptr};
+    QComboBox *telemetryAxisComboBox{nullptr};
+    QLineEdit *controlFormulaLineEdit{nullptr};
+
     void setupTabs();
+    void setupMainContentLayout();
+    QWidget *createStandControlPanel();
+    QWidget *createControlFormulaPanel();
     void connectShellSignals();
     void connectSessionSignals();
+    void applyStandInputs();
+    void selectTelemetryAxisColor();
+    double selectedStandDirectionDegrees() const;
 };
 
 } // namespace ui

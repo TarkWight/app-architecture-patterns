@@ -86,7 +86,7 @@ struct ApplicationContext {
 
     application::useCases::SetStandControlModeUseCase setStandControlModeUseCase{sessionState};
 
-    application::useCases::SetStandImpactUseCase setStandImpactUseCase{sessionState};
+    application::useCases::SetStandImpactUseCase setStandImpactUseCase{sessionState, telemetryClient};
 
     application::useCases::SetFunctionExpressionUseCase setFunctionExpressionUseCase{sessionState};
 

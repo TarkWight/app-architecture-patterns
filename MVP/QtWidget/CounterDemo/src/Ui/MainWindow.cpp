@@ -27,9 +27,32 @@
 
 #include <array>
 #include <cmath>
+#include <iomanip>
+#include <sstream>
 #include <utility>
 
 namespace ui {
+
+namespace {
+
+std::string compassLabel(double degrees) {
+    constexpr std::array<const char *, 16> labels{"N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
+                                                  "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"};
+
+    const auto normalized = std::fmod(degrees + 360.0, 360.0);
+    const auto index = static_cast<std::size_t>(std::lround(normalized / 22.5)) % labels.size();
+    return labels[index];
+}
+
+std::string formatImpact(const domain::WindProfile &profile) {
+    std::ostringstream out;
+    out << std::fixed << std::setprecision(1) << "Bft=" << profile.beaufort
+        << ", dir=" << compassLabel(profile.direction) << " (" << profile.direction
+        << " deg), AoA=" << profile.angleOfAttack << " deg";
+    return out.str();
+}
+
+} // namespace
 
 MainWindow::MainWindow(Dependencies deps, QWidget *parent)
     : QMainWindow(parent), ui(std::make_unique<Ui::MainWindow>()), shellPresenter(deps.shellPresenter),
@@ -409,7 +432,8 @@ void MainWindow::setTestTimeSource(domain::TestTimeSource source) {
 }
 
 void MainWindow::applyStandInputs() {
-    if (sessionAdapter.getState().get().standControlMode != domain::StandControlMode::Manual) {
+    const auto &stateData = sessionAdapter.getState().get();
+    if (stateData.standControlMode != domain::StandControlMode::Manual) {
         appendLog("Manual stand control is disabled for this test mode");
         return;
     }
@@ -418,12 +442,13 @@ void MainWindow::applyStandInputs() {
     target.beaufort = standBeaufortSpinBox->value();
     target.angleOfAttack = standAngleOfAttackSpinBox->value();
     target.direction = selectedStandDirectionDegrees();
-    target.formula = sessionAdapter.getState().get().functionExpression;
+    target.formula = stateData.functionExpression;
 
     setStandImpactUseCase.setTarget(target);
     standImpactTransitionTimer->start();
 
-    appendLog("Manual stand impact target accepted");
+    appendLog("Manual stand impact target accepted: " + formatImpact(stateData.appliedStandImpact) + " -> " +
+              formatImpact(domain::sanitize(target)));
 }
 
 void MainWindow::advanceStandImpactTransition() {
@@ -464,7 +489,7 @@ void MainWindow::advanceStandImpactTransition() {
 
     if (reached) {
         standImpactTransitionTimer->stop();
-        appendLog("Manual stand impact target reached");
+        appendLog("Manual stand impact target reached: " + formatImpact(next));
     }
 }
 

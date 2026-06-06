@@ -4,17 +4,15 @@ namespace infrastructure {
 
 SessionStateQtAdapter::SessionStateQtAdapter(application::session::SessionState &state, QObject *parent)
     : QObject(parent), state(state) {
-    subscription = state.subscribe([this](const application::session::SessionStateData &data) {
-        emitState(data);
-    });
+    subscription = state.subscribe([this](const application::session::SessionStateData &data) { emitState(data); });
 }
 
 QColor SessionStateQtAdapter::toQColor(domain::RgbColor color) {
     return QColor(static_cast<int>(color.r), static_cast<int>(color.g), static_cast<int>(color.b));
 }
 
-presentation::viewModels::TestTimeViewModel SessionStateQtAdapter::toTestTimeViewModel(
-    const application::session::SessionStateData &data) {
+presentation::viewModels::TestTimeViewModel
+SessionStateQtAdapter::toTestTimeViewModel(const application::session::SessionStateData &data) {
 
     presentation::viewModels::TestTimeViewModel model{};
     model.executionStatus = data.testExecutionStatus;
@@ -29,9 +27,7 @@ presentation::viewModels::TestTimeViewModel SessionStateQtAdapter::toTestTimeVie
     model.remainingSeconds = data.remaining.value;
 
     model.displayedSeconds =
-        (data.testTimeDirection == domain::TestTimeDirection::CountDown)
-            ? data.remaining.value
-            : data.elapsed.value;
+        (data.testTimeDirection == domain::TestTimeDirection::CountDown) ? data.remaining.value : data.elapsed.value;
 
     return model;
 }
@@ -51,9 +47,7 @@ void SessionStateQtAdapter::emitState(const application::session::SessionStateDa
     emit testProtocolTitleChanged(QString::fromStdString(data.testProtocol.title));
 
     for (int i = 0; i < 8; ++i) {
-        emit testProtocolLineChanged(
-            i,
-            QString::fromStdString(data.testProtocol.lines[static_cast<std::size_t>(i)]));
+        emit testProtocolLineChanged(i, QString::fromStdString(data.testProtocol.lines[static_cast<std::size_t>(i)]));
     }
 
     emit telemetryPlotChanged();

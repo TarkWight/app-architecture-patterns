@@ -12,15 +12,13 @@
 namespace application::ports {
 
 class IAxisProtocolCodec {
-public:
+  public:
     virtual ~IAxisProtocolCodec() = default;
 
     virtual std::vector<std::uint8_t> encodeCommand(const domain::AxisControlCommand &command) const = 0;
 
-    virtual std::optional<domain::AxisTelemetrySample> decodeTelemetry(
-        domain::AxisId axisId,
-        const std::vector<std::uint8_t> &bytes,
-        double timestampSeconds) const = 0;
+    virtual std::optional<domain::AxisTelemetrySample>
+    decodeTelemetry(domain::AxisId axisId, const std::vector<std::uint8_t> &bytes, double timestampSeconds) const = 0;
 };
 
 } // namespace application::ports

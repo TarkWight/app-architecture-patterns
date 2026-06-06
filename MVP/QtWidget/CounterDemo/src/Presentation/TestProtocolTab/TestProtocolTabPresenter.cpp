@@ -3,10 +3,8 @@
 namespace presentation::testProtocolTab {
 
 TestProtocolTabPresenter::TestProtocolTabPresenter(Dependencies deps)
-    : state(deps.state),
-      setOperatorTestDurationUseCase(deps.setOperatorTestDurationUseCase),
-      updateTestProtocolUseCase(deps.updateTestProtocolUseCase),
-      exportPdfUseCase(deps.exportPdfUseCase) {
+    : state(deps.state), setOperatorTestDurationUseCase(deps.setOperatorTestDurationUseCase),
+      updateTestProtocolUseCase(deps.updateTestProtocolUseCase), exportPdfUseCase(deps.exportPdfUseCase) {
 }
 
 void TestProtocolTabPresenter::attachView(ITestProtocolTabView &view) {

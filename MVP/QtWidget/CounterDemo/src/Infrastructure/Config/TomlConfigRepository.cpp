@@ -4,8 +4,7 @@
 
 namespace infrastructure::config {
 
-application::dto::TelemetryConfig
-TomlConfigRepository::loadTelemetryConfig(const std::string &path) {
+application::dto::TelemetryConfig TomlConfigRepository::loadTelemetryConfig(const std::string &path) {
 
     const auto table = toml::parse_file(path);
 

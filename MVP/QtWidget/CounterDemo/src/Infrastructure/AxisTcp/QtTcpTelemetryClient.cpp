@@ -4,11 +4,8 @@
 
 namespace infrastructure::axisTcp {
 
-QtTcpTelemetryClient::QtTcpTelemetryClient(
-    application::ports::IAxisProtocolCodec &codec,
-    QObject *parent)
-    : QObject(parent),
-      codec(codec) {
+QtTcpTelemetryClient::QtTcpTelemetryClient(application::ports::IAxisProtocolCodec &codec, QObject *parent)
+    : QObject(parent), codec(codec) {
     QObject::connect(&pollTimer, &QTimer::timeout, this, &QtTcpTelemetryClient::handlePollTimer);
 }
 
@@ -159,9 +156,8 @@ void QtTcpTelemetryClient::pollOnce(domain::AxisId axisId) {
         return;
     }
 
-    const auto bytesWritten = connection->socket->write(
-        reinterpret_cast<const char *>(packet.data()),
-        static_cast<qint64>(packet.size()));
+    const auto bytesWritten =
+        connection->socket->write(reinterpret_cast<const char *>(packet.data()), static_cast<qint64>(packet.size()));
 
     if (bytesWritten != static_cast<qint64>(packet.size())) {
         emitError(axisId, "Failed to write full command packet");
@@ -190,25 +186,17 @@ void QtTcpTelemetryClient::createSocketIfNeeded(domain::AxisId axisId, AxisConne
 
     connection.socket = std::make_unique<QTcpSocket>();
 
-    QObject::connect(connection.socket.get(), &QTcpSocket::connected, this, [this, axisId]() {
-        handleConnected(axisId);
-    });
+    QObject::connect(connection.socket.get(), &QTcpSocket::connected, this,
+                     [this, axisId]() { handleConnected(axisId); });
 
-    QObject::connect(connection.socket.get(), &QTcpSocket::disconnected, this, [this, axisId]() {
-        handleDisconnected(axisId);
-    });
+    QObject::connect(connection.socket.get(), &QTcpSocket::disconnected, this,
+                     [this, axisId]() { handleDisconnected(axisId); });
 
-    QObject::connect(connection.socket.get(), &QTcpSocket::readyRead, this, [this, axisId]() {
-        handleReadyRead(axisId);
-    });
+    QObject::connect(connection.socket.get(), &QTcpSocket::readyRead, this,
+                     [this, axisId]() { handleReadyRead(axisId); });
 
-    QObject::connect(
-        connection.socket.get(),
-        &QTcpSocket::errorOccurred,
-        this,
-        [this, axisId](QAbstractSocket::SocketError error) {
-            handleSocketError(axisId, error);
-        });
+    QObject::connect(connection.socket.get(), &QTcpSocket::errorOccurred, this,
+                     [this, axisId](QAbstractSocket::SocketError error) { handleSocketError(axisId, error); });
 }
 
 void QtTcpTelemetryClient::handlePollTimer() {
@@ -328,9 +316,8 @@ void QtTcpTelemetryClient::reconnectDisconnectedAxes() {
             continue;
         }
 
-        if (connection.socket != nullptr &&
-            (connection.socket->state() == QAbstractSocket::ConnectedState ||
-             connection.socket->state() == QAbstractSocket::ConnectingState)) {
+        if (connection.socket != nullptr && (connection.socket->state() == QAbstractSocket::ConnectedState ||
+                                             connection.socket->state() == QAbstractSocket::ConnectingState)) {
             continue;
         }
 
@@ -342,10 +329,8 @@ void QtTcpTelemetryClient::reconnectDisconnectedAxes() {
     }
 }
 
-void QtTcpTelemetryClient::emitStatus(
-    domain::AxisId axisId,
-    domain::TelemetryConnectionStatus status,
-    const std::string &message) {
+void QtTcpTelemetryClient::emitStatus(domain::AxisId axisId, domain::TelemetryConnectionStatus status,
+                                      const std::string &message) {
     auto *connection = findAxis(axisId);
     if (connection != nullptr) {
         connection->status = status;

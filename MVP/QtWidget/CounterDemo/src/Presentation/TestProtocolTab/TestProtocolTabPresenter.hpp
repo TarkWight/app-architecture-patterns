@@ -13,7 +13,7 @@
 namespace presentation::testProtocolTab {
 
 class TestProtocolTabPresenter final {
-public:
+  public:
     struct Dependencies {
         application::session::SessionState &state;
         application::useCases::SetOperatorTestDurationUseCase &setOperatorTestDurationUseCase;
@@ -35,7 +35,7 @@ public:
 
     void onExportPdfPressed(const std::string &filePath);
 
-private:
+  private:
     application::session::SessionState &state;
     application::useCases::SetOperatorTestDurationUseCase &setOperatorTestDurationUseCase;
     application::useCases::UpdateTestProtocolUseCase &updateTestProtocolUseCase;

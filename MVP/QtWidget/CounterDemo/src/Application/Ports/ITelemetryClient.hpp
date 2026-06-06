@@ -12,7 +12,7 @@
 namespace application::ports {
 
 class ITelemetryClient {
-public:
+  public:
     using TelemetryCallback = std::function<void(const domain::AxisTelemetrySample &)>;
     using StatusCallback = std::function<void(domain::AxisId, domain::TelemetryConnectionStatus, const std::string &)>;
     using ErrorCallback = std::function<void(domain::AxisId, const std::string &)>;

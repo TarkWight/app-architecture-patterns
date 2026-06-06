@@ -13,13 +13,13 @@ namespace infrastructure {
 class SessionStateQtAdapter final : public QObject {
     Q_OBJECT
 
-public:
+  public:
     explicit SessionStateQtAdapter(application::session::SessionState &state, QObject *parent = nullptr);
     ~SessionStateQtAdapter() override = default;
 
     const application::session::SessionState &getState() const;
 
-signals:
+  signals:
     void testTimeModelChanged(const presentation::viewModels::TestTimeViewModel &model);
 
     void functionExpressionChanged(const QString &expression);
@@ -37,12 +37,13 @@ signals:
     void telemetryPlotChanged();
     void controlPlotChanged();
 
-private:
+  private:
     application::session::SessionState &state;
     application::session::Subscription subscription;
 
     static QColor toQColor(domain::RgbColor color);
-    static presentation::viewModels::TestTimeViewModel toTestTimeViewModel(const application::session::SessionStateData &data);
+    static presentation::viewModels::TestTimeViewModel
+    toTestTimeViewModel(const application::session::SessionStateData &data);
     void emitState(const application::session::SessionStateData &data);
 };
 

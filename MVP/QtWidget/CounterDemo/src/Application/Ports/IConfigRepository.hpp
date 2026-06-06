@@ -8,11 +8,10 @@
 namespace application::ports {
 
 class IConfigRepository {
-public:
+  public:
     virtual ~IConfigRepository() = default;
 
-    virtual application::dto::TelemetryConfig
-    loadTelemetryConfig(const std::string &path) = 0;
+    virtual application::dto::TelemetryConfig loadTelemetryConfig(const std::string &path) = 0;
 };
 
 } // namespace application::ports

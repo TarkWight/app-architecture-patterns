@@ -18,10 +18,8 @@ namespace infrastructure::axisTcp {
 class QtTcpTelemetryClient final : public QObject, public application::ports::ITelemetryClient {
     Q_OBJECT
 
-public:
-    explicit QtTcpTelemetryClient(
-        application::ports::IAxisProtocolCodec &codec,
-        QObject *parent = nullptr);
+  public:
+    explicit QtTcpTelemetryClient(application::ports::IAxisProtocolCodec &codec, QObject *parent = nullptr);
 
     ~QtTcpTelemetryClient() override;
 
@@ -43,7 +41,7 @@ public:
     void setAxisCommand(domain::AxisId axisId, domain::AxisControlCommand command) override;
     void pollOnce(domain::AxisId axisId) override;
 
-private:
+  private:
     struct AxisConnection {
         QString host{};
         int port{0};
@@ -93,10 +91,7 @@ private:
     void handlePendingTimeouts();
     void reconnectDisconnectedAxes();
 
-    void emitStatus(
-        domain::AxisId axisId,
-        domain::TelemetryConnectionStatus status,
-        const std::string &message);
+    void emitStatus(domain::AxisId axisId, domain::TelemetryConnectionStatus status, const std::string &message);
 
     void emitError(domain::AxisId axisId, const std::string &message);
 

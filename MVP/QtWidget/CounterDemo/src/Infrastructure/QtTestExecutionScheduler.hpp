@@ -26,11 +26,7 @@ class QtTestExecutionScheduler final : public QObject, public application::ports
     void handleTimeout();
 
   private:
-    enum class State {
-        Idle,
-        Running,
-        Paused
-    };
+    enum class State { Idle, Running, Paused };
 
     QTimer timer{};
     TickCallback callback{};

@@ -7,10 +7,8 @@
 
 namespace domain {
 
-
-template <typename Tag, typename Rep = std::uint32_t>
-class Id final {
-public:
+template <typename Tag, typename Rep = std::uint32_t> class Id final {
+  public:
     using ValueType = Rep;
 
     constexpr Id() = default;
@@ -24,12 +22,11 @@ public:
 
     friend constexpr auto operator<=>(const Id &, const Id &) = default;
 
-private:
+  private:
     Rep value{};
 };
 
-template <typename Tag, typename Rep>
-struct IdHash final {
+template <typename Tag, typename Rep> struct IdHash final {
     std::size_t operator()(const Id<Tag, Rep> &id) const noexcept {
         return std::hash<Rep>{}(id.getValue());
     }

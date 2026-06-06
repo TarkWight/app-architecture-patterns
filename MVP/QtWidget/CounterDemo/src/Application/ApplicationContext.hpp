@@ -6,6 +6,7 @@
 #include "UseCases/BuildControlPlotUseCase.hpp"
 #include "UseCases/ExportPdfUseCase.hpp"
 #include "UseCases/GenerateStairPlotUseCase.hpp"
+#include "UseCases/LoadPdfReportDefaultsUseCase.hpp"
 #include "UseCases/PauseTestExecutionUseCase.hpp"
 #include "UseCases/ResumeTestExecutionUseCase.hpp"
 #include "UseCases/SetFunctionExpressionUseCase.hpp"
@@ -42,7 +43,12 @@
 #include "../Presentation/ControlChartsTab/ControlChartsTabPresenter.hpp"
 #include "../Presentation/TestProtocolTab/TestProtocolTabPresenter.hpp"
 
+#include <string>
+
 struct ApplicationContext {
+    std::string pdfReportConfigPath{
+        "/Users/tarkwight/Documents/Development/app-architecture-patterns/MVP/QtWidget/CounterDemo/pdf_report.toml"};
+
     application::session::SessionState sessionState;
 
     infrastructure::QtTextLogger logger{[](const std::string &) {}};
@@ -100,6 +106,8 @@ struct ApplicationContext {
 
     application::useCases::UpdateTestProtocolUseCase updateTestProtocolUseCase{sessionState};
 
+    application::useCases::LoadPdfReportDefaultsUseCase loadPdfReportDefaultsUseCase{sessionState, configRepository};
+
     application::useCases::ExportPdfUseCase exportPdfUseCase{sessionState, pdfExporter};
 
     presentation::ShellPresenter shellPresenter{
@@ -134,7 +142,9 @@ struct ApplicationContext {
             .state = sessionState,
             .setOperatorTestDurationUseCase = setOperatorTestDurationUseCase,
             .updateTestProtocolUseCase = updateTestProtocolUseCase,
-            .exportPdfUseCase = exportPdfUseCase}};
+            .loadPdfReportDefaultsUseCase = loadPdfReportDefaultsUseCase,
+            .exportPdfUseCase = exportPdfUseCase,
+            .pdfReportConfigPath = pdfReportConfigPath}};
 };
 
 #endif // APPLICATIONCONTEXT_HPP

@@ -36,6 +36,7 @@ class TestProtocolTabWidget final : public QWidget, public presentation::testPro
 
     void connectSignals();
     void connectSessionSignals();
+    void setupReportFormLabels();
 };
 
 } // namespace ui

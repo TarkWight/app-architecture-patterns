@@ -1,10 +1,15 @@
 #include "TestProtocolTabPresenter.hpp"
 
+#include <exception>
+#include <utility>
+
 namespace presentation::testProtocolTab {
 
 TestProtocolTabPresenter::TestProtocolTabPresenter(Dependencies deps)
     : state(deps.state), setOperatorTestDurationUseCase(deps.setOperatorTestDurationUseCase),
-      updateTestProtocolUseCase(deps.updateTestProtocolUseCase), exportPdfUseCase(deps.exportPdfUseCase) {
+      updateTestProtocolUseCase(deps.updateTestProtocolUseCase),
+      loadPdfReportDefaultsUseCase(deps.loadPdfReportDefaultsUseCase), exportPdfUseCase(deps.exportPdfUseCase),
+      pdfReportConfigPath(std::move(deps.pdfReportConfigPath)) {
 }
 
 void TestProtocolTabPresenter::attachView(ITestProtocolTabView &view) {
@@ -18,6 +23,13 @@ void TestProtocolTabPresenter::detachView() {
 void TestProtocolTabPresenter::onViewReady() {
     if (view == nullptr) {
         return;
+    }
+
+    try {
+        loadPdfReportDefaultsUseCase.execute(pdfReportConfigPath);
+        view->appendLog("PDF report defaults loaded");
+    } catch (const std::exception &e) {
+        view->appendLog(std::string{"PDF report defaults load failed: "} + e.what());
     }
 
     const auto &session = state.get();

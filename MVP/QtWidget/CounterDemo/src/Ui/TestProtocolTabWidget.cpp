@@ -1,8 +1,13 @@
 #include "TestProtocolTabWidget.hpp"
 #include "ui_TestProtocolTabWidget.h"
 
+#include <QGridLayout>
 #include <QFileDialog>
+#include <QLabel>
+#include <QLineEdit>
 #include <QString>
+
+#include <array>
 
 namespace {
 
@@ -37,6 +42,7 @@ TestProtocolTabWidget::TestProtocolTabWidget(presentation::testProtocolTab::Test
                                              infrastructure::SessionStateQtAdapter &sessionAdapter, QWidget *parent)
     : QWidget(parent), ui(new Ui::TestProtocolTabWidget), presenter(presenter), sessionAdapter(sessionAdapter) {
     ui->setupUi(this);
+    setupReportFormLabels();
 
     presenter.attachView(*this);
 
@@ -72,6 +78,26 @@ void TestProtocolTabWidget::showExportSuccess(const std::string &filePath) {
 
 void TestProtocolTabWidget::appendLog(const std::string &text) {
     ui->plainTextEditLog->appendPlainText(QString::fromStdString(text));
+}
+
+void TestProtocolTabWidget::setupReportFormLabels() {
+    const std::array<const char *, 8> labels{"Организация",   "Номер лицензии", "Адрес",      "Тип испытаний",
+                                             "ФИО оператора", "Комментарий",    "Заключение", "Результат"};
+
+    for (int row = 0; row < static_cast<int>(labels.size()); ++row) {
+        auto *lineEdit = lineEditByIndex(ui, row);
+        if (lineEdit == nullptr) {
+            continue;
+        }
+
+        ui->gridLayoutTestProtocol->removeWidget(lineEdit);
+        ui->gridLayoutTestProtocol->addWidget(
+            new QLabel(QString::fromUtf8(labels[static_cast<std::size_t>(row)]), this), row, 0);
+        ui->gridLayoutTestProtocol->addWidget(lineEdit, row, 1);
+    }
+
+    ui->gridLayoutTestProtocol->setColumnStretch(0, 0);
+    ui->gridLayoutTestProtocol->setColumnStretch(1, 1);
 }
 
 void TestProtocolTabWidget::connectSignals() {

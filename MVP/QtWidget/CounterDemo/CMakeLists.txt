@@ -51,6 +51,7 @@ qt_add_executable(develop
   src/Domain/StandControlMode.hpp
 
   src/Application/Dto/PdfDocumentModel.hpp
+  src/Application/Dto/PdfReportConfig.hpp
   src/Application/Dto/TelemetryConfig.hpp
   src/Application/Dto/AxisEndpointConfig.hpp
 
@@ -77,6 +78,8 @@ qt_add_executable(develop
   src/Application/UseCases/BuildControlPlotUseCase.cpp
   src/Application/UseCases/GenerateStairPlotUseCase.hpp
   src/Application/UseCases/GenerateStairPlotUseCase.cpp
+  src/Application/UseCases/LoadPdfReportDefaultsUseCase.hpp
+  src/Application/UseCases/LoadPdfReportDefaultsUseCase.cpp
   src/Application/UseCases/StartTestExecutionUseCase.hpp
   src/Application/UseCases/StartTestExecutionUseCase.cpp
   src/Application/UseCases/StopTestExecutionUseCase.hpp

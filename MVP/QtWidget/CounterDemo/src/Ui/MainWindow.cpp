@@ -368,47 +368,6 @@ void MainWindow::connectSessionSignals() {
 
                          controlFormulaLineEdit->setText(expression);
                      });
-
-    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::beaufortChanged, this,
-                     [this](double value) {
-                         if (standBeaufortSpinBox == nullptr || standBeaufortSpinBox->value() == value) {
-                             return;
-                         }
-
-                         const QSignalBlocker blocker{standBeaufortSpinBox};
-                         standBeaufortSpinBox->setValue(value);
-                     });
-
-    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::angleOfAttackChanged, this,
-                     [this](double value) {
-                         if (standAngleOfAttackSpinBox == nullptr || standAngleOfAttackSpinBox->value() == value) {
-                             return;
-                         }
-
-                         const QSignalBlocker blocker{standAngleOfAttackSpinBox};
-                         standAngleOfAttackSpinBox->setValue(value);
-                     });
-
-    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::directionChanged, this,
-                     [this](double value) {
-                         if (standDirectionComboBox == nullptr) {
-                             return;
-                         }
-
-                         int bestIndex = 0;
-                         double bestDistance = 360.0;
-                         for (int index = 0; index < standDirectionComboBox->count(); ++index) {
-                             const double direction = standDirectionComboBox->itemData(index).toDouble();
-                             const double distance = std::abs(direction - value);
-                             if (distance < bestDistance) {
-                                 bestDistance = distance;
-                                 bestIndex = index;
-                             }
-                         }
-
-                         const QSignalBlocker blocker{standDirectionComboBox};
-                         standDirectionComboBox->setCurrentIndex(bestIndex);
-                     });
 }
 
 void MainWindow::setTestTimeSource(domain::TestTimeSource source) {

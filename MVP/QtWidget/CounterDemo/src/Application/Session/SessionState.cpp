@@ -1,6 +1,7 @@
 #include "SessionState.hpp"
 
 #include "../../Domain/Plot.hpp"
+#include "../../Domain/AxisId.hpp"
 #include "../../Domain/TestProtocol.hpp"
 #include "../../Domain/Time.hpp"
 #include "../../Domain/WindProfile.hpp"
@@ -9,11 +10,13 @@
 #include "Subscription.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <functional>
 #include <mutex>
 #include <string>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 namespace application::session {
 
@@ -99,6 +102,51 @@ void application::session::SessionState::setTelemetryPlot(domain::PlotModel plot
     notify();
 }
 
+void application::session::SessionState::appendTelemetrySample(domain::AxisTelemetrySample sample) {
+    if (!sample.valid) {
+        return;
+    }
+
+    data.telemetryHistory.push_back(sample);
+
+    constexpr std::size_t maxTelemetryHistorySamples = 50'000;
+    if (data.telemetryHistory.size() > maxTelemetryHistorySamples) {
+        const auto eraseCount = data.telemetryHistory.size() - maxTelemetryHistorySamples;
+        data.telemetryHistory.erase(
+            data.telemetryHistory.begin(),
+            data.telemetryHistory.begin() +
+                static_cast<std::vector<domain::AxisTelemetrySample>::difference_type>(eraseCount));
+    }
+
+    if (data.telemetryFollowTail && !data.telemetryHistory.empty()) {
+        const double baseTimestamp = data.telemetryHistory.front().timestampSeconds;
+        data.telemetryWindowEndSeconds = std::max(0.0, sample.timestampSeconds - baseTimestamp);
+    }
+
+    rebuildTelemetryPlot();
+    notify();
+}
+
+void application::session::SessionState::setTelemetryWindowEndSeconds(double endSeconds) {
+    data.telemetryFollowTail = false;
+    data.telemetryWindowEndSeconds = std::max(0.0, endSeconds);
+
+    rebuildTelemetryPlot();
+    notify();
+}
+
+void application::session::SessionState::followTelemetryTail() {
+    data.telemetryFollowTail = true;
+
+    if (!data.telemetryHistory.empty()) {
+        const double baseTimestamp = data.telemetryHistory.front().timestampSeconds;
+        data.telemetryWindowEndSeconds = std::max(0.0, data.telemetryHistory.back().timestampSeconds - baseTimestamp);
+    }
+
+    rebuildTelemetryPlot();
+    notify();
+}
+
 void application::session::SessionState::setControlPlot(domain::PlotModel plot) {
     data.controlPlot = std::move(plot);
     notify();
@@ -153,6 +201,50 @@ void application::session::SessionState::notify() {
     for (auto &[id, listener] : copy) {
         listener(data);
     }
+}
+
+void application::session::SessionState::rebuildTelemetryPlot() {
+    domain::PlotModel plot{};
+    plot.title = "Telemetry";
+    plot.x.label = "seconds";
+    plot.y = domain::AxisSpec{.min = -180.0, .max = 360.0, .step = 45.0, .label = "degrees"};
+
+    const double windowSeconds = std::max(1.0, data.telemetryWindowSeconds);
+    const double endSeconds = std::max(windowSeconds, data.telemetryWindowEndSeconds);
+    const double startSeconds = std::max(0.0, endSeconds - windowSeconds);
+
+    plot.x =
+        domain::AxisSpec{.min = startSeconds, .max = startSeconds + windowSeconds, .step = 10.0, .label = "seconds"};
+
+    domain::NamedSeries axisY{};
+    axisY.label = "Ось Y / тангаж";
+    axisY.color = domain::RgbColor{220, 60, 50};
+
+    domain::NamedSeries axisZ{};
+    axisZ.label = "Ось Z / направление";
+    axisZ.color = domain::RgbColor{40, 110, 210};
+
+    if (!data.telemetryHistory.empty()) {
+        const double baseTimestamp = data.telemetryHistory.front().timestampSeconds;
+
+        for (const auto &sample : data.telemetryHistory) {
+            const double x = sample.timestampSeconds - baseTimestamp;
+            if (x < startSeconds || x > plot.x.max) {
+                continue;
+            }
+
+            if (sample.axisId == domain::axis0) {
+                axisY.series.points.push_back(domain::Point{.x = x, .y = sample.position});
+            } else if (sample.axisId == domain::axis1) {
+                axisZ.series.points.push_back(domain::Point{.x = x, .y = sample.position});
+            }
+        }
+    }
+
+    plot.seriesList.push_back(std::move(axisY));
+    plot.seriesList.push_back(std::move(axisZ));
+
+    data.telemetryPlot = std::move(plot);
 }
 
 } // namespace application::session

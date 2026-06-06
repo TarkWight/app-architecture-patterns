@@ -22,6 +22,12 @@ struct Series {
     std::vector<Point> points{};
 };
 
+struct NamedSeries {
+    std::string label{};
+    Series series{};
+    RgbColor color{};
+};
+
 struct AxisSpec {
     double min{0.0};
     double max{1.0};
@@ -33,6 +39,7 @@ struct PlotModel {
     AxisSpec x{};
     AxisSpec y{};
     Series series{};
+    std::vector<NamedSeries> seriesList{};
     RgbColor color{};
     std::string title{};
 };

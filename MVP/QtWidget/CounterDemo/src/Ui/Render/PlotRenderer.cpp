@@ -3,6 +3,8 @@
 #include <QPen>
 #include <QString>
 
+#include <algorithm>
+
 namespace ui::render {
 namespace {
 
@@ -36,7 +38,16 @@ void PlotRenderer::drawPlot(QPainter &painter, const QRect &rect, const domain::
 }
 
 bool PlotRenderer::hasRenderablePlot(const domain::PlotModel &plot) {
-    return plot.series.points.size() >= 2 && plot.x.max > plot.x.min && plot.y.max > plot.y.min;
+    if (plot.x.max <= plot.x.min || plot.y.max <= plot.y.min) {
+        return false;
+    }
+
+    if (plot.series.points.size() >= 2) {
+        return true;
+    }
+
+    return std::any_of(plot.seriesList.begin(), plot.seriesList.end(),
+                       [](const domain::NamedSeries &series) { return series.series.points.size() >= 2; });
 }
 
 double PlotRenderer::normalize(double value, double min, double max) {
@@ -139,11 +150,12 @@ void PlotRenderer::drawYGrid(QPainter &painter, const QRect &plotRect, const dom
     }
 }
 
-QPolygon PlotRenderer::buildPolyline(const QRect &plotRect, const domain::PlotModel &plot) {
+QPolygon PlotRenderer::buildPolyline(const QRect &plotRect, const domain::PlotModel &plot,
+                                     const domain::Series &series) {
     QPolygon polyline;
-    polyline.reserve(static_cast<int>(plot.series.points.size()));
+    polyline.reserve(static_cast<int>(series.points.size()));
 
-    for (const auto &point : plot.series.points) {
+    for (const auto &point : series.points) {
         polyline << QPoint(projectX(plotRect, plot, point.x), projectY(plotRect, plot, point.y));
     }
 
@@ -151,10 +163,47 @@ QPolygon PlotRenderer::buildPolyline(const QRect &plotRect, const domain::PlotMo
 }
 
 void PlotRenderer::drawSeries(QPainter &painter, const QRect &plotRect, const domain::PlotModel &plot) {
-    const QPolygon polyline = buildPolyline(plotRect, plot);
+    if (!plot.seriesList.empty()) {
+        for (const auto &series : plot.seriesList) {
+            if (series.series.points.size() < 2) {
+                continue;
+            }
+
+            const QPolygon polyline = buildPolyline(plotRect, plot, series.series);
+
+            painter.setPen(QPen(toQColor(series.color), 2));
+            painter.drawPolyline(polyline);
+        }
+
+        drawLegend(painter, plotRect, plot);
+        return;
+    }
+
+    const QPolygon polyline = buildPolyline(plotRect, plot, plot.series);
 
     painter.setPen(QPen(toQColor(plot.color), 2));
     painter.drawPolyline(polyline);
+}
+
+void PlotRenderer::drawLegend(QPainter &painter, const QRect &plotRect, const domain::PlotModel &plot) {
+    int y = plotRect.top() + 8;
+    const int x = plotRect.right() - 170;
+
+    painter.setPen(QPen(Qt::black, 1));
+
+    for (const auto &series : plot.seriesList) {
+        if (series.label.empty()) {
+            continue;
+        }
+
+        painter.setPen(QPen(toQColor(series.color), 3));
+        painter.drawLine(x, y + 8, x + 22, y + 8);
+
+        painter.setPen(QPen(Qt::black, 1));
+        painter.drawText(x + 28, y, 140, 18, Qt::AlignLeft | Qt::AlignVCenter, QString::fromStdString(series.label));
+
+        y += 20;
+    }
 }
 
 } // namespace ui::render

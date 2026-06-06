@@ -9,6 +9,8 @@
 
 #include "PlotWidget.hpp"
 
+class QScrollBar;
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class TelemetryChartsTabWidget;
@@ -34,9 +36,13 @@ class TelemetryChartsTabWidget final : public QWidget,
     presentation::telemetryChartsTab::TelemetryChartsTabPresenter &presenter;
     infrastructure::SessionStateQtAdapter &sessionAdapter;
     PlotWidget *plotWidget{nullptr};
+    QScrollBar *telemetryScrollBar{nullptr};
+    bool telemetryAutoFollowTail{true};
 
     void connectSignals();
     void connectSessionSignals();
+    void refreshTelemetryScrollBar();
+    int telemetryHistoryEndSeconds() const;
 };
 
 } // namespace ui

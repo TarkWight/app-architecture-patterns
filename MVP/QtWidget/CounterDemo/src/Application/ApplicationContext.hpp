@@ -13,6 +13,7 @@
 #include "UseCases/SetControlChartsTabMinutesUseCase.hpp"
 #include "UseCases/SetOperatorTestDurationUseCase.hpp"
 #include "UseCases/SetTestTimeSourceUseCase.hpp"
+#include "UseCases/SetTelemetryWindowUseCase.hpp"
 #include "UseCases/StartTestExecutionUseCase.hpp"
 #include "UseCases/StopTestExecutionUseCase.hpp"
 #include "UseCases/UpdateTestProtocolUseCase.hpp"
@@ -73,6 +74,8 @@ struct ApplicationContext {
 
     application::useCases::SetTestTimeSourceUseCase setTestTimeSourceUseCase{sessionState};
 
+    application::useCases::SetTelemetryWindowUseCase setTelemetryWindowUseCase{sessionState};
+
     application::useCases::SetFunctionExpressionUseCase setFunctionExpressionUseCase{sessionState};
 
     application::useCases::SetLineColorUseCase setLineColorUseCase{sessionState};
@@ -101,7 +104,8 @@ struct ApplicationContext {
                                                    .connectStandUseCase = connectStandUseCase,
                                                    .disconnectStandUseCase = disconnectStandUseCase}};
 
-    presentation::telemetryChartsTab::TelemetryChartsTabPresenter telemetryChartsTabPresenter{generateStairPlotUseCase};
+    presentation::telemetryChartsTab::TelemetryChartsTabPresenter telemetryChartsTabPresenter{
+        setTelemetryWindowUseCase};
 
     presentation::controlChartsTab::ControlChartsTabPresenter controlChartsTabPresenter{
         presentation::controlChartsTab::ControlChartsTabPresenter::Dependencies{

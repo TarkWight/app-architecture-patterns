@@ -100,6 +100,8 @@ qt_add_executable(develop
   src/Application/UseCases/ResumeTestExecutionUseCase.cpp
   src/Application/UseCases/SetTestTimeSourceUseCase.hpp
   src/Application/UseCases/SetTestTimeSourceUseCase.cpp
+  src/Application/UseCases/SetTelemetryWindowUseCase.hpp
+  src/Application/UseCases/SetTelemetryWindowUseCase.cpp
   src/Application/UseCases/ConfigureTelemetryUseCase.hpp
   src/Application/UseCases/ConfigureTelemetryUseCase.cpp
   src/Application/UseCases/ConnectStandUseCase.hpp

@@ -139,6 +139,7 @@ void ShellPresenter::refreshFromState() {
     view->setFunctionExpression(session.functionExpression.value);
     view->setTestTimeSource(session.testTimeSource);
     refreshStandConnectionButton();
+    notifyStandConnectionStatusChanged(session.standConnectionStatus);
 }
 
 void ShellPresenter::onTestTimeSourceChanged(domain::TestTimeSource source) {
@@ -200,6 +201,18 @@ void ShellPresenter::refreshStandConnectionButton() {
         view->setStandConnectionButtonText("Отключить стенд");
         break;
     }
+}
+
+void ShellPresenter::notifyStandConnectionStatusChanged(domain::StandConnectionStatus status) {
+    if (status == lastStandConnectionStatus) {
+        return;
+    }
+
+    if (status == domain::StandConnectionStatus::Error && view != nullptr) {
+        view->appendLog("Stand connection lost");
+    }
+
+    lastStandConnectionStatus = status;
 }
 
 } // namespace presentation

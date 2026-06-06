@@ -6,6 +6,7 @@
 #include "../../Domain/TestExecutionStatus.hpp"
 #include "../../Domain/TestTimeDirection.hpp"
 #include "../../Domain/TestTimeSource.hpp"
+#include "../../Domain/AxisTelemetrySample.hpp"
 
 #include "SessionStateData.hpp"
 #include "Subscription.hpp"
@@ -44,6 +45,9 @@ class SessionState {
 
     void setTelemetryPlot(domain::PlotModel plot);
     void setControlPlot(domain::PlotModel plot);
+    void appendTelemetrySample(domain::AxisTelemetrySample sample);
+    void setTelemetryWindowEndSeconds(double endSeconds);
+    void followTelemetryTail();
 
     void setTestProtocolTitle(std::string title);
     void setTestProtocolLine(int idx, std::string line);
@@ -62,6 +66,7 @@ class SessionState {
     long long lastId{0};
 
     void notify();
+    void rebuildTelemetryPlot();
 };
 
 } // namespace application::session

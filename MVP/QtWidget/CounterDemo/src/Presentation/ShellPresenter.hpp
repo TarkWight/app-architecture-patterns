@@ -15,6 +15,7 @@
 #include "../Application/UseCases/ConfigureTelemetryUseCase.hpp"
 #include "../Application/UseCases/ConnectStandUseCase.hpp"
 #include "../Application/UseCases/DisconnectStandUseCase.hpp"
+#include "../Domain/StandConnectionStatus.hpp"
 
 #include "IShellView.hpp"
 
@@ -70,6 +71,7 @@ class ShellPresenter final {
     application::useCases::DisconnectStandUseCase &disconnectStandUseCase;
 
     IShellView *view{nullptr};
+    domain::StandConnectionStatus lastStandConnectionStatus{domain::StandConnectionStatus::Disconnected};
 
     static std::string formatTimerText(int secondsValue);
     static bool canStart(domain::TestExecutionStatus status);
@@ -79,6 +81,7 @@ class ShellPresenter final {
 
     void refreshFromState();
     void refreshStandConnectionButton();
+    void notifyStandConnectionStatusChanged(domain::StandConnectionStatus status);
 };
 
 } // namespace presentation

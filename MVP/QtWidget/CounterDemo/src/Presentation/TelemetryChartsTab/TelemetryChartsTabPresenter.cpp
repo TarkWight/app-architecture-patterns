@@ -3,8 +3,8 @@
 namespace presentation::telemetryChartsTab {
 
 TelemetryChartsTabPresenter::TelemetryChartsTabPresenter(
-    application::useCases::GenerateStairPlotUseCase &generateStairPlotUseCase)
-    : generateStairPlotUseCase(generateStairPlotUseCase) {
+    application::useCases::SetTelemetryWindowUseCase &setTelemetryWindowUseCase)
+    : setTelemetryWindowUseCase(setTelemetryWindowUseCase) {
 }
 
 void TelemetryChartsTabPresenter::attachView(ITelemetryChartsTabView &view) {
@@ -16,15 +16,25 @@ void TelemetryChartsTabPresenter::detachView() {
 }
 
 void TelemetryChartsTabPresenter::onViewReady() {
-    onRebuildPlotPressed();
+    if (view != nullptr) {
+        view->refreshPlot();
+    }
 }
 
 void TelemetryChartsTabPresenter::onRebuildPlotPressed() {
-    generateStairPlotUseCase.execute();
+    setTelemetryWindowUseCase.followTail();
 
     if (view != nullptr) {
         view->refreshPlot();
-        view->appendLog("TelemetryChartsTab stair plot rebuilt");
+        view->appendLog("Telemetry tail selected");
+    }
+}
+
+void TelemetryChartsTabPresenter::onTelemetryWindowChanged(int windowEndSeconds) {
+    setTelemetryWindowUseCase.execute(static_cast<double>(windowEndSeconds));
+
+    if (view != nullptr) {
+        view->refreshPlot();
     }
 }
 

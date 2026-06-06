@@ -1,14 +1,14 @@
 #ifndef TELEMETRYCHARTSTABPRESENTER_H
 #define TELEMETRYCHARTSTABPRESENTER_H
 
-#include "../../Application/UseCases/GenerateStairPlotUseCase.hpp"
+#include "../../Application/UseCases/SetTelemetryWindowUseCase.hpp"
 #include "ITelemetryChartsTabView.hpp"
 
 namespace presentation::telemetryChartsTab {
 
 class TelemetryChartsTabPresenter final {
   public:
-    TelemetryChartsTabPresenter(application::useCases::GenerateStairPlotUseCase &generateStairPlotUseCase);
+    explicit TelemetryChartsTabPresenter(application::useCases::SetTelemetryWindowUseCase &setTelemetryWindowUseCase);
 
     void attachView(ITelemetryChartsTabView &view);
     void detachView();
@@ -16,9 +16,10 @@ class TelemetryChartsTabPresenter final {
     void onViewReady();
 
     void onRebuildPlotPressed();
+    void onTelemetryWindowChanged(int windowEndSeconds);
 
   private:
-    application::useCases::GenerateStairPlotUseCase &generateStairPlotUseCase;
+    application::useCases::SetTelemetryWindowUseCase &setTelemetryWindowUseCase;
 
     ITelemetryChartsTabView *view{nullptr};
 };

@@ -2,6 +2,7 @@
 #define SESSIONSTATEDATA_HPP
 
 #include "../../Domain/AxisState.hpp"
+#include "../../Domain/AxisTelemetrySample.hpp"
 #include "../../Domain/Plot.hpp"
 #include "../../Domain/StandConnectionStatus.hpp"
 #include "../../Domain/TelemetryStatus.hpp"
@@ -12,6 +13,8 @@
 #include "../../Domain/Time.hpp"
 #include "../../Domain/WindProfile.hpp"
 #include "../../Domain/Expression.hpp"
+
+#include <vector>
 
 namespace application::session {
 
@@ -39,6 +42,11 @@ struct SessionStateData {
     // ===== Plots =====
     domain::PlotModel telemetryPlot{};
     domain::PlotModel controlPlot{};
+
+    std::vector<domain::AxisTelemetrySample> telemetryHistory{};
+    double telemetryWindowSeconds{60.0};
+    double telemetryWindowEndSeconds{0.0};
+    bool telemetryFollowTail{true};
 
     // ===== Protocol / report =====
     domain::TestProtocol testProtocol{};

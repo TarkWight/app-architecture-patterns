@@ -38,7 +38,7 @@
    <item>
     <widget class="QLineEdit" name="lineEditTitle">
      <property name="placeholderText">
-      <string>Название стиха</string>
+      <string>Название отчёта</string>
      </property>
     </widget>
    </item>
@@ -47,56 +47,56 @@
      <item row="0" column="0">
       <widget class="QLineEdit" name="lineEditLine0">
        <property name="placeholderText">
-        <string>Строка 1</string>
+        <string>Организация</string>
        </property>
       </widget>
      </item>
      <item row="1" column="0">
       <widget class="QLineEdit" name="lineEditLine1">
        <property name="placeholderText">
-        <string>Строка 2</string>
+        <string>Номер лицензии</string>
        </property>
       </widget>
      </item>
      <item row="2" column="0">
       <widget class="QLineEdit" name="lineEditLine2">
        <property name="placeholderText">
-        <string>Строка 3</string>
+        <string>Адрес</string>
        </property>
       </widget>
      </item>
      <item row="3" column="0">
       <widget class="QLineEdit" name="lineEditLine3">
        <property name="placeholderText">
-        <string>Строка 4</string>
+        <string>Тип испытаний</string>
        </property>
       </widget>
      </item>
      <item row="4" column="0">
       <widget class="QLineEdit" name="lineEditLine4">
        <property name="placeholderText">
-        <string>Строка 5</string>
+        <string>ФИО оператора</string>
        </property>
       </widget>
      </item>
      <item row="5" column="0">
       <widget class="QLineEdit" name="lineEditLine5">
        <property name="placeholderText">
-        <string>Строка 6</string>
+        <string>Комментарий к испытаниям</string>
        </property>
       </widget>
      </item>
      <item row="6" column="0">
       <widget class="QLineEdit" name="lineEditLine6">
        <property name="placeholderText">
-        <string>Строка 7</string>
+        <string>Заключение</string>
        </property>
       </widget>
      </item>
      <item row="7" column="0">
       <widget class="QLineEdit" name="lineEditLine7">
        <property name="placeholderText">
-        <string>Строка 8</string>
+        <string>Результат: годен/негоден</string>
        </property>
       </widget>
      </item>

@@ -117,7 +117,7 @@ void TestProtocolTabWidget::setTestProtocolDroneParameters(
 
     droneParameterEdits.clear();
 
-    constexpr int columns = 4;
+    constexpr int columns = 2;
     for (int index = 0; index < static_cast<int>(parameters.size()); ++index) {
         const int row = index / columns;
         const int column = (index % columns) * 2;
@@ -125,6 +125,8 @@ void TestProtocolTabWidget::setTestProtocolDroneParameters(
 
         auto *label = new QLabel(QString::fromStdString(parameter.label), this);
         auto *edit = new QLineEdit(QString::fromStdString(parameter.value), this);
+        label->setMinimumWidth(160);
+        edit->setMinimumWidth(220);
         droneParameterEdits.push_back(edit);
 
         droneParametersLayout->addWidget(label, row, column);
@@ -175,6 +177,7 @@ void TestProtocolTabWidget::setupReportFormLabels() {
             continue;
         }
 
+        lineEdit->setMinimumWidth(360);
         ui->gridLayoutTestProtocol->addWidget(
             new QLabel(QString::fromUtf8(labels[static_cast<std::size_t>(row)]), this), row, 0);
         ui->gridLayoutTestProtocol->addWidget(lineEdit, row, 1);
@@ -216,6 +219,8 @@ void TestProtocolTabWidget::setupDroneParametersEditor() {
     droneParametersLayout->setHorizontalSpacing(8);
     droneParametersLayout->setVerticalSpacing(6);
     layout->addLayout(droneParametersLayout);
+    droneParametersLayout->setColumnStretch(1, 1);
+    droneParametersLayout->setColumnStretch(3, 1);
 
     ui->verticalLayoutRoot->insertWidget(4, group);
 }

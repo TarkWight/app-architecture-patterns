@@ -11,6 +11,7 @@
 #include <QPen>
 #include <QString>
 
+#include <algorithm>
 #include <array>
 #include <string>
 #include <vector>
@@ -124,7 +125,7 @@ void drawCell(QPainter &painter, const QRect &rect, const QString &text, bool he
         painter.setFont(reportFont(9, QFont::Bold));
     }
 
-    painter.drawText(rect.adjusted(10, 8, -10, -8), Qt::AlignCenter | Qt::TextWordWrap, text);
+    painter.drawText(rect.adjusted(12, 12, -12, -12), Qt::AlignCenter | Qt::TextWordWrap, text);
     painter.setFont(oldFont);
 }
 
@@ -137,7 +138,8 @@ void drawReportTable(DrawingContext &context, VerticalCursor &cursor,
                                     context.page.contentWidth * 19 / 100, context.page.contentWidth * 19 / 100,
                                     context.page.contentWidth * 19 / 100};
 
-    constexpr int rowHeight = 88;
+    const QFontMetrics tableMetrics(context.painter.font());
+    const int rowHeight = std::max(104, tableMetrics.height() * 3);
     int x = context.page.left;
 
     for (std::size_t i = 0; i < headers.size(); ++i) {
@@ -180,7 +182,8 @@ void drawDroneParameters(DrawingContext &context, VerticalCursor &cursor,
         return;
     }
 
-    constexpr int rowHeight = 50;
+    const QFontMetrics parameterMetrics(context.painter.font());
+    const int rowHeight = std::max(68, parameterMetrics.height() + 28);
     const int labelWidth = context.page.contentWidth * 42 / 100;
     const int valueWidth = context.page.contentWidth - labelWidth;
 

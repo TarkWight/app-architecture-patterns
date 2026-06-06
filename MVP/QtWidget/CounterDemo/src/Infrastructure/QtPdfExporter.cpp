@@ -13,6 +13,7 @@
 
 #include <array>
 #include <string>
+#include <vector>
 
 namespace {
 
@@ -107,8 +108,11 @@ void drawTitlePage(DrawingContext &context, const application::dto::PdfDocumentM
 
     cursor.y = context.page.height - pageMargin - 190;
     context.painter.setFont(reportFont(14));
-    drawCenteredLine(context, cursor, QStringLiteral("Тип испытаний:"));
-    drawCenteredLine(context, cursor, withFallback(document.testType, QStringLiteral("не указан")));
+    drawCenteredLine(context, cursor,
+                     QStringLiteral("Тип: ") + withFallback(document.testMode, QStringLiteral("не указан")));
+    drawCenteredLine(context, cursor,
+                     QStringLiteral("Испытание: ") +
+                         withFallback(document.testProgramTitle, QStringLiteral("не указано")));
     drawCenteredLine(context, cursor, QStringLiteral("Дата проведения: ") + toQString(document.reportDate));
 }
 
@@ -169,15 +173,44 @@ void drawPlotPage(DrawingContext &context, const domain::PlotModel &plot, const 
     drawCenteredLine(context, cursor, caption, 80);
 }
 
+void drawDroneParameters(DrawingContext &context, VerticalCursor &cursor,
+                         const std::vector<domain::TestProtocolParameter> &parameters) {
+    if (parameters.empty()) {
+        drawParagraph(context, cursor, QStringLiteral("Конфигурация не указана"), sectionSpacing);
+        return;
+    }
+
+    constexpr int rowHeight = 50;
+    const int labelWidth = context.page.contentWidth * 42 / 100;
+    const int valueWidth = context.page.contentWidth - labelWidth;
+
+    for (const auto &parameter : parameters) {
+        const QRect labelRect(context.page.left, cursor.y, labelWidth, rowHeight);
+        const QRect valueRect(context.page.left + labelWidth, cursor.y, valueWidth, rowHeight);
+        drawCell(context.painter, labelRect, toQString(parameter.label), false);
+        drawCell(context.painter, valueRect, toQString(parameter.value), false);
+        cursor.y += rowHeight;
+    }
+
+    cursor.y += sectionSpacing;
+}
+
 void drawSummaryPage(DrawingContext &context, const application::dto::PdfDocumentModel &document) {
     VerticalCursor cursor{.y = context.page.top};
 
     context.painter.setFont(reportFont(14, QFont::Bold));
-    drawParagraph(context, cursor, QStringLiteral("Комментарий к испытаниям:"), 24);
+    drawParagraph(context, cursor, QStringLiteral("Конфигурация БПЛА и параметры теста:"), 24);
 
     context.painter.setFont(reportFont(10));
-    drawParagraph(context, cursor, withFallback(document.comment, QStringLiteral("Комментарий не указан")),
-                  sectionSpacing);
+    drawDroneParameters(context, cursor, document.droneParameters);
+
+    if (!document.comment.empty()) {
+        context.painter.setFont(reportFont(14, QFont::Bold));
+        drawParagraph(context, cursor, QStringLiteral("Комментарий оператора:"), 24);
+
+        context.painter.setFont(reportFont(10));
+        drawParagraph(context, cursor, toQString(document.comment), sectionSpacing);
+    }
 
     context.painter.setFont(reportFont(14, QFont::Bold));
     drawParagraph(context, cursor, QStringLiteral("Заключение:"), 24);

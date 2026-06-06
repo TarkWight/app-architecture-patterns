@@ -1,11 +1,15 @@
 #include "TestProtocolTabWidget.hpp"
 #include "ui_TestProtocolTabWidget.h"
 
+#include <QComboBox>
 #include <QGridLayout>
 #include <QFileDialog>
+#include <QGroupBox>
 #include <QLabel>
 #include <QLineEdit>
+#include <QSignalBlocker>
 #include <QString>
+#include <QVBoxLayout>
 
 #include <array>
 
@@ -43,6 +47,8 @@ TestProtocolTabWidget::TestProtocolTabWidget(presentation::testProtocolTab::Test
     : QWidget(parent), ui(new Ui::TestProtocolTabWidget), presenter(presenter), sessionAdapter(sessionAdapter) {
     ui->setupUi(this);
     setupReportFormLabels();
+    setupTestSelectionControls();
+    setupDroneParametersEditor();
 
     presenter.attachView(*this);
 
@@ -72,6 +78,60 @@ void TestProtocolTabWidget::setTestProtocolLine(int index, const std::string &li
     lineEdit->setText(QString::fromStdString(line));
 }
 
+void TestProtocolTabWidget::setTestProtocolMode(const std::string &mode) {
+    if (testModeComboBox == nullptr) {
+        return;
+    }
+
+    const QSignalBlocker blocker{testModeComboBox};
+    const int index = testModeComboBox->findData(QString::fromStdString(mode));
+    testModeComboBox->setCurrentIndex(index >= 0 ? index : 0);
+}
+
+void TestProtocolTabWidget::setTestProtocolProgram(const std::string &program) {
+    if (testProgramComboBox == nullptr) {
+        return;
+    }
+
+    const QSignalBlocker blocker{testProgramComboBox};
+    const int index = testProgramComboBox->findData(QString::fromStdString(program));
+    testProgramComboBox->setCurrentIndex(index >= 0 ? index : 0);
+}
+
+void TestProtocolTabWidget::setTestProtocolDroneParameters(
+    const std::vector<domain::TestProtocolParameter> &parameters) {
+    if (droneParametersLayout == nullptr) {
+        return;
+    }
+
+    while (auto *item = droneParametersLayout->takeAt(0)) {
+        if (auto *widget = item->widget()) {
+            widget->deleteLater();
+        }
+        delete item;
+    }
+
+    droneParameterEdits.clear();
+
+    constexpr int columns = 3;
+    for (int index = 0; index < static_cast<int>(parameters.size()); ++index) {
+        const int row = index / columns;
+        const int column = (index % columns) * 2;
+        const auto &parameter = parameters[static_cast<std::size_t>(index)];
+
+        auto *label = new QLabel(QString::fromStdString(parameter.label), this);
+        auto *edit = new QLineEdit(QString::fromStdString(parameter.value), this);
+        droneParameterEdits.push_back(edit);
+
+        droneParametersLayout->addWidget(label, row, column);
+        droneParametersLayout->addWidget(edit, row, column + 1);
+
+        QObject::connect(edit, &QLineEdit::textChanged, this, [this, index](const QString &text) {
+            presenter.onTestProtocolDroneParameterChanged(index, text.toStdString());
+        });
+    }
+}
+
 void TestProtocolTabWidget::showExportSuccess(const std::string &filePath) {
     ui->labelExportStatus->setText(QStringLiteral("Exported: %1").arg(QString::fromStdString(filePath)));
 }
@@ -81,8 +141,8 @@ void TestProtocolTabWidget::appendLog(const std::string &text) {
 }
 
 void TestProtocolTabWidget::setupReportFormLabels() {
-    const std::array<const char *, 8> labels{"Организация",   "Номер лицензии", "Адрес",      "Тип испытаний",
-                                             "ФИО оператора", "Комментарий",    "Заключение", "Результат"};
+    const std::array<const char *, 8> labels{"Организация", "Номер лицензии", "Адрес",     "ФИО оператора",
+                                             "Комментарий", "Заключение",     "Результат", "Резерв"};
 
     for (int row = 0; row < static_cast<int>(labels.size()); ++row) {
         auto *lineEdit = lineEditByIndex(ui, row);
@@ -91,6 +151,11 @@ void TestProtocolTabWidget::setupReportFormLabels() {
         }
 
         ui->gridLayoutTestProtocol->removeWidget(lineEdit);
+        if (row == 7) {
+            lineEdit->hide();
+            continue;
+        }
+
         ui->gridLayoutTestProtocol->addWidget(
             new QLabel(QString::fromUtf8(labels[static_cast<std::size_t>(row)]), this), row, 0);
         ui->gridLayoutTestProtocol->addWidget(lineEdit, row, 1);
@@ -98,6 +163,42 @@ void TestProtocolTabWidget::setupReportFormLabels() {
 
     ui->gridLayoutTestProtocol->setColumnStretch(0, 0);
     ui->gridLayoutTestProtocol->setColumnStretch(1, 1);
+}
+
+void TestProtocolTabWidget::setupTestSelectionControls() {
+    auto *group = new QGroupBox(QStringLiteral("Тип и шаблон испытания"), this);
+    auto *layout = new QGridLayout(group);
+
+    testModeComboBox = new QComboBox(group);
+    testModeComboBox->addItem(QStringLiteral("Ручное"), QStringLiteral("manual"));
+    testModeComboBox->addItem(QStringLiteral("Гибридное"), QStringLiteral("hybrid"));
+    testModeComboBox->addItem(QStringLiteral("Автоматическое"), QStringLiteral("automatic"));
+
+    testProgramComboBox = new QComboBox(group);
+    testProgramComboBox->addItem(QStringLiteral("Полет в штиль"), QStringLiteral("test1"));
+    testProgramComboBox->addItem(QStringLiteral("Определение максимальных параметров"), QStringLiteral("test2"));
+    testProgramComboBox->addItem(QStringLiteral("Исследование временной перспективы"), QStringLiteral("test3"));
+
+    layout->addWidget(new QLabel(QStringLiteral("Тип"), group), 0, 0);
+    layout->addWidget(testModeComboBox, 0, 1);
+    layout->addWidget(new QLabel(QStringLiteral("Испытание"), group), 0, 2);
+    layout->addWidget(testProgramComboBox, 0, 3);
+    layout->setColumnStretch(1, 1);
+    layout->setColumnStretch(3, 2);
+
+    ui->verticalLayoutRoot->insertWidget(3, group);
+}
+
+void TestProtocolTabWidget::setupDroneParametersEditor() {
+    auto *group = new QGroupBox(QStringLiteral("Конфигурация БПЛА и параметры теста"), this);
+    auto *layout = new QVBoxLayout(group);
+
+    droneParametersLayout = new QGridLayout();
+    droneParametersLayout->setHorizontalSpacing(8);
+    droneParametersLayout->setVerticalSpacing(6);
+    layout->addLayout(droneParametersLayout);
+
+    ui->verticalLayoutRoot->insertWidget(4, group);
 }
 
 void TestProtocolTabWidget::connectSignals() {
@@ -117,6 +218,14 @@ void TestProtocolTabWidget::connectSignals() {
             presenter.onTestProtocolLineChanged(i, text.toStdString());
         });
     }
+
+    QObject::connect(testModeComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {
+        presenter.onTestProtocolModeChanged(testModeComboBox->currentData().toString().toStdString());
+    });
+
+    QObject::connect(testProgramComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {
+        presenter.onTestProtocolProgramChanged(testProgramComboBox->currentData().toString().toStdString());
+    });
 
     QObject::connect(ui->buttonExportPdf, &QPushButton::clicked, this, [this]() {
         const QString filePath =
@@ -163,6 +272,12 @@ void TestProtocolTabWidget::connectSessionSignals() {
 
                          lineEdit->setText(line);
                      });
+
+    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testProtocolModeChanged, this,
+                     [this](const QString &mode) { setTestProtocolMode(mode.toStdString()); });
+
+    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testProtocolProgramChanged, this,
+                     [this](const QString &program) { setTestProtocolProgram(program.toStdString()); });
 }
 
 } // namespace ui

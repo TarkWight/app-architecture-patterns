@@ -204,6 +204,31 @@ void application::session::SessionState::setTestProtocolLine(int idx, std::strin
     notify();
 }
 
+void application::session::SessionState::setTestProtocolMode(std::string mode) {
+    data.testProtocol.testMode = std::move(mode);
+    notify();
+}
+
+void application::session::SessionState::setTestProtocolProgram(std::string program) {
+    data.testProtocol.testProgram = std::move(program);
+    notify();
+}
+
+void application::session::SessionState::setTestProtocolDroneParameters(
+    std::vector<domain::TestProtocolParameter> parameters) {
+    data.testProtocol.droneParameters = std::move(parameters);
+    notify();
+}
+
+void application::session::SessionState::setTestProtocolDroneParameterValue(int idx, std::string value) {
+    if (idx < 0 || idx >= static_cast<int>(data.testProtocol.droneParameters.size())) {
+        return;
+    }
+
+    data.testProtocol.droneParameters[static_cast<std::size_t>(idx)].value = std::move(value);
+    notify();
+}
+
 void application::session::SessionState::setAxis1State(domain::AxisState stateValue) {
     data.axis1State = stateValue;
     notify();

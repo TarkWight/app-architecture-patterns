@@ -40,6 +40,10 @@ void TestProtocolTabPresenter::onViewReady() {
     for (int i = 0; i < 8; ++i) {
         view->setTestProtocolLine(i, session.testProtocol.lines[static_cast<std::size_t>(i)]);
     }
+
+    view->setTestProtocolMode(session.testProtocol.testMode);
+    view->setTestProtocolProgram(session.testProtocol.testProgram);
+    view->setTestProtocolDroneParameters(session.testProtocol.droneParameters);
 }
 
 void TestProtocolTabPresenter::onOperatorTestDurationChanged(int minutes) {
@@ -64,6 +68,18 @@ void TestProtocolTabPresenter::onTestProtocolLineChanged(int index, std::string 
     if (view != nullptr) {
         view->appendLog("Test protocol line updated");
     }
+}
+
+void TestProtocolTabPresenter::onTestProtocolModeChanged(std::string mode) {
+    updateTestProtocolUseCase.updateMode(std::move(mode));
+}
+
+void TestProtocolTabPresenter::onTestProtocolProgramChanged(std::string program) {
+    updateTestProtocolUseCase.updateProgram(std::move(program));
+}
+
+void TestProtocolTabPresenter::onTestProtocolDroneParameterChanged(int index, std::string value) {
+    updateTestProtocolUseCase.updateDroneParameterValue(index, std::move(value));
 }
 
 void TestProtocolTabPresenter::onExportPdfPressed(const std::string &filePath) {

@@ -45,6 +45,9 @@ void SessionStateQtAdapter::emitState(const application::session::SessionStateDa
     emit angleOfAttackChanged(data.windProfile.angleOfAttack);
 
     emit testProtocolTitleChanged(QString::fromStdString(data.testProtocol.title));
+    emit testProtocolModeChanged(QString::fromStdString(data.testProtocol.testMode));
+    emit testProtocolProgramChanged(QString::fromStdString(data.testProtocol.testProgram));
+    emit testProtocolDroneParametersChanged(data.testProtocol.droneParameters);
 
     for (int i = 0; i < 8; ++i) {
         emit testProtocolLineChanged(i, QString::fromStdString(data.testProtocol.lines[static_cast<std::size_t>(i)]));

@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "../../Domain/Plot.hpp"
+#include "../../Domain/TestProtocol.hpp"
 
 namespace application::dto {
 
@@ -23,10 +24,13 @@ struct PdfDocumentModel final {
     std::string organization{};
     std::string licenseNumber{};
     std::string address{};
-    std::string testType{};
+    std::string testMode{};
+    std::string testProgramTitle{};
+    std::string testProgramShortTitle{};
     std::string reportDate{};
     std::string operatorName{};
     std::string comment{};
+    std::vector<domain::TestProtocolParameter> droneParameters{};
     std::string conclusion{};
 
     std::vector<PdfReportTableRow> tableRows{};

@@ -3,9 +3,141 @@ title = "Протокол испытаний беспилотной авиаци
 organization = "ООО «С.И.Т»"
 license_number = "1234567"
 address = "планета Земля"
-test_type = "Ручное испытание"
+test_mode = "manual"
+test_program = "test1"
 operator_name = "Боровой Арсентий"
 comment = "Испытание прошло штатно"
 conclusion = "Воздушное средство пригодно к эксплуатации"
 result = "_________"
 
+[[pdf_report.drone_parameters]]
+label = "Модель БПЛА"
+value = ""
+
+[[pdf_report.drone_parameters]]
+label = "Серийный номер"
+value = ""
+
+[[pdf_report.drone_parameters]]
+label = "Полетная нагрузка"
+value = "15.00"
+
+[[pdf_report.drone_parameters]]
+label = "DR (%)"
+value = "89.000000000"
+
+[[pdf_report.drone_parameters]]
+label = "Ток оборудования"
+value = "0.020"
+
+[[pdf_report.drone_parameters]]
+label = "Дальность действия"
+value = "15.99"
+
+[[pdf_report.drone_parameters]]
+label = "Скорость Max."
+value = "160.00"
+
+[[pdf_report.drone_parameters]]
+label = "Высота Max."
+value = "130.99"
+
+[[pdf_report.drone_parameters]]
+label = "Время полета max."
+value = "30.00"
+
+[[pdf_report.drone_parameters]]
+label = "Тип связи"
+value = "Glonass"
+
+[[pdf_report.drone_parameters]]
+label = "Модель винтов"
+value = ""
+
+[[pdf_report.drone_parameters]]
+label = "Конфигурация"
+value = ""
+
+[[pdf_report.drone_parameters]]
+label = "Диаметр"
+value = "45.00"
+
+[[pdf_report.drone_parameters]]
+label = "Мощность"
+value = "10"
+
+[[pdf_report.drone_parameters]]
+label = "Max об/мин"
+value = "10000"
+
+[[pdf_report.drone_parameters]]
+label = "Количество лопастей"
+value = "3"
+
+[[pdf_report.drone_parameters]]
+label = "Материал"
+value = ""
+
+[[pdf_report.drone_parameters]]
+label = "Аккумулятор"
+value = ""
+
+[[pdf_report.drone_parameters]]
+label = "Тип аккумулятора"
+value = ""
+
+[[pdf_report.drone_parameters]]
+label = "Номинальная емкость (mAh)"
+value = "18000"
+
+[[pdf_report.drone_parameters]]
+label = "Число ячеек (S)"
+value = "6"
+
+[[pdf_report.drone_parameters]]
+label = "Скорость разряда (C)"
+value = "6"
+
+[[pdf_report.drone_parameters]]
+label = "Вес аккумулятора"
+value = "2,4"
+
+[[pdf_report.drone_parameters]]
+label = "Напряжение 1й ячейки"
+value = "3.80"
+
+[[pdf_report.drone_parameters]]
+label = "Модель двигателей"
+value = ""
+
+[[pdf_report.drone_parameters]]
+label = "Диаметр вала"
+value = "8"
+
+[[pdf_report.drone_parameters]]
+label = "Количество двигателей"
+value = "4"
+
+[[pdf_report.drone_parameters]]
+label = "Производитель"
+value = "T_Motors"
+
+[[pdf_report.drone_parameters]]
+label = "KV"
+value = "480"
+
+[[pdf_report.drone_parameters]]
+label = "Максимальная тяга (кг)"
+value = "1.30"
+
+[[pdf_report.drone_parameters]]
+label = "Пиковый ток (A)"
+value = "13.990"
+
+[[pdf_report.drone_parameters]]
+label = "Вес двигателя"
+value = "3.30"
+
+[[pdf_report.drone_parameters]]
+label = "Версия прошивки"
+value = "1.1.2.32"

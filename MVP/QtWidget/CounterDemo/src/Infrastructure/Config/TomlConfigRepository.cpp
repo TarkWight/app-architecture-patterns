@@ -2,6 +2,8 @@
 
 #include <toml++/toml.h>
 
+#include <utility>
+
 namespace infrastructure::config {
 
 namespace {
@@ -62,11 +64,29 @@ application::dto::PdfReportConfig TomlConfigRepository::loadPdfReportConfig(cons
     assignString(*report, "organization", config.organization);
     assignString(*report, "license_number", config.licenseNumber);
     assignString(*report, "address", config.address);
-    assignString(*report, "test_type", config.testType);
+    assignString(*report, "test_mode", config.testMode);
+    assignString(*report, "test_program", config.testProgram);
     assignString(*report, "operator_name", config.operatorName);
     assignString(*report, "comment", config.comment);
     assignString(*report, "conclusion", config.conclusion);
     assignString(*report, "result", config.result);
+
+    if (const auto *parameters = (*report)["drone_parameters"].as_array()) {
+        for (const auto &parameterNode : *parameters) {
+            const auto *parameter = parameterNode.as_table();
+            if (parameter == nullptr) {
+                continue;
+            }
+
+            domain::TestProtocolParameter field{};
+            assignString(*parameter, "label", field.label);
+            assignString(*parameter, "value", field.value);
+
+            if (!field.label.empty()) {
+                config.droneParameters.push_back(std::move(field));
+            }
+        }
+    }
 
     return config;
 }

@@ -68,35 +68,35 @@
      <item row="3" column="0">
       <widget class="QLineEdit" name="lineEditLine3">
        <property name="placeholderText">
-        <string>Тип испытаний</string>
+        <string>ФИО оператора</string>
        </property>
       </widget>
      </item>
      <item row="4" column="0">
       <widget class="QLineEdit" name="lineEditLine4">
        <property name="placeholderText">
-        <string>ФИО оператора</string>
+        <string>Комментарий оператора</string>
        </property>
       </widget>
      </item>
      <item row="5" column="0">
       <widget class="QLineEdit" name="lineEditLine5">
        <property name="placeholderText">
-        <string>Комментарий к испытаниям</string>
+        <string>Заключение</string>
        </property>
       </widget>
      </item>
      <item row="6" column="0">
       <widget class="QLineEdit" name="lineEditLine6">
        <property name="placeholderText">
-        <string>Заключение</string>
+        <string>Результат: годен/негоден</string>
        </property>
       </widget>
      </item>
      <item row="7" column="0">
       <widget class="QLineEdit" name="lineEditLine7">
        <property name="placeholderText">
-        <string>Результат: годен/негоден</string>
+        <string>Резерв</string>
        </property>
       </widget>
      </item>

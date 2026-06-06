@@ -28,6 +28,36 @@ std::string todayDate() {
     return out.str();
 }
 
+std::string testModeTitle(const std::string &mode) {
+    if (mode == "hybrid") {
+        return "Гибридное";
+    }
+    if (mode == "automatic") {
+        return "Автоматическое";
+    }
+    return "Ручное";
+}
+
+std::string testProgramTitle(const std::string &program) {
+    if (program == "test2") {
+        return "ИСПЫТАНИЕ МАКСИМАЛЬНОЙ ВЕТРОВОЙ НАГРУЗКИ БПЛА";
+    }
+    if (program == "test3") {
+        return "ИСПЫТАНИЕ БПЛА С УЧЕТОМ ВЕТРОВОЙ НАГРУЗКИ";
+    }
+    return "ИСПЫТАНИЕ УСТОЙЧИВОСТИ БПЛА В ИДЕАЛЬНЫХ УСЛОВИЯХ";
+}
+
+std::string testProgramShortTitle(const std::string &program) {
+    if (program == "test2") {
+        return "Определение максимальных параметров";
+    }
+    if (program == "test3") {
+        return "Исследование временной перспективы";
+    }
+    return "Полет в штиль";
+}
+
 } // namespace
 
 ExportPdfUseCase::ExportPdfUseCase(application::session::SessionState &state,
@@ -44,10 +74,13 @@ application::dto::PdfDocumentModel ExportPdfUseCase::buildDocument() const {
     document.organization = valueOrDefault(lines[0], "Организация не указана");
     document.licenseNumber = valueOrDefault(lines[1], "не указан");
     document.address = valueOrDefault(lines[2], "Адрес не указан");
-    document.testType = valueOrDefault(lines[3], "Ручное испытание");
-    document.operatorName = valueOrDefault(lines[4], "не указан");
-    document.comment = valueOrDefault(lines[5], "Комментарий не указан");
-    document.conclusion = valueOrDefault(lines[6], "Заключение не указано");
+    document.testMode = testModeTitle(session.testProtocol.testMode);
+    document.testProgramTitle = testProgramTitle(session.testProtocol.testProgram);
+    document.testProgramShortTitle = testProgramShortTitle(session.testProtocol.testProgram);
+    document.operatorName = valueOrDefault(lines[3], "не указан");
+    document.comment = lines[4];
+    document.conclusion = valueOrDefault(lines[5], "Заключение не указано");
+    document.droneParameters = session.testProtocol.droneParameters;
     document.reportDate = todayDate();
 
     for (int i = 0; i < 4; ++i) {
@@ -55,11 +88,11 @@ application::dto::PdfDocumentModel ExportPdfUseCase::buildDocument() const {
     }
 
     application::dto::PdfReportTableRow row{};
-    row.testType = document.testType;
+    row.testType = document.testProgramShortTitle;
     row.windFormula = valueOrDefault(session.functionExpression.value, "0");
     row.estimatedDurationMinutes = std::to_string(session.estimatedTestDuration.value);
     row.testDurationMinutes = std::to_string(session.activeTestDuration.value);
-    row.result = valueOrDefault(lines[7], "_________");
+    row.result = valueOrDefault(lines[6], "_________");
     document.tableRows.push_back(std::move(row));
 
     document.telemetryPlot = session.telemetryPlot;

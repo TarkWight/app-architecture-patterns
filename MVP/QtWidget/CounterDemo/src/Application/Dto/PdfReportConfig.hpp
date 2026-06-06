@@ -1,7 +1,10 @@
 #ifndef PDFREPORTCONFIG_HPP
 #define PDFREPORTCONFIG_HPP
 
+#include "../../Domain/TestProtocol.hpp"
+
 #include <string>
+#include <vector>
 
 namespace application::dto {
 
@@ -10,9 +13,11 @@ struct PdfReportConfig final {
     std::string organization{};
     std::string licenseNumber{};
     std::string address{};
-    std::string testType{};
+    std::string testMode{};
+    std::string testProgram{};
     std::string operatorName{};
     std::string comment{};
+    std::vector<domain::TestProtocolParameter> droneParameters{};
     std::string conclusion{};
     std::string result{};
 };

@@ -8,6 +8,8 @@
 #include "../Application/Session/SessionState.hpp"
 #include "../Presentation/ViewModels/TestTimeViewModel.hpp"
 
+#include <vector>
+
 namespace infrastructure {
 
 class SessionStateQtAdapter final : public QObject {
@@ -33,6 +35,9 @@ class SessionStateQtAdapter final : public QObject {
 
     void testProtocolTitleChanged(const QString &title);
     void testProtocolLineChanged(int index, const QString &line);
+    void testProtocolModeChanged(const QString &mode);
+    void testProtocolProgramChanged(const QString &program);
+    void testProtocolDroneParametersChanged(const std::vector<domain::TestProtocolParameter> &parameters);
 
     void telemetryPlotChanged();
     void controlPlotChanged();

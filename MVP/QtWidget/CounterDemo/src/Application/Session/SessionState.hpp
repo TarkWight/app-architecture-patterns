@@ -5,6 +5,7 @@
 #include "../../Domain/StandControlMode.hpp"
 #include "../../Domain/StandConnectionStatus.hpp"
 #include "../../Domain/TestExecutionStatus.hpp"
+#include "../../Domain/TestProtocol.hpp"
 #include "../../Domain/TestTimeDirection.hpp"
 #include "../../Domain/TestTimeSource.hpp"
 #include "../../Domain/AxisTelemetrySample.hpp"
@@ -16,6 +17,7 @@
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace application::session {
 
@@ -57,6 +59,10 @@ class SessionState {
 
     void setTestProtocolTitle(std::string title);
     void setTestProtocolLine(int idx, std::string line);
+    void setTestProtocolMode(std::string mode);
+    void setTestProtocolProgram(std::string program);
+    void setTestProtocolDroneParameters(std::vector<domain::TestProtocolParameter> parameters);
+    void setTestProtocolDroneParameterValue(int idx, std::string value);
 
     void setAxis1State(domain::AxisState state);
     void setAxis2State(domain::AxisState state);

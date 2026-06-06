@@ -15,13 +15,17 @@ void LoadPdfReportDefaultsUseCase::execute(const std::string &configPath) {
 
     state.setTestProtocolTitle(config.title);
 
-    const std::array<std::string, 8> lines{config.organization, config.licenseNumber, config.address,
-                                           config.testType,     config.operatorName,  config.comment,
-                                           config.conclusion,   config.result};
+    const std::array<std::string, 8> lines{
+        config.organization, config.licenseNumber, config.address, config.operatorName,
+        config.comment,      config.conclusion,    config.result,  {}};
 
     for (std::size_t i = 0; i < lines.size(); ++i) {
         state.setTestProtocolLine(static_cast<int>(i), lines[i]);
     }
+
+    state.setTestProtocolMode(config.testMode);
+    state.setTestProtocolProgram(config.testProgram);
+    state.setTestProtocolDroneParameters(config.droneParameters);
 }
 
 } // namespace application::useCases

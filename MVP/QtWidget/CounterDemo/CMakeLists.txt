@@ -48,6 +48,7 @@ qt_add_executable(develop
   src/Domain/AxisTelemetrySample.hpp
   src/Domain/AxisControlCommand.hpp
   src/Domain/TelemetryConnectionStatus.hpp
+  src/Domain/StandControlMode.hpp
 
   src/Application/Dto/PdfDocumentModel.hpp
   src/Application/Dto/TelemetryConfig.hpp
@@ -104,6 +105,12 @@ qt_add_executable(develop
   src/Application/UseCases/SetTelemetryWindowUseCase.cpp
   src/Application/UseCases/SetTelemetryAxisColorUseCase.hpp
   src/Application/UseCases/SetTelemetryAxisColorUseCase.cpp
+  src/Application/UseCases/SetTelemetryAxisVisibleUseCase.hpp
+  src/Application/UseCases/SetTelemetryAxisVisibleUseCase.cpp
+  src/Application/UseCases/SetStandControlModeUseCase.hpp
+  src/Application/UseCases/SetStandControlModeUseCase.cpp
+  src/Application/UseCases/SetStandImpactUseCase.hpp
+  src/Application/UseCases/SetStandImpactUseCase.cpp
   src/Application/UseCases/ConfigureTelemetryUseCase.hpp
   src/Application/UseCases/ConfigureTelemetryUseCase.cpp
   src/Application/UseCases/ConnectStandUseCase.hpp

@@ -2,6 +2,7 @@
 #define SESSIONSTATE_HPP
 
 #include "../../Domain/Plot.hpp"
+#include "../../Domain/StandControlMode.hpp"
 #include "../../Domain/StandConnectionStatus.hpp"
 #include "../../Domain/TestExecutionStatus.hpp"
 #include "../../Domain/TestTimeDirection.hpp"
@@ -49,6 +50,10 @@ class SessionState {
     void setTelemetryWindowEndSeconds(double endSeconds);
     void followTelemetryTail();
     void setTelemetryAxisColor(domain::AxisId axisId, domain::RgbColor color);
+    void setTelemetryAxisVisible(domain::AxisId axisId, bool visible);
+    void setStandControlMode(domain::StandControlMode mode);
+    void setAppliedStandImpact(domain::WindProfile profile);
+    void setTargetStandImpact(domain::WindProfile profile);
 
     void setTestProtocolTitle(std::string title);
     void setTestProtocolLine(int idx, std::string line);

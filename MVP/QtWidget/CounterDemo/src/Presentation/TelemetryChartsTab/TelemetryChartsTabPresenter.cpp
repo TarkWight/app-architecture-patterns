@@ -4,7 +4,8 @@ namespace presentation::telemetryChartsTab {
 
 TelemetryChartsTabPresenter::TelemetryChartsTabPresenter(Dependencies deps)
     : setTelemetryWindowUseCase(deps.setTelemetryWindowUseCase),
-      setTelemetryAxisColorUseCase(deps.setTelemetryAxisColorUseCase) {
+      setTelemetryAxisColorUseCase(deps.setTelemetryAxisColorUseCase),
+      setTelemetryAxisVisibleUseCase(deps.setTelemetryAxisVisibleUseCase) {
 }
 
 void TelemetryChartsTabPresenter::attachView(ITelemetryChartsTabView &view) {
@@ -40,6 +41,14 @@ void TelemetryChartsTabPresenter::onTelemetryWindowChanged(int windowEndSeconds)
 
 void TelemetryChartsTabPresenter::onTelemetryAxisColorSelected(domain::AxisId axisId, domain::RgbColor color) {
     setTelemetryAxisColorUseCase.execute(axisId, color);
+
+    if (view != nullptr) {
+        view->refreshPlot();
+    }
+}
+
+void TelemetryChartsTabPresenter::onTelemetryAxisVisibilityChanged(domain::AxisId axisId, bool visible) {
+    setTelemetryAxisVisibleUseCase.execute(axisId, visible);
 
     if (view != nullptr) {
         view->refreshPlot();

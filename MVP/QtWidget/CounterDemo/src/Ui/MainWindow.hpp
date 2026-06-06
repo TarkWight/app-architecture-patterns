@@ -10,12 +10,21 @@
 #include "../Presentation/TelemetryChartsTab/TelemetryChartsTabPresenter.hpp"
 #include "../Presentation/ControlChartsTab/ControlChartsTabPresenter.hpp"
 #include "../Presentation/TestProtocolTab/TestProtocolTabPresenter.hpp"
+#include "../Application/UseCases/SetStandControlModeUseCase.hpp"
+#include "../Application/UseCases/SetStandImpactUseCase.hpp"
+#include "../Domain/AxisId.hpp"
 #include "../Domain/TestTimeSource.hpp"
 
 class QComboBox;
+class QCheckBox;
 class QDoubleSpinBox;
+class QFormLayout;
+class QLabel;
 class QLineEdit;
 class QPushButton;
+class QString;
+class QTimer;
+class QVBoxLayout;
 class QWidget;
 
 QT_BEGIN_NAMESPACE
@@ -39,6 +48,8 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
         presentation::telemetryChartsTab::TelemetryChartsTabPresenter &telemetryChartsTabPresenter;
         presentation::controlChartsTab::ControlChartsTabPresenter &controlChartsTabPresenter;
         presentation::testProtocolTab::TestProtocolTabPresenter &testProtocolTabPresenter;
+        application::useCases::SetStandControlModeUseCase &setStandControlModeUseCase;
+        application::useCases::SetStandImpactUseCase &setStandImpactUseCase;
         infrastructure::SessionStateQtAdapter &sessionAdapter;
     };
 
@@ -64,6 +75,8 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     presentation::telemetryChartsTab::TelemetryChartsTabPresenter &telemetryChartsTabPresenter;
     presentation::controlChartsTab::ControlChartsTabPresenter &controlChartsTabPresenter;
     presentation::testProtocolTab::TestProtocolTabPresenter &testProtocolTabPresenter;
+    application::useCases::SetStandControlModeUseCase &setStandControlModeUseCase;
+    application::useCases::SetStandImpactUseCase &setStandImpactUseCase;
     infrastructure::SessionStateQtAdapter &sessionAdapter;
 
     TelemetryChartsTabWidget *telemetryChartsTabWidget{nullptr};
@@ -73,18 +86,30 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     QDoubleSpinBox *standBeaufortSpinBox{nullptr};
     QDoubleSpinBox *standAngleOfAttackSpinBox{nullptr};
     QComboBox *standDirectionComboBox{nullptr};
-    QComboBox *telemetryAxisComboBox{nullptr};
+    QComboBox *standControlModeComboBox{nullptr};
+    QComboBox *telemetryCurveComboBox{nullptr};
+    QComboBox *telemetrySourceComboBox{nullptr};
+    QCheckBox *telemetryCurveVisibleCheckBox{nullptr};
     QLineEdit *controlFormulaLineEdit{nullptr};
+    QTimer *standImpactTransitionTimer{nullptr};
+    QPushButton *standApplyButton{nullptr};
 
     void setupTabs();
     void setupMainContentLayout();
     QWidget *createStandControlPanel();
     QWidget *createControlFormulaPanel();
+    QLabel *createPanelTitle(QWidget &parent, const QString &text) const;
+    void addStandImpactRows(QFormLayout &form, QWidget &parent);
+    void addTelemetryBindingRows(QFormLayout &form, QWidget &parent);
+    void addStandControlButtons(QVBoxLayout &layout, QWidget &parent);
     void connectShellSignals();
     void connectSessionSignals();
     void applyStandInputs();
+    void advanceStandImpactTransition();
     void selectTelemetryAxisColor();
+    void updateManualStandControlsEnabled();
     double selectedStandDirectionDegrees() const;
+    domain::AxisId selectedTelemetryAxisId() const;
 };
 
 } // namespace ui

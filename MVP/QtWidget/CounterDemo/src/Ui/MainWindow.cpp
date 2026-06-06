@@ -8,7 +8,9 @@
 #include "ui_MainWindow.h"
 
 #include "../Domain/AxisId.hpp"
+#include "../Domain/StandControlMode.hpp"
 
+#include <QCheckBox>
 #include <QColorDialog>
 #include <QComboBox>
 #include <QDoubleSpinBox>
@@ -20,6 +22,7 @@
 #include <QPushButton>
 #include <QSignalBlocker>
 #include <QString>
+#include <QTimer>
 #include <QVBoxLayout>
 
 #include <array>
@@ -32,12 +35,18 @@ MainWindow::MainWindow(Dependencies deps, QWidget *parent)
     : QMainWindow(parent), ui(std::make_unique<Ui::MainWindow>()), shellPresenter(deps.shellPresenter),
       telemetryChartsTabPresenter(deps.telemetryChartsTabPresenter),
       controlChartsTabPresenter(deps.controlChartsTabPresenter),
-      testProtocolTabPresenter(deps.testProtocolTabPresenter), sessionAdapter(deps.sessionAdapter) {
+      testProtocolTabPresenter(deps.testProtocolTabPresenter),
+      setStandControlModeUseCase(deps.setStandControlModeUseCase), setStandImpactUseCase(deps.setStandImpactUseCase),
+      sessionAdapter(deps.sessionAdapter) {
     ui->setupUi(this);
 
     ui->comboBoxTestTimeSource->addItem(QStringLiteral("Авторасчёт"));
     ui->comboBoxTestTimeSource->addItem(QStringLiteral("Время оператора"));
     ui->comboBoxTestTimeSource->addItem(QStringLiteral("Свободный режим"));
+
+    standImpactTransitionTimer = new QTimer(this);
+    standImpactTransitionTimer->setInterval(100);
+    QObject::connect(standImpactTransitionTimer, &QTimer::timeout, this, &MainWindow::advanceStandImpactTransition);
 
     shellPresenter.attachView(*this);
 
@@ -132,30 +141,50 @@ QWidget *MainWindow::createStandControlPanel() {
 
     auto *layout = new QVBoxLayout(panel);
     layout->setSpacing(8);
-
-    auto *title = new QLabel(QStringLiteral("Управление стендом"), panel);
-    auto titleFont = title->font();
-    titleFont.setBold(true);
-    title->setFont(titleFont);
-    layout->addWidget(title);
+    layout->addWidget(createPanelTitle(*panel, QStringLiteral("Управление стендом")));
 
     auto *form = new QFormLayout();
     form->setLabelAlignment(Qt::AlignLeft);
+    addStandImpactRows(*form, *panel);
+    addTelemetryBindingRows(*form, *panel);
 
-    standBeaufortSpinBox = new QDoubleSpinBox(panel);
+    layout->addLayout(form);
+    addStandControlButtons(*layout, *panel);
+    layout->addStretch(1);
+
+    return panel;
+}
+
+QLabel *MainWindow::createPanelTitle(QWidget &parent, const QString &text) const {
+    auto *title = new QLabel(text, &parent);
+    auto titleFont = title->font();
+    titleFont.setBold(true);
+    title->setFont(titleFont);
+    return title;
+}
+
+void MainWindow::addStandImpactRows(QFormLayout &form, QWidget &parent) {
+    standControlModeComboBox = new QComboBox(&parent);
+    standControlModeComboBox->addItem(QStringLiteral("Ручной"), static_cast<int>(domain::StandControlMode::Manual));
+    standControlModeComboBox->addItem(QStringLiteral("Гибридный"), static_cast<int>(domain::StandControlMode::Hybrid));
+    standControlModeComboBox->addItem(QStringLiteral("Заготовленный"),
+                                      static_cast<int>(domain::StandControlMode::PresetScenario));
+    form.addRow(QStringLiteral("Вид теста"), standControlModeComboBox);
+
+    standBeaufortSpinBox = new QDoubleSpinBox(&parent);
     standBeaufortSpinBox->setDecimals(1);
     standBeaufortSpinBox->setRange(0.0, 12.0);
     standBeaufortSpinBox->setSingleStep(0.1);
-    form->addRow(QStringLiteral("Бофорт"), standBeaufortSpinBox);
+    form.addRow(QStringLiteral("Бофорт"), standBeaufortSpinBox);
 
-    standAngleOfAttackSpinBox = new QDoubleSpinBox(panel);
+    standAngleOfAttackSpinBox = new QDoubleSpinBox(&parent);
     standAngleOfAttackSpinBox->setDecimals(1);
     standAngleOfAttackSpinBox->setRange(-90.0, 90.0);
     standAngleOfAttackSpinBox->setSingleStep(1.0);
     standAngleOfAttackSpinBox->setSuffix(QStringLiteral(" °"));
-    form->addRow(QStringLiteral("Угол атаки"), standAngleOfAttackSpinBox);
+    form.addRow(QStringLiteral("Угол атаки"), standAngleOfAttackSpinBox);
 
-    standDirectionComboBox = new QComboBox(panel);
+    standDirectionComboBox = new QComboBox(&parent);
     const std::array<std::pair<const char *, double>, 16> directions{{
         {"N", 0.0},
         {"NNE", 22.5},
@@ -179,26 +208,33 @@ QWidget *MainWindow::createStandControlPanel() {
         standDirectionComboBox->addItem(
             QStringLiteral("%1 (%2°)").arg(QString::fromUtf8(label)).arg(degrees, 0, 'f', 1), degrees);
     }
-    form->addRow(QStringLiteral("Сторона света"), standDirectionComboBox);
+    form.addRow(QStringLiteral("Сторона света"), standDirectionComboBox);
+}
 
-    telemetryAxisComboBox = new QComboBox(panel);
-    telemetryAxisComboBox->addItem(QStringLiteral("Ось Y / тангаж"), 0);
-    telemetryAxisComboBox->addItem(QStringLiteral("Ось Z / направление"), 1);
-    form->addRow(QStringLiteral("Линия графика"), telemetryAxisComboBox);
+void MainWindow::addTelemetryBindingRows(QFormLayout &form, QWidget &parent) {
+    telemetryCurveComboBox = new QComboBox(&parent);
+    telemetryCurveComboBox->addItem(QStringLiteral("Кривая 1"), 0);
+    telemetryCurveComboBox->addItem(QStringLiteral("Кривая 2"), 1);
+    form.addRow(QStringLiteral("Кривая"), telemetryCurveComboBox);
 
-    layout->addLayout(form);
+    telemetrySourceComboBox = new QComboBox(&parent);
+    telemetrySourceComboBox->addItem(QStringLiteral("Ось Y / тангаж"), 0);
+    telemetrySourceComboBox->addItem(QStringLiteral("Ось Z / направление"), 1);
+    form.addRow(QStringLiteral("Источник"), telemetrySourceComboBox);
 
-    auto *applyButton = new QPushButton(QStringLiteral("Применить воздействие"), panel);
-    QObject::connect(applyButton, &QPushButton::clicked, this, [this]() { applyStandInputs(); });
-    layout->addWidget(applyButton);
+    telemetryCurveVisibleCheckBox = new QCheckBox(QStringLiteral("Показывать"), &parent);
+    telemetryCurveVisibleCheckBox->setChecked(true);
+    form.addRow(QStringLiteral("Отображение"), telemetryCurveVisibleCheckBox);
+}
 
-    auto *colorButton = new QPushButton(QStringLiteral("Цвет линии"), panel);
+void MainWindow::addStandControlButtons(QVBoxLayout &layout, QWidget &parent) {
+    standApplyButton = new QPushButton(QStringLiteral("Применить воздействие"), &parent);
+    QObject::connect(standApplyButton, &QPushButton::clicked, this, [this]() { applyStandInputs(); });
+    layout.addWidget(standApplyButton);
+
+    auto *colorButton = new QPushButton(QStringLiteral("Цвет линии"), &parent);
     QObject::connect(colorButton, &QPushButton::clicked, this, [this]() { selectTelemetryAxisColor(); });
-    layout->addWidget(colorButton);
-
-    layout->addStretch(1);
-
-    return panel;
+    layout.addWidget(colorButton);
 }
 
 QWidget *MainWindow::createControlFormulaPanel() {
@@ -269,6 +305,30 @@ void MainWindow::connectShellSignals() {
     QObject::connect(ui->buttonConnectTelemetry, &QPushButton::clicked, this, [this]() {
         shellPresenter.onConnectTelemetryPressed(
             "/Users/tarkwight/Documents/Development/app-architecture-patterns/MVP/QtWidget/CounterDemo/telemetry.toml");
+    });
+
+    QObject::connect(standControlModeComboBox, &QComboBox::currentIndexChanged, this, [this]() {
+        const auto mode = static_cast<domain::StandControlMode>(standControlModeComboBox->currentData().toInt());
+        setStandControlModeUseCase.execute(mode);
+        updateManualStandControlsEnabled();
+    });
+
+    QObject::connect(telemetryCurveComboBox, &QComboBox::currentIndexChanged, this, [this](int index) {
+        const QSignalBlocker sourceBlocker{telemetrySourceComboBox};
+        const QSignalBlocker visibleBlocker{telemetryCurveVisibleCheckBox};
+
+        telemetrySourceComboBox->setCurrentIndex(index);
+
+        const auto &stateData = sessionAdapter.getState().get();
+        telemetryCurveVisibleCheckBox->setChecked(index == 0 ? stateData.telemetryAxisYVisible
+                                                             : stateData.telemetryAxisZVisible);
+    });
+
+    QObject::connect(telemetrySourceComboBox, &QComboBox::currentIndexChanged, this,
+                     [this](int index) { telemetryCurveComboBox->setCurrentIndex(index); });
+
+    QObject::connect(telemetryCurveVisibleCheckBox, &QCheckBox::toggled, this, [this](bool checked) {
+        telemetryChartsTabPresenter.onTelemetryAxisVisibilityChanged(selectedTelemetryAxisId(), checked);
     });
 }
 
@@ -349,12 +409,63 @@ void MainWindow::setTestTimeSource(domain::TestTimeSource source) {
 }
 
 void MainWindow::applyStandInputs() {
-    controlChartsTabPresenter.onBeaufortChanged(standBeaufortSpinBox->value());
-    controlChartsTabPresenter.onAngleOfAttackChanged(standAngleOfAttackSpinBox->value());
-    controlChartsTabPresenter.onDirectionChanged(selectedStandDirectionDegrees());
+    if (sessionAdapter.getState().get().standControlMode != domain::StandControlMode::Manual) {
+        appendLog("Manual stand control is disabled for this test mode");
+        return;
+    }
+
+    domain::WindProfile target{};
+    target.beaufort = standBeaufortSpinBox->value();
+    target.angleOfAttack = standAngleOfAttackSpinBox->value();
+    target.direction = selectedStandDirectionDegrees();
+    target.formula = sessionAdapter.getState().get().functionExpression;
+
+    setStandImpactUseCase.setTarget(target);
+    standImpactTransitionTimer->start();
+
+    appendLog("Manual stand impact target accepted");
+}
+
+void MainWindow::advanceStandImpactTransition() {
+    const auto &stateData = sessionAdapter.getState().get();
+    if (stateData.standControlMode != domain::StandControlMode::Manual) {
+        standImpactTransitionTimer->stop();
+        return;
+    }
+
+    const auto current = stateData.appliedStandImpact;
+    const auto target = stateData.targetStandImpact;
+
+    auto stepTowards = [](double value, double targetValue, double step) {
+        const double delta = targetValue - value;
+        if (std::abs(delta) <= step) {
+            return targetValue;
+        }
+
+        return value + (delta > 0.0 ? step : -step);
+    };
+
+    domain::WindProfile next = current;
+    next.beaufort = stepTowards(current.beaufort, target.beaufort, 0.1);
+    next.angleOfAttack = stepTowards(current.angleOfAttack, target.angleOfAttack, 1.0);
+    next.direction = stepTowards(current.direction, target.direction, 2.5);
+    next.formula = target.formula;
+
+    setStandImpactUseCase.setApplied(next);
+
+    controlChartsTabPresenter.onBeaufortChanged(next.beaufort);
+    controlChartsTabPresenter.onAngleOfAttackChanged(next.angleOfAttack);
+    controlChartsTabPresenter.onDirectionChanged(next.direction);
     controlChartsTabPresenter.onRebuildPlotPressed();
 
-    appendLog("Stand impact parameters applied");
+    const bool reached = std::abs(next.beaufort - target.beaufort) < 0.001 &&
+                         std::abs(next.angleOfAttack - target.angleOfAttack) < 0.001 &&
+                         std::abs(next.direction - target.direction) < 0.001;
+
+    if (reached) {
+        standImpactTransitionTimer->stop();
+        appendLog("Manual stand impact target reached");
+    }
 }
 
 void MainWindow::selectTelemetryAxisColor() {
@@ -363,14 +474,27 @@ void MainWindow::selectTelemetryAxisColor() {
         return;
     }
 
-    const int axisIndex = telemetryAxisComboBox->currentData().toInt();
-    const domain::AxisId axisId = axisIndex == 0 ? domain::axis0 : domain::axis1;
-
-    telemetryChartsTabPresenter.onTelemetryAxisColorSelected(axisId, MainWindowUiAdapter::toDomainColor(color));
+    telemetryChartsTabPresenter.onTelemetryAxisColorSelected(selectedTelemetryAxisId(),
+                                                             MainWindowUiAdapter::toDomainColor(color));
 }
 
 double MainWindow::selectedStandDirectionDegrees() const {
     return standDirectionComboBox->currentData().toDouble();
+}
+
+void MainWindow::updateManualStandControlsEnabled() {
+    const bool manualEnabled = static_cast<domain::StandControlMode>(standControlModeComboBox->currentData().toInt()) ==
+                               domain::StandControlMode::Manual;
+
+    standBeaufortSpinBox->setEnabled(manualEnabled);
+    standAngleOfAttackSpinBox->setEnabled(manualEnabled);
+    standDirectionComboBox->setEnabled(manualEnabled);
+    standApplyButton->setEnabled(manualEnabled);
+}
+
+domain::AxisId MainWindow::selectedTelemetryAxisId() const {
+    const int sourceIndex = telemetrySourceComboBox->currentData().toInt();
+    return sourceIndex == 0 ? domain::axis0 : domain::axis1;
 }
 
 } // namespace ui

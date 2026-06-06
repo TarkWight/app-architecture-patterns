@@ -158,6 +158,33 @@ void application::session::SessionState::setTelemetryAxisColor(domain::AxisId ax
     notify();
 }
 
+void application::session::SessionState::setTelemetryAxisVisible(domain::AxisId axisId, bool visible) {
+    if (axisId == domain::axis0) {
+        data.telemetryAxisYVisible = visible;
+    } else if (axisId == domain::axis1) {
+        data.telemetryAxisZVisible = visible;
+    }
+
+    rebuildTelemetryPlot();
+    notify();
+}
+
+void application::session::SessionState::setStandControlMode(domain::StandControlMode mode) {
+    data.standControlMode = mode;
+    notify();
+}
+
+void application::session::SessionState::setAppliedStandImpact(domain::WindProfile profile) {
+    data.appliedStandImpact = domain::sanitize(std::move(profile));
+    data.windProfile = data.appliedStandImpact;
+    notify();
+}
+
+void application::session::SessionState::setTargetStandImpact(domain::WindProfile profile) {
+    data.targetStandImpact = domain::sanitize(std::move(profile));
+    notify();
+}
+
 void application::session::SessionState::setControlPlot(domain::PlotModel plot) {
     data.controlPlot = std::move(plot);
     notify();
@@ -244,16 +271,21 @@ void application::session::SessionState::rebuildTelemetryPlot() {
                 continue;
             }
 
-            if (sample.axisId == domain::axis0) {
+            if (sample.axisId == domain::axis0 && data.telemetryAxisYVisible) {
                 axisY.series.points.push_back(domain::Point{.x = x, .y = sample.position});
-            } else if (sample.axisId == domain::axis1) {
+            } else if (sample.axisId == domain::axis1 && data.telemetryAxisZVisible) {
                 axisZ.series.points.push_back(domain::Point{.x = x, .y = sample.position});
             }
         }
     }
 
-    plot.seriesList.push_back(std::move(axisY));
-    plot.seriesList.push_back(std::move(axisZ));
+    if (data.telemetryAxisYVisible) {
+        plot.seriesList.push_back(std::move(axisY));
+    }
+
+    if (data.telemetryAxisZVisible) {
+        plot.seriesList.push_back(std::move(axisZ));
+    }
 
     data.telemetryPlot = std::move(plot);
 }

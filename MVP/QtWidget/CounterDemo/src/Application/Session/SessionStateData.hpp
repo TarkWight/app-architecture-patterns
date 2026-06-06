@@ -4,6 +4,7 @@
 #include "../../Domain/AxisState.hpp"
 #include "../../Domain/AxisTelemetrySample.hpp"
 #include "../../Domain/Plot.hpp"
+#include "../../Domain/StandControlMode.hpp"
 #include "../../Domain/StandConnectionStatus.hpp"
 #include "../../Domain/TelemetryStatus.hpp"
 #include "../../Domain/TestExecutionStatus.hpp"
@@ -49,6 +50,13 @@ struct SessionStateData {
     bool telemetryFollowTail{true};
     domain::RgbColor telemetryAxisYColor{220, 60, 50};
     domain::RgbColor telemetryAxisZColor{40, 110, 210};
+    bool telemetryAxisYVisible{true};
+    bool telemetryAxisZVisible{true};
+
+    // ===== Stand control =====
+    domain::StandControlMode standControlMode{domain::StandControlMode::Manual};
+    domain::WindProfile appliedStandImpact{};
+    domain::WindProfile targetStandImpact{};
 
     // ===== Protocol / report =====
     domain::TestProtocol testProtocol{};

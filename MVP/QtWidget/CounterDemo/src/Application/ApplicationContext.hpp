@@ -14,7 +14,10 @@
 #include "UseCases/SetOperatorTestDurationUseCase.hpp"
 #include "UseCases/SetTestTimeSourceUseCase.hpp"
 #include "UseCases/SetTelemetryAxisColorUseCase.hpp"
+#include "UseCases/SetTelemetryAxisVisibleUseCase.hpp"
 #include "UseCases/SetTelemetryWindowUseCase.hpp"
+#include "UseCases/SetStandControlModeUseCase.hpp"
+#include "UseCases/SetStandImpactUseCase.hpp"
 #include "UseCases/StartTestExecutionUseCase.hpp"
 #include "UseCases/StopTestExecutionUseCase.hpp"
 #include "UseCases/UpdateTestProtocolUseCase.hpp"
@@ -79,6 +82,12 @@ struct ApplicationContext {
 
     application::useCases::SetTelemetryAxisColorUseCase setTelemetryAxisColorUseCase{sessionState};
 
+    application::useCases::SetTelemetryAxisVisibleUseCase setTelemetryAxisVisibleUseCase{sessionState};
+
+    application::useCases::SetStandControlModeUseCase setStandControlModeUseCase{sessionState};
+
+    application::useCases::SetStandImpactUseCase setStandImpactUseCase{sessionState};
+
     application::useCases::SetFunctionExpressionUseCase setFunctionExpressionUseCase{sessionState};
 
     application::useCases::SetLineColorUseCase setLineColorUseCase{sessionState};
@@ -110,7 +119,8 @@ struct ApplicationContext {
     presentation::telemetryChartsTab::TelemetryChartsTabPresenter telemetryChartsTabPresenter{
         presentation::telemetryChartsTab::TelemetryChartsTabPresenter::Dependencies{
             .setTelemetryWindowUseCase = setTelemetryWindowUseCase,
-            .setTelemetryAxisColorUseCase = setTelemetryAxisColorUseCase}};
+            .setTelemetryAxisColorUseCase = setTelemetryAxisColorUseCase,
+            .setTelemetryAxisVisibleUseCase = setTelemetryAxisVisibleUseCase}};
 
     presentation::controlChartsTab::ControlChartsTabPresenter controlChartsTabPresenter{
         presentation::controlChartsTab::ControlChartsTabPresenter::Dependencies{

@@ -40,6 +40,7 @@ class TestProtocolTabPresenter final {
     void onTestProtocolDroneParameterChanged(int index, std::string value);
 
     void onLoadPdfTomlPressed(const std::string &filePath);
+    void onSavePdfTomlTemplatePressed(const std::string &filePath);
     void onExportPdfPressed(const std::string &filePath);
 
   private:

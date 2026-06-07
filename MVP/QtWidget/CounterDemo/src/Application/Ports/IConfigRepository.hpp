@@ -14,6 +14,7 @@ class IConfigRepository {
 
     virtual application::dto::TelemetryConfig loadTelemetryConfig(const std::string &path) = 0;
     virtual application::dto::PdfReportConfig loadPdfReportConfig(const std::string &path) = 0;
+    virtual void savePdfReportTemplate(const std::string &path, const application::dto::PdfReportConfig &config) = 0;
 };
 
 } // namespace application::ports

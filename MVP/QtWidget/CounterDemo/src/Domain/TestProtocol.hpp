@@ -8,6 +8,7 @@
 namespace domain {
 
 struct TestProtocolParameter {
+    std::string key{};
     std::string label{};
     std::string value{};
 };

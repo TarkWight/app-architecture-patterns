@@ -10,39 +10,39 @@ namespace {
 
 std::vector<domain::TestProtocolParameter> requiredDroneParameters() {
     return {
-        {"Модель БПЛА", ""},
-        {"Серийный номер", ""},
-        {"Полетная нагрузка", "0"},
-        {"DR (%)", "0"},
-        {"Ток оборудования", "0"},
-        {"Дальность действия", "0"},
-        {"Скорость Max.", "0"},
-        {"Высота Max.", "0"},
-        {"Время полета max.", "0"},
-        {"Тип связи", ""},
-        {"Модель винтов", ""},
-        {"Конфигурация", ""},
-        {"Диаметр", "0"},
-        {"Мощность", "0"},
-        {"Max об/мин", "0"},
-        {"Количество лопастей", "0"},
-        {"Материал", ""},
-        {"Аккумулятор", ""},
-        {"Тип аккумулятора", ""},
-        {"Номинальная емкость (mAh)", "0"},
-        {"Число ячеек (S)", "0"},
-        {"Скорость разряда (C)", "0"},
-        {"Вес аккумулятора", "0"},
-        {"Напряжение 1й ячейки", "0"},
-        {"Модель двигателей", ""},
-        {"Диаметр вала", "0"},
-        {"Количество двигателей", "0"},
-        {"Производитель", ""},
-        {"KV", "0"},
-        {"Максимальная тяга (кг)", "0"},
-        {"Пиковый ток (A)", "0"},
-        {"Вес двигателя", "0"},
-        {"Версия прошивки", ""},
+        {"uav_model", "Модель БПЛА", ""},
+        {"serial_number", "Серийный номер", ""},
+        {"flight_payload", "Полетная нагрузка", "0"},
+        {"drag_ratio_percent", "DR (%)", "0"},
+        {"equipment_current", "Ток оборудования", "0"},
+        {"operation_range", "Дальность действия", "0"},
+        {"max_speed", "Скорость Max.", "0"},
+        {"max_altitude", "Высота Max.", "0"},
+        {"max_flight_time", "Время полета max.", "0"},
+        {"communication_type", "Тип связи", ""},
+        {"propeller_model", "Модель винтов", ""},
+        {"propeller_configuration", "Конфигурация", ""},
+        {"propeller_diameter", "Диаметр", "0"},
+        {"propeller_power", "Мощность", "0"},
+        {"propeller_max_rpm", "Max об/мин", "0"},
+        {"propeller_blade_count", "Количество лопастей", "0"},
+        {"propeller_material", "Материал", ""},
+        {"battery_model", "Аккумулятор", ""},
+        {"battery_type", "Тип аккумулятора", ""},
+        {"battery_capacity_mah", "Номинальная емкость (mAh)", "0"},
+        {"battery_cell_count", "Число ячеек (S)", "0"},
+        {"battery_discharge_rate_c", "Скорость разряда (C)", "0"},
+        {"battery_weight", "Вес аккумулятора", "0"},
+        {"battery_cell_voltage", "Напряжение 1й ячейки", "0"},
+        {"motor_model", "Модель двигателей", ""},
+        {"motor_shaft_diameter", "Диаметр вала", "0"},
+        {"motor_count", "Количество двигателей", "0"},
+        {"motor_manufacturer", "Производитель", ""},
+        {"motor_kv", "KV", "0"},
+        {"motor_max_thrust_kg", "Максимальная тяга (кг)", "0"},
+        {"motor_peak_current_a", "Пиковый ток (A)", "0"},
+        {"motor_weight", "Вес двигателя", "0"},
+        {"firmware_version", "Версия прошивки", ""},
     };
 }
 
@@ -52,7 +52,8 @@ mergeWithRequiredParameters(const std::vector<domain::TestProtocolParameter> &lo
 
     for (const auto &loadedParameter : loadedParameters) {
         auto existing = std::find_if(parameters.begin(), parameters.end(), [&loadedParameter](const auto &parameter) {
-            return parameter.label == loadedParameter.label;
+            return (!loadedParameter.key.empty() && parameter.key == loadedParameter.key) ||
+                   (!loadedParameter.label.empty() && parameter.label == loadedParameter.label);
         });
 
         if (existing == parameters.end()) {
@@ -82,6 +83,14 @@ void applyConfig(application::session::SessionState &state, const application::d
     state.setTestProtocolDroneParameters(mergeWithRequiredParameters(config.droneParameters));
 }
 
+application::dto::PdfReportConfig emptyTemplateConfig() {
+    application::dto::PdfReportConfig config{};
+    config.testMode = "manual";
+    config.testProgram = "test1";
+    config.droneParameters = requiredDroneParameters();
+    return config;
+}
+
 } // namespace
 
 LoadPdfReportDefaultsUseCase::LoadPdfReportDefaultsUseCase(application::session::SessionState &state,
@@ -96,6 +105,10 @@ void LoadPdfReportDefaultsUseCase::execute(const std::string &configPath) {
 
 void LoadPdfReportDefaultsUseCase::applyEmptyDefaults() {
     applyConfig(state, application::dto::PdfReportConfig{});
+}
+
+void LoadPdfReportDefaultsUseCase::saveEmptyTemplate(const std::string &configPath) {
+    configRepository.savePdfReportTemplate(configPath, emptyTemplateConfig());
 }
 
 } // namespace application::useCases

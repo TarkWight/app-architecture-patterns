@@ -46,6 +46,7 @@ class TestProtocolTabWidget final : public QWidget, public presentation::testPro
     QComboBox *testModeComboBox{nullptr};
     QComboBox *testProgramComboBox{nullptr};
     QPushButton *loadPdfTomlButton{nullptr};
+    QPushButton *savePdfTomlTemplateButton{nullptr};
     QGridLayout *droneParametersLayout{nullptr};
     std::vector<QLineEdit *> droneParameterEdits{};
 

@@ -105,6 +105,19 @@ void TestProtocolTabPresenter::onLoadPdfTomlPressed(const std::string &filePath)
     }
 }
 
+void TestProtocolTabPresenter::onSavePdfTomlTemplatePressed(const std::string &filePath) {
+    if (view == nullptr) {
+        return;
+    }
+
+    try {
+        loadPdfReportDefaultsUseCase.saveEmptyTemplate(filePath);
+        view->appendLog(std::string{"Empty PDF report TOML template saved: "} + filePath);
+    } catch (const std::exception &e) {
+        view->appendLog(std::string{"PDF report TOML template save failed: "} + e.what());
+    }
+}
+
 void TestProtocolTabPresenter::onExportPdfPressed(const std::string &filePath) {
     exportPdfUseCase.execute(filePath);
 

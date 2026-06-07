@@ -173,6 +173,10 @@ void TestProtocolTabWidget::setupReportFormLabels() {
     loadPdfTomlButton = new QPushButton(QStringLiteral("Загрузить TOML"), header);
     loadPdfTomlButton->setToolTip(QStringLiteral("Подгрузить значения полей протокола из .toml файла"));
     headerLayout->addWidget(loadPdfTomlButton);
+
+    savePdfTomlTemplateButton = new QPushButton(QStringLiteral("Создать шаблон TOML"), header);
+    savePdfTomlTemplateButton->setToolTip(QStringLiteral("Сохранить пустой .toml шаблон для полей протокола"));
+    headerLayout->addWidget(savePdfTomlTemplateButton);
     ui->verticalLayoutRoot->insertWidget(2, header);
 
     const std::array<const char *, 8> labels{"Организация", "Номер лицензии", "Адрес",     "ФИО оператора",
@@ -274,6 +278,18 @@ void TestProtocolTabWidget::connectSignals() {
         }
 
         presenter.onLoadPdfTomlPressed(filePath.toStdString());
+    });
+
+    QObject::connect(savePdfTomlTemplateButton, &QPushButton::clicked, this, [this]() {
+        const QString filePath = QFileDialog::getSaveFileName(this, QStringLiteral("Создать шаблон PDF TOML"),
+                                                              QStringLiteral("pdf_report.template.toml"),
+                                                              QStringLiteral("TOML Files (*.toml);;All Files (*)"));
+
+        if (filePath.isEmpty()) {
+            return;
+        }
+
+        presenter.onSavePdfTomlTemplatePressed(filePath.toStdString());
     });
 
     QObject::connect(ui->buttonExportPdf, &QPushButton::clicked, this, [this]() {

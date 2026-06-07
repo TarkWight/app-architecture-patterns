@@ -124,7 +124,8 @@ void MainWindow::setStandConnectionStatusText(const std::string &text) {
 }
 
 void MainWindow::setFunctionExpression(const std::string &expression) {
-    if (controlFormulaLineEdit == nullptr || controlFormulaLineEdit->text().toStdString() == expression) {
+    if (controlFormulaLineEdit == nullptr || controlFormulaLineEdit->hasFocus() ||
+        controlFormulaLineEdit->text().toStdString() == expression) {
         return;
     }
 
@@ -384,7 +385,8 @@ void MainWindow::connectSessionSignals() {
 
     QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::functionExpressionChanged, this,
                      [this](const QString &expression) {
-                         if (controlFormulaLineEdit == nullptr || controlFormulaLineEdit->text() == expression) {
+                         if (controlFormulaLineEdit == nullptr || controlFormulaLineEdit->hasFocus() ||
+                             controlFormulaLineEdit->text() == expression) {
                              return;
                          }
 

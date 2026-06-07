@@ -28,6 +28,16 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(tomlplusplus)
 
+include(CTest)
+if (BUILD_TESTING)
+  FetchContent_Declare(
+      googletest
+      GIT_REPOSITORY https://github.com/google/googletest.git
+      GIT_TAG v1.15.2
+  )
+  FetchContent_MakeAvailable(googletest)
+endif()
+
 qt_add_executable(develop
   src/main.cpp
 
@@ -184,4 +194,32 @@ enable_code_quality(develop)
 
 if (APPLE)
   set_target_properties(develop PROPERTIES MACOSX_BUNDLE TRUE)
+endif()
+
+if (BUILD_TESTING)
+  add_executable(domain_tests
+    tests/Domain/TestExecutionTransitionsTest.cpp
+    tests/Domain/WindProfileTest.cpp
+  )
+
+  target_include_directories(domain_tests
+    PRIVATE
+      ${CMAKE_CURRENT_SOURCE_DIR}/src
+  )
+
+  target_link_libraries(domain_tests
+    PRIVATE
+      GTest::gtest_main
+  )
+
+  if (APPLE AND EXISTS "/opt/homebrew/opt/llvm/lib/c++")
+    target_link_options(domain_tests
+      PRIVATE
+        -L/opt/homebrew/opt/llvm/lib/c++
+        -Wl,-rpath,/opt/homebrew/opt/llvm/lib/c++
+    )
+  endif()
+
+  include(GoogleTest)
+  gtest_discover_tests(domain_tests)
 endif()

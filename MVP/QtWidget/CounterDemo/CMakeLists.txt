@@ -52,6 +52,7 @@ qt_add_executable(develop
   src/Domain/TelemetryStatus.hpp
   src/Domain/StandConnectionStatus.hpp
   src/Domain/StandImpactTransition.hpp
+  src/Domain/StandScenario.hpp
   src/Domain/TestTimeSource.hpp
   src/Domain/TestTimeDirection.hpp
   src/Domain/Id.hpp
@@ -200,6 +201,7 @@ endif()
 if (BUILD_TESTING)
   add_executable(domain_tests
     tests/Domain/AxisControlCommandTest.cpp
+    tests/Domain/StandScenarioTest.cpp
     tests/Domain/StandImpactTransitionTest.cpp
     tests/Domain/TestExecutionTransitionsTest.cpp
     tests/Domain/TestProtocolTest.cpp

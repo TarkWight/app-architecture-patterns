@@ -10,6 +10,7 @@
 #include "../Domain/AxisId.hpp"
 #include "../Domain/StandControlMode.hpp"
 #include "../Domain/StandImpactTransition.hpp"
+#include "../Domain/StandScenario.hpp"
 #include "../Domain/WindProfile.hpp"
 
 #include <QCheckBox>
@@ -417,7 +418,8 @@ void MainWindow::setTestTimeSource(domain::TestTimeSource source) {
 
 void MainWindow::applyStandInputs() {
     const auto &stateData = sessionAdapter.getState().get();
-    if (stateData.standControlMode != domain::StandControlMode::Manual) {
+    const domain::StandScenario scenario{stateData.standControlMode};
+    if (!scenario.allowsManualImpact()) {
         const std::string message = "Manual stand control is disabled for this test mode";
         appendLog(message);
         showOperatorWarning("Ручное управление заблокировано", message);
@@ -433,11 +435,16 @@ void MainWindow::applyStandInputs() {
 
     appendLog("Manual stand impact target accepted: " + formatImpact(stateData.appliedStandImpact) + " -> " +
               formatImpact(target));
+
+    if (scenario.manualImpactPolicy() == domain::ManualImpactPolicy::ReturnToScenarioAfterManualImpact) {
+        appendLog("Hybrid stand mode accepted manual impact as a temporary override");
+    }
 }
 
 void MainWindow::advanceStandImpactTransition() {
     const auto &stateData = sessionAdapter.getState().get();
-    if (stateData.standControlMode != domain::StandControlMode::Manual) {
+    const domain::StandScenario scenario{stateData.standControlMode};
+    if (!scenario.allowsManualImpact()) {
         standImpactTransitionTimer->stop();
         return;
     }
@@ -456,6 +463,10 @@ void MainWindow::advanceStandImpactTransition() {
     if (transition.targetReached) {
         standImpactTransitionTimer->stop();
         appendLog("Manual stand impact target reached: " + formatImpact(next));
+
+        if (scenario.manualImpactPolicy() == domain::ManualImpactPolicy::ReturnToScenarioAfterManualImpact) {
+            appendLog("Hybrid scenario return is pending scenario engine implementation");
+        }
     }
 }
 
@@ -474,8 +485,8 @@ double MainWindow::selectedStandDirectionDegrees() const {
 }
 
 void MainWindow::updateManualStandControlsEnabled() {
-    const bool manualEnabled = static_cast<domain::StandControlMode>(standControlModeComboBox->currentData().toInt()) ==
-                               domain::StandControlMode::Manual;
+    const auto mode = static_cast<domain::StandControlMode>(standControlModeComboBox->currentData().toInt());
+    const bool manualEnabled = !domain::StandScenario{mode}.locksManualControls();
 
     standBeaufortSpinBox->setEnabled(manualEnabled);
     standAngleOfAttackSpinBox->setEnabled(manualEnabled);

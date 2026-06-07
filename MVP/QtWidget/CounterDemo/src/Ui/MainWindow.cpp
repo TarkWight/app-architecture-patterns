@@ -48,9 +48,9 @@ std::string compassLabel(double degrees) {
 
 std::string formatImpact(const domain::WindProfile &profile) {
     std::ostringstream out;
-    out << std::fixed << std::setprecision(1) << "Bft=" << profile.beaufort
-        << ", dir=" << compassLabel(profile.direction) << " (" << profile.direction
-        << " deg), AoA=" << profile.angleOfAttack << " deg";
+    out << std::fixed << std::setprecision(1) << "Bft=" << profile.beaufort.value()
+        << ", dir=" << compassLabel(profile.direction.degrees()) << " (" << profile.direction.degrees()
+        << " deg), AoA=" << profile.angleOfAttack.degrees() << " deg";
     return out.str();
 }
 
@@ -423,10 +423,8 @@ void MainWindow::applyStandInputs() {
         return;
     }
 
-    domain::WindProfile target{};
-    target.beaufort = standBeaufortSpinBox->value();
-    target.angleOfAttack = standAngleOfAttackSpinBox->value();
-    target.direction = selectedStandDirectionDegrees();
+    domain::WindProfile target = domain::makeWindProfile(standBeaufortSpinBox->value(), selectedStandDirectionDegrees(),
+                                                         standAngleOfAttackSpinBox->value());
     target.formula = stateData.functionExpression;
 
     setStandImpactUseCase.setTarget(target);
@@ -455,22 +453,21 @@ void MainWindow::advanceStandImpactTransition() {
         return value + (delta > 0.0 ? step : -step);
     };
 
-    domain::WindProfile next = current;
-    next.beaufort = stepTowards(current.beaufort, target.beaufort, 0.1);
-    next.angleOfAttack = stepTowards(current.angleOfAttack, target.angleOfAttack, 1.0);
-    next.direction = stepTowards(current.direction, target.direction, 2.5);
-    next.formula = target.formula;
+    domain::WindProfile next = domain::makeWindProfile(
+        stepTowards(current.beaufort.value(), target.beaufort.value(), 0.1),
+        stepTowards(current.direction.degrees(), target.direction.degrees(), 2.5),
+        stepTowards(current.angleOfAttack.degrees(), target.angleOfAttack.degrees(), 1.0), target.formula);
 
     setStandImpactUseCase.setApplied(next);
 
-    controlChartsTabPresenter.onBeaufortChanged(next.beaufort);
-    controlChartsTabPresenter.onAngleOfAttackChanged(next.angleOfAttack);
-    controlChartsTabPresenter.onDirectionChanged(next.direction);
+    controlChartsTabPresenter.onBeaufortChanged(next.beaufort.value());
+    controlChartsTabPresenter.onAngleOfAttackChanged(next.angleOfAttack.degrees());
+    controlChartsTabPresenter.onDirectionChanged(next.direction.degrees());
     controlChartsTabPresenter.onRebuildPlotPressed();
 
-    const bool reached = std::abs(next.beaufort - target.beaufort) < 0.001 &&
-                         std::abs(next.angleOfAttack - target.angleOfAttack) < 0.001 &&
-                         std::abs(next.direction - target.direction) < 0.001;
+    const bool reached = std::abs(next.beaufort.value() - target.beaufort.value()) < 0.001 &&
+                         std::abs(next.angleOfAttack.degrees() - target.angleOfAttack.degrees()) < 0.001 &&
+                         std::abs(next.direction.degrees() - target.direction.degrees()) < 0.001;
 
     if (reached) {
         standImpactTransitionTimer->stop();

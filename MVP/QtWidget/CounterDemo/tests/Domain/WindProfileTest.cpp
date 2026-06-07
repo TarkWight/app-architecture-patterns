@@ -5,36 +5,26 @@
 namespace {
 
 TEST(WindProfileTest, ClampsBeaufortToOperationalRange) {
-    domain::WindProfile low{};
-    low.beaufort = -1.0;
-
-    domain::WindProfile high{};
-    high.beaufort = 12.0;
-
-    EXPECT_DOUBLE_EQ(domain::sanitize(low).beaufort, domain::minOperationalBeaufort);
-    EXPECT_DOUBLE_EQ(domain::sanitize(high).beaufort, domain::maxOperationalBeaufort);
+    EXPECT_DOUBLE_EQ(domain::Beaufort::from(-1.0).value(), domain::minOperationalBeaufort);
+    EXPECT_DOUBLE_EQ(domain::Beaufort::from(12.0).value(), domain::maxOperationalBeaufort);
 }
 
 TEST(WindProfileTest, NormalizesDirectionToCompassCircle) {
-    domain::WindProfile negative{};
-    negative.direction = -22.5;
-
-    domain::WindProfile overflow{};
-    overflow.direction = 382.5;
-
-    EXPECT_DOUBLE_EQ(domain::sanitize(negative).direction, 337.5);
-    EXPECT_DOUBLE_EQ(domain::sanitize(overflow).direction, 22.5);
+    EXPECT_DOUBLE_EQ(domain::WindDirection::from(-22.5).degrees(), 337.5);
+    EXPECT_DOUBLE_EQ(domain::WindDirection::from(382.5).degrees(), 22.5);
 }
 
 TEST(WindProfileTest, ClampsAngleOfAttackToStandRange) {
-    domain::WindProfile low{};
-    low.angleOfAttack = -120.0;
+    EXPECT_DOUBLE_EQ(domain::AngleOfAttack::from(-120.0).degrees(), domain::minAngleOfAttack);
+    EXPECT_DOUBLE_EQ(domain::AngleOfAttack::from(120.0).degrees(), domain::maxAngleOfAttack);
+}
 
-    domain::WindProfile high{};
-    high.angleOfAttack = 120.0;
+TEST(WindProfileTest, FactoryCreatesProfileWithNormalizedValues) {
+    const auto profile = domain::makeWindProfile(9.0, -45.0, 120.0);
 
-    EXPECT_DOUBLE_EQ(domain::sanitize(low).angleOfAttack, -90.0);
-    EXPECT_DOUBLE_EQ(domain::sanitize(high).angleOfAttack, 90.0);
+    EXPECT_DOUBLE_EQ(profile.beaufort.value(), domain::maxOperationalBeaufort);
+    EXPECT_DOUBLE_EQ(profile.direction.degrees(), 315.0);
+    EXPECT_DOUBLE_EQ(profile.angleOfAttack.degrees(), domain::maxAngleOfAttack);
 }
 
 } // namespace

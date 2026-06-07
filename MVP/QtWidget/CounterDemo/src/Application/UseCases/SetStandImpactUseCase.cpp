@@ -15,13 +15,13 @@ constexpr float axis0TorqueMultiplier = 1.3F;
 constexpr double activeEpsilon = 0.001;
 
 domain::AxisControlCommand makeAxis0Command(const domain::WindProfile &profile) {
-    const float torque = static_cast<float>(profile.beaufort) * axis0TorqueMultiplier;
-    const bool active = std::abs(profile.angleOfAttack) > activeEpsilon || std::abs(torque) > activeEpsilon;
+    const float torque = static_cast<float>(profile.beaufort.value()) * axis0TorqueMultiplier;
+    const bool active = std::abs(profile.angleOfAttack.degrees()) > activeEpsilon || std::abs(torque) > activeEpsilon;
     if (!active) {
         return domain::stopAxisCommand();
     }
 
-    return domain::sanitize(domain::AxisControlCommand{.position = static_cast<float>(profile.angleOfAttack),
+    return domain::sanitize(domain::AxisControlCommand{.position = static_cast<float>(profile.angleOfAttack.degrees()),
                                                        .velocity = commandVelocity,
                                                        .torque = torque,
                                                        .cmd1 = true,
@@ -31,13 +31,13 @@ domain::AxisControlCommand makeAxis0Command(const domain::WindProfile &profile) 
 }
 
 domain::AxisControlCommand makeAxis1Command(const domain::WindProfile &profile) {
-    const float torque = static_cast<float>(profile.beaufort);
-    const bool active = std::abs(profile.direction) > activeEpsilon || std::abs(torque) > activeEpsilon;
+    const float torque = static_cast<float>(profile.beaufort.value());
+    const bool active = std::abs(profile.direction.degrees()) > activeEpsilon || std::abs(torque) > activeEpsilon;
     if (!active) {
         return domain::stopAxisCommand();
     }
 
-    return domain::sanitize(domain::AxisControlCommand{.position = static_cast<float>(profile.direction),
+    return domain::sanitize(domain::AxisControlCommand{.position = static_cast<float>(profile.direction.degrees()),
                                                        .velocity = commandVelocity,
                                                        .torque = torque,
                                                        .cmd1 = true,

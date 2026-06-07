@@ -27,8 +27,8 @@ domain::PlotModel BuildControlPlotUseCase::execute() {
 
     plot.series.points.reserve(static_cast<std::size_t>(sampleCount) + 1);
 
-    const double beaufort = stateData.windProfile.beaufort;
-    const double angleOfAttack = stateData.windProfile.angleOfAttack;
+    const double beaufort = stateData.windProfile.beaufort.value();
+    const double angleOfAttack = stateData.windProfile.angleOfAttack.degrees();
 
     const double windFactor = 1.0 + (beaufort * 0.05);
     const double attackOffset = angleOfAttack * 0.01;

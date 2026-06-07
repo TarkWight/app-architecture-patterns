@@ -29,7 +29,16 @@ void TestProtocolTabPresenter::onViewReady() {
         loadPdfReportDefaultsUseCase.execute(pdfReportConfigPath);
         view->appendLog("PDF report defaults loaded");
     } catch (const std::exception &e) {
+        loadPdfReportDefaultsUseCase.applyEmptyDefaults();
         view->appendLog(std::string{"PDF report defaults load failed: "} + e.what());
+    }
+
+    syncViewFromState();
+}
+
+void TestProtocolTabPresenter::syncViewFromState() {
+    if (view == nullptr) {
+        return;
     }
 
     const auto &session = state.get();
@@ -80,6 +89,20 @@ void TestProtocolTabPresenter::onTestProtocolProgramChanged(std::string program)
 
 void TestProtocolTabPresenter::onTestProtocolDroneParameterChanged(int index, std::string value) {
     updateTestProtocolUseCase.updateDroneParameterValue(index, std::move(value));
+}
+
+void TestProtocolTabPresenter::onLoadPdfTomlPressed(const std::string &filePath) {
+    if (view == nullptr) {
+        return;
+    }
+
+    try {
+        loadPdfReportDefaultsUseCase.execute(filePath);
+        syncViewFromState();
+        view->appendLog(std::string{"PDF report fields loaded from TOML: "} + filePath);
+    } catch (const std::exception &e) {
+        view->appendLog(std::string{"PDF report TOML load failed: "} + e.what());
+    }
 }
 
 void TestProtocolTabPresenter::onExportPdfPressed(const std::string &filePath) {

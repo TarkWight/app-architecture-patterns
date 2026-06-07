@@ -6,8 +6,10 @@
 #include <QFileDialog>
 #include <QFrame>
 #include <QGroupBox>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
+#include <QPushButton>
 #include <QScrollArea>
 #include <QSignalBlocker>
 #include <QSizePolicy>
@@ -162,6 +164,17 @@ void TestProtocolTabWidget::setupScrollableContent() {
 }
 
 void TestProtocolTabWidget::setupReportFormLabels() {
+    auto *header = new QWidget(this);
+    auto *headerLayout = new QHBoxLayout(header);
+    headerLayout->setContentsMargins(0, 0, 0, 0);
+    headerLayout->addWidget(new QLabel(QStringLiteral("Данные PDF-протокола, организации и результата"), header));
+    headerLayout->addStretch(1);
+
+    loadPdfTomlButton = new QPushButton(QStringLiteral("Загрузить TOML"), header);
+    loadPdfTomlButton->setToolTip(QStringLiteral("Подгрузить значения полей протокола из .toml файла"));
+    headerLayout->addWidget(loadPdfTomlButton);
+    ui->verticalLayoutRoot->insertWidget(2, header);
+
     const std::array<const char *, 8> labels{"Организация", "Номер лицензии", "Адрес",     "ФИО оператора",
                                              "Комментарий", "Заключение",     "Результат", "Резерв"};
 
@@ -249,6 +262,18 @@ void TestProtocolTabWidget::connectSignals() {
 
     QObject::connect(testProgramComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {
         presenter.onTestProtocolProgramChanged(testProgramComboBox->currentData().toString().toStdString());
+    });
+
+    QObject::connect(loadPdfTomlButton, &QPushButton::clicked, this, [this]() {
+        const QString filePath =
+            QFileDialog::getOpenFileName(this, QStringLiteral("Загрузить данные PDF из TOML"), QStringLiteral(""),
+                                         QStringLiteral("TOML Files (*.toml);;All Files (*)"));
+
+        if (filePath.isEmpty()) {
+            return;
+        }
+
+        presenter.onLoadPdfTomlPressed(filePath.toStdString());
     });
 
     QObject::connect(ui->buttonExportPdf, &QPushButton::clicked, this, [this]() {

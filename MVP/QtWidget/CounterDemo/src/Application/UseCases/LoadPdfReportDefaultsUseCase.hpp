@@ -14,6 +14,7 @@ class LoadPdfReportDefaultsUseCase final {
                                  application::ports::IConfigRepository &configRepository);
 
     void execute(const std::string &configPath);
+    void applyEmptyDefaults();
 
   private:
     application::session::SessionState &state;

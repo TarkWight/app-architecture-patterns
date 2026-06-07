@@ -39,6 +39,7 @@ class TestProtocolTabPresenter final {
     void onTestProtocolProgramChanged(std::string program);
     void onTestProtocolDroneParameterChanged(int index, std::string value);
 
+    void onLoadPdfTomlPressed(const std::string &filePath);
     void onExportPdfPressed(const std::string &filePath);
 
   private:
@@ -50,6 +51,8 @@ class TestProtocolTabPresenter final {
     std::string pdfReportConfigPath;
 
     ITestProtocolTabView *view{nullptr};
+
+    void syncViewFromState();
 };
 
 } // namespace presentation::testProtocolTab

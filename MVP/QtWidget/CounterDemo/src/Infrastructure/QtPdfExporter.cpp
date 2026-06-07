@@ -10,6 +10,7 @@
 #include <QPdfWriter>
 #include <QPen>
 #include <QString>
+#include <QTextOption>
 
 #include <algorithm>
 #include <array>
@@ -45,6 +46,11 @@ struct VerticalCursor {
 struct DrawingContext {
     QPainter &painter;
     PdfPage page;
+};
+
+struct PlotBlock {
+    const domain::PlotModel &plot;
+    QString caption;
 };
 
 PdfPage pageSpec(const QPdfWriter &writer) {
@@ -125,7 +131,12 @@ void drawCell(QPainter &painter, const QRect &rect, const QString &text, bool he
         painter.setFont(reportFont(9, QFont::Bold));
     }
 
-    painter.drawText(rect.adjusted(12, 12, -12, -12), Qt::AlignCenter | Qt::TextWordWrap, text);
+    QTextOption option;
+    option.setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    option.setWrapMode(QTextOption::WordWrap);
+
+    const QRectF textRect = QRectF(rect).adjusted(14.0, 18.0, -14.0, -18.0);
+    painter.drawText(textRect, text, option);
     painter.setFont(oldFont);
 }
 
@@ -139,7 +150,7 @@ void drawReportTable(DrawingContext &context, VerticalCursor &cursor,
                                     context.page.contentWidth * 19 / 100};
 
     const QFontMetrics tableMetrics(context.painter.font());
-    const int rowHeight = std::max(104, tableMetrics.height() * 3);
+    const int rowHeight = std::max(132, tableMetrics.height() * 4);
     int x = context.page.left;
 
     for (std::size_t i = 0; i < headers.size(); ++i) {
@@ -163,16 +174,26 @@ void drawReportTable(DrawingContext &context, VerticalCursor &cursor,
     cursor.y += sectionSpacing;
 }
 
-void drawPlotPage(DrawingContext &context, const domain::PlotModel &plot, const QString &caption) {
-    VerticalCursor cursor{.y = context.page.top};
-    const QRect plotRect(context.page.left, cursor.y, context.page.contentWidth,
-                         context.page.height - (2 * pageMargin) - 120);
+void drawPlotWithCaption(DrawingContext &context, VerticalCursor &cursor, const PlotBlock &block, int plotHeight) {
+    const QRect plotRect(context.page.left, cursor.y, context.page.contentWidth, plotHeight);
 
-    ui::render::PlotRenderer::drawPlot(context.painter, plotRect, plot);
+    ui::render::PlotRenderer::drawPlot(context.painter, plotRect, block.plot);
 
     cursor.y = plotRect.bottom() + 40;
     context.painter.setFont(reportFont(11));
-    drawCenteredLine(context, cursor, caption, 80);
+    drawCenteredLine(context, cursor, block.caption, 80);
+    cursor.y += 60;
+}
+
+void drawPlotsPage(DrawingContext &context, const application::dto::PdfDocumentModel &document) {
+    VerticalCursor cursor{.y = context.page.top};
+    const int availableHeight = context.page.height - (2 * pageMargin);
+    const int plotHeight = (availableHeight - 300) / 2;
+
+    drawPlotWithCaption(context, cursor, PlotBlock{document.controlPlot, toQString(document.controlPlotCaption)},
+                        plotHeight);
+    drawPlotWithCaption(context, cursor, PlotBlock{document.telemetryPlot, toQString(document.telemetryPlotCaption)},
+                        plotHeight);
 }
 
 void drawDroneParameters(DrawingContext &context, VerticalCursor &cursor,
@@ -183,15 +204,21 @@ void drawDroneParameters(DrawingContext &context, VerticalCursor &cursor,
     }
 
     const QFontMetrics parameterMetrics(context.painter.font());
-    const int rowHeight = std::max(68, parameterMetrics.height() + 28);
-    const int labelWidth = context.page.contentWidth * 42 / 100;
-    const int valueWidth = context.page.contentWidth - labelWidth;
+    const int rowHeight = std::max(84, parameterMetrics.height() + 42);
+    const int pairWidth = context.page.contentWidth / 2;
+    const int labelWidth = pairWidth * 58 / 100;
+    const int valueWidth = pairWidth - labelWidth;
 
-    for (const auto &parameter : parameters) {
-        const QRect labelRect(context.page.left, cursor.y, labelWidth, rowHeight);
-        const QRect valueRect(context.page.left + labelWidth, cursor.y, valueWidth, rowHeight);
-        drawCell(context.painter, labelRect, toQString(parameter.label), false);
-        drawCell(context.painter, valueRect, toQString(parameter.value), false);
+    for (std::size_t index = 0; index < parameters.size(); index += 2) {
+        for (std::size_t column = 0; column < 2 && (index + column) < parameters.size(); ++column) {
+            const auto &parameter = parameters[index + column];
+            const int x = context.page.left + static_cast<int>(column) * pairWidth;
+            const QRect labelRect(x, cursor.y, labelWidth, rowHeight);
+            const QRect valueRect(x + labelWidth, cursor.y, valueWidth, rowHeight);
+            drawCell(context.painter, labelRect, toQString(parameter.label), false);
+            drawCell(context.painter, valueRect, toQString(parameter.value), false);
+        }
+
         cursor.y += rowHeight;
     }
 
@@ -264,10 +291,7 @@ void QtPdfExporter::exportDocument(const application::dto::PdfDocumentModel &doc
     drawReportTable(context, cursor, document);
 
     writer.newPage();
-    drawPlotPage(context, document.controlPlot, toQString(document.controlPlotCaption));
-
-    writer.newPage();
-    drawPlotPage(context, document.telemetryPlot, toQString(document.telemetryPlotCaption));
+    drawPlotsPage(context, document);
 
     writer.newPage();
     drawSummaryPage(context, document);

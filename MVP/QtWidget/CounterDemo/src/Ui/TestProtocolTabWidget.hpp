@@ -12,6 +12,7 @@
 class QComboBox;
 class QGridLayout;
 class QLineEdit;
+class QPushButton;
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -44,6 +45,7 @@ class TestProtocolTabWidget final : public QWidget, public presentation::testPro
     infrastructure::SessionStateQtAdapter &sessionAdapter;
     QComboBox *testModeComboBox{nullptr};
     QComboBox *testProgramComboBox{nullptr};
+    QPushButton *loadPdfTomlButton{nullptr};
     QGridLayout *droneParametersLayout{nullptr};
     std::vector<QLineEdit *> droneParameterEdits{};
 

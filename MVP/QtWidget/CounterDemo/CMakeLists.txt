@@ -135,7 +135,7 @@ qt_add_executable(develop
 
   src/Infrastructure/QtTextLogger.hpp
   src/Infrastructure/QtTextLogger.cpp
-  src/Infrastructure/SimpleFunctionEngineStub.hpp
+  src/Infrastructure/SimpleFunctionEngine.hpp
   src/Infrastructure/QtTestExecutionScheduler.hpp
   src/Infrastructure/QtTestExecutionScheduler.cpp
   src/Infrastructure/SessionStateQtAdapter.hpp
@@ -207,6 +207,7 @@ if (BUILD_TESTING)
     tests/Domain/TestProtocolTest.cpp
     tests/Domain/TimeTest.cpp
     tests/Domain/WindProfileTest.cpp
+    tests/Infrastructure/SimpleFunctionEngineTest.cpp
   )
 
   target_include_directories(domain_tests

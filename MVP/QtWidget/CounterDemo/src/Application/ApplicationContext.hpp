@@ -36,7 +36,7 @@
 #include "../Infrastructure/QtTextLogger.hpp"
 #include "../Infrastructure/QtTestExecutionScheduler.hpp"
 #include "../Infrastructure/SessionStateQtAdapter.hpp"
-#include "../Infrastructure/SimpleFunctionEngineStub.hpp"
+#include "../Infrastructure/SimpleFunctionEngine.hpp"
 
 #include "../Presentation/ShellPresenter.hpp"
 #include "../Presentation/TelemetryChartsTab/TelemetryChartsTabPresenter.hpp"
@@ -53,7 +53,7 @@ struct ApplicationContext {
 
     infrastructure::QtTextLogger logger{[](const std::string &) {}};
 
-    infrastructure::SimpleFunctionEngineStub functionEngine;
+    infrastructure::SimpleFunctionEngine functionEngine;
     infrastructure::QtTestExecutionScheduler testExecutionScheduler;
     infrastructure::QtPdfExporter pdfExporter;
     infrastructure::SessionStateQtAdapter sessionAdapter{sessionState};

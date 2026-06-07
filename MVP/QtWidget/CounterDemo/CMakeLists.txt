@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 4.0.1)
-project("MVP - Counter" LANGUAGES CXX)
+project("UAS Test Stand MVP" LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

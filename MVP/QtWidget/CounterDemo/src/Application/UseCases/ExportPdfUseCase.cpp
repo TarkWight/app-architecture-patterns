@@ -28,36 +28,6 @@ std::string todayDate() {
     return out.str();
 }
 
-std::string testModeTitle(const std::string &mode) {
-    if (mode == "hybrid") {
-        return "Гибридное";
-    }
-    if (mode == "automatic") {
-        return "Автоматическое";
-    }
-    return "Ручное";
-}
-
-std::string testProgramTitle(const std::string &program) {
-    if (program == "test2") {
-        return "ИСПЫТАНИЕ МАКСИМАЛЬНОЙ ВЕТРОВОЙ НАГРУЗКИ БПЛА";
-    }
-    if (program == "test3") {
-        return "ИСПЫТАНИЕ БПЛА С УЧЕТОМ ВЕТРОВОЙ НАГРУЗКИ";
-    }
-    return "ИСПЫТАНИЕ УСТОЙЧИВОСТИ БПЛА В ИДЕАЛЬНЫХ УСЛОВИЯХ";
-}
-
-std::string testProgramShortTitle(const std::string &program) {
-    if (program == "test2") {
-        return "Определение максимальных параметров";
-    }
-    if (program == "test3") {
-        return "Исследование временной перспективы";
-    }
-    return "Полет в штиль";
-}
-
 } // namespace
 
 ExportPdfUseCase::ExportPdfUseCase(application::session::SessionState &state,
@@ -74,9 +44,9 @@ application::dto::PdfDocumentModel ExportPdfUseCase::buildDocument() const {
     document.organization = valueOrDefault(lines[0], "Организация не указана");
     document.licenseNumber = valueOrDefault(lines[1], "не указан");
     document.address = valueOrDefault(lines[2], "Адрес не указан");
-    document.testMode = testModeTitle(session.testProtocol.testMode);
-    document.testProgramTitle = testProgramTitle(session.testProtocol.testProgram);
-    document.testProgramShortTitle = testProgramShortTitle(session.testProtocol.testProgram);
+    document.testMode = domain::testModeTitle(session.testProtocol.testMode);
+    document.testProgramTitle = domain::testProgramTitle(session.testProtocol.testProgram);
+    document.testProgramShortTitle = domain::testProgramShortTitle(session.testProtocol.testProgram);
     document.operatorName = valueOrDefault(lines[3], "не указан");
     document.comment = lines[4];
     document.conclusion = valueOrDefault(lines[5], "Заключение не указано");

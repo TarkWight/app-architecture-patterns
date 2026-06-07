@@ -199,6 +199,7 @@ endif()
 if (BUILD_TESTING)
   add_executable(domain_tests
     tests/Domain/TestExecutionTransitionsTest.cpp
+    tests/Domain/TestProtocolTest.cpp
     tests/Domain/WindProfileTest.cpp
   )
 

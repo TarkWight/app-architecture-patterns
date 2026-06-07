@@ -205,12 +205,12 @@ void application::session::SessionState::setTestProtocolLine(int idx, std::strin
 }
 
 void application::session::SessionState::setTestProtocolMode(std::string mode) {
-    data.testProtocol.testMode = std::move(mode);
+    data.testProtocol.testMode = domain::testModeFromKey(mode);
     notify();
 }
 
 void application::session::SessionState::setTestProtocolProgram(std::string program) {
-    data.testProtocol.testProgram = std::move(program);
+    data.testProtocol.testProgram = domain::testProgramFromKey(program);
     notify();
 }
 

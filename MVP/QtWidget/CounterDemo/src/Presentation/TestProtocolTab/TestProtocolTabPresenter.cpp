@@ -50,8 +50,8 @@ void TestProtocolTabPresenter::syncViewFromState() {
         view->setTestProtocolLine(i, session.testProtocol.lines[static_cast<std::size_t>(i)]);
     }
 
-    view->setTestProtocolMode(session.testProtocol.testMode);
-    view->setTestProtocolProgram(session.testProtocol.testProgram);
+    view->setTestProtocolMode(std::string{domain::testModeKey(session.testProtocol.testMode)});
+    view->setTestProtocolProgram(std::string{domain::testProgramKey(session.testProtocol.testProgram)});
     view->setTestProtocolDroneParameters(session.testProtocol.droneParameters);
 }
 

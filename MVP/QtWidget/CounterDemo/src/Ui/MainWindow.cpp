@@ -9,6 +9,7 @@
 
 #include "../Domain/AxisId.hpp"
 #include "../Domain/StandControlMode.hpp"
+#include "../Domain/StandImpactTransition.hpp"
 #include "../Domain/WindProfile.hpp"
 
 #include <QCheckBox>
@@ -441,22 +442,9 @@ void MainWindow::advanceStandImpactTransition() {
         return;
     }
 
-    const auto current = stateData.appliedStandImpact;
-    const auto target = stateData.targetStandImpact;
-
-    auto stepTowards = [](double value, double targetValue, double step) {
-        const double delta = targetValue - value;
-        if (std::abs(delta) <= step) {
-            return targetValue;
-        }
-
-        return value + (delta > 0.0 ? step : -step);
-    };
-
-    domain::WindProfile next = domain::makeWindProfile(
-        stepTowards(current.beaufort.value(), target.beaufort.value(), 0.1),
-        stepTowards(current.direction.degrees(), target.direction.degrees(), 2.5),
-        stepTowards(current.angleOfAttack.degrees(), target.angleOfAttack.degrees(), 1.0), target.formula);
+    const auto transition =
+        domain::StandImpactTransition{}.advance(stateData.appliedStandImpact, stateData.targetStandImpact);
+    const auto &next = transition.impact;
 
     setStandImpactUseCase.setApplied(next);
 
@@ -465,11 +453,7 @@ void MainWindow::advanceStandImpactTransition() {
     controlChartsTabPresenter.onDirectionChanged(next.direction.degrees());
     controlChartsTabPresenter.onRebuildPlotPressed();
 
-    const bool reached = std::abs(next.beaufort.value() - target.beaufort.value()) < 0.001 &&
-                         std::abs(next.angleOfAttack.degrees() - target.angleOfAttack.degrees()) < 0.001 &&
-                         std::abs(next.direction.degrees() - target.direction.degrees()) < 0.001;
-
-    if (reached) {
+    if (transition.targetReached) {
         standImpactTransitionTimer->stop();
         appendLog("Manual stand impact target reached: " + formatImpact(next));
     }

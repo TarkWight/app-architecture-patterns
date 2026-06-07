@@ -138,22 +138,6 @@ application::dto::PdfReportConfig TomlConfigRepository::loadPdfReportConfig(cons
             field.value = nodeToString(valueNode);
             config.droneParameters.push_back(std::move(field));
         }
-    } else if (const auto *parameters = (*report)["drone_parameters"].as_array()) {
-        for (const auto &parameterNode : *parameters) {
-            const auto *parameter = parameterNode.as_table();
-            if (parameter == nullptr) {
-                continue;
-            }
-
-            domain::TestProtocolParameter field{};
-            assignString(*parameter, "key", field.key);
-            assignString(*parameter, "label", field.label);
-            assignString(*parameter, "value", field.value);
-
-            if (!field.key.empty() || !field.label.empty()) {
-                config.droneParameters.push_back(std::move(field));
-            }
-        }
     }
 
     return config;

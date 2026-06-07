@@ -14,11 +14,11 @@ void UpdateTestProtocolUseCase::updateLine(int index, std::string line) {
 }
 
 void UpdateTestProtocolUseCase::updateMode(std::string mode) {
-    state.setTestProtocolMode(std::move(mode));
+    state.setTestProtocolMode(domain::testModeFromKey(mode));
 }
 
 void UpdateTestProtocolUseCase::updateProgram(std::string program) {
-    state.setTestProtocolProgram(std::move(program));
+    state.setTestProtocolProgram(domain::testProgramFromKey(program));
 }
 
 void UpdateTestProtocolUseCase::updateDroneParameterValue(int index, std::string value) {

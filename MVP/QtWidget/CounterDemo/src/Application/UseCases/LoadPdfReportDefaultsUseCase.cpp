@@ -78,8 +78,8 @@ void applyConfig(application::session::SessionState &state, const application::d
         state.setTestProtocolLine(static_cast<int>(i), lines[i]);
     }
 
-    state.setTestProtocolMode(config.testMode.empty() ? "manual" : config.testMode);
-    state.setTestProtocolProgram(config.testProgram.empty() ? "test1" : config.testProgram);
+    state.setTestProtocolMode(domain::testModeFromKey(config.testMode));
+    state.setTestProtocolProgram(domain::testProgramFromKey(config.testProgram));
     state.setTestProtocolDroneParameters(mergeWithRequiredParameters(config.droneParameters));
 }
 

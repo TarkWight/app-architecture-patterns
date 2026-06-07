@@ -431,7 +431,7 @@ void MainWindow::applyStandInputs() {
     standImpactTransitionTimer->start();
 
     appendLog("Manual stand impact target accepted: " + formatImpact(stateData.appliedStandImpact) + " -> " +
-              formatImpact(domain::sanitize(target)));
+              formatImpact(target));
 }
 
 void MainWindow::advanceStandImpactTransition() {

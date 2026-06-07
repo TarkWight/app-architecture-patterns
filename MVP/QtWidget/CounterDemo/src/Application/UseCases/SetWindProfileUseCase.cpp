@@ -6,7 +6,7 @@ SetWindProfileUseCase::SetWindProfileUseCase(application::session::SessionState 
 }
 
 void SetWindProfileUseCase::execute(domain::WindProfile profile) {
-    state.setWindProfile(domain::sanitize(std::move(profile)));
+    state.setWindProfile(std::move(profile));
 }
 
 } // namespace application::useCases

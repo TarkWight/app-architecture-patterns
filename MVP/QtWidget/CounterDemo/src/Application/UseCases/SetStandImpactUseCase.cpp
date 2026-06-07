@@ -58,9 +58,8 @@ void SetStandImpactUseCase::setTarget(domain::WindProfile profile) {
 }
 
 void SetStandImpactUseCase::setApplied(domain::WindProfile profile) {
-    const auto sanitized = domain::sanitize(std::move(profile));
-    state.setAppliedStandImpact(sanitized);
-    sendAppliedImpact(sanitized);
+    state.setAppliedStandImpact(profile);
+    sendAppliedImpact(profile);
 }
 
 void SetStandImpactUseCase::sendAppliedImpact(const domain::WindProfile &profile) {

@@ -84,9 +84,6 @@ inline WindProfile makeWindProfile(double beaufort, double direction, double ang
                        .formula = std::move(formula)};
 }
 
-inline WindProfile sanitize(WindProfile profile) {
-    return profile;
-}
 } // namespace domain
 
 #endif // WINDPROFILE_HPP

@@ -43,7 +43,7 @@ void application::session::SessionState::setFunctionExpression(std::string expr)
 }
 
 void application::session::SessionState::setWindProfile(domain::WindProfile profile) {
-    data.windProfile = domain::sanitize(std::move(profile));
+    data.windProfile = std::move(profile);
     notify();
 }
 
@@ -175,13 +175,13 @@ void application::session::SessionState::setStandControlMode(domain::StandContro
 }
 
 void application::session::SessionState::setAppliedStandImpact(domain::WindProfile profile) {
-    data.appliedStandImpact = domain::sanitize(std::move(profile));
+    data.appliedStandImpact = std::move(profile);
     data.windProfile = data.appliedStandImpact;
     notify();
 }
 
 void application::session::SessionState::setTargetStandImpact(domain::WindProfile profile) {
-    data.targetStandImpact = domain::sanitize(std::move(profile));
+    data.targetStandImpact = std::move(profile);
     notify();
 }
 
@@ -204,13 +204,13 @@ void application::session::SessionState::setTestProtocolLine(int idx, std::strin
     notify();
 }
 
-void application::session::SessionState::setTestProtocolMode(std::string mode) {
-    data.testProtocol.testMode = domain::testModeFromKey(mode);
+void application::session::SessionState::setTestProtocolMode(domain::TestMode mode) {
+    data.testProtocol.testMode = mode;
     notify();
 }
 
-void application::session::SessionState::setTestProtocolProgram(std::string program) {
-    data.testProtocol.testProgram = domain::testProgramFromKey(program);
+void application::session::SessionState::setTestProtocolProgram(domain::TestProgram program) {
+    data.testProtocol.testProgram = program;
     notify();
 }
 

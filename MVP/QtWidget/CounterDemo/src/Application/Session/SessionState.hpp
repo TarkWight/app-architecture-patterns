@@ -59,8 +59,8 @@ class SessionState {
 
     void setTestProtocolTitle(std::string title);
     void setTestProtocolLine(int idx, std::string line);
-    void setTestProtocolMode(std::string mode);
-    void setTestProtocolProgram(std::string program);
+    void setTestProtocolMode(domain::TestMode mode);
+    void setTestProtocolProgram(domain::TestProgram program);
     void setTestProtocolDroneParameters(std::vector<domain::TestProtocolParameter> parameters);
     void setTestProtocolDroneParameterValue(int idx, std::string value);
 

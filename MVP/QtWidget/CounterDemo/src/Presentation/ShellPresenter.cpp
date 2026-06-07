@@ -128,8 +128,8 @@ void ShellPresenter::refreshFromState() {
     const auto &session = state.get();
 
     const int displayedSeconds = (session.testTimeDirection == domain::TestTimeDirection::CountDown)
-                                     ? session.remaining.value
-                                     : session.elapsed.value;
+                                     ? session.remaining.value()
+                                     : session.elapsed.value();
 
     view->setTimerText(formatTimerText(displayedSeconds));
     view->setStartEnabled(canStart(session.testExecutionStatus));

@@ -60,8 +60,8 @@ application::dto::PdfDocumentModel ExportPdfUseCase::buildDocument() const {
     application::dto::PdfReportTableRow row{};
     row.testType = document.testProgramShortTitle;
     row.windFormula = valueOrDefault(session.functionExpression.value, "0");
-    row.estimatedDurationMinutes = std::to_string(session.estimatedTestDuration.value);
-    row.testDurationMinutes = std::to_string(session.activeTestDuration.value);
+    row.estimatedDurationMinutes = std::to_string(session.estimatedTestDuration.value());
+    row.testDurationMinutes = std::to_string(session.activeTestDuration.value());
     row.result = valueOrDefault(lines[6], "_________");
     document.tableRows.push_back(std::move(row));
 

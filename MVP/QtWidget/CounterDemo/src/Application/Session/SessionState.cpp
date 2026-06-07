@@ -53,7 +53,7 @@ void application::session::SessionState::setLineColor(domain::RgbColor color) {
 }
 
 void application::session::SessionState::setControlChartsTabMinutes(int minutes) {
-    data.controlChartsTabMinutes.value = std::clamp(minutes, 1, 24 * 60);
+    data.controlChartsTabMinutes = domain::DurationMinutes::required(minutes);
     notify();
 }
 
@@ -73,27 +73,27 @@ void application::session::SessionState::setTestTimeDirection(domain::TestTimeDi
 }
 
 void application::session::SessionState::setEstimatedTestDurationMinutes(int minutes) {
-    data.estimatedTestDuration.value = std::clamp(minutes, 1, 24 * 60);
+    data.estimatedTestDuration = domain::DurationMinutes::required(minutes);
     notify();
 }
 
 void application::session::SessionState::setOperatorTestDurationMinutes(int minutes) {
-    data.operatorTestDuration.value = std::clamp(minutes, 1, 24 * 60);
+    data.operatorTestDuration = domain::DurationMinutes::required(minutes);
     notify();
 }
 
 void application::session::SessionState::setActiveTestDurationMinutes(int minutes) {
-    data.activeTestDuration.value = std::clamp(minutes, 0, 24 * 60);
+    data.activeTestDuration = domain::DurationMinutes::optional(minutes);
     notify();
 }
 
 void application::session::SessionState::setElapsedSeconds(int seconds) {
-    data.elapsed.value = std::max(0, seconds);
+    data.elapsed = domain::ElapsedSeconds::from(seconds);
     notify();
 }
 
 void application::session::SessionState::setRemainingSeconds(int seconds) {
-    data.remaining.value = std::max(0, seconds);
+    data.remaining = domain::RemainingSeconds::from(seconds);
     notify();
 }
 

@@ -22,7 +22,7 @@ void ControlChartsTabPresenter::onViewReady() {
 
     const auto &stateData = state.get();
 
-    view->setMinutes(stateData.controlChartsTabMinutes.value);
+    view->setMinutes(stateData.controlChartsTabMinutes.value());
     view->setBeaufort(stateData.windProfile.beaufort.value());
     view->setDirection(stateData.windProfile.direction.degrees());
     view->setAngleOfAttack(stateData.windProfile.angleOfAttack.degrees());

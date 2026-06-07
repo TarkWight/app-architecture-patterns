@@ -23,12 +23,12 @@ void StartTestExecutionUseCase::execute() {
 
     switch (session.testTimeSource) {
     case domain::TestTimeSource::AutoCalculated:
-        activeDurationMinutes = session.estimatedTestDuration.value;
+        activeDurationMinutes = session.estimatedTestDuration.value();
         direction = domain::TestTimeDirection::CountDown;
         break;
 
     case domain::TestTimeSource::OperatorDefined:
-        activeDurationMinutes = session.operatorTestDuration.value;
+        activeDurationMinutes = session.operatorTestDuration.value();
         direction = domain::TestTimeDirection::CountDown;
         break;
 
@@ -56,7 +56,7 @@ void StartTestExecutionUseCase::execute() {
         const auto &current = state.get();
 
         if (current.testTimeDirection == domain::TestTimeDirection::CountDown) {
-            const int totalSeconds = current.activeTestDuration.value * 60;
+            const int totalSeconds = current.activeTestDuration.value() * 60;
             const int remainingSeconds = (elapsedSeconds < totalSeconds) ? (totalSeconds - elapsedSeconds) : 0;
 
             state.setRemainingSeconds(remainingSeconds);

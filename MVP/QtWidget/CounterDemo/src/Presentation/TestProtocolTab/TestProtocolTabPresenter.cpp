@@ -43,7 +43,7 @@ void TestProtocolTabPresenter::syncViewFromState() {
 
     const auto &session = state.get();
 
-    view->setOperatorTestDurationMinutes(session.operatorTestDuration.value);
+    view->setOperatorTestDurationMinutes(session.operatorTestDuration.value());
     view->setTestProtocolTitle(session.testProtocol.title);
 
     for (int i = 0; i < 8; ++i) {

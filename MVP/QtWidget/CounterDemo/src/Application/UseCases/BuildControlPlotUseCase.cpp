@@ -16,7 +16,7 @@ domain::PlotModel BuildControlPlotUseCase::execute() {
     plot.title = "Control chart";
     plot.color = stateData.lineColor;
 
-    const int minutes = stateData.controlChartsTabMinutes.value > 0 ? stateData.controlChartsTabMinutes.value : 20;
+    const int minutes = stateData.controlChartsTabMinutes.value();
 
     plot.x = domain::AxisSpec{0.0, static_cast<double>(minutes), 1.0, "minutes"};
 

@@ -19,15 +19,15 @@ SessionStateQtAdapter::toTestTimeViewModel(const application::session::SessionSt
     model.timeSource = data.testTimeSource;
     model.timeDirection = data.testTimeDirection;
 
-    model.estimatedDurationMinutes = data.estimatedTestDuration.value;
-    model.operatorDurationMinutes = data.operatorTestDuration.value;
-    model.activeDurationMinutes = data.activeTestDuration.value;
+    model.estimatedDurationMinutes = data.estimatedTestDuration.value();
+    model.operatorDurationMinutes = data.operatorTestDuration.value();
+    model.activeDurationMinutes = data.activeTestDuration.value();
 
-    model.elapsedSeconds = data.elapsed.value;
-    model.remainingSeconds = data.remaining.value;
+    model.elapsedSeconds = data.elapsed.value();
+    model.remainingSeconds = data.remaining.value();
 
-    model.displayedSeconds =
-        (data.testTimeDirection == domain::TestTimeDirection::CountDown) ? data.remaining.value : data.elapsed.value;
+    model.displayedSeconds = (data.testTimeDirection == domain::TestTimeDirection::CountDown) ? data.remaining.value()
+                                                                                              : data.elapsed.value();
 
     return model;
 }
@@ -38,7 +38,7 @@ void SessionStateQtAdapter::emitState(const application::session::SessionStateDa
     emit functionExpressionChanged(QString::fromStdString(data.functionExpression.value));
     emit lineColorChanged(toQColor(data.lineColor));
 
-    emit controlChartsTabMinutesChanged(data.controlChartsTabMinutes.value);
+    emit controlChartsTabMinutesChanged(data.controlChartsTabMinutes.value());
 
     emit beaufortChanged(data.windProfile.beaufort.value());
     emit directionChanged(data.windProfile.direction.degrees());

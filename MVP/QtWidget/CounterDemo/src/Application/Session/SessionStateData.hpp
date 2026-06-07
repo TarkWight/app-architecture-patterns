@@ -27,18 +27,19 @@ struct SessionStateData {
     domain::TestTimeSource testTimeSource{domain::TestTimeSource::FreeRun};
     domain::TestTimeDirection testTimeDirection{domain::TestTimeDirection::CountUp};
 
-    domain::DurationMinutes estimatedTestDuration{20}; // рассчитано программой
-    domain::DurationMinutes operatorTestDuration{20};  // введено оператором
-    domain::DurationMinutes activeTestDuration{20};    // реально используемое при запуске
+    domain::DurationMinutes estimatedTestDuration{domain::DurationMinutes::required(20)}; // рассчитано программой
+    domain::DurationMinutes operatorTestDuration{domain::DurationMinutes::required(20)};  // введено оператором
+    domain::DurationMinutes activeTestDuration{
+        domain::DurationMinutes::required(20)}; // реально используемое при запуске
 
-    domain::ElapsedSeconds elapsed{};
-    domain::RemainingSeconds remaining{};
+    domain::ElapsedSeconds elapsed{domain::ElapsedSeconds::from(0)};
+    domain::RemainingSeconds remaining{domain::RemainingSeconds::from(0)};
 
     // ===== UI / scenario input =====
     domain::Expression functionExpression{};
     domain::WindProfile windProfile{};
     domain::RgbColor lineColor{};
-    domain::DurationMinutes controlChartsTabMinutes{20};
+    domain::DurationMinutes controlChartsTabMinutes{domain::DurationMinutes::required(20)};
 
     // ===== Plots =====
     domain::PlotModel telemetryPlot{};

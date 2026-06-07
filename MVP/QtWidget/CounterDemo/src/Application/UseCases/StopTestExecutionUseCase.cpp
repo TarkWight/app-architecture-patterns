@@ -23,7 +23,7 @@ void StopTestExecutionUseCase::execute() {
     state.setElapsedSeconds(0);
 
     if (session.testTimeDirection == domain::TestTimeDirection::CountDown) {
-        state.setRemainingSeconds(session.activeTestDuration.value * 60);
+        state.setRemainingSeconds(session.activeTestDuration.value() * 60);
     } else {
         state.setRemainingSeconds(0);
     }

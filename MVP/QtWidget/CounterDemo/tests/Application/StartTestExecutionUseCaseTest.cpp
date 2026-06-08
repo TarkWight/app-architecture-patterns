@@ -1,12 +1,12 @@
 #include "../../src/Application/UseCases/StartTestExecutionUseCase.hpp"
 
+#include "../../src/Application/Ports/IFunctionEngine.hpp"
 #include "../../src/Application/Ports/ITelemetryClient.hpp"
 #include "../../src/Application/Ports/ITestExecutionScheduler.hpp"
 #include "../../src/Application/Session/SessionState.hpp"
 #include "../../src/Domain/AxisId.hpp"
 #include "../../src/Domain/TestTimeDirection.hpp"
 #include "../../src/Domain/TestTimeSource.hpp"
-#include "../../src/Domain/WindControlProfile.hpp"
 
 #include <gtest/gtest.h>
 
@@ -101,6 +101,13 @@ class TelemetryClientSpy final : public application::ports::ITelemetryClient {
     std::optional<domain::AxisControlCommand> axis1Command{};
 };
 
+class ScenarioFunctionEngine final : public application::ports::IFunctionEngine {
+  public:
+    double eval(const std::string & /*expr*/, double x) const override {
+        return x < (1.0 / 60.0) ? 1.0 : 2.0;
+    }
+};
+
 TEST(StartTestExecutionUseCaseTest, ManualModeStartsAsStopwatchEvenWhenOperatorDurationIsSelected) {
     application::session::SessionState state{};
     state.setTestProtocolMode(domain::TestMode::Manual);
@@ -109,7 +116,10 @@ TEST(StartTestExecutionUseCaseTest, ManualModeStartsAsStopwatchEvenWhenOperatorD
 
     TestExecutionSchedulerSpy scheduler{};
     TelemetryClientSpy telemetryClient{};
-    application::useCases::StartTestExecutionUseCase useCase{state, scheduler, telemetryClient};
+    ScenarioFunctionEngine functionEngine{};
+    application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
+    application::useCases::StartTestExecutionUseCase useCase{state, scheduler, telemetryClient,
+                                                             buildControlPlotUseCase};
 
     useCase.execute();
 
@@ -128,19 +138,12 @@ TEST(StartTestExecutionUseCaseTest, AutomaticModeAppliesScenarioImpactFromProfil
     state.setEstimatedTestDurationMinutes(1);
     state.setWindProfile(domain::makeWindProfile(0.0, 90.0, 5.0, domain::Expression{.value = "x"}));
 
-    domain::WindControlProfile profile{};
-    profile.durationMinutes = 1;
-    profile.sampleIntervalSeconds = 1.0;
-    profile.samples = {
-        domain::WindControlSample{.timeSeconds = 0.0, .timeMinutes = 0.0, .beaufort = domain::Beaufort::from(1.0)},
-        domain::WindControlSample{
-            .timeSeconds = 1.0, .timeMinutes = 1.0 / 60.0, .beaufort = domain::Beaufort::from(2.0)},
-    };
-    state.setControlProfile(profile);
-
     TestExecutionSchedulerSpy scheduler{};
     TelemetryClientSpy telemetryClient{};
-    application::useCases::StartTestExecutionUseCase useCase{state, scheduler, telemetryClient};
+    ScenarioFunctionEngine functionEngine{};
+    application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
+    application::useCases::StartTestExecutionUseCase useCase{state, scheduler, telemetryClient,
+                                                             buildControlPlotUseCase};
 
     useCase.execute();
 

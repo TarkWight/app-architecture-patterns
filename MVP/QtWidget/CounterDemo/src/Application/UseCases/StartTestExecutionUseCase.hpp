@@ -1,6 +1,8 @@
 #ifndef STARTTESTEXECUTIONUSECASE_HPP
 #define STARTTESTEXECUTIONUSECASE_HPP
 
+#include "BuildControlPlotUseCase.hpp"
+
 #include "../Ports/ITelemetryClient.hpp"
 #include "../Ports/ITestExecutionScheduler.hpp"
 #include "../Session/SessionState.hpp"
@@ -11,7 +13,8 @@ class StartTestExecutionUseCase final {
   public:
     StartTestExecutionUseCase(application::session::SessionState &state,
                               application::ports::ITestExecutionScheduler &testExecutionScheduler,
-                              application::ports::ITelemetryClient &telemetryClient);
+                              application::ports::ITelemetryClient &telemetryClient,
+                              BuildControlPlotUseCase &buildControlPlotUseCase);
 
     void execute();
 
@@ -19,6 +22,7 @@ class StartTestExecutionUseCase final {
     application::session::SessionState &state;
     application::ports::ITestExecutionScheduler &testExecutionScheduler;
     application::ports::ITelemetryClient &telemetryClient;
+    BuildControlPlotUseCase &buildControlPlotUseCase;
 
     void applyScenarioImpact(int elapsedSeconds);
     void sendAppliedImpact(const domain::WindProfile &profile);

@@ -13,14 +13,19 @@ namespace application::useCases {
 
 StartTestExecutionUseCase::StartTestExecutionUseCase(
     application::session::SessionState &state, application::ports::ITestExecutionScheduler &testExecutionScheduler,
-    application::ports::ITelemetryClient &telemetryClient)
-    : state(state), testExecutionScheduler(testExecutionScheduler), telemetryClient(telemetryClient) {
+    application::ports::ITelemetryClient &telemetryClient, BuildControlPlotUseCase &buildControlPlotUseCase)
+    : state(state), testExecutionScheduler(testExecutionScheduler), telemetryClient(telemetryClient),
+      buildControlPlotUseCase(buildControlPlotUseCase) {
 }
 
 void StartTestExecutionUseCase::execute() {
     const auto &session = state.get();
     if (!domain::canStart(session.testExecutionStatus)) {
         return;
+    }
+
+    if (session.testProtocol.testMode != domain::TestMode::Manual) {
+        buildControlPlotUseCase.execute();
     }
 
     int activeDurationMinutes = 0;

@@ -31,6 +31,26 @@ domain::DurationMinutes determineGridDuration(const session::SessionStateData &s
     return determinePreviewDuration(stateData);
 }
 
+double traceAxisStepSeconds(double maxSeconds) {
+    if (maxSeconds <= 10.0) {
+        return 1.0;
+    }
+    if (maxSeconds <= 60.0) {
+        return 10.0;
+    }
+    if (maxSeconds <= 300.0) {
+        return 30.0;
+    }
+    if (maxSeconds <= 900.0) {
+        return 60.0;
+    }
+    if (maxSeconds <= 3600.0) {
+        return 300.0;
+    }
+
+    return 600.0;
+}
+
 domain::WindControlProfile buildProfile(const session::SessionStateData &stateData,
                                         const ports::IFunctionEngine &engine) {
     domain::WindControlProfile profile{};
@@ -90,19 +110,23 @@ void addControlTraceSeries(domain::PlotModel &plot, const std::vector<domain::Co
     safeCommand.series.points.reserve(trace.size());
 
     for (const auto &sample : trace) {
-        const double timeMinutes = sample.timeSeconds / 60.0;
-        target.series.points.push_back(domain::Point{.x = timeMinutes, .y = sample.targetValue.beaufort.value()});
+        target.series.points.push_back(
+            domain::Point{.x = sample.timeSeconds, .y = sample.targetValue.beaufort.value()});
         safeCommand.series.points.push_back(
-            domain::Point{.x = timeMinutes, .y = sample.safeCommandValue.beaufort.value()});
+            domain::Point{.x = sample.timeSeconds, .y = sample.safeCommandValue.beaufort.value()});
     }
+
+    const double markerTimeSeconds = trace.back().timeSeconds;
+    const double maxSeconds = std::max(10.0, std::ceil(markerTimeSeconds));
+    plot.x =
+        domain::AxisSpec{.min = 0.0, .max = maxSeconds, .step = traceAxisStepSeconds(maxSeconds), .label = "seconds"};
 
     plot.series.points.clear();
     plot.seriesList.clear();
     plot.seriesList.push_back(std::move(target));
     plot.seriesList.push_back(std::move(safeCommand));
 
-    const double markerTimeMinutes = trace.back().timeSeconds / 60.0;
-    plot.marker = domain::PlotMarker{.x = markerTimeMinutes, .label = "Сейчас", .visible = true};
+    plot.marker = domain::PlotMarker{.x = markerTimeSeconds, .label = "Сейчас", .visible = true};
 }
 
 } // namespace

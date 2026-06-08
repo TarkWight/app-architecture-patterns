@@ -106,9 +106,12 @@ TEST(BuildControlPlotUseCaseTest, UsesControlTraceAsTargetAndSafeCommandSeriesWh
     EXPECT_EQ(plot.seriesList.at(0).label, "Цель");
     EXPECT_EQ(plot.seriesList.at(1).label, "Безопасная команда");
     EXPECT_TRUE(plot.marker.visible);
-    EXPECT_DOUBLE_EQ(plot.marker.x, 1.0 / 60.0);
+    EXPECT_DOUBLE_EQ(plot.marker.x, 1.0);
     EXPECT_EQ(plot.marker.label, "Сейчас");
-    EXPECT_DOUBLE_EQ(plot.seriesList.at(0).series.points.at(1).x, 1.0 / 60.0);
+    EXPECT_EQ(plot.x.label, "seconds");
+    EXPECT_DOUBLE_EQ(plot.x.max, 10.0);
+    EXPECT_DOUBLE_EQ(plot.x.step, 1.0);
+    EXPECT_DOUBLE_EQ(plot.seriesList.at(0).series.points.at(1).x, 1.0);
     EXPECT_DOUBLE_EQ(plot.seriesList.at(0).series.points.at(1).y, 3.0);
     EXPECT_DOUBLE_EQ(plot.seriesList.at(1).series.points.at(1).y, 0.2);
 }

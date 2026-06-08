@@ -110,4 +110,14 @@ domain::PlotModel BuildControlPlotUseCase::execute() {
     return plot;
 }
 
+domain::PlotModel BuildControlPlotUseCase::refreshFromState() {
+    const auto &stateData = state.get();
+
+    auto plot = buildPlot(stateData, stateData.controlProfile);
+    addControlTraceSeries(plot, stateData.controlTraceHistory);
+
+    state.setControlPlot(plot);
+    return plot;
+}
+
 } // namespace application::useCases

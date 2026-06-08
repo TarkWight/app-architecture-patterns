@@ -108,4 +108,26 @@ TEST(BuildControlPlotUseCaseTest, UsesControlTraceAsTargetAndSafeCommandSeriesWh
     EXPECT_DOUBLE_EQ(plot.seriesList.at(1).series.points.at(1).y, 0.2);
 }
 
+TEST(BuildControlPlotUseCaseTest, RefreshFromStateKeepsExistingProfileAndUpdatesTraceSeries) {
+    application::session::SessionState state{};
+    state.setEstimatedTestDurationMinutes(1);
+    const LinearFunctionEngine engine{};
+    application::useCases::BuildControlPlotUseCase useCase{state, engine};
+    useCase.execute();
+
+    const auto profileSize = state.get().controlProfile.samples.size();
+    state.appendControlTraceSample(domain::ControlTraceSample{
+        .timeSeconds = 0.0,
+        .targetValue = domain::makeWindProfile(2.0, 0.0, 0.0),
+        .safeCommandValue = domain::makeWindProfile(0.1, 0.0, 0.0),
+    });
+
+    const auto plot = useCase.refreshFromState();
+
+    EXPECT_EQ(state.get().controlProfile.samples.size(), profileSize);
+    ASSERT_EQ(plot.seriesList.size(), 2U);
+    EXPECT_TRUE(plot.marker.visible);
+    EXPECT_DOUBLE_EQ(plot.marker.x, 0.0);
+}
+
 } // namespace

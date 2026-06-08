@@ -108,6 +108,7 @@ void StartTestExecutionUseCase::applyScenarioImpact(int elapsedSeconds) {
     state.appendControlTraceSample(domain::ControlTraceSample{.timeSeconds = static_cast<double>(elapsedSeconds),
                                                               .targetValue = *impact,
                                                               .safeCommandValue = transition.impact});
+    buildControlPlotUseCase.refreshFromState();
     sendAppliedImpact(transition.impact);
 }
 

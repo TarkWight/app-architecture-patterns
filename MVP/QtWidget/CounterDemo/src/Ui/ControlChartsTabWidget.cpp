@@ -1,7 +1,7 @@
 #include "ControlChartsTabWidget.hpp"
 #include "ui_ControlChartsTabWidget.h"
 
-#include "../Domain/WindProfile.hpp"
+#include "../Domain/WindImpact.hpp"
 
 #include <QString>
 

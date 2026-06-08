@@ -136,7 +136,7 @@ TEST(StartTestExecutionUseCaseTest, AutomaticModeSmoothlyFollowsScenarioImpactFr
     application::session::SessionState state{};
     state.setTestProtocolMode(domain::TestMode::Automatic);
     state.setEstimatedTestDurationMinutes(1);
-    state.setWindProfile(domain::makeWindProfile(0.0, 90.0, 5.0, domain::Expression{.value = "x"}));
+    state.setWindImpact(domain::makeWindImpact(0.0, 90.0, 5.0, domain::Expression{.value = "x"}));
 
     TestExecutionSchedulerSpy scheduler{};
     TelemetryClientSpy telemetryClient{};
@@ -179,8 +179,8 @@ TEST(StartTestExecutionUseCaseTest, ScenarioStartClearsPreviousControlTrace) {
     state.setEstimatedTestDurationMinutes(1);
     state.appendControlTraceSample(
         domain::ControlTraceSample{.timeSeconds = 42.0,
-                                   .targetValue = domain::makeWindProfile(7.0, 0.0, 0.0),
-                                   .safeCommandValue = domain::makeWindProfile(6.0, 0.0, 0.0)});
+                                   .targetValue = domain::makeWindImpact(7.0, 0.0, 0.0),
+                                   .safeCommandValue = domain::makeWindImpact(6.0, 0.0, 0.0)});
 
     TestExecutionSchedulerSpy scheduler{};
     TelemetryClientSpy telemetryClient{};

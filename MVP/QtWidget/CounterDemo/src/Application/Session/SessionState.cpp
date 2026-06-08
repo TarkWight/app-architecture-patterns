@@ -6,7 +6,7 @@
 #include "../../Domain/TestProtocol.hpp"
 #include "../../Domain/Time.hpp"
 #include "../../Domain/WindControlProfile.hpp"
-#include "../../Domain/WindProfile.hpp"
+#include "../../Domain/WindImpact.hpp"
 
 #include "SessionStateData.hpp"
 #include "Subscription.hpp"
@@ -43,8 +43,8 @@ void application::session::SessionState::setFunctionExpression(std::string expr)
     notify();
 }
 
-void application::session::SessionState::setWindProfile(domain::WindProfile profile) {
-    data.windProfile = std::move(profile);
+void application::session::SessionState::setWindImpact(domain::WindImpact profile) {
+    data.windImpact = std::move(profile);
     notify();
 }
 
@@ -175,13 +175,13 @@ void application::session::SessionState::setStandControlMode(domain::StandContro
     notify();
 }
 
-void application::session::SessionState::setAppliedStandImpact(domain::WindProfile profile) {
+void application::session::SessionState::setAppliedStandImpact(domain::WindImpact profile) {
     data.appliedStandImpact = std::move(profile);
-    data.windProfile = data.appliedStandImpact;
+    data.windImpact = data.appliedStandImpact;
     notify();
 }
 
-void application::session::SessionState::setTargetStandImpact(domain::WindProfile profile) {
+void application::session::SessionState::setTargetStandImpact(domain::WindImpact profile) {
     data.targetStandImpact = std::move(profile);
     notify();
 }

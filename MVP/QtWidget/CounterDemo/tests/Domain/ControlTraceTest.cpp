@@ -6,7 +6,7 @@ namespace {
 
 TEST(ControlTraceTest, SamplesAlwaysMoveForwardInTime) {
     domain::ControlTrace trace{};
-    const auto impact = domain::makeWindProfile(1.0, 0.0, 0.0);
+    const auto impact = domain::makeWindImpact(1.0, 0.0, 0.0);
 
     trace.append(domain::ControlTraceSample{.timeSeconds = 0.0, .targetValue = impact, .safeCommandValue = impact});
     trace.append(domain::ControlTraceSample{.timeSeconds = 0.0, .targetValue = impact, .safeCommandValue = impact});
@@ -22,7 +22,7 @@ TEST(ControlTraceTest, SamplesAlwaysMoveForwardInTime) {
 
 TEST(ControlTraceTest, KeepsOnlyRecentSamplesInsideHistoryLimit) {
     domain::ControlTrace trace{};
-    const auto impact = domain::makeWindProfile(1.0, 0.0, 0.0);
+    const auto impact = domain::makeWindImpact(1.0, 0.0, 0.0);
 
     for (std::size_t index = 0; index < domain::ControlTrace::maxSamples + 2U; ++index) {
         trace.append(domain::ControlTraceSample{

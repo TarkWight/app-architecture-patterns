@@ -48,7 +48,7 @@ qt_add_executable(develop
   src/Domain/TestProtocol.hpp
   src/Domain/Time.hpp
   src/Domain/Expression.hpp
-  src/Domain/WindProfile.hpp
+  src/Domain/WindImpact.hpp
   src/Domain/WindControlProfile.hpp
   src/Domain/WindControlProfileImpact.hpp
   src/Domain/AxisState.hpp
@@ -113,8 +113,8 @@ qt_add_executable(develop
   src/Application/UseCases/UpdateTestProtocolUseCase.cpp
   src/Application/UseCases/SetControlChartsTabMinutesUseCase.hpp
   src/Application/UseCases/SetControlChartsTabMinutesUseCase.cpp
-  src/Application/UseCases/SetWindProfileUseCase.hpp
-  src/Application/UseCases/SetWindProfileUseCase.cpp
+  src/Application/UseCases/SetWindImpactUseCase.hpp
+  src/Application/UseCases/SetWindImpactUseCase.cpp
   src/Application/UseCases/PauseTestExecutionUseCase.hpp
   src/Application/UseCases/PauseTestExecutionUseCase.cpp
   src/Application/UseCases/ResumeTestExecutionUseCase.hpp
@@ -213,7 +213,7 @@ if (BUILD_TESTING)
     tests/Domain/TestExecutionTransitionsTest.cpp
     tests/Domain/TestProtocolTest.cpp
     tests/Domain/TimeTest.cpp
-    tests/Domain/WindProfileTest.cpp
+    tests/Domain/WindImpactTest.cpp
     tests/Domain/WindControlProfileImpactTest.cpp
     tests/Application/BuildControlPlotUseCaseTest.cpp
     tests/Application/SessionStateTest.cpp

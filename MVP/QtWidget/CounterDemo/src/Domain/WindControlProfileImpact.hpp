@@ -3,7 +3,7 @@
 
 #include "Time.hpp"
 #include "WindControlProfile.hpp"
-#include "WindProfile.hpp"
+#include "WindImpact.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -11,8 +11,8 @@
 
 namespace domain {
 
-inline std::optional<WindProfile> windImpactAt(const WindControlProfile &profile, ElapsedSeconds elapsed,
-                                               const WindProfile &baseImpact) {
+inline std::optional<WindImpact> windImpactAt(const WindControlProfile &profile, ElapsedSeconds elapsed,
+                                              const WindImpact &baseImpact) {
     if (profile.samples.empty() || profile.sampleIntervalSeconds <= 0.0) {
         return std::nullopt;
     }
@@ -22,10 +22,10 @@ inline std::optional<WindProfile> windImpactAt(const WindControlProfile &profile
     const auto sampleIndex = std::min(requestedIndex, profile.samples.size() - 1);
     const auto &sample = profile.samples.at(sampleIndex);
 
-    return WindProfile{.beaufort = sample.beaufort,
-                       .direction = baseImpact.direction,
-                       .angleOfAttack = baseImpact.angleOfAttack,
-                       .formula = baseImpact.formula};
+    return WindImpact{.beaufort = sample.beaufort,
+                      .direction = baseImpact.direction,
+                      .angleOfAttack = baseImpact.angleOfAttack,
+                      .formula = baseImpact.formula};
 }
 
 } // namespace domain

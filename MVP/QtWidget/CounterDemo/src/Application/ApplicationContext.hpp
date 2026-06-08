@@ -22,7 +22,7 @@
 #include "UseCases/StartTestExecutionUseCase.hpp"
 #include "UseCases/StopTestExecutionUseCase.hpp"
 #include "UseCases/UpdateTestProtocolUseCase.hpp"
-#include "UseCases/SetWindProfileUseCase.hpp"
+#include "UseCases/SetWindImpactUseCase.hpp"
 #include "UseCases/ConfigureTelemetryUseCase.hpp"
 #include "UseCases/ConnectStandUseCase.hpp"
 #include "UseCases/DisconnectStandUseCase.hpp"
@@ -101,7 +101,7 @@ struct ApplicationContext {
 
     application::useCases::SetControlChartsTabMinutesUseCase setControlChartsTabMinutesUseCase{sessionState};
 
-    application::useCases::SetWindProfileUseCase setWindProfileUseCase{sessionState};
+    application::useCases::SetWindImpactUseCase setWindImpactUseCase{sessionState};
 
     application::useCases::SetOperatorTestDurationUseCase setOperatorTestDurationUseCase{sessionState};
 
@@ -135,7 +135,7 @@ struct ApplicationContext {
         presentation::controlChartsTab::ControlChartsTabPresenter::Dependencies{
             .state = sessionState,
             .setControlChartsTabMinutesUseCase = setControlChartsTabMinutesUseCase,
-            .setWindProfileUseCase = setWindProfileUseCase,
+            .setWindImpactUseCase = setWindImpactUseCase,
             .buildControlPlotUseCase = buildControlPlotUseCase}};
 
     presentation::testProtocolTab::TestProtocolTabPresenter testProtocolTabPresenter{

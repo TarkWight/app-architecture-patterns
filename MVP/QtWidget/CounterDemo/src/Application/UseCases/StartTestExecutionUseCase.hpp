@@ -25,7 +25,7 @@ class StartTestExecutionUseCase final {
     BuildControlPlotUseCase &buildControlPlotUseCase;
 
     void applyScenarioImpact(int elapsedSeconds);
-    void sendAppliedImpact(const domain::WindProfile &profile);
+    void sendAppliedImpact(const domain::WindImpact &profile);
 };
 
 } // namespace application::useCases

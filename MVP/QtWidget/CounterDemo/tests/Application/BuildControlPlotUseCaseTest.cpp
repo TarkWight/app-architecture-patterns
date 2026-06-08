@@ -87,13 +87,13 @@ TEST(BuildControlPlotUseCaseTest, UsesControlTraceAsTargetAndSafeCommandSeriesWh
     state.setEstimatedTestDurationMinutes(1);
     state.appendControlTraceSample(domain::ControlTraceSample{
         .timeSeconds = 0.0,
-        .targetValue = domain::makeWindProfile(2.0, 0.0, 0.0),
-        .safeCommandValue = domain::makeWindProfile(0.1, 0.0, 0.0),
+        .targetValue = domain::makeWindImpact(2.0, 0.0, 0.0),
+        .safeCommandValue = domain::makeWindImpact(0.1, 0.0, 0.0),
     });
     state.appendControlTraceSample(domain::ControlTraceSample{
         .timeSeconds = 1.0,
-        .targetValue = domain::makeWindProfile(3.0, 0.0, 0.0),
-        .safeCommandValue = domain::makeWindProfile(0.2, 0.0, 0.0),
+        .targetValue = domain::makeWindImpact(3.0, 0.0, 0.0),
+        .safeCommandValue = domain::makeWindImpact(0.2, 0.0, 0.0),
     });
 
     const LinearFunctionEngine engine{};
@@ -126,8 +126,8 @@ TEST(BuildControlPlotUseCaseTest, RefreshFromStateKeepsExistingProfileAndUpdates
     const auto profileSize = state.get().controlProfile.samples.size();
     state.appendControlTraceSample(domain::ControlTraceSample{
         .timeSeconds = 0.0,
-        .targetValue = domain::makeWindProfile(2.0, 0.0, 0.0),
-        .safeCommandValue = domain::makeWindProfile(0.1, 0.0, 0.0),
+        .targetValue = domain::makeWindImpact(2.0, 0.0, 0.0),
+        .safeCommandValue = domain::makeWindImpact(0.1, 0.0, 0.0),
     });
 
     const auto plot = useCase.refreshFromState();

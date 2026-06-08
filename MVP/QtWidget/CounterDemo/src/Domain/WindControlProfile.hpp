@@ -1,7 +1,7 @@
 #ifndef WINDCONTROLPROFILE_HPP
 #define WINDCONTROLPROFILE_HPP
 
-#include "WindProfile.hpp"
+#include "WindImpact.hpp"
 
 #include <vector>
 

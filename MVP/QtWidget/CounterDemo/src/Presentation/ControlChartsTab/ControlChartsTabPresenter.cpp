@@ -4,7 +4,7 @@ namespace presentation::controlChartsTab {
 
 ControlChartsTabPresenter::ControlChartsTabPresenter(Dependencies deps)
     : state(deps.state), setControlChartsTabMinutesUseCase(deps.setControlChartsTabMinutesUseCase),
-      setWindProfileUseCase(deps.setWindProfileUseCase), buildControlPlotUseCase(deps.buildControlPlotUseCase) {
+      setWindImpactUseCase(deps.setWindImpactUseCase), buildControlPlotUseCase(deps.buildControlPlotUseCase) {
 }
 
 void ControlChartsTabPresenter::attachView(IControlChartsTabView &view) {
@@ -23,9 +23,9 @@ void ControlChartsTabPresenter::onViewReady() {
     const auto &stateData = state.get();
 
     view->setMinutes(stateData.controlChartsTabMinutes.value());
-    view->setBeaufort(stateData.windProfile.beaufort.value());
-    view->setDirection(stateData.windProfile.direction.degrees());
-    view->setAngleOfAttack(stateData.windProfile.angleOfAttack.degrees());
+    view->setBeaufort(stateData.windImpact.beaufort.value());
+    view->setDirection(stateData.windImpact.direction.degrees());
+    view->setAngleOfAttack(stateData.windImpact.angleOfAttack.degrees());
 
     onRebuildPlotPressed();
 }
@@ -41,7 +41,7 @@ void ControlChartsTabPresenter::onMinutesChanged(int minutes) {
 void ControlChartsTabPresenter::onBeaufortChanged(double value) {
     const auto &stateData = state.get();
 
-    updateWindProfile(value, stateData.windProfile.direction.degrees(), stateData.windProfile.angleOfAttack.degrees());
+    updateWindImpact(value, stateData.windImpact.direction.degrees(), stateData.windImpact.angleOfAttack.degrees());
 
     if (view != nullptr) {
         view->appendLog("Beaufort value updated");
@@ -51,7 +51,7 @@ void ControlChartsTabPresenter::onBeaufortChanged(double value) {
 void ControlChartsTabPresenter::onDirectionChanged(double value) {
     const auto &stateData = state.get();
 
-    updateWindProfile(stateData.windProfile.beaufort.value(), value, stateData.windProfile.angleOfAttack.degrees());
+    updateWindImpact(stateData.windImpact.beaufort.value(), value, stateData.windImpact.angleOfAttack.degrees());
 
     if (view != nullptr) {
         view->appendLog("Wind direction updated");
@@ -61,7 +61,7 @@ void ControlChartsTabPresenter::onDirectionChanged(double value) {
 void ControlChartsTabPresenter::onAngleOfAttackChanged(double value) {
     const auto &stateData = state.get();
 
-    updateWindProfile(stateData.windProfile.beaufort.value(), stateData.windProfile.direction.degrees(), value);
+    updateWindImpact(stateData.windImpact.beaufort.value(), stateData.windImpact.direction.degrees(), value);
 
     if (view != nullptr) {
         view->appendLog("Angle of attack updated");
@@ -77,11 +77,11 @@ void ControlChartsTabPresenter::onRebuildPlotPressed() {
     }
 }
 
-void ControlChartsTabPresenter::updateWindProfile(double beaufort, double direction, double angleOfAttack) {
-    domain::WindProfile profile = domain::makeWindProfile(beaufort, direction, angleOfAttack);
+void ControlChartsTabPresenter::updateWindImpact(double beaufort, double direction, double angleOfAttack) {
+    domain::WindImpact profile = domain::makeWindImpact(beaufort, direction, angleOfAttack);
     profile.formula = state.get().functionExpression;
 
-    setWindProfileUseCase.execute(profile);
+    setWindImpactUseCase.execute(profile);
 }
 
 } // namespace presentation::controlChartsTab

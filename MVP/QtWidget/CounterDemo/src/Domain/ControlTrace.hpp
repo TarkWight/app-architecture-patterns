@@ -1,7 +1,7 @@
 #ifndef CONTROLTRACE_HPP
 #define CONTROLTRACE_HPP
 
-#include "WindProfile.hpp"
+#include "WindImpact.hpp"
 
 #include <cstddef>
 #include <utility>
@@ -11,8 +11,8 @@ namespace domain {
 
 struct ControlTraceSample {
     double timeSeconds{0.0};
-    WindProfile targetValue{};
-    WindProfile safeCommandValue{};
+    WindImpact targetValue{};
+    WindImpact safeCommandValue{};
 };
 
 class ControlTrace final {

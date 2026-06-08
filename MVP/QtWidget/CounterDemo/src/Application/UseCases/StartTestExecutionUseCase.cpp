@@ -27,7 +27,7 @@ void StartTestExecutionUseCase::execute() {
 
     if (session.testProtocol.testMode != domain::TestMode::Manual) {
         buildControlPlotUseCase.execute();
-        state.setTargetStandImpact(state.get().windProfile);
+        state.setTargetStandImpact(state.get().windImpact);
         state.clearControlTrace();
     }
 
@@ -112,7 +112,7 @@ void StartTestExecutionUseCase::applyScenarioImpact(int elapsedSeconds) {
     sendAppliedImpact(transition.impact);
 }
 
-void StartTestExecutionUseCase::sendAppliedImpact(const domain::WindProfile &profile) {
+void StartTestExecutionUseCase::sendAppliedImpact(const domain::WindImpact &profile) {
     telemetryClient.setAxisCommand(domain::axis0, domain::axis0WindCommand(profile));
     telemetryClient.setAxisCommand(domain::axis1, domain::axis1WindCommand(profile));
 }

@@ -32,7 +32,7 @@ class SessionState {
     Subscription subscribe(Listener listener);
 
     void setFunctionExpression(std::string expr);
-    void setWindProfile(domain::WindProfile profile);
+    void setWindImpact(domain::WindImpact profile);
     void setLineColor(domain::RgbColor color);
     void setControlChartsTabMinutes(int minutes);
 
@@ -59,8 +59,8 @@ class SessionState {
     void setTelemetryAxisColor(domain::AxisId axisId, domain::RgbColor color);
     void setTelemetryAxisVisible(domain::AxisId axisId, bool visible);
     void setStandControlMode(domain::StandControlMode mode);
-    void setAppliedStandImpact(domain::WindProfile profile);
-    void setTargetStandImpact(domain::WindProfile profile);
+    void setAppliedStandImpact(domain::WindImpact profile);
+    void setTargetStandImpact(domain::WindImpact profile);
 
     void setTestProtocolTitle(std::string title);
     void setTestProtocolLine(int idx, std::string line);

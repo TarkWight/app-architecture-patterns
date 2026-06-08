@@ -12,11 +12,11 @@ SetStandImpactUseCase::SetStandImpactUseCase(application::session::SessionState 
     : state(state), telemetryClient(telemetryClient) {
 }
 
-void SetStandImpactUseCase::setTarget(domain::WindProfile profile) {
+void SetStandImpactUseCase::setTarget(domain::WindImpact profile) {
     state.setTargetStandImpact(std::move(profile));
 }
 
-void SetStandImpactUseCase::setApplied(domain::WindProfile profile) {
+void SetStandImpactUseCase::setApplied(domain::WindImpact profile) {
     const auto target = state.get().targetStandImpact;
     const int elapsedSeconds = state.get().elapsed.value();
 
@@ -26,7 +26,7 @@ void SetStandImpactUseCase::setApplied(domain::WindProfile profile) {
     sendAppliedImpact(profile);
 }
 
-void SetStandImpactUseCase::sendAppliedImpact(const domain::WindProfile &profile) {
+void SetStandImpactUseCase::sendAppliedImpact(const domain::WindImpact &profile) {
     telemetryClient.setAxisCommand(domain::axis0, domain::axis0WindCommand(profile));
     telemetryClient.setAxisCommand(domain::axis1, domain::axis1WindCommand(profile));
 }

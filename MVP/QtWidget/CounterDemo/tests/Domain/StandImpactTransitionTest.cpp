@@ -5,20 +5,20 @@
 namespace {
 
 TEST(StandImpactTransitionTest, AdvancesImpactByConfiguredSafeSteps) {
-    const auto current = domain::makeWindProfile(1.0, 10.0, -5.0);
-    const auto target = domain::makeWindProfile(2.0, 20.0, 5.0);
+    const auto current = domain::makeWindImpact(1.0, 10.0, 5.0);
+    const auto target = domain::makeWindImpact(2.0, 20.0, 15.0);
 
     const auto result = domain::StandImpactTransition{}.advance(current, target);
 
     EXPECT_DOUBLE_EQ(result.impact.beaufort.value(), 1.1);
     EXPECT_DOUBLE_EQ(result.impact.direction.degrees(), 12.5);
-    EXPECT_DOUBLE_EQ(result.impact.angleOfAttack.degrees(), -4.0);
+    EXPECT_DOUBLE_EQ(result.impact.angleOfAttack.degrees(), 6.0);
     EXPECT_FALSE(result.targetReached);
 }
 
 TEST(StandImpactTransitionTest, SnapsToTargetWhenRemainingDeltaFitsIntoOneStep) {
-    const auto current = domain::makeWindProfile(1.95, 18.0, 4.5);
-    const auto target = domain::makeWindProfile(2.0, 20.0, 5.0);
+    const auto current = domain::makeWindImpact(1.95, 18.0, 4.5);
+    const auto target = domain::makeWindImpact(2.0, 20.0, 5.0);
 
     const auto result = domain::StandImpactTransition{}.advance(current, target);
 
@@ -29,10 +29,10 @@ TEST(StandImpactTransitionTest, SnapsToTargetWhenRemainingDeltaFitsIntoOneStep) 
 }
 
 TEST(StandImpactTransitionTest, CarriesTargetFormulaToNextImpact) {
-    auto current = domain::makeWindProfile(0.0, 0.0, 0.0);
+    auto current = domain::makeWindImpact(0.0, 0.0, 0.0);
     current.formula.value = "old";
 
-    auto target = domain::makeWindProfile(0.0, 0.0, 0.0);
+    auto target = domain::makeWindImpact(0.0, 0.0, 0.0);
     target.formula.value = "new";
 
     const auto result = domain::StandImpactTransition{}.advance(current, target);

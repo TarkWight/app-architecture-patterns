@@ -14,7 +14,7 @@ TEST(WindControlProfileImpactTest, ResolvesWindImpactByElapsedSeconds) {
         domain::WindControlSample{
             .timeSeconds = 2.0, .timeMinutes = 2.0 / 60.0, .beaufort = domain::Beaufort::from(3.0)},
     };
-    const auto base = domain::makeWindProfile(0.0, 90.0, 4.0, domain::Expression{.value = "x"});
+    const auto base = domain::makeWindImpact(0.0, 90.0, 4.0, domain::Expression{.value = "x"});
 
     const auto impact = domain::windImpactAt(profile, domain::ElapsedSeconds::from(1), base);
 
@@ -34,7 +34,7 @@ TEST(WindControlProfileImpactTest, ClampsElapsedTimeToLastProfileSample) {
             .timeSeconds = 1.0, .timeMinutes = 1.0 / 60.0, .beaufort = domain::Beaufort::from(2.0)},
     };
 
-    const auto impact = domain::windImpactAt(profile, domain::ElapsedSeconds::from(100), domain::WindProfile{});
+    const auto impact = domain::windImpactAt(profile, domain::ElapsedSeconds::from(100), domain::WindImpact{});
 
     ASSERT_TRUE(impact.has_value());
     EXPECT_DOUBLE_EQ(impact->beaufort.value(), 2.0);
@@ -42,7 +42,7 @@ TEST(WindControlProfileImpactTest, ClampsElapsedTimeToLastProfileSample) {
 
 TEST(WindControlProfileImpactTest, EmptyProfileHasNoImpact) {
     const auto impact =
-        domain::windImpactAt(domain::WindControlProfile{}, domain::ElapsedSeconds::from(0), domain::WindProfile{});
+        domain::windImpactAt(domain::WindControlProfile{}, domain::ElapsedSeconds::from(0), domain::WindImpact{});
 
     EXPECT_FALSE(impact.has_value());
 }

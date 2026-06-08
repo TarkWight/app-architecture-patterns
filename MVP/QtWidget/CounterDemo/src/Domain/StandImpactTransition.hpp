@@ -1,14 +1,14 @@
 #ifndef STANDIMPACTTRANSITION_HPP
 #define STANDIMPACTTRANSITION_HPP
 
-#include "WindProfile.hpp"
+#include "WindImpact.hpp"
 
 #include <cmath>
 
 namespace domain {
 
 struct StandImpactTransitionStep {
-    WindProfile impact{};
+    WindImpact impact{};
     bool targetReached{false};
 };
 
@@ -19,8 +19,8 @@ class StandImpactTransition final {
     static constexpr double angleOfAttackStepDegrees = 1.0;
     static constexpr double reachedEpsilon = 0.001;
 
-    [[nodiscard]] StandImpactTransitionStep advance(const WindProfile &current, const WindProfile &target) const {
-        auto next = makeWindProfile(
+    [[nodiscard]] StandImpactTransitionStep advance(const WindImpact &current, const WindImpact &target) const {
+        auto next = makeWindImpact(
             stepTowards(current.beaufort.value(), target.beaufort.value(), beaufortStep),
             stepTowards(current.direction.degrees(), target.direction.degrees(), directionStepDegrees),
             stepTowards(current.angleOfAttack.degrees(), target.angleOfAttack.degrees(), angleOfAttackStepDegrees),
@@ -39,7 +39,7 @@ class StandImpactTransition final {
         return value + (delta > 0.0 ? step : -step);
     }
 
-    static bool isReached(const WindProfile &value, const WindProfile &target) {
+    static bool isReached(const WindImpact &value, const WindImpact &target) {
         return std::abs(value.beaufort.value() - target.beaufort.value()) < reachedEpsilon &&
                std::abs(value.direction.degrees() - target.direction.degrees()) < reachedEpsilon &&
                std::abs(value.angleOfAttack.degrees() - target.angleOfAttack.degrees()) < reachedEpsilon;

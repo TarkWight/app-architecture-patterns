@@ -12,7 +12,7 @@
 #include "../Domain/StandControlMode.hpp"
 #include "../Domain/StandImpactTransition.hpp"
 #include "../Domain/StandScenario.hpp"
-#include "../Domain/WindProfile.hpp"
+#include "../Domain/WindImpact.hpp"
 
 #include <QCheckBox>
 #include <QColorDialog>
@@ -49,7 +49,7 @@ std::string compassLabel(double degrees) {
     return labels[index];
 }
 
-std::string formatImpact(const domain::WindProfile &profile) {
+std::string formatImpact(const domain::WindImpact &profile) {
     std::ostringstream out;
     out << std::fixed << std::setprecision(1) << "Bft=" << profile.beaufort.value()
         << ", dir=" << compassLabel(profile.direction.degrees()) << " (" << profile.direction.degrees()
@@ -230,7 +230,7 @@ void MainWindow::addStandImpactRows(QFormLayout &form, QWidget &parent) {
 
     standAngleOfAttackSpinBox = new QDoubleSpinBox(&parent);
     standAngleOfAttackSpinBox->setDecimals(1);
-    standAngleOfAttackSpinBox->setRange(-90.0, 90.0);
+    standAngleOfAttackSpinBox->setRange(domain::minAngleOfAttack, domain::maxAngleOfAttack);
     standAngleOfAttackSpinBox->setSingleStep(1.0);
     standAngleOfAttackSpinBox->setSuffix(QStringLiteral(" °"));
     form.addRow(QStringLiteral("Угол атаки"), standAngleOfAttackSpinBox);
@@ -448,8 +448,8 @@ void MainWindow::applyStandInputs() {
         return;
     }
 
-    domain::WindProfile target = domain::makeWindProfile(standBeaufortSpinBox->value(), selectedStandDirectionDegrees(),
-                                                         standAngleOfAttackSpinBox->value());
+    domain::WindImpact target = domain::makeWindImpact(standBeaufortSpinBox->value(), selectedStandDirectionDegrees(),
+                                                       standAngleOfAttackSpinBox->value());
     target.formula = stateData.functionExpression;
 
     setStandImpactUseCase.setTarget(target);

@@ -17,7 +17,7 @@ TEST(AxisControlCommandTest, StopCommandHasZeroMotionAndNoFlags) {
 }
 
 TEST(AxisControlCommandTest, Axis0CommandUsesAngleOfAttackAndAllFlags) {
-    const auto profile = domain::makeWindProfile(3.5, 90.0, 12.0);
+    const auto profile = domain::makeWindImpact(3.5, 90.0, 12.0);
 
     const auto command = domain::axis0WindCommand(profile);
 
@@ -31,7 +31,7 @@ TEST(AxisControlCommandTest, Axis0CommandUsesAngleOfAttackAndAllFlags) {
 }
 
 TEST(AxisControlCommandTest, Axis1CommandUsesDirectionAndOnlyFirstFlag) {
-    const auto profile = domain::makeWindProfile(3.5, 90.0, 12.0);
+    const auto profile = domain::makeWindImpact(3.5, 90.0, 12.0);
 
     const auto command = domain::axis1WindCommand(profile);
 
@@ -45,7 +45,7 @@ TEST(AxisControlCommandTest, Axis1CommandUsesDirectionAndOnlyFirstFlag) {
 }
 
 TEST(AxisControlCommandTest, WindCommandsStopWhenImpactIsZero) {
-    const auto profile = domain::makeWindProfile(0.0, 0.0, 0.0);
+    const auto profile = domain::makeWindImpact(0.0, 0.0, 0.0);
 
     EXPECT_FLOAT_EQ(domain::axis0WindCommand(profile).velocity, 0.0F);
     EXPECT_FLOAT_EQ(domain::axis1WindCommand(profile).velocity, 0.0F);

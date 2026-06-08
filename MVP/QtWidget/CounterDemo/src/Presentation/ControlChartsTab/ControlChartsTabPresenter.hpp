@@ -3,7 +3,7 @@
 
 #include "../../Application/UseCases/BuildControlPlotUseCase.hpp"
 #include "../../Application/UseCases/SetControlChartsTabMinutesUseCase.hpp"
-#include "../../Application/UseCases/SetWindProfileUseCase.hpp"
+#include "../../Application/UseCases/SetWindImpactUseCase.hpp"
 
 #include "IControlChartsTabView.hpp"
 
@@ -14,7 +14,7 @@ class ControlChartsTabPresenter final {
     struct Dependencies {
         application::session::SessionState &state;
         application::useCases::SetControlChartsTabMinutesUseCase &setControlChartsTabMinutesUseCase;
-        application::useCases::SetWindProfileUseCase &setWindProfileUseCase;
+        application::useCases::SetWindImpactUseCase &setWindImpactUseCase;
         application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
     };
 
@@ -36,12 +36,12 @@ class ControlChartsTabPresenter final {
   private:
     application::session::SessionState &state;
     application::useCases::SetControlChartsTabMinutesUseCase &setControlChartsTabMinutesUseCase;
-    application::useCases::SetWindProfileUseCase &setWindProfileUseCase;
+    application::useCases::SetWindImpactUseCase &setWindImpactUseCase;
     application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
 
     IControlChartsTabView *view{nullptr};
 
-    void updateWindProfile(double beaufort, double direction, double angleOfAttack);
+    void updateWindImpact(double beaufort, double direction, double angleOfAttack);
 };
 
 } // namespace presentation::controlChartsTab

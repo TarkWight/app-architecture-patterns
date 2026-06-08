@@ -1,7 +1,7 @@
 #ifndef SETSTANDIMPACTUSECASE_HPP
 #define SETSTANDIMPACTUSECASE_HPP
 
-#include "../../Domain/WindProfile.hpp"
+#include "../../Domain/WindImpact.hpp"
 #include "../Ports/ITelemetryClient.hpp"
 #include "../Session/SessionState.hpp"
 
@@ -12,14 +12,14 @@ class SetStandImpactUseCase final {
     SetStandImpactUseCase(application::session::SessionState &state,
                           application::ports::ITelemetryClient &telemetryClient);
 
-    void setTarget(domain::WindProfile profile);
-    void setApplied(domain::WindProfile profile);
+    void setTarget(domain::WindImpact profile);
+    void setApplied(domain::WindImpact profile);
 
   private:
     application::session::SessionState &state;
     application::ports::ITelemetryClient &telemetryClient;
 
-    void sendAppliedImpact(const domain::WindProfile &profile);
+    void sendAppliedImpact(const domain::WindImpact &profile);
 };
 
 } // namespace application::useCases

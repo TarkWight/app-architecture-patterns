@@ -1,7 +1,7 @@
 #ifndef AXISCONTROLCOMMAND_HPP
 #define AXISCONTROLCOMMAND_HPP
 
-#include "WindProfile.hpp"
+#include "WindImpact.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -33,7 +33,7 @@ inline AxisControlCommand boundedAxisCommand(AxisControlCommand command) {
     return command;
 }
 
-inline AxisControlCommand axis0WindCommand(const WindProfile &profile) {
+inline AxisControlCommand axis0WindCommand(const WindImpact &profile) {
     const float torque = static_cast<float>(profile.beaufort.value()) * axis0TorqueMultiplier;
     const bool active = std::abs(profile.angleOfAttack.degrees()) > axisCommandActiveEpsilon ||
                         std::abs(torque) > axisCommandActiveEpsilon;
@@ -50,7 +50,7 @@ inline AxisControlCommand axis0WindCommand(const WindProfile &profile) {
                                                  .cmd4 = true});
 }
 
-inline AxisControlCommand axis1WindCommand(const WindProfile &profile) {
+inline AxisControlCommand axis1WindCommand(const WindImpact &profile) {
     const float torque = static_cast<float>(profile.beaufort.value());
     const bool active =
         std::abs(profile.direction.degrees()) > axisCommandActiveEpsilon || std::abs(torque) > axisCommandActiveEpsilon;

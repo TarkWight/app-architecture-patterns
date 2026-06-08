@@ -14,7 +14,7 @@
 #include "../../Domain/TestTimeSource.hpp"
 #include "../../Domain/Time.hpp"
 #include "../../Domain/WindControlProfile.hpp"
-#include "../../Domain/WindProfile.hpp"
+#include "../../Domain/WindImpact.hpp"
 #include "../../Domain/Expression.hpp"
 
 #include <vector>
@@ -47,7 +47,7 @@ struct SessionStateData {
 
     // ===== UI / scenario input =====
     domain::Expression functionExpression{};
-    domain::WindProfile windProfile{};
+    domain::WindImpact windImpact{};
     domain::RgbColor lineColor{};
     domain::DurationMinutes controlChartsTabMinutes{domain::DurationMinutes::required(20)};
 
@@ -68,8 +68,8 @@ struct SessionStateData {
 
     // ===== Stand control =====
     domain::StandControlMode standControlMode{domain::StandControlMode::Manual};
-    domain::WindProfile appliedStandImpact{};
-    domain::WindProfile targetStandImpact{};
+    domain::WindImpact appliedStandImpact{};
+    domain::WindImpact targetStandImpact{};
 
     // ===== Protocol / report =====
     domain::TestProtocol testProtocol{};

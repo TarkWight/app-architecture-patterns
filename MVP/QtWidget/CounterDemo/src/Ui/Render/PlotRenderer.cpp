@@ -36,13 +36,14 @@ void PlotRenderer::drawPlot(QPainter &painter, const QRect &rect, const domain::
     drawAxisLabels(painter, plotRect, drawablePlot);
     drawXGrid(painter, plotRect, drawablePlot, leftMargin);
     drawYGrid(painter, plotRect, drawablePlot, leftMargin);
-    drawMarker(painter, plotRect, drawablePlot);
 
     if (!hasRenderablePlot(drawablePlot)) {
+        drawMarker(painter, plotRect, drawablePlot);
         return;
     }
 
     drawSeries(painter, plotRect, drawablePlot);
+    drawMarker(painter, plotRect, drawablePlot);
 }
 
 bool PlotRenderer::hasRenderablePlot(const domain::PlotModel &plot) {

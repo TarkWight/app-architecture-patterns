@@ -51,6 +51,10 @@ double traceAxisStepSeconds(double maxSeconds) {
     return 600.0;
 }
 
+bool hasFormulaSeries(const domain::PlotModel &plot) {
+    return !plot.series.points.empty();
+}
+
 domain::WindControlProfile buildProfile(const session::SessionStateData &stateData,
                                         const ports::IFunctionEngine &engine) {
     domain::WindControlProfile profile{};
@@ -98,6 +102,17 @@ void addControlTraceSeries(domain::PlotModel &plot, const domain::ControlTrace &
         return;
     }
 
+    const bool overlayFormula = hasFormulaSeries(plot);
+
+    if (overlayFormula) {
+        domain::NamedSeries formula{};
+        formula.label = "Формула";
+        formula.color = plot.color;
+        formula.series = std::move(plot.series);
+        plot.seriesList.clear();
+        plot.seriesList.push_back(std::move(formula));
+    }
+
     domain::NamedSeries target{};
     target.label = "Цель";
     target.color = domain::RgbColor{220, 60, 50};
@@ -110,23 +125,25 @@ void addControlTraceSeries(domain::PlotModel &plot, const domain::ControlTrace &
     safeCommand.series.points.reserve(trace.size());
 
     for (const auto &sample : trace.samples()) {
-        target.series.points.push_back(
-            domain::Point{.x = sample.timeSeconds, .y = sample.targetValue.beaufort.value()});
-        safeCommand.series.points.push_back(
-            domain::Point{.x = sample.timeSeconds, .y = sample.safeCommandValue.beaufort.value()});
+        const double x = overlayFormula ? sample.timeSeconds / 60.0 : sample.timeSeconds;
+        target.series.points.push_back(domain::Point{.x = x, .y = sample.targetValue.beaufort.value()});
+        safeCommand.series.points.push_back(domain::Point{.x = x, .y = sample.safeCommandValue.beaufort.value()});
     }
 
     const double markerTimeSeconds = trace.back().timeSeconds;
-    const double maxSeconds = std::max(10.0, std::ceil(markerTimeSeconds));
-    plot.x =
-        domain::AxisSpec{.min = 0.0, .max = maxSeconds, .step = traceAxisStepSeconds(maxSeconds), .label = "seconds"};
+    const double markerX = overlayFormula ? markerTimeSeconds / 60.0 : markerTimeSeconds;
+
+    if (!overlayFormula) {
+        const double maxSeconds = std::max(10.0, std::ceil(markerTimeSeconds));
+        plot.x = domain::AxisSpec{
+            .min = 0.0, .max = maxSeconds, .step = traceAxisStepSeconds(maxSeconds), .label = "seconds"};
+    }
 
     plot.series.points.clear();
-    plot.seriesList.clear();
     plot.seriesList.push_back(std::move(target));
     plot.seriesList.push_back(std::move(safeCommand));
 
-    plot.marker = domain::PlotMarker{.x = markerTimeSeconds, .label = "Сейчас", .visible = true};
+    plot.marker = domain::PlotMarker{.x = markerX, .label = "Сейчас", .visible = true};
 }
 
 } // namespace

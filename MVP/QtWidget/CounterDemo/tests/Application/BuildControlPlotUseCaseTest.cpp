@@ -133,6 +133,40 @@ TEST(BuildControlPlotUseCaseTest, UsesControlTraceAsTargetAndSafeCommandSeriesWh
     EXPECT_DOUBLE_EQ(plot.seriesList.at(1).series.points.at(1).y, 0.2);
 }
 
+TEST(BuildControlPlotUseCaseTest, KeepsFormulaSeriesWhenControlTraceIsAvailableForScenarioMode) {
+    application::session::SessionState state{};
+    state.setTestProtocolMode(domain::TestMode::Hybrid);
+    state.setEstimatedTestDurationMinutes(2);
+    state.appendControlTraceSample(domain::ControlTraceSample{
+        .timeSeconds = 0.0,
+        .targetValue = domain::makeWindImpact(2.0, 0.0, 0.0),
+        .safeCommandValue = domain::makeWindImpact(0.1, 0.0, 0.0),
+    });
+    state.appendControlTraceSample(domain::ControlTraceSample{
+        .timeSeconds = 1.0,
+        .targetValue = domain::makeWindImpact(3.0, 0.0, 0.0),
+        .safeCommandValue = domain::makeWindImpact(0.2, 0.0, 0.0),
+    });
+
+    const LinearFunctionEngine engine{};
+    application::useCases::BuildControlPlotUseCase useCase{state, engine};
+
+    const auto plot = useCase.execute();
+
+    ASSERT_EQ(plot.seriesList.size(), 3U);
+    EXPECT_TRUE(plot.series.points.empty());
+    EXPECT_EQ(plot.seriesList.at(0).label, "Формула");
+    EXPECT_EQ(plot.seriesList.at(1).label, "Цель");
+    EXPECT_EQ(plot.seriesList.at(2).label, "Безопасная команда");
+    EXPECT_EQ(plot.x.label, "minutes");
+    EXPECT_DOUBLE_EQ(plot.marker.x, 1.0 / 60.0);
+    EXPECT_DOUBLE_EQ(plot.seriesList.at(0).series.points.at(60).x, 1.0);
+    EXPECT_DOUBLE_EQ(plot.seriesList.at(0).series.points.at(60).y, 1.0);
+    EXPECT_DOUBLE_EQ(plot.seriesList.at(1).series.points.at(1).x, 1.0 / 60.0);
+    EXPECT_DOUBLE_EQ(plot.seriesList.at(1).series.points.at(1).y, 3.0);
+    EXPECT_DOUBLE_EQ(plot.seriesList.at(2).series.points.at(1).y, 0.2);
+}
+
 TEST(BuildControlPlotUseCaseTest, RefreshFromStateKeepsExistingProfileAndUpdatesTraceSeries) {
     application::session::SessionState state{};
     state.setEstimatedTestDurationMinutes(1);

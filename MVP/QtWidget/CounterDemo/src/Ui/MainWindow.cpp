@@ -8,6 +8,7 @@
 #include "ui_MainWindow.h"
 
 #include "../Domain/AxisId.hpp"
+#include "../Domain/FormulaTemplate.hpp"
 #include "../Domain/StandControlMode.hpp"
 #include "../Domain/StandImpactTransition.hpp"
 #include "../Domain/StandScenario.hpp"
@@ -126,6 +127,8 @@ void MainWindow::setStandConnectionStatusText(const std::string &text) {
 }
 
 void MainWindow::setFunctionExpression(const std::string &expression) {
+    updateControlFormulaTemplateSelection(expression);
+
     if (controlFormulaLineEdit == nullptr || controlFormulaLineEdit->hasFocus() ||
         controlFormulaLineEdit->text().toStdString() == expression) {
         return;
@@ -295,9 +298,19 @@ QWidget *MainWindow::createControlFormulaPanel() {
 
     layout->addWidget(new QLabel(QStringLiteral("Формула:"), panel));
 
+    controlFormulaTemplateComboBox = new QComboBox(panel);
+    controlFormulaTemplateComboBox->addItem(QStringLiteral("Своя формула"), QString{});
+    for (const auto &formulaTemplate : domain::formulaTemplates) {
+        controlFormulaTemplateComboBox->addItem(
+            QString::fromUtf8(formulaTemplate.title.data(), static_cast<qsizetype>(formulaTemplate.title.size())),
+            QString::fromUtf8(formulaTemplate.key.data(), static_cast<qsizetype>(formulaTemplate.key.size())));
+    }
+    layout->addWidget(controlFormulaTemplateComboBox);
+
     controlFormulaLineEdit = new QLineEdit(panel);
     controlFormulaLineEdit->setPlaceholderText(QStringLiteral("Введите формулу управляющего воздействия"));
     controlFormulaLineEdit->setText(ui->lineEditFormula->text());
+    updateControlFormulaTemplateSelection(controlFormulaLineEdit->text().toStdString());
     layout->addWidget(controlFormulaLineEdit, 1);
 
     auto *calculateButton = new QPushButton(QStringLiteral("Рассчитать"), panel);
@@ -329,6 +342,15 @@ void MainWindow::connectShellSignals() {
 
     QObject::connect(controlFormulaLineEdit, &QLineEdit::editingFinished, this,
                      [this]() { shellPresenter.onFunctionEdited(controlFormulaLineEdit->text().toStdString()); });
+
+    QObject::connect(controlFormulaTemplateComboBox, &QComboBox::currentIndexChanged, this, [this](int index) {
+        if (index <= 0) {
+            return;
+        }
+
+        shellPresenter.onFormulaTemplateSelected(
+            controlFormulaTemplateComboBox->currentData().toString().toStdString());
+    });
 
     QObject::connect(ui->comboBoxTestTimeSource, &QComboBox::currentIndexChanged, this, [this](int index) {
         domain::TestTimeSource source = domain::TestTimeSource::AutoCalculated;
@@ -482,6 +504,19 @@ void MainWindow::selectTelemetryAxisColor() {
 
 double MainWindow::selectedStandDirectionDegrees() const {
     return standDirectionComboBox->currentData().toDouble();
+}
+
+void MainWindow::updateControlFormulaTemplateSelection(const std::string &expression) {
+    if (controlFormulaTemplateComboBox == nullptr) {
+        return;
+    }
+
+    const QSignalBlocker blocker{controlFormulaTemplateComboBox};
+    const auto key = domain::formulaTemplateKeyByExpression(expression);
+    const int index = key.empty() ? 0
+                                  : controlFormulaTemplateComboBox->findData(
+                                        QString::fromUtf8(key.data(), static_cast<qsizetype>(key.size())));
+    controlFormulaTemplateComboBox->setCurrentIndex(index >= 0 ? index : 0);
 }
 
 void MainWindow::updateManualStandControlsEnabled() {

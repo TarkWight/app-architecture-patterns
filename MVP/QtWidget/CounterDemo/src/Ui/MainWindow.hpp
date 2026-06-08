@@ -92,6 +92,7 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     QComboBox *telemetryCurveComboBox{nullptr};
     QComboBox *telemetrySourceComboBox{nullptr};
     QCheckBox *telemetryCurveVisibleCheckBox{nullptr};
+    QComboBox *controlFormulaTemplateComboBox{nullptr};
     QLineEdit *controlFormulaLineEdit{nullptr};
     QTimer *standImpactTransitionTimer{nullptr};
     QPushButton *standApplyButton{nullptr};
@@ -112,6 +113,7 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     void advanceStandImpactTransition();
     void selectTelemetryAxisColor();
     void updateManualStandControlsEnabled();
+    void updateControlFormulaTemplateSelection(const std::string &expression);
     double selectedStandDirectionDegrees() const;
     domain::AxisId selectedTelemetryAxisId() const;
 };

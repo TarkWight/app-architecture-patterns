@@ -42,6 +42,7 @@ qt_add_executable(develop
   src/main.cpp
 
   src/Domain/Plot.hpp
+  src/Domain/FormulaTemplate.hpp
   src/Domain/TestProtocol.hpp
   src/Domain/Time.hpp
   src/Domain/Expression.hpp

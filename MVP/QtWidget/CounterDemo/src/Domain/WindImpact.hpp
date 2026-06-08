@@ -1,11 +1,8 @@
 #ifndef WINDIMPACT_HPP
 #define WINDIMPACT_HPP
 
-#include "Expression.hpp"
-
 #include <algorithm>
 #include <cmath>
-#include <utility>
 
 namespace domain {
 
@@ -76,14 +73,12 @@ struct WindImpact {
     Beaufort beaufort{Beaufort::from(0.0)};
     WindDirection direction{WindDirection::from(0.0)};
     AngleOfAttack angleOfAttack{AngleOfAttack::from(0.0)};
-    Expression formula{};
 };
 
-inline WindImpact makeWindImpact(double beaufort, double direction, double angleOfAttack, Expression formula = {}) {
+inline WindImpact makeWindImpact(double beaufort, double direction, double angleOfAttack) {
     return WindImpact{.beaufort = Beaufort::from(beaufort),
                       .direction = WindDirection::from(direction),
-                      .angleOfAttack = AngleOfAttack::from(angleOfAttack),
-                      .formula = std::move(formula)};
+                      .angleOfAttack = AngleOfAttack::from(angleOfAttack)};
 }
 
 } // namespace domain

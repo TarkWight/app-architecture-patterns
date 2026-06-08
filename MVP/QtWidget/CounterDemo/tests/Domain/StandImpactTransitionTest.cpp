@@ -28,17 +28,4 @@ TEST(StandImpactTransitionTest, SnapsToTargetWhenRemainingDeltaFitsIntoOneStep) 
     EXPECT_TRUE(result.targetReached);
 }
 
-TEST(StandImpactTransitionTest, CarriesTargetFormulaToNextImpact) {
-    auto current = domain::makeWindImpact(0.0, 0.0, 0.0);
-    current.formula.value = "old";
-
-    auto target = domain::makeWindImpact(0.0, 0.0, 0.0);
-    target.formula.value = "new";
-
-    const auto result = domain::StandImpactTransition{}.advance(current, target);
-
-    EXPECT_EQ(result.impact.formula.value, "new");
-    EXPECT_TRUE(result.targetReached);
-}
-
 } // namespace

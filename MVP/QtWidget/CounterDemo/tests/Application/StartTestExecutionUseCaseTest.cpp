@@ -136,7 +136,8 @@ TEST(StartTestExecutionUseCaseTest, AutomaticModeSmoothlyFollowsScenarioImpactFr
     application::session::SessionState state{};
     state.setTestProtocolMode(domain::TestMode::Automatic);
     state.setEstimatedTestDurationMinutes(1);
-    state.setWindImpact(domain::makeWindImpact(0.0, 90.0, 5.0, domain::Expression{.value = "x"}));
+    state.setFunctionExpression("x");
+    state.setWindImpact(domain::makeWindImpact(0.0, 90.0, 5.0));
 
     TestExecutionSchedulerSpy scheduler{};
     TelemetryClientSpy telemetryClient{};

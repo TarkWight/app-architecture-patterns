@@ -22,10 +22,8 @@ inline std::optional<WindImpact> windImpactAt(const WindControlProfile &profile,
     const auto sampleIndex = std::min(requestedIndex, profile.samples.size() - 1);
     const auto &sample = profile.samples.at(sampleIndex);
 
-    return WindImpact{.beaufort = sample.beaufort,
-                      .direction = baseImpact.direction,
-                      .angleOfAttack = baseImpact.angleOfAttack,
-                      .formula = baseImpact.formula};
+    return WindImpact{
+        .beaufort = sample.beaufort, .direction = baseImpact.direction, .angleOfAttack = baseImpact.angleOfAttack};
 }
 
 } // namespace domain

@@ -78,10 +78,7 @@ void ControlChartsTabPresenter::onRebuildPlotPressed() {
 }
 
 void ControlChartsTabPresenter::updateWindImpact(double beaufort, double direction, double angleOfAttack) {
-    domain::WindImpact profile = domain::makeWindImpact(beaufort, direction, angleOfAttack);
-    profile.formula = state.get().functionExpression;
-
-    setWindImpactUseCase.execute(profile);
+    setWindImpactUseCase.execute(domain::makeWindImpact(beaufort, direction, angleOfAttack));
 }
 
 } // namespace presentation::controlChartsTab

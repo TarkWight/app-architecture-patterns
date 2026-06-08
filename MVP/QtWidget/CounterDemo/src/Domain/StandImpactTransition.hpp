@@ -23,8 +23,7 @@ class StandImpactTransition final {
         auto next = makeWindImpact(
             stepTowards(current.beaufort.value(), target.beaufort.value(), beaufortStep),
             stepTowards(current.direction.degrees(), target.direction.degrees(), directionStepDegrees),
-            stepTowards(current.angleOfAttack.degrees(), target.angleOfAttack.degrees(), angleOfAttackStepDegrees),
-            target.formula);
+            stepTowards(current.angleOfAttack.degrees(), target.angleOfAttack.degrees(), angleOfAttackStepDegrees));
 
         return StandImpactTransitionStep{.impact = next, .targetReached = isReached(next, target)};
     }

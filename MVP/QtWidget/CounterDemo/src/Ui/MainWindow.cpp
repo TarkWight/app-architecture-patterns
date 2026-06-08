@@ -450,7 +450,6 @@ void MainWindow::applyStandInputs() {
 
     domain::WindImpact target = domain::makeWindImpact(standBeaufortSpinBox->value(), selectedStandDirectionDegrees(),
                                                        standAngleOfAttackSpinBox->value());
-    target.formula = stateData.functionExpression;
 
     setStandImpactUseCase.setTarget(target);
     standImpactTransitionTimer->start();

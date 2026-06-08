@@ -24,6 +24,8 @@ class StartTestExecutionUseCase final {
     application::ports::ITelemetryClient &telemetryClient;
     BuildControlPlotUseCase &buildControlPlotUseCase;
 
+    void startTelemetryPollingIfConnected();
+    void stopTelemetryPollingIfActive();
     void applyScenarioImpact(int elapsedSeconds);
     void sendAppliedImpact(const domain::WindImpact &profile);
 };

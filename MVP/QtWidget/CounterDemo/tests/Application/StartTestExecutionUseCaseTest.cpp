@@ -5,6 +5,8 @@
 #include "../../src/Application/Ports/ITestExecutionScheduler.hpp"
 #include "../../src/Application/Session/SessionState.hpp"
 #include "../../src/Domain/AxisId.hpp"
+#include "../../src/Domain/StandConnectionStatus.hpp"
+#include "../../src/Domain/TestExecutionStatus.hpp"
 #include "../../src/Domain/TestTimeDirection.hpp"
 #include "../../src/Domain/TestTimeSource.hpp"
 
@@ -78,9 +80,11 @@ class TelemetryClientSpy final : public application::ports::ITelemetryClient {
     }
 
     void startPolling(int /*intervalMs*/) override {
+        ++startPollingCalls;
     }
 
     void stopPolling() override {
+        ++stopPollingCalls;
     }
 
     void setAxisCommand(domain::AxisId axisId, domain::AxisControlCommand command) override {
@@ -99,6 +103,8 @@ class TelemetryClientSpy final : public application::ports::ITelemetryClient {
     ErrorCallback errorCallback{};
     std::optional<domain::AxisControlCommand> axis0Command{};
     std::optional<domain::AxisControlCommand> axis1Command{};
+    int startPollingCalls{0};
+    int stopPollingCalls{0};
 };
 
 class ScenarioFunctionEngine final : public application::ports::IFunctionEngine {
@@ -194,6 +200,47 @@ TEST(StartTestExecutionUseCaseTest, ScenarioStartClearsPreviousControlTrace) {
 
     ASSERT_EQ(state.get().controlTrace.size(), 1U);
     EXPECT_DOUBLE_EQ(state.get().controlTrace.front().timeSeconds, 0.0);
+}
+
+TEST(StartTestExecutionUseCaseTest, StartsTelemetryPollingWhenStandIsConnected) {
+    application::session::SessionState state{};
+    state.setTestProtocolMode(domain::TestMode::Manual);
+    state.setStandConnectionStatus(domain::StandConnectionStatus::Connected);
+
+    TestExecutionSchedulerSpy scheduler{};
+    TelemetryClientSpy telemetryClient{};
+    ScenarioFunctionEngine functionEngine{};
+    application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
+    application::useCases::StartTestExecutionUseCase useCase{state, scheduler, telemetryClient,
+                                                             buildControlPlotUseCase};
+
+    useCase.execute();
+
+    EXPECT_EQ(telemetryClient.startPollingCalls, 1);
+    EXPECT_EQ(state.get().standConnectionStatus, domain::StandConnectionStatus::Polling);
+}
+
+TEST(StartTestExecutionUseCaseTest, StopsTelemetryPollingWhenTimedScenarioCompletes) {
+    application::session::SessionState state{};
+    state.setTestProtocolMode(domain::TestMode::Automatic);
+    state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
+    state.setEstimatedTestDurationMinutes(1);
+    state.setStandConnectionStatus(domain::StandConnectionStatus::Connected);
+
+    TestExecutionSchedulerSpy scheduler{};
+    TelemetryClientSpy telemetryClient{};
+    ScenarioFunctionEngine functionEngine{};
+    application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
+    application::useCases::StartTestExecutionUseCase useCase{state, scheduler, telemetryClient,
+                                                             buildControlPlotUseCase};
+
+    useCase.execute();
+    scheduler.tick(60);
+
+    EXPECT_EQ(telemetryClient.startPollingCalls, 1);
+    EXPECT_EQ(telemetryClient.stopPollingCalls, 1);
+    EXPECT_EQ(state.get().standConnectionStatus, domain::StandConnectionStatus::Connected);
+    EXPECT_EQ(state.get().testExecutionStatus, domain::TestExecutionStatus::Completed);
 }
 
 } // namespace

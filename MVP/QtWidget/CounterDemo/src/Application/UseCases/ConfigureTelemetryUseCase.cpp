@@ -31,6 +31,11 @@ void ConfigureTelemetryUseCase::execute(const std::string &configPath) {
                 }
                 break;
             case domain::TelemetryConnectionStatus::Connected:
+                if (currentStatus != domain::StandConnectionStatus::Disconnecting) {
+                    state.setStandConnectionStatus(domain::StandConnectionStatus::Connected);
+                    state.setTelemetryStatus(domain::TelemetryStatus::Valid);
+                }
+                break;
             case domain::TelemetryConnectionStatus::Polling:
                 if (currentStatus != domain::StandConnectionStatus::Disconnecting) {
                     state.setStandConnectionStatus(domain::StandConnectionStatus::Polling);
@@ -39,6 +44,7 @@ void ConfigureTelemetryUseCase::execute(const std::string &configPath) {
                 break;
             case domain::TelemetryConnectionStatus::Disconnected:
                 if (currentStatus == domain::StandConnectionStatus::Connecting ||
+                    currentStatus == domain::StandConnectionStatus::Connected ||
                     currentStatus == domain::StandConnectionStatus::Polling) {
                     state.setStandConnectionStatus(domain::StandConnectionStatus::Error);
                     state.setTelemetryStatus(domain::TelemetryStatus::Unavailable);

@@ -184,8 +184,9 @@ void ShellPresenter::onConnectTelemetryPressed(std::string configPath) {
     try {
         const auto status = state.get().standConnectionStatus;
 
-        if (status == domain::StandConnectionStatus::Polling || status == domain::StandConnectionStatus::Connecting ||
-            status == domain::StandConnectionStatus::Error) {
+        if (status == domain::StandConnectionStatus::Connected || status == domain::StandConnectionStatus::Polling ||
+            status == domain::StandConnectionStatus::Connecting ||
+            status == domain::StandConnectionStatus::Disconnecting || status == domain::StandConnectionStatus::Error) {
             disconnectStandUseCase.execute();
 
             if (view != nullptr) {
@@ -227,6 +228,7 @@ void ShellPresenter::refreshStandConnectionButton() {
     case domain::StandConnectionStatus::Configured:
         view->setStandConnectionButtonText("Подключить стенд");
         break;
+    case domain::StandConnectionStatus::Connected:
     case domain::StandConnectionStatus::Connecting:
     case domain::StandConnectionStatus::Polling:
     case domain::StandConnectionStatus::Disconnecting:
@@ -251,6 +253,9 @@ void ShellPresenter::refreshStandConnectionStatusText() {
     case domain::StandConnectionStatus::Connecting:
         view->setStandConnectionStatusText("Стенд: подключение");
         break;
+    case domain::StandConnectionStatus::Connected:
+        view->setStandConnectionStatusText("Стенд: подключен");
+        break;
     case domain::StandConnectionStatus::Polling:
         view->setStandConnectionStatusText("Стенд: обмен активен");
         break;
@@ -268,7 +273,8 @@ void ShellPresenter::notifyStandConnectionStatusChanged(domain::StandConnectionS
         return;
     }
 
-    if (status == domain::StandConnectionStatus::Polling || status == domain::StandConnectionStatus::Disconnected) {
+    if (status == domain::StandConnectionStatus::Connected || status == domain::StandConnectionStatus::Polling ||
+        status == domain::StandConnectionStatus::Disconnected) {
         standConnectionWarningShown = false;
     }
 

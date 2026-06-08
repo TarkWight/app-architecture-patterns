@@ -12,6 +12,7 @@ ConnectStandUseCase::ConnectStandUseCase(application::session::SessionState &sta
 void ConnectStandUseCase::execute() {
     const auto currentStatus = state.get().standConnectionStatus;
     if (currentStatus == domain::StandConnectionStatus::Connecting ||
+        currentStatus == domain::StandConnectionStatus::Connected ||
         currentStatus == domain::StandConnectionStatus::Polling) {
         return;
     }
@@ -19,9 +20,8 @@ void ConnectStandUseCase::execute() {
     state.setStandConnectionStatus(domain::StandConnectionStatus::Connecting);
 
     telemetryClient.connectAll();
-    telemetryClient.startPolling(state.get().telemetryPollIntervalMs);
 
-    state.setStandConnectionStatus(domain::StandConnectionStatus::Polling);
+    state.setStandConnectionStatus(domain::StandConnectionStatus::Connected);
 }
 
 } // namespace application::useCases

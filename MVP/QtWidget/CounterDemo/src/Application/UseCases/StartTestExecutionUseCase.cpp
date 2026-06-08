@@ -2,6 +2,7 @@
 
 #include "../../Domain/AxisControlCommand.hpp"
 #include "../../Domain/AxisId.hpp"
+#include "../../Domain/StandConnectionStatus.hpp"
 #include "../../Domain/TestExecutionStatus.hpp"
 #include "../../Domain/TestExecutionTransitions.hpp"
 #include "../../Domain/TestProtocol.hpp"
@@ -67,6 +68,7 @@ void StartTestExecutionUseCase::execute() {
     }
 
     state.setTestExecutionStatus(domain::TestExecutionStatus::Running);
+    startTelemetryPollingIfConnected();
     applyScenarioImpact(0);
 
     testExecutionScheduler.start(0, [this](int elapsedSeconds) {
@@ -83,10 +85,29 @@ void StartTestExecutionUseCase::execute() {
 
             if (remainingSeconds == 0) {
                 testExecutionScheduler.stop();
+                stopTelemetryPollingIfActive();
                 state.setTestExecutionStatus(domain::TestExecutionStatus::Completed);
             }
         }
     });
+}
+
+void StartTestExecutionUseCase::startTelemetryPollingIfConnected() {
+    if (state.get().standConnectionStatus != domain::StandConnectionStatus::Connected) {
+        return;
+    }
+
+    telemetryClient.startPolling(state.get().telemetryPollIntervalMs);
+    state.setStandConnectionStatus(domain::StandConnectionStatus::Polling);
+}
+
+void StartTestExecutionUseCase::stopTelemetryPollingIfActive() {
+    if (state.get().standConnectionStatus != domain::StandConnectionStatus::Polling) {
+        return;
+    }
+
+    telemetryClient.stopPolling();
+    state.setStandConnectionStatus(domain::StandConnectionStatus::Connected);
 }
 
 void StartTestExecutionUseCase::applyScenarioImpact(int elapsedSeconds) {

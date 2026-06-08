@@ -7,6 +7,7 @@ enum class StandConnectionStatus {
     Disconnected,
     Configured,
     Connecting,
+    Connected,
     Polling,
     Disconnecting,
     Error,

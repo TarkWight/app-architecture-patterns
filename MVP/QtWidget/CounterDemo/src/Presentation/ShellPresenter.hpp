@@ -47,6 +47,7 @@ class ShellPresenter final {
     void onStartPressed();
     void onStateChanged();
     void onPausePressed();
+    void onPauseResumePressed();
     void onResumePressed();
     void onStopPressed();
     void onCalculatePressed();

@@ -64,6 +64,18 @@ void ShellPresenter::onResumePressed() {
     }
 }
 
+void ShellPresenter::onPauseResumePressed() {
+    const auto status = state.get().testExecutionStatus;
+    if (canPause(status)) {
+        onPausePressed();
+        return;
+    }
+
+    if (canResume(status)) {
+        onResumePressed();
+    }
+}
+
 void ShellPresenter::onStopPressed() {
     stopTestExecutionUseCase.execute();
     refreshFromState();
@@ -148,8 +160,8 @@ void ShellPresenter::refreshFromState() {
 
     view->setTimerText(formatTimerText(displayedSeconds));
     view->setStartEnabled(canStart(session.testExecutionStatus));
-    view->setPauseEnabled(canPause(session.testExecutionStatus));
-    view->setResumeEnabled(canResume(session.testExecutionStatus));
+    view->setPauseResumeEnabled(canPause(session.testExecutionStatus) || canResume(session.testExecutionStatus));
+    view->setPauseResumeText(canResume(session.testExecutionStatus) ? "Продолжить" : "Пауза");
     view->setStopEnabled(canStop(session.testExecutionStatus));
     view->setFunctionExpression(session.functionExpression.value);
     view->setTestTimeSource(session.testTimeSource);

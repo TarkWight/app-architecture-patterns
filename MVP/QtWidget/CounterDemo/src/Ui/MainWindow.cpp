@@ -106,12 +106,12 @@ void MainWindow::setStopEnabled(bool enabled) {
     ui->buttonStop->setEnabled(enabled);
 }
 
-void MainWindow::setPauseEnabled(bool enabled) {
+void MainWindow::setPauseResumeEnabled(bool enabled) {
     ui->buttonPause->setEnabled(enabled);
 }
 
-void MainWindow::setResumeEnabled(bool enabled) {
-    ui->buttonResume->setEnabled(enabled);
+void MainWindow::setPauseResumeText(const std::string &text) {
+    ui->buttonPause->setText(QString::fromStdString(text));
 }
 
 void MainWindow::setStandConnectionButtonText(const std::string &text) {
@@ -329,9 +329,7 @@ QWidget *MainWindow::createControlFormulaPanel() {
 void MainWindow::connectShellSignals() {
     QObject::connect(ui->buttonStart, &QPushButton::clicked, this, [this]() { shellPresenter.onStartPressed(); });
 
-    QObject::connect(ui->buttonPause, &QPushButton::clicked, this, [this]() { shellPresenter.onPausePressed(); });
-
-    QObject::connect(ui->buttonResume, &QPushButton::clicked, this, [this]() { shellPresenter.onResumePressed(); });
+    QObject::connect(ui->buttonPause, &QPushButton::clicked, this, [this]() { shellPresenter.onPauseResumePressed(); });
 
     QObject::connect(ui->buttonStop, &QPushButton::clicked, this, [this]() { shellPresenter.onStopPressed(); });
 

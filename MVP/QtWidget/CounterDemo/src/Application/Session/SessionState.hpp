@@ -8,6 +8,7 @@
 #include "../../Domain/TestProtocol.hpp"
 #include "../../Domain/TestTimeDirection.hpp"
 #include "../../Domain/TestTimeSource.hpp"
+#include "../../Domain/WindControlProfile.hpp"
 #include "../../Domain/AxisTelemetrySample.hpp"
 
 #include "SessionStateData.hpp"
@@ -48,6 +49,7 @@ class SessionState {
 
     void setTelemetryPlot(domain::PlotModel plot);
     void setControlPlot(domain::PlotModel plot);
+    void setControlProfile(domain::WindControlProfile profile);
     void appendTelemetrySample(domain::AxisTelemetrySample sample);
     void setTelemetryWindowEndSeconds(double endSeconds);
     void followTelemetryTail();

@@ -1,9 +1,56 @@
 #include "BuildControlPlotUseCase.hpp"
 
-#include <algorithm>
-#include <cmath>
+#include "../../Domain/WindControlProfile.hpp"
+
+#include <cstddef>
+#include <utility>
 
 namespace application::useCases {
+
+namespace {
+
+domain::WindControlProfile buildProfile(const session::SessionStateData &stateData,
+                                        const ports::IFunctionEngine &engine) {
+    domain::WindControlProfile profile{};
+    // TODO: derive the duration from the test time or calculated UAV configuration instead of the MVP constant.
+    profile.durationMinutes = domain::temporaryFormulaProfileDurationMinutes;
+    profile.sampleIntervalSeconds = domain::windControlProfileSampleIntervalSeconds;
+
+    const int sampleCount =
+        static_cast<int>(static_cast<double>(profile.durationMinutes * 60) / profile.sampleIntervalSeconds);
+    profile.samples.reserve(static_cast<std::size_t>(sampleCount));
+
+    for (int index = 0; index < sampleCount; ++index) {
+        const double timeSeconds = static_cast<double>(index) * profile.sampleIntervalSeconds;
+        const double timeMinutes = timeSeconds / 60.0;
+        const double rawBeaufort = engine.eval(stateData.functionExpression.value, timeMinutes);
+
+        profile.samples.push_back(domain::WindControlSample{
+            .timeSeconds = timeSeconds,
+            .timeMinutes = timeMinutes,
+            .beaufort = domain::Beaufort::from(rawBeaufort),
+        });
+    }
+
+    return profile;
+}
+
+domain::PlotModel buildPlot(const session::SessionStateData &stateData, const domain::WindControlProfile &profile) {
+    domain::PlotModel plot{};
+    plot.title = "Control chart";
+    plot.color = stateData.lineColor;
+    plot.x = domain::AxisSpec{0.0, static_cast<double>(profile.durationMinutes), 1.0, "minutes"};
+    plot.y = domain::AxisSpec{0.0, domain::maxOperationalBeaufort, 0.5, "Beaufort"};
+
+    plot.series.points.reserve(profile.samples.size());
+    for (const auto &sample : profile.samples) {
+        plot.series.points.push_back(domain::Point{.x = sample.timeMinutes, .y = sample.beaufort.value()});
+    }
+
+    return plot;
+}
+
+} // namespace
 
 BuildControlPlotUseCase::BuildControlPlotUseCase(session::SessionState &state, const ports::IFunctionEngine &engine)
     : state(state), engine(engine) {
@@ -12,38 +59,10 @@ BuildControlPlotUseCase::BuildControlPlotUseCase(session::SessionState &state, c
 domain::PlotModel BuildControlPlotUseCase::execute() {
     const auto &stateData = state.get();
 
-    domain::PlotModel plot{};
-    plot.title = "Control chart";
-    plot.color = stateData.lineColor;
+    auto profile = buildProfile(stateData, engine);
+    auto plot = buildPlot(stateData, profile);
 
-    const int minutes = stateData.controlChartsTabMinutes.value();
-
-    plot.x = domain::AxisSpec{0.0, static_cast<double>(minutes), 1.0, "minutes"};
-
-    plot.y = domain::AxisSpec{0.0, 7.5, 0.5, "Y"};
-
-    constexpr double sampleStep = 0.1;
-    const int sampleCount = static_cast<int>(std::floor(static_cast<double>(minutes) / sampleStep));
-
-    plot.series.points.reserve(static_cast<std::size_t>(sampleCount) + 1);
-
-    const double beaufort = stateData.windProfile.beaufort.value();
-    const double angleOfAttack = stateData.windProfile.angleOfAttack.degrees();
-
-    const double windFactor = 1.0 + (beaufort * 0.05);
-    const double attackOffset = angleOfAttack * 0.01;
-
-    for (int index = 0; index <= sampleCount; ++index) {
-        const double x = static_cast<double>(index) * sampleStep;
-
-        const double baseValue = engine.eval(stateData.functionExpression.value, x);
-
-        const double yRaw = (baseValue * windFactor) + attackOffset;
-        const double y = std::clamp(yRaw, plot.y.min, plot.y.max);
-
-        plot.series.points.push_back(domain::Point{.x = x, .y = y});
-    }
-
+    state.setControlProfile(std::move(profile));
     state.setControlPlot(plot);
     return plot;
 }

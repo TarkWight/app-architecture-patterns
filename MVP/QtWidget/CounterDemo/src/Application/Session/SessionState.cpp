@@ -4,6 +4,7 @@
 #include "../../Domain/AxisId.hpp"
 #include "../../Domain/TestProtocol.hpp"
 #include "../../Domain/Time.hpp"
+#include "../../Domain/WindControlProfile.hpp"
 #include "../../Domain/WindProfile.hpp"
 
 #include "SessionStateData.hpp"
@@ -187,6 +188,11 @@ void application::session::SessionState::setTargetStandImpact(domain::WindProfil
 
 void application::session::SessionState::setControlPlot(domain::PlotModel plot) {
     data.controlPlot = std::move(plot);
+    notify();
+}
+
+void application::session::SessionState::setControlProfile(domain::WindControlProfile profile) {
+    data.controlProfile = std::move(profile);
     notify();
 }
 

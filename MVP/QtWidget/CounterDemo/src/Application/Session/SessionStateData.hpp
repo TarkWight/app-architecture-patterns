@@ -12,6 +12,7 @@
 #include "../../Domain/TestTimeDirection.hpp"
 #include "../../Domain/TestTimeSource.hpp"
 #include "../../Domain/Time.hpp"
+#include "../../Domain/WindControlProfile.hpp"
 #include "../../Domain/WindProfile.hpp"
 #include "../../Domain/Expression.hpp"
 
@@ -44,6 +45,7 @@ struct SessionStateData {
     // ===== Plots =====
     domain::PlotModel telemetryPlot{};
     domain::PlotModel controlPlot{};
+    domain::WindControlProfile controlProfile{};
 
     std::vector<domain::AxisTelemetrySample> telemetryHistory{};
     double telemetryWindowSeconds{60.0};

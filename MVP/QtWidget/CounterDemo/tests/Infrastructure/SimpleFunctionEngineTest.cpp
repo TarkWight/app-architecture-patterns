@@ -24,8 +24,10 @@ TEST(SimpleFunctionEngineTest, EvaluatesFunctionsAndPower) {
     const infrastructure::SimpleFunctionEngine engine{};
 
     EXPECT_DOUBLE_EQ(engine.eval("x^2", 3.0), 9.0);
+    EXPECT_DOUBLE_EQ(engine.eval("x**2", 3.0), 9.0);
     EXPECT_NEAR(engine.eval("sin(x)", 1.0), std::sin(1.0), 0.000001);
     EXPECT_NEAR(engine.eval("cos(x)", 1.0), std::cos(1.0), 0.000001);
+    EXPECT_DOUBLE_EQ(engine.eval("abs(x)", -3.0), 3.0);
 }
 
 TEST(SimpleFunctionEngineTest, ReturnsZeroForInvalidExpressions) {

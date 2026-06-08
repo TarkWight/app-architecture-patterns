@@ -67,7 +67,7 @@ class SimpleFunctionEngine final : public application::ports::IFunctionEngine {
 
         double parsePower() {
             double value = parseUnary();
-            if (consume('^')) {
+            if (consumeText("**") || consume('^')) {
                 value = std::pow(value, parsePower());
             }
             return value;
@@ -93,6 +93,9 @@ class SimpleFunctionEngine final : public application::ports::IFunctionEngine {
             }
             if (consumeName("cos")) {
                 return std::cos(parseFunctionArgument());
+            }
+            if (consumeName("abs")) {
+                return std::abs(parseFunctionArgument());
             }
             if (consumeName("x") || consumeName("t")) {
                 return variableValue;
@@ -136,6 +139,15 @@ class SimpleFunctionEngine final : public application::ports::IFunctionEngine {
                 return false;
             }
             ++position;
+            return true;
+        }
+
+        bool consumeText(std::string_view text) {
+            skipSpaces();
+            if (expression.substr(position, text.size()) != text) {
+                return false;
+            }
+            position += text.size();
             return true;
         }
 

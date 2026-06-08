@@ -221,6 +221,7 @@ if (BUILD_TESTING)
     tests/Application/SetStandControlModeUseCaseTest.cpp
     tests/Application/SetStandImpactUseCaseTest.cpp
     tests/Application/StartTestExecutionUseCaseTest.cpp
+    tests/Application/UpdateTestProtocolUseCaseTest.cpp
     tests/Infrastructure/SimpleFunctionEngineTest.cpp
     src/Application/Session/SessionState.cpp
     src/Application/Session/Subscription.cpp
@@ -229,6 +230,7 @@ if (BUILD_TESTING)
     src/Application/UseCases/SetStandControlModeUseCase.cpp
     src/Application/UseCases/SetStandImpactUseCase.cpp
     src/Application/UseCases/StartTestExecutionUseCase.cpp
+    src/Application/UseCases/UpdateTestProtocolUseCase.cpp
   )
 
   target_include_directories(domain_tests

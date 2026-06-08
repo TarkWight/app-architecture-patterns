@@ -406,6 +406,13 @@ void MainWindow::connectSessionSignals() {
 
                          controlFormulaLineEdit->setText(expression);
                      });
+
+    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testProtocolModeChanged, this,
+                     [this](const QString & /*mode*/) {
+                         updateStandControlModeSelection();
+                         updateManualStandControlsEnabled();
+                         controlChartsTabPresenter.onRebuildPlotPressed();
+                     });
 }
 
 void MainWindow::setTestTimeSource(domain::TestTimeSource source) {
@@ -510,6 +517,21 @@ void MainWindow::updateControlFormulaTemplateSelection(const std::string &expres
                                   : controlFormulaTemplateComboBox->findData(
                                         QString::fromUtf8(key.data(), static_cast<qsizetype>(key.size())));
     controlFormulaTemplateComboBox->setCurrentIndex(index >= 0 ? index : 0);
+}
+
+void MainWindow::updateStandControlModeSelection() {
+    if (standControlModeComboBox == nullptr) {
+        return;
+    }
+
+    const auto mode = sessionAdapter.getState().get().standControlMode;
+    const int index = standControlModeComboBox->findData(static_cast<int>(mode));
+    if (index < 0 || standControlModeComboBox->currentIndex() == index) {
+        return;
+    }
+
+    const QSignalBlocker blocker{standControlModeComboBox};
+    standControlModeComboBox->setCurrentIndex(index);
 }
 
 void MainWindow::updateManualStandControlsEnabled() {

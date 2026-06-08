@@ -112,6 +112,7 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     void applyStandInputs();
     void advanceStandImpactTransition();
     void selectTelemetryAxisColor();
+    void updateStandControlModeSelection();
     void updateManualStandControlsEnabled();
     void updateControlFormulaTemplateSelection(const std::string &expression);
     double selectedStandDirectionDegrees() const;

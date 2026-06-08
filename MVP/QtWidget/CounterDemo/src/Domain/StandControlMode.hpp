@@ -24,6 +24,19 @@ constexpr TestMode testModeForStandControlMode(StandControlMode mode) {
     return TestMode::Manual;
 }
 
+constexpr StandControlMode standControlModeForTestMode(TestMode mode) {
+    switch (mode) {
+    case TestMode::Manual:
+        return StandControlMode::Manual;
+    case TestMode::Hybrid:
+        return StandControlMode::Hybrid;
+    case TestMode::Automatic:
+        return StandControlMode::PresetScenario;
+    }
+
+    return StandControlMode::Manual;
+}
+
 } // namespace domain
 
 #endif // STANDCONTROLMODE_HPP

@@ -67,9 +67,6 @@ void ControlChartsTabWidget::insertTopPanel(QWidget &panel) {
 }
 
 void ControlChartsTabWidget::connectSignals() {
-    QObject::connect(ui->buttonRebuildPlot, &QPushButton::clicked, this,
-                     [this]() { presenter.onRebuildPlotPressed(); });
-
     QObject::connect(ui->spinBoxMinutes, qOverload<int>(&QSpinBox::valueChanged), this,
                      [this](int value) { presenter.onMinutesChanged(value); });
 

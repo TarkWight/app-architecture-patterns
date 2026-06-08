@@ -166,7 +166,6 @@ void MainWindow::setupStandConnectionStatusIndicator() {
 void MainWindow::setupMainContentLayout() {
     ui->labelFormulaCaption->hide();
     ui->lineEditFormula->hide();
-    ui->buttonCalculate->hide();
     ui->buttonPickColor->hide();
 
     const int tabIndex = ui->verticalLayoutRoot->indexOf(ui->tabWidget);
@@ -308,7 +307,7 @@ QWidget *MainWindow::createControlFormulaPanel() {
     updateControlFormulaTemplateSelection(controlFormulaLineEdit->text().toStdString());
     layout->addWidget(controlFormulaLineEdit, 1);
 
-    auto *calculateButton = new QPushButton(QStringLiteral("Рассчитать"), panel);
+    auto *calculateButton = new QPushButton(QStringLiteral("Рассчитать и построить"), panel);
     QObject::connect(calculateButton, &QPushButton::clicked, this, [this]() { shellPresenter.onCalculatePressed(); });
     layout->addWidget(calculateButton);
 

@@ -102,15 +102,7 @@
         </widget>
        </item>
 
-       <item row="0" column="7">
-        <widget class="QPushButton" name="buttonCalculate">
-         <property name="text">
-          <string>Рассчёт</string>
-         </property>
-        </widget>
-       </item>
-
-		<item row="0" column="8">
+		<item row="0" column="7">
 		 <widget class="QPushButton" name="buttonConnectTelemetry">
 		  <property name="text">
 		   <string>Подключить стенд</string>
@@ -118,7 +110,7 @@
 		 </widget>
 		</item>
 
-		<item row="0" column="9">
+		<item row="0" column="8">
 		 <spacer name="horizontalSpacerTop">
 		  <property name="orientation">
 		   <enum>Qt::Horizontal</enum>

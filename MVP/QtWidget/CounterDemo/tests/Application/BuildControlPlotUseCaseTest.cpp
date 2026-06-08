@@ -77,4 +77,32 @@ TEST(BuildControlPlotUseCaseTest, ManualModeStillBuildsFormulaPreviewForTheChart
     EXPECT_EQ(plot.series.points.size(), state.get().controlProfile.samples.size());
 }
 
+TEST(BuildControlPlotUseCaseTest, UsesControlTraceAsTargetAndSafeCommandSeriesWhenAvailable) {
+    application::session::SessionState state{};
+    state.setEstimatedTestDurationMinutes(1);
+    state.appendControlTraceSample(domain::ControlTraceSample{
+        .timeSeconds = 0.0,
+        .targetValue = domain::makeWindProfile(2.0, 0.0, 0.0),
+        .safeCommandValue = domain::makeWindProfile(0.1, 0.0, 0.0),
+    });
+    state.appendControlTraceSample(domain::ControlTraceSample{
+        .timeSeconds = 1.0,
+        .targetValue = domain::makeWindProfile(3.0, 0.0, 0.0),
+        .safeCommandValue = domain::makeWindProfile(0.2, 0.0, 0.0),
+    });
+
+    const LinearFunctionEngine engine{};
+    application::useCases::BuildControlPlotUseCase useCase{state, engine};
+
+    const auto plot = useCase.execute();
+
+    ASSERT_EQ(plot.seriesList.size(), 2U);
+    EXPECT_TRUE(plot.series.points.empty());
+    EXPECT_EQ(plot.seriesList.at(0).label, "Цель");
+    EXPECT_EQ(plot.seriesList.at(1).label, "Безопасная команда");
+    EXPECT_DOUBLE_EQ(plot.seriesList.at(0).series.points.at(1).x, 1.0 / 60.0);
+    EXPECT_DOUBLE_EQ(plot.seriesList.at(0).series.points.at(1).y, 3.0);
+    EXPECT_DOUBLE_EQ(plot.seriesList.at(1).series.points.at(1).y, 0.2);
+}
+
 } // namespace

@@ -1,5 +1,6 @@
 #include "BuildControlPlotUseCase.hpp"
 
+#include "../../Domain/ControlTrace.hpp"
 #include "../../Domain/TestTimeSource.hpp"
 #include "../../Domain/WindControlProfile.hpp"
 
@@ -59,6 +60,35 @@ domain::PlotModel buildPlot(const session::SessionStateData &stateData, const do
     return plot;
 }
 
+void addControlTraceSeries(domain::PlotModel &plot, const std::vector<domain::ControlTraceSample> &trace) {
+    if (trace.empty()) {
+        return;
+    }
+
+    domain::NamedSeries target{};
+    target.label = "Цель";
+    target.color = domain::RgbColor{220, 60, 50};
+
+    domain::NamedSeries safeCommand{};
+    safeCommand.label = "Безопасная команда";
+    safeCommand.color = domain::RgbColor{40, 110, 210};
+
+    target.series.points.reserve(trace.size());
+    safeCommand.series.points.reserve(trace.size());
+
+    for (const auto &sample : trace) {
+        const double timeMinutes = sample.timeSeconds / 60.0;
+        target.series.points.push_back(domain::Point{.x = timeMinutes, .y = sample.targetValue.beaufort.value()});
+        safeCommand.series.points.push_back(
+            domain::Point{.x = timeMinutes, .y = sample.safeCommandValue.beaufort.value()});
+    }
+
+    plot.series.points.clear();
+    plot.seriesList.clear();
+    plot.seriesList.push_back(std::move(target));
+    plot.seriesList.push_back(std::move(safeCommand));
+}
+
 } // namespace
 
 BuildControlPlotUseCase::BuildControlPlotUseCase(session::SessionState &state, const ports::IFunctionEngine &engine)
@@ -70,6 +100,7 @@ domain::PlotModel BuildControlPlotUseCase::execute() {
 
     auto profile = buildProfile(stateData, engine);
     auto plot = buildPlot(stateData, profile);
+    addControlTraceSeries(plot, stateData.controlTraceHistory);
 
     state.setControlProfile(std::move(profile));
     state.setControlPlot(plot);

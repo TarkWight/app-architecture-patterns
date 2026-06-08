@@ -212,6 +212,7 @@ if (BUILD_TESTING)
     tests/Domain/TimeTest.cpp
     tests/Domain/WindProfileTest.cpp
     tests/Application/BuildControlPlotUseCaseTest.cpp
+    tests/Application/SessionStateTest.cpp
     tests/Application/StartTestExecutionUseCaseTest.cpp
     tests/Infrastructure/SimpleFunctionEngineTest.cpp
     src/Application/Session/SessionState.cpp

@@ -20,6 +20,14 @@
 
 namespace application::session {
 
+inline domain::PlotModel makeInitialTelemetryPlot() {
+    domain::PlotModel plot{};
+    plot.title = "Telemetry";
+    plot.x = domain::AxisSpec{.min = 0.0, .max = 60.0, .step = 10.0, .label = "seconds"};
+    plot.y = domain::AxisSpec{.min = -180.0, .max = 360.0, .step = 45.0, .label = "degrees"};
+    return plot;
+}
+
 struct SessionStateData {
     // ===== Execution =====
     domain::TestExecutionStatus testExecutionStatus{domain::TestExecutionStatus::Idle};
@@ -43,7 +51,7 @@ struct SessionStateData {
     domain::DurationMinutes controlChartsTabMinutes{domain::DurationMinutes::required(20)};
 
     // ===== Plots =====
-    domain::PlotModel telemetryPlot{};
+    domain::PlotModel telemetryPlot{makeInitialTelemetryPlot()};
     domain::PlotModel controlPlot{};
     domain::WindControlProfile controlProfile{};
 

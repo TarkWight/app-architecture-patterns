@@ -89,7 +89,6 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     QDoubleSpinBox *standAngleOfAttackSpinBox{nullptr};
     QComboBox *standDirectionComboBox{nullptr};
     QComboBox *standControlModeComboBox{nullptr};
-    QComboBox *telemetryCurveComboBox{nullptr};
     QComboBox *telemetrySourceComboBox{nullptr};
     QCheckBox *telemetryCurveVisibleCheckBox{nullptr};
     QComboBox *controlFormulaTemplateComboBox{nullptr};

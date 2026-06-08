@@ -263,11 +263,6 @@ void MainWindow::addStandImpactRows(QFormLayout &form, QWidget &parent) {
 }
 
 void MainWindow::addTelemetryBindingRows(QFormLayout &form, QWidget &parent) {
-    telemetryCurveComboBox = new QComboBox(&parent);
-    telemetryCurveComboBox->addItem(QStringLiteral("Кривая 1"), 0);
-    telemetryCurveComboBox->addItem(QStringLiteral("Кривая 2"), 1);
-    form.addRow(QStringLiteral("Кривая"), telemetryCurveComboBox);
-
     telemetrySourceComboBox = new QComboBox(&parent);
     telemetrySourceComboBox->addItem(QStringLiteral("Ось Y / тангаж"), 0);
     telemetrySourceComboBox->addItem(QStringLiteral("Ось Z / направление"), 1);
@@ -384,19 +379,13 @@ void MainWindow::connectShellSignals() {
         controlChartsTabPresenter.onRebuildPlotPressed();
     });
 
-    QObject::connect(telemetryCurveComboBox, &QComboBox::currentIndexChanged, this, [this](int index) {
-        const QSignalBlocker sourceBlocker{telemetrySourceComboBox};
+    QObject::connect(telemetrySourceComboBox, &QComboBox::currentIndexChanged, this, [this](int index) {
         const QSignalBlocker visibleBlocker{telemetryCurveVisibleCheckBox};
-
-        telemetrySourceComboBox->setCurrentIndex(index);
 
         const auto &stateData = sessionAdapter.getState().get();
         telemetryCurveVisibleCheckBox->setChecked(index == 0 ? stateData.telemetryAxisYVisible
                                                              : stateData.telemetryAxisZVisible);
     });
-
-    QObject::connect(telemetrySourceComboBox, &QComboBox::currentIndexChanged, this,
-                     [this](int index) { telemetryCurveComboBox->setCurrentIndex(index); });
 
     QObject::connect(telemetryCurveVisibleCheckBox, &QCheckBox::toggled, this, [this](bool checked) {
         telemetryChartsTabPresenter.onTelemetryAxisVisibilityChanged(selectedTelemetryAxisId(), checked);

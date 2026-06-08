@@ -19,23 +19,4 @@ TEST(SessionStateTest, InitializesTelemetryPlotWithVisibleCoordinateGrid) {
     EXPECT_EQ(plot.y.label, "degrees");
 }
 
-TEST(SessionStateTest, ControlTraceSamplesAlwaysMoveForwardInTime) {
-    application::session::SessionState state{};
-    const auto impact = domain::makeWindProfile(1.0, 0.0, 0.0);
-
-    state.appendControlTraceSample(
-        domain::ControlTraceSample{.timeSeconds = 0.0, .targetValue = impact, .safeCommandValue = impact});
-    state.appendControlTraceSample(
-        domain::ControlTraceSample{.timeSeconds = 0.0, .targetValue = impact, .safeCommandValue = impact});
-    state.appendControlTraceSample(
-        domain::ControlTraceSample{.timeSeconds = 0.0, .targetValue = impact, .safeCommandValue = impact});
-
-    ASSERT_EQ(state.get().controlTraceHistory.size(), 3U);
-    EXPECT_DOUBLE_EQ(state.get().controlTraceHistory.at(0).timeSeconds, 0.0);
-    EXPECT_NEAR(state.get().controlTraceHistory.at(1).timeSeconds, 0.1, 0.0001);
-    EXPECT_NEAR(state.get().controlTraceHistory.at(2).timeSeconds, 0.2, 0.0001);
-    EXPECT_GT(state.get().controlTraceHistory.at(1).timeSeconds, state.get().controlTraceHistory.at(0).timeSeconds);
-    EXPECT_GT(state.get().controlTraceHistory.at(2).timeSeconds, state.get().controlTraceHistory.at(1).timeSeconds);
-}
-
 } // namespace

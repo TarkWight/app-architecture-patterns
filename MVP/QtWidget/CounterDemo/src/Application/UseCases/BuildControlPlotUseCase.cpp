@@ -23,8 +23,8 @@ domain::DurationMinutes determinePreviewDuration(const session::SessionStateData
 }
 
 domain::DurationMinutes determineGridDuration(const session::SessionStateData &stateData) {
-    if (!stateData.controlTraceHistory.empty()) {
-        const double lastTraceMinute = stateData.controlTraceHistory.back().timeSeconds / 60.0;
+    if (!stateData.controlTrace.empty()) {
+        const double lastTraceMinute = stateData.controlTrace.back().timeSeconds / 60.0;
         return domain::DurationMinutes::required(std::max(1, static_cast<int>(std::ceil(lastTraceMinute))));
     }
 
@@ -93,7 +93,7 @@ domain::PlotModel buildPlot(const session::SessionStateData &stateData, const do
     return plot;
 }
 
-void addControlTraceSeries(domain::PlotModel &plot, const std::vector<domain::ControlTraceSample> &trace) {
+void addControlTraceSeries(domain::PlotModel &plot, const domain::ControlTrace &trace) {
     if (trace.empty()) {
         return;
     }
@@ -109,7 +109,7 @@ void addControlTraceSeries(domain::PlotModel &plot, const std::vector<domain::Co
     target.series.points.reserve(trace.size());
     safeCommand.series.points.reserve(trace.size());
 
-    for (const auto &sample : trace) {
+    for (const auto &sample : trace.samples()) {
         target.series.points.push_back(
             domain::Point{.x = sample.timeSeconds, .y = sample.targetValue.beaufort.value()});
         safeCommand.series.points.push_back(
@@ -143,7 +143,7 @@ domain::PlotModel BuildControlPlotUseCase::execute() {
 
     auto profile = timing.formulaEnabled ? buildProfile(stateData, engine) : domain::WindControlProfile{};
     auto plot = buildPlot(stateData, profile);
-    addControlTraceSeries(plot, stateData.controlTraceHistory);
+    addControlTraceSeries(plot, stateData.controlTrace);
 
     state.setControlProfile(std::move(profile));
     state.setControlPlot(plot);
@@ -154,7 +154,7 @@ domain::PlotModel BuildControlPlotUseCase::refreshFromState() {
     const auto &stateData = state.get();
 
     auto plot = buildPlot(stateData, stateData.controlProfile);
-    addControlTraceSeries(plot, stateData.controlTraceHistory);
+    addControlTraceSeries(plot, stateData.controlTrace);
 
     state.setControlPlot(plot);
     return plot;

@@ -21,12 +21,6 @@
 #include <vector>
 
 namespace application::session {
-namespace {
-
-constexpr double controlTraceMinimumStepSeconds = 0.1;
-
-}
-
 const application::session::SessionStateData &application::session::SessionState::get() const {
     return data;
 }
@@ -203,26 +197,12 @@ void application::session::SessionState::setControlProfile(domain::WindControlPr
 }
 
 void application::session::SessionState::clearControlTrace() {
-    data.controlTraceHistory.clear();
+    data.controlTrace.clear();
     notify();
 }
 
 void application::session::SessionState::appendControlTraceSample(domain::ControlTraceSample sample) {
-    if (!data.controlTraceHistory.empty() && sample.timeSeconds <= data.controlTraceHistory.back().timeSeconds) {
-        sample.timeSeconds = data.controlTraceHistory.back().timeSeconds + controlTraceMinimumStepSeconds;
-    }
-
-    data.controlTraceHistory.push_back(std::move(sample));
-
-    constexpr std::size_t maxControlTraceSamples = 50'000;
-    if (data.controlTraceHistory.size() > maxControlTraceSamples) {
-        const auto eraseCount = data.controlTraceHistory.size() - maxControlTraceSamples;
-        data.controlTraceHistory.erase(
-            data.controlTraceHistory.begin(),
-            data.controlTraceHistory.begin() +
-                static_cast<std::vector<domain::ControlTraceSample>::difference_type>(eraseCount));
-    }
-
+    data.controlTrace.append(std::move(sample));
     notify();
 }
 

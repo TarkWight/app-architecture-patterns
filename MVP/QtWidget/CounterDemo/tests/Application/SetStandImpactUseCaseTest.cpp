@@ -77,10 +77,10 @@ TEST(SetStandImpactUseCaseTest, RecordsManualTargetAndSafeCommandTraceWhenApplie
     useCase.setTarget(target);
     useCase.setApplied(safeCommand);
 
-    ASSERT_EQ(state.get().controlTraceHistory.size(), 1U);
-    EXPECT_DOUBLE_EQ(state.get().controlTraceHistory.front().timeSeconds, 7.0);
-    EXPECT_DOUBLE_EQ(state.get().controlTraceHistory.front().targetValue.beaufort.value(), 5.0);
-    EXPECT_DOUBLE_EQ(state.get().controlTraceHistory.front().safeCommandValue.beaufort.value(), 1.2);
+    ASSERT_EQ(state.get().controlTrace.size(), 1U);
+    EXPECT_DOUBLE_EQ(state.get().controlTrace.front().timeSeconds, 7.0);
+    EXPECT_DOUBLE_EQ(state.get().controlTrace.front().targetValue.beaufort.value(), 5.0);
+    EXPECT_DOUBLE_EQ(state.get().controlTrace.front().safeCommandValue.beaufort.value(), 1.2);
     ASSERT_TRUE(telemetryClient.axis1Command.has_value());
     EXPECT_FLOAT_EQ(telemetryClient.axis1Command->torque, 1.2F);
 }

@@ -206,6 +206,7 @@ endif()
 if (BUILD_TESTING)
   add_executable(domain_tests
     tests/Domain/AxisControlCommandTest.cpp
+    tests/Domain/ControlTraceTest.cpp
     tests/Domain/ControlProfileTimingTest.cpp
     tests/Domain/StandScenarioTest.cpp
     tests/Domain/StandImpactTransitionTest.cpp

@@ -55,7 +55,7 @@ struct SessionStateData {
     domain::PlotModel telemetryPlot{makeInitialTelemetryPlot()};
     domain::PlotModel controlPlot{};
     domain::WindControlProfile controlProfile{};
-    std::vector<domain::ControlTraceSample> controlTraceHistory{};
+    domain::ControlTrace controlTrace{};
 
     std::vector<domain::AxisTelemetrySample> telemetryHistory{};
     double telemetryWindowSeconds{60.0};

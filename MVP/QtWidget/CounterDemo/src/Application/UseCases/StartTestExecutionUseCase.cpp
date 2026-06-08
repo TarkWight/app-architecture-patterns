@@ -7,6 +7,7 @@
 #include "../../Domain/TestProtocol.hpp"
 #include "../../Domain/TestTimeDirection.hpp"
 #include "../../Domain/TestTimeSource.hpp"
+#include "../../Domain/StandImpactTransition.hpp"
 #include "../../Domain/WindControlProfileImpact.hpp"
 
 namespace application::useCases {
@@ -26,6 +27,7 @@ void StartTestExecutionUseCase::execute() {
 
     if (session.testProtocol.testMode != domain::TestMode::Manual) {
         buildControlPlotUseCase.execute();
+        state.setTargetStandImpact(state.get().windProfile);
     }
 
     int activeDurationMinutes = 0;
@@ -92,15 +94,17 @@ void StartTestExecutionUseCase::applyScenarioImpact(int elapsedSeconds) {
         return;
     }
 
-    const auto impact =
-        domain::windImpactAt(session.controlProfile, domain::ElapsedSeconds::from(elapsedSeconds), session.windProfile);
+    const auto impact = domain::windImpactAt(session.controlProfile, domain::ElapsedSeconds::from(elapsedSeconds),
+                                             session.targetStandImpact);
     if (!impact.has_value()) {
         return;
     }
 
+    const auto transition = domain::StandImpactTransition{}.advance(session.appliedStandImpact, *impact);
+
     state.setTargetStandImpact(*impact);
-    state.setAppliedStandImpact(*impact);
-    sendAppliedImpact(*impact);
+    state.setAppliedStandImpact(transition.impact);
+    sendAppliedImpact(transition.impact);
 }
 
 void StartTestExecutionUseCase::sendAppliedImpact(const domain::WindProfile &profile) {

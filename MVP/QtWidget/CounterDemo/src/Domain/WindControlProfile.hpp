@@ -7,7 +7,6 @@
 
 namespace domain {
 
-constexpr int temporaryFormulaProfileDurationMinutes = 48;
 constexpr double windControlProfileSampleIntervalSeconds = 1.0;
 
 struct WindControlSample {
@@ -17,7 +16,7 @@ struct WindControlSample {
 };
 
 struct WindControlProfile {
-    int durationMinutes{temporaryFormulaProfileDurationMinutes};
+    int durationMinutes{0};
     double sampleIntervalSeconds{windControlProfileSampleIntervalSeconds};
     std::vector<WindControlSample> samples{};
 };

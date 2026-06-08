@@ -8,6 +8,8 @@ SetControlChartsTabMinutesUseCase::SetControlChartsTabMinutesUseCase(application
 
 void SetControlChartsTabMinutesUseCase::execute(int minutes) {
     state.setControlChartsTabMinutes(minutes);
+    state.setOperatorTestDurationMinutes(minutes);
+    state.setTestTimeSource(domain::TestTimeSource::OperatorDefined);
 }
 
 } // namespace application::useCases

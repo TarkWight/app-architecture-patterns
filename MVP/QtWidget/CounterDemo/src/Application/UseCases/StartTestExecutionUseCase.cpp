@@ -2,6 +2,7 @@
 
 #include "../../Domain/TestExecutionStatus.hpp"
 #include "../../Domain/TestExecutionTransitions.hpp"
+#include "../../Domain/TestProtocol.hpp"
 #include "../../Domain/TestTimeDirection.hpp"
 #include "../../Domain/TestTimeSource.hpp"
 
@@ -21,21 +22,26 @@ void StartTestExecutionUseCase::execute() {
     int activeDurationMinutes = 0;
     domain::TestTimeDirection direction = domain::TestTimeDirection::CountUp;
 
-    switch (session.testTimeSource) {
-    case domain::TestTimeSource::AutoCalculated:
-        activeDurationMinutes = session.estimatedTestDuration.value();
-        direction = domain::TestTimeDirection::CountDown;
-        break;
-
-    case domain::TestTimeSource::OperatorDefined:
-        activeDurationMinutes = session.operatorTestDuration.value();
-        direction = domain::TestTimeDirection::CountDown;
-        break;
-
-    case domain::TestTimeSource::FreeRun:
+    if (session.testProtocol.testMode == domain::TestMode::Manual) {
         activeDurationMinutes = 0;
         direction = domain::TestTimeDirection::CountUp;
-        break;
+    } else {
+        switch (session.testTimeSource) {
+        case domain::TestTimeSource::AutoCalculated:
+            activeDurationMinutes = session.estimatedTestDuration.value();
+            direction = domain::TestTimeDirection::CountDown;
+            break;
+
+        case domain::TestTimeSource::OperatorDefined:
+            activeDurationMinutes = session.operatorTestDuration.value();
+            direction = domain::TestTimeDirection::CountDown;
+            break;
+
+        case domain::TestTimeSource::FreeRun:
+            activeDurationMinutes = 0;
+            direction = domain::TestTimeDirection::CountUp;
+            break;
+        }
     }
 
     state.setActiveTestDurationMinutes(activeDurationMinutes);

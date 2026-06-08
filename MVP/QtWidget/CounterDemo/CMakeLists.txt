@@ -43,6 +43,7 @@ qt_add_executable(develop
 
   src/Domain/Plot.hpp
   src/Domain/FormulaTemplate.hpp
+  src/Domain/ControlProfileTiming.hpp
   src/Domain/TestProtocol.hpp
   src/Domain/Time.hpp
   src/Domain/Expression.hpp
@@ -203,6 +204,7 @@ endif()
 if (BUILD_TESTING)
   add_executable(domain_tests
     tests/Domain/AxisControlCommandTest.cpp
+    tests/Domain/ControlProfileTimingTest.cpp
     tests/Domain/StandScenarioTest.cpp
     tests/Domain/StandImpactTransitionTest.cpp
     tests/Domain/TestExecutionTransitionsTest.cpp
@@ -210,10 +212,12 @@ if (BUILD_TESTING)
     tests/Domain/TimeTest.cpp
     tests/Domain/WindProfileTest.cpp
     tests/Application/BuildControlPlotUseCaseTest.cpp
+    tests/Application/StartTestExecutionUseCaseTest.cpp
     tests/Infrastructure/SimpleFunctionEngineTest.cpp
     src/Application/Session/SessionState.cpp
     src/Application/Session/Subscription.cpp
     src/Application/UseCases/BuildControlPlotUseCase.cpp
+    src/Application/UseCases/StartTestExecutionUseCase.cpp
   )
 
   target_include_directories(domain_tests

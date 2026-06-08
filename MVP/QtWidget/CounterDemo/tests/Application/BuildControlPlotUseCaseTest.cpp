@@ -24,15 +24,17 @@ class OutOfRangeFunctionEngine final : public application::ports::IFunctionEngin
     }
 };
 
-TEST(BuildControlPlotUseCaseTest, BuildsOneSecondWindControlProfileForTemporaryMvpDuration) {
+TEST(BuildControlPlotUseCaseTest, BuildsOneSecondWindControlProfileForCalculatedAutomaticDuration) {
     application::session::SessionState state{};
+    state.setTestProtocolMode(domain::TestMode::Automatic);
+    state.setEstimatedTestDurationMinutes(48);
     const LinearFunctionEngine engine{};
     application::useCases::BuildControlPlotUseCase useCase{state, engine};
 
     const auto plot = useCase.execute();
     const auto &profile = state.get().controlProfile;
 
-    EXPECT_EQ(profile.durationMinutes, domain::temporaryFormulaProfileDurationMinutes);
+    EXPECT_EQ(profile.durationMinutes, 48);
     EXPECT_DOUBLE_EQ(profile.sampleIntervalSeconds, domain::windControlProfileSampleIntervalSeconds);
     EXPECT_EQ(profile.samples.size(), static_cast<std::size_t>(48 * 60));
     EXPECT_EQ(plot.series.points.size(), profile.samples.size());
@@ -51,6 +53,7 @@ TEST(BuildControlPlotUseCaseTest, BuildsOneSecondWindControlProfileForTemporaryM
 
 TEST(BuildControlPlotUseCaseTest, ClampsFormulaOutputToOperationalBeaufortRange) {
     application::session::SessionState state{};
+    state.setTestProtocolMode(domain::TestMode::Automatic);
     const OutOfRangeFunctionEngine engine{};
     application::useCases::BuildControlPlotUseCase useCase{state, engine};
 
@@ -59,6 +62,18 @@ TEST(BuildControlPlotUseCaseTest, ClampsFormulaOutputToOperationalBeaufortRange)
 
     EXPECT_DOUBLE_EQ(profile.samples.at(0).beaufort.value(), domain::minOperationalBeaufort);
     EXPECT_DOUBLE_EQ(profile.samples.at(60).beaufort.value(), domain::maxOperationalBeaufort);
+}
+
+TEST(BuildControlPlotUseCaseTest, ManualModeDoesNotBuildFormulaSamples) {
+    application::session::SessionState state{};
+    state.setTestProtocolMode(domain::TestMode::Manual);
+    const LinearFunctionEngine engine{};
+    application::useCases::BuildControlPlotUseCase useCase{state, engine};
+
+    const auto plot = useCase.execute();
+
+    EXPECT_TRUE(state.get().controlProfile.samples.empty());
+    EXPECT_TRUE(plot.series.points.empty());
 }
 
 } // namespace

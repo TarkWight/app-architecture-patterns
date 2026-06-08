@@ -3,6 +3,7 @@
 
 #include "../../Domain/AxisState.hpp"
 #include "../../Domain/AxisTelemetrySample.hpp"
+#include "../../Domain/ControlTrace.hpp"
 #include "../../Domain/Plot.hpp"
 #include "../../Domain/StandControlMode.hpp"
 #include "../../Domain/StandConnectionStatus.hpp"
@@ -54,6 +55,7 @@ struct SessionStateData {
     domain::PlotModel telemetryPlot{makeInitialTelemetryPlot()};
     domain::PlotModel controlPlot{};
     domain::WindControlProfile controlProfile{};
+    std::vector<domain::ControlTraceSample> controlTraceHistory{};
 
     std::vector<domain::AxisTelemetrySample> telemetryHistory{};
     double telemetryWindowSeconds{60.0};

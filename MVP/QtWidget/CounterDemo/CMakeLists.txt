@@ -43,6 +43,7 @@ qt_add_executable(develop
 
   src/Domain/Plot.hpp
   src/Domain/FormulaTemplate.hpp
+  src/Domain/ControlTrace.hpp
   src/Domain/ControlProfileTiming.hpp
   src/Domain/TestProtocol.hpp
   src/Domain/Time.hpp

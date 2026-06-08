@@ -28,6 +28,7 @@ void StartTestExecutionUseCase::execute() {
     if (session.testProtocol.testMode != domain::TestMode::Manual) {
         buildControlPlotUseCase.execute();
         state.setTargetStandImpact(state.get().windProfile);
+        state.clearControlTrace();
     }
 
     int activeDurationMinutes = 0;
@@ -104,6 +105,9 @@ void StartTestExecutionUseCase::applyScenarioImpact(int elapsedSeconds) {
 
     state.setTargetStandImpact(*impact);
     state.setAppliedStandImpact(transition.impact);
+    state.appendControlTraceSample(domain::ControlTraceSample{.timeSeconds = static_cast<double>(elapsedSeconds),
+                                                              .targetValue = *impact,
+                                                              .safeCommandValue = transition.impact});
     sendAppliedImpact(transition.impact);
 }
 

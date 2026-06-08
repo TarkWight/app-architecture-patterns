@@ -1,6 +1,7 @@
 #ifndef SESSIONSTATE_HPP
 #define SESSIONSTATE_HPP
 
+#include "../../Domain/ControlTrace.hpp"
 #include "../../Domain/Plot.hpp"
 #include "../../Domain/StandControlMode.hpp"
 #include "../../Domain/StandConnectionStatus.hpp"
@@ -50,6 +51,8 @@ class SessionState {
     void setTelemetryPlot(domain::PlotModel plot);
     void setControlPlot(domain::PlotModel plot);
     void setControlProfile(domain::WindControlProfile profile);
+    void clearControlTrace();
+    void appendControlTraceSample(domain::ControlTraceSample sample);
     void appendTelemetrySample(domain::AxisTelemetrySample sample);
     void setTelemetryWindowEndSeconds(double endSeconds);
     void followTelemetryTail();

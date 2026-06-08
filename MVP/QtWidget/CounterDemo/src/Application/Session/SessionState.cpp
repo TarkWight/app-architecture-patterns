@@ -1,7 +1,8 @@
 #include "SessionState.hpp"
 
-#include "../../Domain/Plot.hpp"
 #include "../../Domain/AxisId.hpp"
+#include "../../Domain/ControlTrace.hpp"
+#include "../../Domain/Plot.hpp"
 #include "../../Domain/TestProtocol.hpp"
 #include "../../Domain/Time.hpp"
 #include "../../Domain/WindControlProfile.hpp"
@@ -193,6 +194,26 @@ void application::session::SessionState::setControlPlot(domain::PlotModel plot) 
 
 void application::session::SessionState::setControlProfile(domain::WindControlProfile profile) {
     data.controlProfile = std::move(profile);
+    notify();
+}
+
+void application::session::SessionState::clearControlTrace() {
+    data.controlTraceHistory.clear();
+    notify();
+}
+
+void application::session::SessionState::appendControlTraceSample(domain::ControlTraceSample sample) {
+    data.controlTraceHistory.push_back(std::move(sample));
+
+    constexpr std::size_t maxControlTraceSamples = 50'000;
+    if (data.controlTraceHistory.size() > maxControlTraceSamples) {
+        const auto eraseCount = data.controlTraceHistory.size() - maxControlTraceSamples;
+        data.controlTraceHistory.erase(
+            data.controlTraceHistory.begin(),
+            data.controlTraceHistory.begin() +
+                static_cast<std::vector<domain::ControlTraceSample>::difference_type>(eraseCount));
+    }
+
     notify();
 }
 

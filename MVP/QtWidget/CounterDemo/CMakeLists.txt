@@ -49,6 +49,7 @@ qt_add_executable(develop
   src/Domain/Expression.hpp
   src/Domain/WindProfile.hpp
   src/Domain/WindControlProfile.hpp
+  src/Domain/WindControlProfileImpact.hpp
   src/Domain/AxisState.hpp
   src/Domain/TestExecutionStatus.hpp
   src/Domain/TestExecutionTransitions.hpp
@@ -211,6 +212,7 @@ if (BUILD_TESTING)
     tests/Domain/TestProtocolTest.cpp
     tests/Domain/TimeTest.cpp
     tests/Domain/WindProfileTest.cpp
+    tests/Domain/WindControlProfileImpactTest.cpp
     tests/Application/BuildControlPlotUseCaseTest.cpp
     tests/Application/SessionStateTest.cpp
     tests/Application/StartTestExecutionUseCaseTest.cpp

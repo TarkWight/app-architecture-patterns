@@ -1,16 +1,20 @@
 #include "StartTestExecutionUseCase.hpp"
 
+#include "../../Domain/AxisControlCommand.hpp"
+#include "../../Domain/AxisId.hpp"
 #include "../../Domain/TestExecutionStatus.hpp"
 #include "../../Domain/TestExecutionTransitions.hpp"
 #include "../../Domain/TestProtocol.hpp"
 #include "../../Domain/TestTimeDirection.hpp"
 #include "../../Domain/TestTimeSource.hpp"
+#include "../../Domain/WindControlProfileImpact.hpp"
 
 namespace application::useCases {
 
 StartTestExecutionUseCase::StartTestExecutionUseCase(
-    application::session::SessionState &state, application::ports::ITestExecutionScheduler &testExecutionScheduler)
-    : state(state), testExecutionScheduler(testExecutionScheduler) {
+    application::session::SessionState &state, application::ports::ITestExecutionScheduler &testExecutionScheduler,
+    application::ports::ITelemetryClient &telemetryClient)
+    : state(state), testExecutionScheduler(testExecutionScheduler), telemetryClient(telemetryClient) {
 }
 
 void StartTestExecutionUseCase::execute() {
@@ -55,9 +59,11 @@ void StartTestExecutionUseCase::execute() {
     }
 
     state.setTestExecutionStatus(domain::TestExecutionStatus::Running);
+    applyScenarioImpact(0);
 
     testExecutionScheduler.start(0, [this](int elapsedSeconds) {
         state.setElapsedSeconds(elapsedSeconds);
+        applyScenarioImpact(elapsedSeconds);
 
         const auto &current = state.get();
 
@@ -73,6 +79,28 @@ void StartTestExecutionUseCase::execute() {
             }
         }
     });
+}
+
+void StartTestExecutionUseCase::applyScenarioImpact(int elapsedSeconds) {
+    const auto &session = state.get();
+    if (session.testProtocol.testMode == domain::TestMode::Manual) {
+        return;
+    }
+
+    const auto impact =
+        domain::windImpactAt(session.controlProfile, domain::ElapsedSeconds::from(elapsedSeconds), session.windProfile);
+    if (!impact.has_value()) {
+        return;
+    }
+
+    state.setTargetStandImpact(*impact);
+    state.setAppliedStandImpact(*impact);
+    sendAppliedImpact(*impact);
+}
+
+void StartTestExecutionUseCase::sendAppliedImpact(const domain::WindProfile &profile) {
+    telemetryClient.setAxisCommand(domain::axis0, domain::axis0WindCommand(profile));
+    telemetryClient.setAxisCommand(domain::axis1, domain::axis1WindCommand(profile));
 }
 
 } // namespace application::useCases

@@ -1,11 +1,18 @@
 #include "../../src/Application/UseCases/StartTestExecutionUseCase.hpp"
 
+#include "../../src/Application/Ports/ITelemetryClient.hpp"
 #include "../../src/Application/Ports/ITestExecutionScheduler.hpp"
 #include "../../src/Application/Session/SessionState.hpp"
+#include "../../src/Domain/AxisId.hpp"
 #include "../../src/Domain/TestTimeDirection.hpp"
 #include "../../src/Domain/TestTimeSource.hpp"
+#include "../../src/Domain/WindControlProfile.hpp"
 
 #include <gtest/gtest.h>
+
+#include <optional>
+#include <string>
+#include <utility>
 
 namespace {
 
@@ -41,6 +48,59 @@ class TestExecutionSchedulerSpy final : public application::ports::ITestExecutio
     TickCallback tick{};
 };
 
+class TelemetryClientSpy final : public application::ports::ITelemetryClient {
+  public:
+    void setTelemetryCallback(TelemetryCallback callback) override {
+        telemetryCallback = std::move(callback);
+    }
+
+    void setStatusCallback(StatusCallback callback) override {
+        statusCallback = std::move(callback);
+    }
+
+    void setErrorCallback(ErrorCallback callback) override {
+        errorCallback = std::move(callback);
+    }
+
+    void configureAxis(domain::AxisId /*axisId*/, std::string /*host*/, int /*port*/) override {
+    }
+
+    void connectAxis(domain::AxisId /*axisId*/) override {
+    }
+
+    void disconnectAxis(domain::AxisId /*axisId*/) override {
+    }
+
+    void connectAll() override {
+    }
+
+    void disconnectAll() override {
+    }
+
+    void startPolling(int /*intervalMs*/) override {
+    }
+
+    void stopPolling() override {
+    }
+
+    void setAxisCommand(domain::AxisId axisId, domain::AxisControlCommand command) override {
+        if (axisId == domain::axis0) {
+            axis0Command = command;
+        } else if (axisId == domain::axis1) {
+            axis1Command = command;
+        }
+    }
+
+    void pollOnce(domain::AxisId /*axisId*/) override {
+    }
+
+    TelemetryCallback telemetryCallback{};
+    StatusCallback statusCallback{};
+    ErrorCallback errorCallback{};
+    std::optional<domain::AxisControlCommand> axis0Command{};
+    std::optional<domain::AxisControlCommand> axis1Command{};
+};
+
 TEST(StartTestExecutionUseCaseTest, ManualModeStartsAsStopwatchEvenWhenOperatorDurationIsSelected) {
     application::session::SessionState state{};
     state.setTestProtocolMode(domain::TestMode::Manual);
@@ -48,7 +108,8 @@ TEST(StartTestExecutionUseCaseTest, ManualModeStartsAsStopwatchEvenWhenOperatorD
     state.setOperatorTestDurationMinutes(20);
 
     TestExecutionSchedulerSpy scheduler{};
-    application::useCases::StartTestExecutionUseCase useCase{state, scheduler};
+    TelemetryClientSpy telemetryClient{};
+    application::useCases::StartTestExecutionUseCase useCase{state, scheduler, telemetryClient};
 
     useCase.execute();
 
@@ -57,6 +118,45 @@ TEST(StartTestExecutionUseCaseTest, ManualModeStartsAsStopwatchEvenWhenOperatorD
     EXPECT_EQ(state.get().testTimeDirection, domain::TestTimeDirection::CountUp);
     EXPECT_EQ(state.get().activeTestDuration.value(), 0);
     EXPECT_EQ(state.get().remaining.value(), 0);
+    EXPECT_FALSE(telemetryClient.axis0Command.has_value());
+    EXPECT_FALSE(telemetryClient.axis1Command.has_value());
+}
+
+TEST(StartTestExecutionUseCaseTest, AutomaticModeAppliesScenarioImpactFromProfileOnStartAndTick) {
+    application::session::SessionState state{};
+    state.setTestProtocolMode(domain::TestMode::Automatic);
+    state.setEstimatedTestDurationMinutes(1);
+    state.setWindProfile(domain::makeWindProfile(0.0, 90.0, 5.0, domain::Expression{.value = "x"}));
+
+    domain::WindControlProfile profile{};
+    profile.durationMinutes = 1;
+    profile.sampleIntervalSeconds = 1.0;
+    profile.samples = {
+        domain::WindControlSample{.timeSeconds = 0.0, .timeMinutes = 0.0, .beaufort = domain::Beaufort::from(1.0)},
+        domain::WindControlSample{
+            .timeSeconds = 1.0, .timeMinutes = 1.0 / 60.0, .beaufort = domain::Beaufort::from(2.0)},
+    };
+    state.setControlProfile(profile);
+
+    TestExecutionSchedulerSpy scheduler{};
+    TelemetryClientSpy telemetryClient{};
+    application::useCases::StartTestExecutionUseCase useCase{state, scheduler, telemetryClient};
+
+    useCase.execute();
+
+    ASSERT_TRUE(telemetryClient.axis1Command.has_value());
+    EXPECT_FLOAT_EQ(telemetryClient.axis1Command->torque, 1.0F);
+    EXPECT_DOUBLE_EQ(state.get().appliedStandImpact.beaufort.value(), 1.0);
+
+    scheduler.tick(1);
+
+    ASSERT_TRUE(telemetryClient.axis0Command.has_value());
+    ASSERT_TRUE(telemetryClient.axis1Command.has_value());
+    EXPECT_FLOAT_EQ(telemetryClient.axis0Command->torque, 2.6F);
+    EXPECT_FLOAT_EQ(telemetryClient.axis1Command->torque, 2.0F);
+    EXPECT_FLOAT_EQ(telemetryClient.axis0Command->position, 5.0F);
+    EXPECT_FLOAT_EQ(telemetryClient.axis1Command->position, 90.0F);
+    EXPECT_DOUBLE_EQ(state.get().targetStandImpact.beaufort.value(), 2.0);
 }
 
 } // namespace

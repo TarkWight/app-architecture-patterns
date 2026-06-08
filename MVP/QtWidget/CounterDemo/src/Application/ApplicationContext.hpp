@@ -74,7 +74,8 @@ struct ApplicationContext {
 
     application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{sessionState, functionEngine};
 
-    application::useCases::StartTestExecutionUseCase startTestExecutionUseCase{sessionState, testExecutionScheduler};
+    application::useCases::StartTestExecutionUseCase startTestExecutionUseCase{sessionState, testExecutionScheduler,
+                                                                               telemetryClient};
 
     application::useCases::PauseTestExecutionUseCase pauseTestExecutionUseCase{sessionState, testExecutionScheduler};
 

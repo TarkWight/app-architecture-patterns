@@ -34,6 +34,8 @@ class PlotRenderer final {
 
     static void drawYGrid(QPainter &painter, const QRect &plotRect, const domain::PlotModel &plot, int leftMargin);
 
+    static void drawMarker(QPainter &painter, const QRect &plotRect, const domain::PlotModel &plot);
+
     static QPolygon buildPolyline(const QRect &plotRect, const domain::PlotModel &plot, const domain::Series &series);
 
     static void drawSeries(QPainter &painter, const QRect &plotRect, const domain::PlotModel &plot);

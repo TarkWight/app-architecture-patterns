@@ -62,6 +62,7 @@ domain::PlotModel PlotWidget::interpolatePlot(const domain::PlotModel &current, 
     domain::PlotModel result = target;
     result.x = interpolateAxis(current.x, target.x);
     result.y = interpolateAxis(current.y, target.y);
+    result.marker.x = interpolateValue(current.marker.x, target.marker.x);
     result.color = interpolateColor(current.color, target.color);
     result.series = interpolateSeries(current.series, target.series);
 

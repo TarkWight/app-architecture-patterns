@@ -36,6 +36,7 @@ void PlotRenderer::drawPlot(QPainter &painter, const QRect &rect, const domain::
     drawAxisLabels(painter, plotRect, drawablePlot);
     drawXGrid(painter, plotRect, drawablePlot, leftMargin);
     drawYGrid(painter, plotRect, drawablePlot, leftMargin);
+    drawMarker(painter, plotRect, drawablePlot);
 
     if (!hasRenderablePlot(drawablePlot)) {
         return;
@@ -154,6 +155,22 @@ void PlotRenderer::drawYGrid(QPainter &painter, const QRect &plotRect, const dom
         painter.drawText(plotRect.left() - leftMargin, py - 8, leftMargin - 5, 16, Qt::AlignRight | Qt::AlignVCenter,
                          QString::number(yValue));
         painter.setPen(QPen(Qt::lightGray, 1, Qt::DashLine));
+    }
+}
+
+void PlotRenderer::drawMarker(QPainter &painter, const QRect &plotRect, const domain::PlotModel &plot) {
+    if (!plot.marker.visible || plot.marker.x < plot.x.min || plot.marker.x > plot.x.max) {
+        return;
+    }
+
+    const int px = projectX(plotRect, plot, plot.marker.x);
+    painter.setPen(QPen(Qt::darkGray, 2, Qt::DashDotLine));
+    painter.drawLine(px, plotRect.top(), px, plotRect.bottom());
+
+    if (!plot.marker.label.empty()) {
+        painter.setPen(QPen(Qt::black, 1));
+        painter.drawText(px + 4, plotRect.top() + 4, 120, 18, Qt::AlignLeft | Qt::AlignVCenter,
+                         QString::fromStdString(plot.marker.label));
     }
 }
 

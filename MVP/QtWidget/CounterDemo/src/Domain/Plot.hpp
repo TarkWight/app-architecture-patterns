@@ -35,11 +35,18 @@ struct AxisSpec {
     std::string label{};
 };
 
+struct PlotMarker {
+    double x{0.0};
+    std::string label{};
+    bool visible{false};
+};
+
 struct PlotModel {
     AxisSpec x{};
     AxisSpec y{};
     Series series{};
     std::vector<NamedSeries> seriesList{};
+    PlotMarker marker{};
     RgbColor color{};
     std::string title{};
 };

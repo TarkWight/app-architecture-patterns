@@ -87,6 +87,9 @@ void addControlTraceSeries(domain::PlotModel &plot, const std::vector<domain::Co
     plot.seriesList.clear();
     plot.seriesList.push_back(std::move(target));
     plot.seriesList.push_back(std::move(safeCommand));
+
+    const double markerTimeMinutes = trace.back().timeSeconds / 60.0;
+    plot.marker = domain::PlotMarker{.x = markerTimeMinutes, .label = "Сейчас", .visible = true};
 }
 
 } // namespace

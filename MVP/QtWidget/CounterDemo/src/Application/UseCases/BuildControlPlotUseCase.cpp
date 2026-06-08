@@ -1,10 +1,12 @@
 #include "BuildControlPlotUseCase.hpp"
 
 #include "../../Domain/ControlTrace.hpp"
+#include "../../Domain/ControlProfileTiming.hpp"
 #include "../../Domain/TestTimeSource.hpp"
 #include "../../Domain/WindControlProfile.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <utility>
 
@@ -18,6 +20,15 @@ domain::DurationMinutes determinePreviewDuration(const session::SessionStateData
     }
 
     return stateData.estimatedTestDuration;
+}
+
+domain::DurationMinutes determineGridDuration(const session::SessionStateData &stateData) {
+    if (!stateData.controlTraceHistory.empty()) {
+        const double lastTraceMinute = stateData.controlTraceHistory.back().timeSeconds / 60.0;
+        return domain::DurationMinutes::required(std::max(1, static_cast<int>(std::ceil(lastTraceMinute))));
+    }
+
+    return determinePreviewDuration(stateData);
 }
 
 domain::WindControlProfile buildProfile(const session::SessionStateData &stateData,
@@ -49,7 +60,9 @@ domain::PlotModel buildPlot(const session::SessionStateData &stateData, const do
     domain::PlotModel plot{};
     plot.title = "Control chart";
     plot.color = stateData.lineColor;
-    plot.x = domain::AxisSpec{0.0, static_cast<double>(std::max(1, profile.durationMinutes)), 1.0, "minutes"};
+    const int durationMinutes =
+        profile.durationMinutes > 0 ? profile.durationMinutes : determineGridDuration(stateData).value();
+    plot.x = domain::AxisSpec{0.0, static_cast<double>(std::max(1, durationMinutes)), 1.0, "minutes"};
     plot.y = domain::AxisSpec{0.0, domain::maxOperationalBeaufort, 0.5, "Beaufort"};
 
     plot.series.points.reserve(profile.samples.size());
@@ -100,8 +113,11 @@ BuildControlPlotUseCase::BuildControlPlotUseCase(session::SessionState &state, c
 
 domain::PlotModel BuildControlPlotUseCase::execute() {
     const auto &stateData = state.get();
+    const auto timing =
+        domain::determineControlProfileTiming(stateData.testProtocol.testMode, stateData.testTimeSource,
+                                              stateData.estimatedTestDuration, stateData.operatorTestDuration);
 
-    auto profile = buildProfile(stateData, engine);
+    auto profile = timing.formulaEnabled ? buildProfile(stateData, engine) : domain::WindControlProfile{};
     auto plot = buildPlot(stateData, profile);
     addControlTraceSeries(plot, stateData.controlTraceHistory);
 

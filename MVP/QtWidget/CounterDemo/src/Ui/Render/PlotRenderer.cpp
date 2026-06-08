@@ -50,12 +50,12 @@ bool PlotRenderer::hasRenderablePlot(const domain::PlotModel &plot) {
         return false;
     }
 
-    if (plot.series.points.size() >= 2) {
+    if (!plot.series.points.empty()) {
         return true;
     }
 
     return std::any_of(plot.seriesList.begin(), plot.seriesList.end(),
-                       [](const domain::NamedSeries &series) { return series.series.points.size() >= 2; });
+                       [](const domain::NamedSeries &series) { return !series.series.points.empty(); });
 }
 
 double PlotRenderer::normalize(double value, double min, double max) {
@@ -186,27 +186,40 @@ QPolygon PlotRenderer::buildPolyline(const QRect &plotRect, const domain::PlotMo
     return polyline;
 }
 
+void PlotRenderer::drawPoint(QPainter &painter, const QRect &plotRect, const domain::PlotModel &plot,
+                             const domain::Point &point) {
+    constexpr int radius = 4;
+    const QPoint center{projectX(plotRect, plot, point.x), projectY(plotRect, plot, point.y)};
+    painter.drawEllipse(center, radius, radius);
+}
+
 void PlotRenderer::drawSeries(QPainter &painter, const QRect &plotRect, const domain::PlotModel &plot) {
     if (!plot.seriesList.empty()) {
         for (const auto &series : plot.seriesList) {
-            if (series.series.points.size() < 2) {
+            if (series.series.points.empty()) {
                 continue;
             }
 
-            const QPolygon polyline = buildPolyline(plotRect, plot, series.series);
-
             painter.setPen(QPen(toQColor(series.color), 2));
-            painter.drawPolyline(polyline);
+            if (series.series.points.size() == 1) {
+                drawPoint(painter, plotRect, plot, series.series.points.front());
+            } else {
+                const QPolygon polyline = buildPolyline(plotRect, plot, series.series);
+                painter.drawPolyline(polyline);
+            }
         }
 
         drawLegend(painter, plotRect, plot);
         return;
     }
 
-    const QPolygon polyline = buildPolyline(plotRect, plot, plot.series);
-
     painter.setPen(QPen(toQColor(plot.color), 2));
-    painter.drawPolyline(polyline);
+    if (plot.series.points.size() == 1) {
+        drawPoint(painter, plotRect, plot, plot.series.points.front());
+    } else {
+        const QPolygon polyline = buildPolyline(plotRect, plot, plot.series);
+        painter.drawPolyline(polyline);
+    }
 }
 
 void PlotRenderer::drawLegend(QPainter &painter, const QRect &plotRect, const domain::PlotModel &plot) {

@@ -38,6 +38,9 @@ class PlotRenderer final {
 
     static QPolygon buildPolyline(const QRect &plotRect, const domain::PlotModel &plot, const domain::Series &series);
 
+    static void drawPoint(QPainter &painter, const QRect &plotRect, const domain::PlotModel &plot,
+                          const domain::Point &point);
+
     static void drawSeries(QPainter &painter, const QRect &plotRect, const domain::PlotModel &plot);
 
     static void drawLegend(QPainter &painter, const QRect &plotRect, const domain::PlotModel &plot);

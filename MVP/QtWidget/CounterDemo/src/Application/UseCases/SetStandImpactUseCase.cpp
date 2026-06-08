@@ -17,7 +17,12 @@ void SetStandImpactUseCase::setTarget(domain::WindProfile profile) {
 }
 
 void SetStandImpactUseCase::setApplied(domain::WindProfile profile) {
+    const auto target = state.get().targetStandImpact;
+    const int elapsedSeconds = state.get().elapsed.value();
+
     state.setAppliedStandImpact(profile);
+    state.appendControlTraceSample(domain::ControlTraceSample{
+        .timeSeconds = static_cast<double>(elapsedSeconds), .targetValue = target, .safeCommandValue = profile});
     sendAppliedImpact(profile);
 }
 

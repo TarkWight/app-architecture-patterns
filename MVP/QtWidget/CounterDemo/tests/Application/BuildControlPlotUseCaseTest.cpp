@@ -1,4 +1,5 @@
 #include "../../src/Application/UseCases/BuildControlPlotUseCase.hpp"
+#include "../../src/Application/UseCases/SetStandControlModeUseCase.hpp"
 
 #include "../../src/Application/Ports/IFunctionEngine.hpp"
 #include "../../src/Application/Session/SessionState.hpp"
@@ -80,6 +81,22 @@ TEST(BuildControlPlotUseCaseTest, ManualModeShowsEmptyControlGridUntilCommandsAr
     EXPECT_DOUBLE_EQ(plot.x.max, 20.0);
     EXPECT_DOUBLE_EQ(plot.y.min, domain::minOperationalBeaufort);
     EXPECT_DOUBLE_EQ(plot.y.max, domain::maxOperationalBeaufort);
+}
+
+TEST(BuildControlPlotUseCaseTest, PresetScenarioStandModeBuildsFormulaProfileForControlChart) {
+    application::session::SessionState state{};
+    state.setEstimatedTestDurationMinutes(1);
+    application::useCases::SetStandControlModeUseCase setModeUseCase{state};
+    setModeUseCase.execute(domain::StandControlMode::PresetScenario);
+    const LinearFunctionEngine engine{};
+    application::useCases::BuildControlPlotUseCase useCase{state, engine};
+
+    const auto plot = useCase.execute();
+
+    EXPECT_EQ(state.get().testProtocol.testMode, domain::TestMode::Automatic);
+    EXPECT_EQ(state.get().controlProfile.samples.size(), static_cast<std::size_t>(60));
+    EXPECT_EQ(plot.series.points.size(), state.get().controlProfile.samples.size());
+    EXPECT_FALSE(plot.series.points.empty());
 }
 
 TEST(BuildControlPlotUseCaseTest, UsesControlTraceAsTargetAndSafeCommandSeriesWhenAvailable) {

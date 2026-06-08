@@ -381,6 +381,7 @@ void MainWindow::connectShellSignals() {
         const auto mode = static_cast<domain::StandControlMode>(standControlModeComboBox->currentData().toInt());
         setStandControlModeUseCase.execute(mode);
         updateManualStandControlsEnabled();
+        controlChartsTabPresenter.onRebuildPlotPressed();
     });
 
     QObject::connect(telemetryCurveComboBox, &QComboBox::currentIndexChanged, this, [this](int index) {

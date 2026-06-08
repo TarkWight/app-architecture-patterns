@@ -217,12 +217,14 @@ if (BUILD_TESTING)
     tests/Domain/WindControlProfileImpactTest.cpp
     tests/Application/BuildControlPlotUseCaseTest.cpp
     tests/Application/SessionStateTest.cpp
+    tests/Application/SetStandControlModeUseCaseTest.cpp
     tests/Application/SetStandImpactUseCaseTest.cpp
     tests/Application/StartTestExecutionUseCaseTest.cpp
     tests/Infrastructure/SimpleFunctionEngineTest.cpp
     src/Application/Session/SessionState.cpp
     src/Application/Session/Subscription.cpp
     src/Application/UseCases/BuildControlPlotUseCase.cpp
+    src/Application/UseCases/SetStandControlModeUseCase.cpp
     src/Application/UseCases/SetStandImpactUseCase.cpp
     src/Application/UseCases/StartTestExecutionUseCase.cpp
   )

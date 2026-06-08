@@ -64,16 +64,17 @@ TEST(BuildControlPlotUseCaseTest, ClampsFormulaOutputToOperationalBeaufortRange)
     EXPECT_DOUBLE_EQ(profile.samples.at(60).beaufort.value(), domain::maxOperationalBeaufort);
 }
 
-TEST(BuildControlPlotUseCaseTest, ManualModeDoesNotBuildFormulaSamples) {
+TEST(BuildControlPlotUseCaseTest, ManualModeStillBuildsFormulaPreviewForTheChart) {
     application::session::SessionState state{};
     state.setTestProtocolMode(domain::TestMode::Manual);
+    state.setEstimatedTestDurationMinutes(20);
     const LinearFunctionEngine engine{};
     application::useCases::BuildControlPlotUseCase useCase{state, engine};
 
     const auto plot = useCase.execute();
 
-    EXPECT_TRUE(state.get().controlProfile.samples.empty());
-    EXPECT_TRUE(plot.series.points.empty());
+    EXPECT_EQ(state.get().controlProfile.samples.size(), static_cast<std::size_t>(20 * 60));
+    EXPECT_EQ(plot.series.points.size(), state.get().controlProfile.samples.size());
 }
 
 } // namespace

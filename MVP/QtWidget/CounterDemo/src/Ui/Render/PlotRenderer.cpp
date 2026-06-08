@@ -21,20 +21,27 @@ QRect makeInnerPlotRect(const QRect &outerRect) {
 } // namespace
 
 void PlotRenderer::drawPlot(QPainter &painter, const QRect &rect, const domain::PlotModel &plot) {
+    domain::PlotModel drawablePlot = plot;
+    if (drawablePlot.x.max <= drawablePlot.x.min) {
+        drawablePlot.x = domain::AxisSpec{.min = 0.0, .max = 1.0, .step = 0.25, .label = plot.x.label};
+    }
+    if (drawablePlot.y.max <= drawablePlot.y.min) {
+        drawablePlot.y = domain::AxisSpec{.min = 0.0, .max = 1.0, .step = 0.25, .label = plot.y.label};
+    }
+
     const QRect plotRect = makeInnerPlotRect(rect);
 
     drawFrame(painter, plotRect);
-    drawTitle(painter, rect, plot);
-    drawAxisLabels(painter, plotRect, plot);
+    drawTitle(painter, rect, drawablePlot);
+    drawAxisLabels(painter, plotRect, drawablePlot);
+    drawXGrid(painter, plotRect, drawablePlot, leftMargin);
+    drawYGrid(painter, plotRect, drawablePlot, leftMargin);
 
-    if (!hasRenderablePlot(plot)) {
-        painter.drawText(plotRect, Qt::AlignCenter, QStringLiteral("No plot data"));
+    if (!hasRenderablePlot(drawablePlot)) {
         return;
     }
 
-    drawXGrid(painter, plotRect, plot, leftMargin);
-    drawYGrid(painter, plotRect, plot, leftMargin);
-    drawSeries(painter, plotRect, plot);
+    drawSeries(painter, plotRect, drawablePlot);
 }
 
 bool PlotRenderer::hasRenderablePlot(const domain::PlotModel &plot) {

@@ -88,7 +88,6 @@ class SimpleFunctionEngine final : public application::ports::IFunctionEngine {
                 const double value = parseExpression();
                 return consume(')') ? value : fail();
             }
-            consumeText("std::");
             if (consumeName("sin")) {
                 return std::sin(parseFunctionArgument());
             }

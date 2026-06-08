@@ -64,6 +64,7 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     void setStandConnectionButtonText(const std::string &text) override;
     void setStandConnectionStatusText(const std::string &text) override;
     void setTestTimeSource(domain::TestTimeSource source) override;
+    void setTestTimeSourceEnabled(bool enabled) override;
 
     void setFunctionExpression(const std::string &expression) override;
 

@@ -1,6 +1,8 @@
 #include "ControlChartsTabWidget.hpp"
 #include "ui_ControlChartsTabWidget.h"
 
+#include "../Domain/TestProtocol.hpp"
+#include "../Domain/TestTimeSource.hpp"
 #include "../Domain/WindImpact.hpp"
 
 #include <QString>
@@ -28,6 +30,7 @@ ControlChartsTabWidget::ControlChartsTabWidget(presentation::controlChartsTab::C
 
     connectSignals();
     connectSessionSignals();
+    updateMinutesInputEnabled();
 }
 
 ControlChartsTabWidget::~ControlChartsTabWidget() {
@@ -81,6 +84,13 @@ void ControlChartsTabWidget::connectSignals() {
 }
 
 void ControlChartsTabWidget::connectSessionSignals() {
+    QObject::connect(
+        &sessionAdapter, &infrastructure::SessionStateQtAdapter::testTimeModelChanged, this,
+        [this](const presentation::viewModels::TestTimeViewModel & /*model*/) { updateMinutesInputEnabled(); });
+
+    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testProtocolModeChanged, this,
+                     [this](const QString & /*mode*/) { updateMinutesInputEnabled(); });
+
     QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::controlChartsTabMinutesChanged, this,
                      [this](int minutes) {
                          if (ui->spinBoxMinutes->value() == minutes) {
@@ -119,6 +129,13 @@ void ControlChartsTabWidget::connectSessionSignals() {
 
     QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::controlPlotChanged, this,
                      [this]() { refreshPlot(); });
+}
+
+void ControlChartsTabWidget::updateMinutesInputEnabled() {
+    const auto &state = sessionAdapter.getState().get();
+    const bool enabled = state.testProtocol.testMode == domain::TestMode::Hybrid &&
+                         state.testTimeSource == domain::TestTimeSource::OperatorDefined;
+    ui->spinBoxMinutes->setEnabled(enabled);
 }
 
 } // namespace ui

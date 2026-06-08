@@ -41,6 +41,7 @@ class ControlChartsTabWidget final : public QWidget, public presentation::contro
 
     void connectSignals();
     void connectSessionSignals();
+    void updateMinutesInputEnabled();
 };
 
 } // namespace ui

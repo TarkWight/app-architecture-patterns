@@ -428,6 +428,10 @@ void MainWindow::setTestTimeSource(domain::TestTimeSource source) {
     }
 }
 
+void MainWindow::setTestTimeSourceEnabled(bool enabled) {
+    ui->comboBoxTestTimeSource->setEnabled(enabled);
+}
+
 void MainWindow::applyStandInputs() {
     const auto &stateData = sessionAdapter.getState().get();
     const domain::StandScenario scenario{stateData.standControlMode};

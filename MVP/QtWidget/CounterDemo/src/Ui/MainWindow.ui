@@ -47,7 +47,7 @@
        <item row="0" column="0">
         <widget class="QLabel" name="labelTimerCaption">
          <property name="text">
-          <string>Таймер:</string>
+          <string>Время теста:</string>
          </property>
         </widget>
        </item>

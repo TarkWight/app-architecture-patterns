@@ -20,6 +20,7 @@ class IShellView {
 
     virtual void setFunctionExpression(const std::string &expression) = 0;
     virtual void setTestTimeSource(domain::TestTimeSource source) = 0;
+    virtual void setTestTimeSourceEnabled(bool enabled) = 0;
 
     virtual void appendLog(const std::string &text) = 0;
     virtual void showOperatorWarning(const std::string &title, const std::string &message) = 0;

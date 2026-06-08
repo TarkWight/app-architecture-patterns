@@ -14,6 +14,8 @@ TEST(SetStandControlModeUseCaseTest, SynchronizesManualStandModeWithManualTestMo
 
     EXPECT_EQ(state.get().standControlMode, domain::StandControlMode::Manual);
     EXPECT_EQ(state.get().testProtocol.testMode, domain::TestMode::Manual);
+    EXPECT_EQ(state.get().testTimeSource, domain::TestTimeSource::FreeRun);
+    EXPECT_EQ(state.get().testTimeDirection, domain::TestTimeDirection::CountUp);
 }
 
 TEST(SetStandControlModeUseCaseTest, SynchronizesHybridStandModeWithHybridTestMode) {
@@ -24,6 +26,8 @@ TEST(SetStandControlModeUseCaseTest, SynchronizesHybridStandModeWithHybridTestMo
 
     EXPECT_EQ(state.get().standControlMode, domain::StandControlMode::Hybrid);
     EXPECT_EQ(state.get().testProtocol.testMode, domain::TestMode::Hybrid);
+    EXPECT_EQ(state.get().testTimeSource, domain::TestTimeSource::AutoCalculated);
+    EXPECT_EQ(state.get().testTimeDirection, domain::TestTimeDirection::CountDown);
 }
 
 TEST(SetStandControlModeUseCaseTest, SynchronizesPresetScenarioStandModeWithAutomaticTestMode) {
@@ -34,6 +38,8 @@ TEST(SetStandControlModeUseCaseTest, SynchronizesPresetScenarioStandModeWithAuto
 
     EXPECT_EQ(state.get().standControlMode, domain::StandControlMode::PresetScenario);
     EXPECT_EQ(state.get().testProtocol.testMode, domain::TestMode::Automatic);
+    EXPECT_EQ(state.get().testTimeSource, domain::TestTimeSource::AutoCalculated);
+    EXPECT_EQ(state.get().testTimeDirection, domain::TestTimeDirection::CountDown);
 }
 
 } // namespace

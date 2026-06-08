@@ -3,6 +3,7 @@
 #include "../Domain/FormulaTemplate.hpp"
 #include "../Domain/StandConnectionStatus.hpp"
 #include "../Domain/TestExecutionTransitions.hpp"
+#include "../Domain/TestProtocol.hpp"
 #include "../Domain/TestTimeSource.hpp"
 #include "../Domain/TestTimeDirection.hpp"
 #include <exception>
@@ -126,6 +127,10 @@ bool ShellPresenter::canResume(domain::TestExecutionStatus status) {
     return domain::canResume(status);
 }
 
+bool testTimeSourceCanBeChanged(domain::TestMode mode) {
+    return mode == domain::TestMode::Hybrid;
+}
+
 bool ShellPresenter::canStop(domain::TestExecutionStatus status) {
     return domain::canStop(status);
 }
@@ -148,6 +153,7 @@ void ShellPresenter::refreshFromState() {
     view->setStopEnabled(canStop(session.testExecutionStatus));
     view->setFunctionExpression(session.functionExpression.value);
     view->setTestTimeSource(session.testTimeSource);
+    view->setTestTimeSourceEnabled(testTimeSourceCanBeChanged(session.testProtocol.testMode));
     refreshStandConnectionButton();
     refreshStandConnectionStatusText();
     notifyStandConnectionStatusChanged(session.standConnectionStatus);

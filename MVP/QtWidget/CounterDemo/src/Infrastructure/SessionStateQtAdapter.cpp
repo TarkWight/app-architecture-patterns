@@ -11,23 +11,46 @@ QColor SessionStateQtAdapter::toQColor(domain::RgbColor color) {
     return QColor(static_cast<int>(color.r), static_cast<int>(color.g), static_cast<int>(color.b));
 }
 
+presentation::viewModels::TestTimeViewModel
+SessionStateQtAdapter::toTestTimeViewModel(const application::session::SessionStateData &data) {
+
+    presentation::viewModels::TestTimeViewModel model{};
+    model.executionStatus = data.testExecutionStatus;
+    model.timeSource = data.testTimeSource;
+    model.timeDirection = data.testTimeDirection;
+
+    model.estimatedDurationMinutes = data.estimatedTestDuration.value();
+    model.operatorDurationMinutes = data.operatorTestDuration.value();
+    model.activeDurationMinutes = data.activeTestDuration.value();
+
+    model.elapsedSeconds = data.elapsed.value();
+    model.remainingSeconds = data.remaining.value();
+
+    model.displayedSeconds = (data.testTimeDirection == domain::TestTimeDirection::CountDown) ? data.remaining.value()
+                                                                                              : data.elapsed.value();
+
+    return model;
+}
+
 void SessionStateQtAdapter::emitState(const application::session::SessionStateData &data) {
-    emit timerChanged(data.elapsed.value, data.timerRunning);
-    emit timerDurationChanged(data.timerDuration.value);
+    emit testTimeModelChanged(toTestTimeViewModel(data));
 
     emit functionExpressionChanged(QString::fromStdString(data.functionExpression.value));
     emit lineColorChanged(toQColor(data.lineColor));
 
-    emit controlChartsTabMinutesChanged(data.controlChartsTabMinutes.value);
+    emit controlChartsTabMinutesChanged(data.controlChartsTabMinutes.value());
 
-    emit beaufortChanged(data.windProfile.beaufort);
-    emit directionChanged(data.windProfile.direction);
-    emit angleOfAttackChanged(data.windProfile.angleOfAttack);
+    emit beaufortChanged(data.windImpact.beaufort.value());
+    emit directionChanged(data.windImpact.direction.degrees());
+    emit angleOfAttackChanged(data.windImpact.angleOfAttack.degrees());
 
-    emit poemTitleChanged(QString::fromStdString(data.poem.title));
+    emit testProtocolTitleChanged(QString::fromStdString(data.testProtocol.title));
+    emit testProtocolModeChanged(QString::fromUtf8(domain::testModeKey(data.testProtocol.testMode).data()));
+    emit testProtocolProgramChanged(QString::fromUtf8(domain::testProgramKey(data.testProtocol.testProgram).data()));
+    emit testProtocolDroneParametersChanged(data.testProtocol.droneParameters);
 
     for (int i = 0; i < 8; ++i) {
-        emit poemLineChanged(i, QString::fromStdString(data.poem.lines[static_cast<std::size_t>(i)]));
+        emit testProtocolLineChanged(i, QString::fromStdString(data.testProtocol.lines[static_cast<std::size_t>(i)]));
     }
 
     emit telemetryPlotChanged();

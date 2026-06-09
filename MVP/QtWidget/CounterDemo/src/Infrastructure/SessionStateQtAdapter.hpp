@@ -6,6 +6,9 @@
 #include <QColor>
 
 #include "../Application/Session/SessionState.hpp"
+#include "../Presentation/ViewModels/TestTimeViewModel.hpp"
+
+#include <vector>
 
 namespace infrastructure {
 
@@ -19,8 +22,7 @@ class SessionStateQtAdapter final : public QObject {
     const application::session::SessionState &getState() const;
 
   signals:
-    void timerChanged(int elapsedSeconds, bool running);
-    void timerDurationChanged(int minutes);
+    void testTimeModelChanged(const presentation::viewModels::TestTimeViewModel &model);
 
     void functionExpressionChanged(const QString &expression);
     void lineColorChanged(const QColor &color);
@@ -31,8 +33,11 @@ class SessionStateQtAdapter final : public QObject {
     void directionChanged(double value);
     void angleOfAttackChanged(double value);
 
-    void poemTitleChanged(const QString &title);
-    void poemLineChanged(int index, const QString &line);
+    void testProtocolTitleChanged(const QString &title);
+    void testProtocolLineChanged(int index, const QString &line);
+    void testProtocolModeChanged(const QString &mode);
+    void testProtocolProgramChanged(const QString &program);
+    void testProtocolDroneParametersChanged(const std::vector<domain::TestProtocolParameter> &parameters);
 
     void telemetryPlotChanged();
     void controlPlotChanged();
@@ -42,6 +47,8 @@ class SessionStateQtAdapter final : public QObject {
     application::session::Subscription subscription;
 
     static QColor toQColor(domain::RgbColor color);
+    static presentation::viewModels::TestTimeViewModel
+    toTestTimeViewModel(const application::session::SessionStateData &data);
     void emitState(const application::session::SessionStateData &data);
 };
 

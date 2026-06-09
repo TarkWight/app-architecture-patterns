@@ -1,8 +1,22 @@
 #include "TestProtocolTabWidget.hpp"
 #include "ui_TestProtocolTabWidget.h"
 
+#include <QComboBox>
+#include <QGridLayout>
 #include <QFileDialog>
+#include <QFrame>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QScrollArea>
+#include <QSignalBlocker>
+#include <QSizePolicy>
 #include <QString>
+#include <QVBoxLayout>
+
+#include <array>
 
 namespace {
 
@@ -37,6 +51,10 @@ TestProtocolTabWidget::TestProtocolTabWidget(presentation::testProtocolTab::Test
                                              infrastructure::SessionStateQtAdapter &sessionAdapter, QWidget *parent)
     : QWidget(parent), ui(new Ui::TestProtocolTabWidget), presenter(presenter), sessionAdapter(sessionAdapter) {
     ui->setupUi(this);
+    setupScrollableContent();
+    setupReportFormLabels();
+    setupTestSelectionControls();
+    setupDroneParametersEditor();
 
     presenter.attachView(*this);
 
@@ -49,21 +67,80 @@ TestProtocolTabWidget::~TestProtocolTabWidget() {
     delete ui;
 }
 
-void TestProtocolTabWidget::setTimerDurationMinutes(int minutes) {
+void TestProtocolTabWidget::setOperatorTestDurationMinutes(int minutes) {
+    const QSignalBlocker blocker{ui->spinBoxTimerMinutes};
     ui->spinBoxTimerMinutes->setValue(minutes);
 }
 
-void TestProtocolTabWidget::setPoemTitle(const std::string &title) {
+void TestProtocolTabWidget::setTestProtocolTitle(const std::string &title) {
+    const QSignalBlocker blocker{ui->lineEditTitle};
     ui->lineEditTitle->setText(QString::fromStdString(title));
 }
 
-void TestProtocolTabWidget::setPoemLine(int index, const std::string &line) {
+void TestProtocolTabWidget::setTestProtocolLine(int index, const std::string &line) {
     auto *lineEdit = lineEditByIndex(ui, index);
     if (lineEdit == nullptr) {
         return;
     }
 
+    const QSignalBlocker blocker{lineEdit};
     lineEdit->setText(QString::fromStdString(line));
+}
+
+void TestProtocolTabWidget::setTestProtocolMode(const std::string &mode) {
+    if (testModeComboBox == nullptr) {
+        return;
+    }
+
+    const QSignalBlocker blocker{testModeComboBox};
+    const int index = testModeComboBox->findData(QString::fromStdString(mode));
+    testModeComboBox->setCurrentIndex(index >= 0 ? index : 0);
+}
+
+void TestProtocolTabWidget::setTestProtocolProgram(const std::string &program) {
+    if (testProgramComboBox == nullptr) {
+        return;
+    }
+
+    const QSignalBlocker blocker{testProgramComboBox};
+    const int index = testProgramComboBox->findData(QString::fromStdString(program));
+    testProgramComboBox->setCurrentIndex(index >= 0 ? index : 0);
+}
+
+void TestProtocolTabWidget::setTestProtocolDroneParameters(
+    const std::vector<domain::TestProtocolParameter> &parameters) {
+    if (droneParametersLayout == nullptr) {
+        return;
+    }
+
+    while (auto *item = droneParametersLayout->takeAt(0)) {
+        if (auto *widget = item->widget()) {
+            widget->deleteLater();
+        }
+        delete item;
+    }
+
+    droneParameterEdits.clear();
+
+    constexpr int columns = 2;
+    for (int index = 0; index < static_cast<int>(parameters.size()); ++index) {
+        const int row = index / columns;
+        const int column = (index % columns) * 2;
+        const auto &parameter = parameters[static_cast<std::size_t>(index)];
+
+        auto *label = new QLabel(QString::fromStdString(parameter.label), this);
+        auto *edit = new QLineEdit(QString::fromStdString(parameter.value), this);
+        label->setMinimumWidth(160);
+        edit->setMinimumWidth(220);
+        droneParameterEdits.push_back(edit);
+
+        droneParametersLayout->addWidget(label, row, column);
+        droneParametersLayout->addWidget(edit, row, column + 1);
+
+        QObject::connect(edit, &QLineEdit::textChanged, this, [this, index](const QString &text) {
+            presenter.onTestProtocolDroneParameterChanged(index, text.toStdString());
+        });
+    }
 }
 
 void TestProtocolTabWidget::showExportSuccess(const std::string &filePath) {
@@ -74,12 +151,106 @@ void TestProtocolTabWidget::appendLog(const std::string &text) {
     ui->plainTextEditLog->appendPlainText(QString::fromStdString(text));
 }
 
+void TestProtocolTabWidget::setupScrollableContent() {
+    auto *contentWidget = new QWidget(this);
+    contentWidget->setLayout(ui->verticalLayoutRoot);
+    contentWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
+
+    auto *scrollArea = new QScrollArea(this);
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setWidget(contentWidget);
+    scrollArea->setFrameShape(QFrame::NoFrame);
+
+    auto *rootLayout = new QVBoxLayout(this);
+    rootLayout->setContentsMargins(0, 0, 0, 0);
+    rootLayout->addWidget(scrollArea);
+}
+
+void TestProtocolTabWidget::setupReportFormLabels() {
+    auto *header = new QWidget(this);
+    auto *headerLayout = new QHBoxLayout(header);
+    headerLayout->setContentsMargins(0, 0, 0, 0);
+    headerLayout->addWidget(new QLabel(QStringLiteral("Данные PDF-протокола, организации и результата"), header));
+    headerLayout->addStretch(1);
+
+    loadPdfTomlButton = new QPushButton(QStringLiteral("Загрузить TOML"), header);
+    loadPdfTomlButton->setToolTip(QStringLiteral("Подгрузить значения полей протокола из .toml файла"));
+    headerLayout->addWidget(loadPdfTomlButton);
+
+    savePdfTomlTemplateButton = new QPushButton(QStringLiteral("Создать шаблон TOML"), header);
+    savePdfTomlTemplateButton->setToolTip(QStringLiteral("Сохранить пустой .toml шаблон для полей протокола"));
+    headerLayout->addWidget(savePdfTomlTemplateButton);
+    ui->verticalLayoutRoot->insertWidget(2, header);
+
+    const std::array<const char *, 8> labels{"Организация", "Номер лицензии", "Адрес",     "ФИО оператора",
+                                             "Комментарий", "Заключение",     "Результат", "Резерв"};
+
+    for (int row = 0; row < static_cast<int>(labels.size()); ++row) {
+        auto *lineEdit = lineEditByIndex(ui, row);
+        if (lineEdit == nullptr) {
+            continue;
+        }
+
+        ui->gridLayoutTestProtocol->removeWidget(lineEdit);
+        if (row == 7) {
+            lineEdit->hide();
+            continue;
+        }
+
+        lineEdit->setMinimumWidth(360);
+        ui->gridLayoutTestProtocol->addWidget(
+            new QLabel(QString::fromUtf8(labels[static_cast<std::size_t>(row)]), this), row, 0);
+        ui->gridLayoutTestProtocol->addWidget(lineEdit, row, 1);
+    }
+
+    ui->gridLayoutTestProtocol->setColumnStretch(0, 0);
+    ui->gridLayoutTestProtocol->setColumnStretch(1, 1);
+}
+
+void TestProtocolTabWidget::setupTestSelectionControls() {
+    auto *group = new QGroupBox(QStringLiteral("Тип и шаблон испытания"), this);
+    auto *layout = new QGridLayout(group);
+
+    testModeComboBox = new QComboBox(group);
+    testModeComboBox->addItem(QStringLiteral("Ручное"), QStringLiteral("manual"));
+    testModeComboBox->addItem(QStringLiteral("Гибридное"), QStringLiteral("hybrid"));
+    testModeComboBox->addItem(QStringLiteral("Автоматическое"), QStringLiteral("automatic"));
+
+    testProgramComboBox = new QComboBox(group);
+    testProgramComboBox->addItem(QStringLiteral("Полет в штиль"), QStringLiteral("test1"));
+    testProgramComboBox->addItem(QStringLiteral("Определение максимальных параметров"), QStringLiteral("test2"));
+    testProgramComboBox->addItem(QStringLiteral("Исследование временной перспективы"), QStringLiteral("test3"));
+
+    layout->addWidget(new QLabel(QStringLiteral("Тип"), group), 0, 0);
+    layout->addWidget(testModeComboBox, 0, 1);
+    layout->addWidget(new QLabel(QStringLiteral("Испытание"), group), 0, 2);
+    layout->addWidget(testProgramComboBox, 0, 3);
+    layout->setColumnStretch(1, 1);
+    layout->setColumnStretch(3, 2);
+
+    ui->verticalLayoutRoot->insertWidget(3, group);
+}
+
+void TestProtocolTabWidget::setupDroneParametersEditor() {
+    auto *group = new QGroupBox(QStringLiteral("Конфигурация БПЛА и параметры теста"), this);
+    auto *layout = new QVBoxLayout(group);
+
+    droneParametersLayout = new QGridLayout();
+    droneParametersLayout->setHorizontalSpacing(8);
+    droneParametersLayout->setVerticalSpacing(6);
+    layout->addLayout(droneParametersLayout);
+    droneParametersLayout->setColumnStretch(1, 1);
+    droneParametersLayout->setColumnStretch(3, 1);
+
+    ui->verticalLayoutRoot->insertWidget(4, group);
+}
+
 void TestProtocolTabWidget::connectSignals() {
     QObject::connect(ui->spinBoxTimerMinutes, qOverload<int>(&QSpinBox::valueChanged), this,
-                     [this](int value) { presenter.onTimerDurationChanged(value); });
+                     [this](int value) { presenter.onOperatorTestDurationChanged(value); });
 
     QObject::connect(ui->lineEditTitle, &QLineEdit::textChanged, this,
-                     [this](const QString &text) { presenter.onPoemTitleChanged(text.toStdString()); });
+                     [this](const QString &text) { presenter.onTestProtocolTitleChanged(text.toStdString()); });
 
     for (int i = 0; i < 8; ++i) {
         auto *lineEdit = lineEditByIndex(ui, i);
@@ -87,13 +258,47 @@ void TestProtocolTabWidget::connectSignals() {
             continue;
         }
 
-        QObject::connect(lineEdit, &QLineEdit::textChanged, this,
-                         [this, i](const QString &text) { presenter.onPoemLineChanged(i, text.toStdString()); });
+        QObject::connect(lineEdit, &QLineEdit::textChanged, this, [this, i](const QString &text) {
+            presenter.onTestProtocolLineChanged(i, text.toStdString());
+        });
     }
 
+    QObject::connect(testModeComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {
+        presenter.onTestProtocolModeChanged(testModeComboBox->currentData().toString().toStdString());
+    });
+
+    QObject::connect(testProgramComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {
+        presenter.onTestProtocolProgramChanged(testProgramComboBox->currentData().toString().toStdString());
+    });
+
+    QObject::connect(loadPdfTomlButton, &QPushButton::clicked, this, [this]() {
+        const QString filePath =
+            QFileDialog::getOpenFileName(this, QStringLiteral("Загрузить данные PDF из TOML"), QStringLiteral(""),
+                                         QStringLiteral("TOML Files (*.toml);;All Files (*)"));
+
+        if (filePath.isEmpty()) {
+            return;
+        }
+
+        presenter.onLoadPdfTomlPressed(filePath.toStdString());
+    });
+
+    QObject::connect(savePdfTomlTemplateButton, &QPushButton::clicked, this, [this]() {
+        const QString filePath = QFileDialog::getSaveFileName(this, QStringLiteral("Создать шаблон PDF TOML"),
+                                                              QStringLiteral("pdf_report.template.toml"),
+                                                              QStringLiteral("TOML Files (*.toml);;All Files (*)"));
+
+        if (filePath.isEmpty()) {
+            return;
+        }
+
+        presenter.onSavePdfTomlTemplatePressed(filePath.toStdString());
+    });
+
     QObject::connect(ui->buttonExportPdf, &QPushButton::clicked, this, [this]() {
-        const QString filePath = QFileDialog::getSaveFileName(
-            this, QStringLiteral("Export PDF"), QStringLiteral("poem-report.pdf"), QStringLiteral("PDF Files (*.pdf)"));
+        const QString filePath =
+            QFileDialog::getSaveFileName(this, QStringLiteral("Export PDF"), QStringLiteral("testProtocol-report.pdf"),
+                                         QStringLiteral("PDF Files (*.pdf)"));
 
         if (filePath.isEmpty()) {
             return;
@@ -104,25 +309,25 @@ void TestProtocolTabWidget::connectSignals() {
 }
 
 void TestProtocolTabWidget::connectSessionSignals() {
-    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::timerDurationChanged, this,
-                     [this](int minutes) {
-                         if (ui->spinBoxTimerMinutes->value() == minutes) {
+    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testTimeModelChanged, this,
+                     [this](const presentation::viewModels::TestTimeViewModel &model) {
+                         if (ui->spinBoxTimerMinutes->value() == model.operatorDurationMinutes) {
                              return;
                          }
 
-                         ui->spinBoxTimerMinutes->setValue(minutes);
+                         setOperatorTestDurationMinutes(model.operatorDurationMinutes);
                      });
 
-    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::poemTitleChanged, this,
+    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testProtocolTitleChanged, this,
                      [this](const QString &title) {
                          if (ui->lineEditTitle->text() == title) {
                              return;
                          }
 
-                         ui->lineEditTitle->setText(title);
+                         setTestProtocolTitle(title.toStdString());
                      });
 
-    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::poemLineChanged, this,
+    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testProtocolLineChanged, this,
                      [this](int index, const QString &line) {
                          auto *lineEdit = lineEditByIndex(ui, index);
                          if (lineEdit == nullptr) {
@@ -133,8 +338,14 @@ void TestProtocolTabWidget::connectSessionSignals() {
                              return;
                          }
 
-                         lineEdit->setText(line);
+                         setTestProtocolLine(index, line.toStdString());
                      });
+
+    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testProtocolModeChanged, this,
+                     [this](const QString &mode) { setTestProtocolMode(mode.toStdString()); });
+
+    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testProtocolProgramChanged, this,
+                     [this](const QString &program) { setTestProtocolProgram(program.toStdString()); });
 }
 
 } // namespace ui

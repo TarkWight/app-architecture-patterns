@@ -1,0 +1,79 @@
+[pdf_report]
+title = "Протокол испытаний беспилотной авиационной системы"
+organization = "ООО «С.И.Т»"
+license_number = "1234567"
+address = "планета Земля"
+test_mode = "manual"
+test_program = "test1"
+operator_name = "Боровой Арсентий"
+comment = "Испытание прошло штатно"
+conclusion = "Воздушное средство пригодно к эксплуатации"
+result = "_________"
+
+[pdf_report.drone_parameters]
+# Модель БПЛА
+uav_model = ""
+# Серийный номер
+serial_number = ""
+# Полетная нагрузка
+flight_payload = "15.00"
+# DR (%)
+drag_ratio_percent = "89.000000000"
+# Ток оборудования
+equipment_current = "0.020"
+# Дальность действия
+operation_range = "15.99"
+# Скорость Max.
+max_speed = "160.00"
+# Высота Max.
+max_altitude = "130.99"
+# Время полета max.
+max_flight_time = "30.00"
+# Тип связи
+communication_type = "Glonass"
+# Модель винтов
+propeller_model = ""
+# Конфигурация
+propeller_configuration = ""
+# Диаметр
+propeller_diameter = "45.00"
+# Мощность
+propeller_power = "10"
+# Max об/мин
+propeller_max_rpm = "10000"
+# Количество лопастей
+propeller_blade_count = "3"
+# Материал
+propeller_material = ""
+# Аккумулятор
+battery_model = ""
+# Тип аккумулятора
+battery_type = ""
+# Номинальная емкость (mAh)
+battery_capacity_mah = "18000"
+# Число ячеек (S)
+battery_cell_count = "6"
+# Скорость разряда (C)
+battery_discharge_rate_c = "6"
+# Вес аккумулятора
+battery_weight = "2,4"
+# Напряжение 1й ячейки
+battery_cell_voltage = "3.80"
+# Модель двигателей
+motor_model = ""
+# Диаметр вала
+motor_shaft_diameter = "8"
+# Количество двигателей
+motor_count = "4"
+# Производитель
+motor_manufacturer = "T_Motors"
+# KV
+motor_kv = "480"
+# Максимальная тяга (кг)
+motor_max_thrust_kg = "1.30"
+# Пиковый ток (A)
+motor_peak_current_a = "13.990"
+# Вес двигателя
+motor_weight = "3.30"
+# Версия прошивки
+firmware_version = "1.1.2.32"

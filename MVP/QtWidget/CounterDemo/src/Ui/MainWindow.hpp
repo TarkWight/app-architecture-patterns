@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <memory>
+#include <string>
 
 #include "../Infrastructure/SessionStateQtAdapter.hpp"
 #include "../Presentation/IShellView.hpp"
@@ -10,6 +11,17 @@
 #include "../Presentation/TelemetryChartsTab/TelemetryChartsTabPresenter.hpp"
 #include "../Presentation/ControlChartsTab/ControlChartsTabPresenter.hpp"
 #include "../Presentation/TestProtocolTab/TestProtocolTabPresenter.hpp"
+#include "../Application/UseCases/SetStandControlModeUseCase.hpp"
+#include "../Application/UseCases/SetStandImpactUseCase.hpp"
+#include "../Domain/AxisId.hpp"
+#include "../Domain/TestTimeSource.hpp"
+
+class QComboBox;
+class QCheckBox;
+class QDoubleSpinBox;
+class QLabel;
+class QString;
+class QTimer;
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -32,6 +44,8 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
         presentation::telemetryChartsTab::TelemetryChartsTabPresenter &telemetryChartsTabPresenter;
         presentation::controlChartsTab::ControlChartsTabPresenter &controlChartsTabPresenter;
         presentation::testProtocolTab::TestProtocolTabPresenter &testProtocolTabPresenter;
+        application::useCases::SetStandControlModeUseCase &setStandControlModeUseCase;
+        application::useCases::SetStandImpactUseCase &setStandImpactUseCase;
         infrastructure::SessionStateQtAdapter &sessionAdapter;
     };
 
@@ -41,8 +55,17 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     void setTimerText(const std::string &text) override;
     void setStartEnabled(bool enabled) override;
     void setStopEnabled(bool enabled) override;
+    void setPauseResumeEnabled(bool enabled) override;
+    void setPauseResumeText(const std::string &text) override;
+    void setStandConnectionButtonText(const std::string &text) override;
+    void setStandConnectionStatusText(const std::string &text) override;
+    void setTestTimeSource(domain::TestTimeSource source) override;
+    void setTestTimeSourceEnabled(bool enabled) override;
+
     void setFunctionExpression(const std::string &expression) override;
+
     void appendLog(const std::string &text) override;
+    void showOperatorWarning(const std::string &title, const std::string &message) override;
 
   private:
     std::unique_ptr<Ui::MainWindow> ui;
@@ -51,15 +74,31 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     presentation::telemetryChartsTab::TelemetryChartsTabPresenter &telemetryChartsTabPresenter;
     presentation::controlChartsTab::ControlChartsTabPresenter &controlChartsTabPresenter;
     presentation::testProtocolTab::TestProtocolTabPresenter &testProtocolTabPresenter;
+    application::useCases::SetStandControlModeUseCase &setStandControlModeUseCase;
+    application::useCases::SetStandImpactUseCase &setStandImpactUseCase;
     infrastructure::SessionStateQtAdapter &sessionAdapter;
 
     TelemetryChartsTabWidget *telemetryChartsTabWidget{nullptr};
     ControlChartsTabWidget *controlChartsTabWidget{nullptr};
     TestProtocolTabWidget *testProtocolTabWidget{nullptr};
 
+    QTimer *standImpactTransitionTimer{nullptr};
+    bool controlPlotRebuildScheduled{false};
+    std::string observedTestProtocolModeKey{};
+
     void setupTabs();
+    void setupStandControlPanel();
     void connectShellSignals();
     void connectSessionSignals();
+    void applyStandInputs();
+    void advanceStandImpactTransition();
+    void selectTelemetryAxisColor();
+    void scheduleControlPlotRebuild();
+    void updateStandControlModeSelection();
+    void updateManualStandControlsEnabled();
+    void updateControlFormulaTemplateSelection(const std::string &expression);
+    double selectedStandDirectionDegrees() const;
+    domain::AxisId selectedTelemetryAxisId() const;
 };
 
 } // namespace ui

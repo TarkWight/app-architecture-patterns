@@ -2,8 +2,9 @@
 #define TAB3PRESENTER_HPP
 
 #include "../../Application/UseCases/ExportPdfUseCase.hpp"
-#include "../../Application/UseCases/SetTimerDurationUseCase.hpp"
-#include "../../Application/UseCases/UpdatePoemUseCase.hpp"
+#include "../../Application/UseCases/LoadPdfReportDefaultsUseCase.hpp"
+#include "../../Application/UseCases/SetOperatorTestDurationUseCase.hpp"
+#include "../../Application/UseCases/UpdateTestProtocolUseCase.hpp"
 #include "../../Application/Session/SessionState.hpp"
 
 #include "ITestProtocolTabView.hpp"
@@ -16,9 +17,11 @@ class TestProtocolTabPresenter final {
   public:
     struct Dependencies {
         application::session::SessionState &state;
-        application::useCases::SetTimerDurationUseCase &setTimerDurationUseCase;
-        application::useCases::UpdatePoemUseCase &updatePoemUseCase;
+        application::useCases::SetOperatorTestDurationUseCase &setOperatorTestDurationUseCase;
+        application::useCases::UpdateTestProtocolUseCase &updateTestProtocolUseCase;
+        application::useCases::LoadPdfReportDefaultsUseCase &loadPdfReportDefaultsUseCase;
         application::useCases::ExportPdfUseCase &exportPdfUseCase;
+        std::string pdfReportConfigPath;
     };
 
     explicit TestProtocolTabPresenter(Dependencies deps);
@@ -28,20 +31,29 @@ class TestProtocolTabPresenter final {
 
     void onViewReady();
 
-    void onTimerDurationChanged(int minutes);
+    void onOperatorTestDurationChanged(int minutes);
 
-    void onPoemTitleChanged(std::string title);
-    void onPoemLineChanged(int index, std::string line);
+    void onTestProtocolTitleChanged(std::string title);
+    void onTestProtocolLineChanged(int index, std::string line);
+    void onTestProtocolModeChanged(std::string mode);
+    void onTestProtocolProgramChanged(std::string program);
+    void onTestProtocolDroneParameterChanged(int index, std::string value);
 
+    void onLoadPdfTomlPressed(const std::string &filePath);
+    void onSavePdfTomlTemplatePressed(const std::string &filePath);
     void onExportPdfPressed(const std::string &filePath);
 
   private:
     application::session::SessionState &state;
-    application::useCases::SetTimerDurationUseCase &setTimerDurationUseCase;
-    application::useCases::UpdatePoemUseCase &updatePoemUseCase;
+    application::useCases::SetOperatorTestDurationUseCase &setOperatorTestDurationUseCase;
+    application::useCases::UpdateTestProtocolUseCase &updateTestProtocolUseCase;
+    application::useCases::LoadPdfReportDefaultsUseCase &loadPdfReportDefaultsUseCase;
     application::useCases::ExportPdfUseCase &exportPdfUseCase;
+    std::string pdfReportConfigPath;
 
     ITestProtocolTabView *view{nullptr};
+
+    void syncViewFromState();
 };
 
 } // namespace presentation::testProtocolTab

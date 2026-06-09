@@ -6,43 +6,95 @@
 #include "UseCases/BuildControlPlotUseCase.hpp"
 #include "UseCases/ExportPdfUseCase.hpp"
 #include "UseCases/GenerateStairPlotUseCase.hpp"
+#include "UseCases/LoadPdfReportDefaultsUseCase.hpp"
+#include "UseCases/PauseTestExecutionUseCase.hpp"
+#include "UseCases/ResumeTestExecutionUseCase.hpp"
 #include "UseCases/SetFunctionExpressionUseCase.hpp"
 #include "UseCases/SetLineColorUseCase.hpp"
 #include "UseCases/SetControlChartsTabMinutesUseCase.hpp"
-#include "UseCases/SetTimerDurationUseCase.hpp"
-#include "UseCases/StartTimerUseCase.hpp"
-#include "UseCases/StopTimerUseCase.hpp"
-#include "UseCases/UpdatePoemUseCase.hpp"
-#include "UseCases/SetWindProfileUseCase.hpp"
+#include "UseCases/SetOperatorTestDurationUseCase.hpp"
+#include "UseCases/SetTestTimeSourceUseCase.hpp"
+#include "UseCases/SetTelemetryAxisColorUseCase.hpp"
+#include "UseCases/SetTelemetryAxisVisibleUseCase.hpp"
+#include "UseCases/SetTelemetryWindowUseCase.hpp"
+#include "UseCases/SetStandControlModeUseCase.hpp"
+#include "UseCases/SetStandImpactUseCase.hpp"
+#include "UseCases/StartTestExecutionUseCase.hpp"
+#include "UseCases/StopTestExecutionUseCase.hpp"
+#include "UseCases/UpdateTestProtocolUseCase.hpp"
+#include "UseCases/SetWindImpactUseCase.hpp"
+#include "UseCases/ConfigureTelemetryUseCase.hpp"
+#include "UseCases/ConnectStandUseCase.hpp"
+#include "UseCases/DisconnectStandUseCase.hpp"
+
+#include "../Infrastructure/Config/TomlConfigRepository.hpp"
+
+#include "../Infrastructure/AxisTcp/LegacyAxisProtocolCodec.hpp"
+#include "../Infrastructure/AxisTcp/QtTcpTelemetryClient.hpp"
 
 #include "../Infrastructure/QtPdfExporter.hpp"
 #include "../Infrastructure/QtTextLogger.hpp"
-#include "../Infrastructure/QtTimerService.hpp"
+#include "../Infrastructure/QtTestExecutionScheduler.hpp"
 #include "../Infrastructure/SessionStateQtAdapter.hpp"
-#include "../Infrastructure/SimpleFunctionEngineStub.hpp"
+#include "../Infrastructure/SimpleFunctionEngine.hpp"
 
 #include "../Presentation/ShellPresenter.hpp"
 #include "../Presentation/TelemetryChartsTab/TelemetryChartsTabPresenter.hpp"
 #include "../Presentation/ControlChartsTab/ControlChartsTabPresenter.hpp"
 #include "../Presentation/TestProtocolTab/TestProtocolTabPresenter.hpp"
 
+#include <string>
+
 struct ApplicationContext {
+    std::string pdfReportConfigPath{
+        "/Users/tarkwight/Documents/Development/app-architecture-patterns/MVP/QtWidget/CounterDemo/pdf_report.toml"};
+
     application::session::SessionState sessionState;
 
     infrastructure::QtTextLogger logger{[](const std::string &) {}};
 
-    infrastructure::SimpleFunctionEngineStub functionEngine;
-    infrastructure::QtTimerService timerService;
+    infrastructure::SimpleFunctionEngine functionEngine;
+    infrastructure::QtTestExecutionScheduler testExecutionScheduler;
     infrastructure::QtPdfExporter pdfExporter;
     infrastructure::SessionStateQtAdapter sessionAdapter{sessionState};
+    infrastructure::config::TomlConfigRepository configRepository;
+
+    infrastructure::axisTcp::LegacyAxisProtocolCodec axisProtocolCodec;
+
+    infrastructure::axisTcp::QtTcpTelemetryClient telemetryClient{axisProtocolCodec};
+
+    application::useCases::ConfigureTelemetryUseCase configureTelemetryUseCase{sessionState, configRepository,
+                                                                               telemetryClient};
+
+    application::useCases::ConnectStandUseCase connectStandUseCase{sessionState, telemetryClient};
+
+    application::useCases::DisconnectStandUseCase disconnectStandUseCase{sessionState, telemetryClient};
 
     application::useCases::GenerateStairPlotUseCase generateStairPlotUseCase{sessionState};
 
     application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{sessionState, functionEngine};
 
-    application::useCases::StartTimerUseCase startTimerUseCase{sessionState, timerService};
+    application::useCases::StartTestExecutionUseCase startTestExecutionUseCase{
+        sessionState, testExecutionScheduler, telemetryClient, buildControlPlotUseCase};
 
-    application::useCases::StopTimerUseCase stopTimerUseCase{sessionState, timerService};
+    application::useCases::PauseTestExecutionUseCase pauseTestExecutionUseCase{sessionState, testExecutionScheduler};
+
+    application::useCases::ResumeTestExecutionUseCase resumeTestExecutionUseCase{sessionState, testExecutionScheduler};
+
+    application::useCases::StopTestExecutionUseCase stopTestExecutionUseCase{sessionState, testExecutionScheduler,
+                                                                             telemetryClient};
+
+    application::useCases::SetTestTimeSourceUseCase setTestTimeSourceUseCase{sessionState};
+
+    application::useCases::SetTelemetryWindowUseCase setTelemetryWindowUseCase{sessionState};
+
+    application::useCases::SetTelemetryAxisColorUseCase setTelemetryAxisColorUseCase{sessionState};
+
+    application::useCases::SetTelemetryAxisVisibleUseCase setTelemetryAxisVisibleUseCase{sessionState};
+
+    application::useCases::SetStandControlModeUseCase setStandControlModeUseCase{sessionState};
+
+    application::useCases::SetStandImpactUseCase setStandImpactUseCase{sessionState, telemetryClient};
 
     application::useCases::SetFunctionExpressionUseCase setFunctionExpressionUseCase{sessionState};
 
@@ -50,37 +102,51 @@ struct ApplicationContext {
 
     application::useCases::SetControlChartsTabMinutesUseCase setControlChartsTabMinutesUseCase{sessionState};
 
-    application::useCases::SetWindProfileUseCase setWindProfileUseCase{sessionState};
+    application::useCases::SetWindImpactUseCase setWindImpactUseCase{sessionState};
 
-    application::useCases::SetTimerDurationUseCase setTimerDurationUseCase{sessionState};
+    application::useCases::SetOperatorTestDurationUseCase setOperatorTestDurationUseCase{sessionState};
 
-    application::useCases::UpdatePoemUseCase updatePoemUseCase{sessionState};
+    application::useCases::UpdateTestProtocolUseCase updateTestProtocolUseCase{sessionState};
+
+    application::useCases::LoadPdfReportDefaultsUseCase loadPdfReportDefaultsUseCase{sessionState, configRepository};
 
     application::useCases::ExportPdfUseCase exportPdfUseCase{sessionState, pdfExporter};
 
     presentation::ShellPresenter shellPresenter{
         presentation::ShellPresenter::Dependencies{.state = sessionState,
-                                                   .startTimerUseCase = startTimerUseCase,
-                                                   .stopTimerUseCase = stopTimerUseCase,
+                                                   .startTestExecutionUseCase = startTestExecutionUseCase,
+                                                   .pauseTestExecutionUseCase = pauseTestExecutionUseCase,
+                                                   .resumeTestExecutionUseCase = resumeTestExecutionUseCase,
+                                                   .stopTestExecutionUseCase = stopTestExecutionUseCase,
+                                                   .setTestTimeSourceUseCase = setTestTimeSourceUseCase,
                                                    .setFunctionExpressionUseCase = setFunctionExpressionUseCase,
                                                    .setLineColorUseCase = setLineColorUseCase,
-                                                   .buildControlPlotUseCase = buildControlPlotUseCase}};
+                                                   .buildControlPlotUseCase = buildControlPlotUseCase,
+                                                   .configureTelemetryUseCase = configureTelemetryUseCase,
+                                                   .connectStandUseCase = connectStandUseCase,
+                                                   .disconnectStandUseCase = disconnectStandUseCase}};
 
-    presentation::telemetryChartsTab::TelemetryChartsTabPresenter telemetryChartsTabPresenter{generateStairPlotUseCase};
+    presentation::telemetryChartsTab::TelemetryChartsTabPresenter telemetryChartsTabPresenter{
+        presentation::telemetryChartsTab::TelemetryChartsTabPresenter::Dependencies{
+            .setTelemetryWindowUseCase = setTelemetryWindowUseCase,
+            .setTelemetryAxisColorUseCase = setTelemetryAxisColorUseCase,
+            .setTelemetryAxisVisibleUseCase = setTelemetryAxisVisibleUseCase}};
 
     presentation::controlChartsTab::ControlChartsTabPresenter controlChartsTabPresenter{
         presentation::controlChartsTab::ControlChartsTabPresenter::Dependencies{
             .state = sessionState,
             .setControlChartsTabMinutesUseCase = setControlChartsTabMinutesUseCase,
-            .setWindProfileUseCase = setWindProfileUseCase,
+            .setWindImpactUseCase = setWindImpactUseCase,
             .buildControlPlotUseCase = buildControlPlotUseCase}};
 
     presentation::testProtocolTab::TestProtocolTabPresenter testProtocolTabPresenter{
-        presentation::testProtocolTab::TestProtocolTabPresenter::Dependencies{.state = sessionState,
-                                                                              .setTimerDurationUseCase =
-                                                                                  setTimerDurationUseCase,
-                                                                              .updatePoemUseCase = updatePoemUseCase,
-                                                                              .exportPdfUseCase = exportPdfUseCase}};
+        presentation::testProtocolTab::TestProtocolTabPresenter::Dependencies{
+            .state = sessionState,
+            .setOperatorTestDurationUseCase = setOperatorTestDurationUseCase,
+            .updateTestProtocolUseCase = updateTestProtocolUseCase,
+            .loadPdfReportDefaultsUseCase = loadPdfReportDefaultsUseCase,
+            .exportPdfUseCase = exportPdfUseCase,
+            .pdfReportConfigPath = pdfReportConfigPath}};
 };
 
 #endif // APPLICATIONCONTEXT_HPP

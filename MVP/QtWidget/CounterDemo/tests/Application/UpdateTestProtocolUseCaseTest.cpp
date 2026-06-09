@@ -42,4 +42,22 @@ TEST(UpdateTestProtocolUseCaseTest, AutomaticModeSelectsPresetStandControlAndCal
     EXPECT_EQ(state.get().testTimeDirection, domain::TestTimeDirection::CountDown);
 }
 
+TEST(UpdateTestProtocolUseCaseTest, PublishesOneConsistentStateSnapshotForModeChange) {
+    application::session::SessionState state{};
+    application::useCases::UpdateTestProtocolUseCase useCase{state};
+    int notifications = 0;
+
+    [[maybe_unused]] auto subscription =
+        state.subscribe([&notifications](const application::session::SessionStateData & /*data*/) { ++notifications; });
+    notifications = 0;
+
+    useCase.updateMode("automatic");
+
+    EXPECT_EQ(notifications, 1);
+    EXPECT_EQ(state.get().testProtocol.testMode, domain::TestMode::Automatic);
+    EXPECT_EQ(state.get().standControlMode, domain::StandControlMode::PresetScenario);
+    EXPECT_EQ(state.get().testTimeSource, domain::TestTimeSource::AutoCalculated);
+    EXPECT_EQ(state.get().testTimeDirection, domain::TestTimeDirection::CountDown);
+}
+
 } // namespace

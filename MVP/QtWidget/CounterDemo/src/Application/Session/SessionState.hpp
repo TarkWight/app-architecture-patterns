@@ -59,6 +59,8 @@ class SessionState {
     void setTelemetryAxisColor(domain::AxisId axisId, domain::RgbColor color);
     void setTelemetryAxisVisible(domain::AxisId axisId, bool visible);
     void setStandControlMode(domain::StandControlMode mode);
+    void setTestModeState(domain::TestMode testMode, domain::StandControlMode standMode,
+                          domain::TestTimeSource timeSource, domain::TestTimeDirection timeDirection);
     void setAppliedStandImpact(domain::WindImpact profile);
     void setTargetStandImpact(domain::WindImpact profile);
 

@@ -134,6 +134,7 @@ void MainWindow::setFunctionExpression(const std::string &expression) {
         return;
     }
 
+    const QSignalBlocker blocker{controlFormulaLineEdit};
     controlFormulaLineEdit->setText(QString::fromStdString(expression));
 }
 
@@ -373,7 +374,7 @@ void MainWindow::connectShellSignals() {
         const auto mode = static_cast<domain::StandControlMode>(standControlModeComboBox->currentData().toInt());
         setStandControlModeUseCase.execute(mode);
         updateManualStandControlsEnabled();
-        controlChartsTabPresenter.onRebuildPlotPressed();
+        scheduleControlPlotRebuild();
     });
 
     QObject::connect(telemetrySourceComboBox, &QComboBox::currentIndexChanged, this, [this](int index) {
@@ -395,20 +396,13 @@ void MainWindow::connectSessionSignals() {
         [this](const presentation::viewModels::TestTimeViewModel & /*model*/) { shellPresenter.onStateChanged(); });
 
     QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::functionExpressionChanged, this,
-                     [this](const QString &expression) {
-                         if (controlFormulaLineEdit == nullptr || controlFormulaLineEdit->hasFocus() ||
-                             controlFormulaLineEdit->text() == expression) {
-                             return;
-                         }
-
-                         controlFormulaLineEdit->setText(expression);
-                     });
+                     [this](const QString &expression) { setFunctionExpression(expression.toStdString()); });
 
     QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testProtocolModeChanged, this,
                      [this](const QString & /*mode*/) {
                          updateStandControlModeSelection();
                          updateManualStandControlsEnabled();
-                         controlChartsTabPresenter.onRebuildPlotPressed();
+                         scheduleControlPlotRebuild();
                      });
 }
 
@@ -427,9 +421,12 @@ void MainWindow::setTestTimeSource(domain::TestTimeSource source) {
         break;
     }
 
-    if (ui->comboBoxTestTimeSource->currentIndex() != index) {
-        ui->comboBoxTestTimeSource->setCurrentIndex(index);
+    if (ui->comboBoxTestTimeSource->currentIndex() == index) {
+        return;
     }
+
+    const QSignalBlocker blocker{ui->comboBoxTestTimeSource};
+    ui->comboBoxTestTimeSource->setCurrentIndex(index);
 }
 
 void MainWindow::setTestTimeSourceEnabled(bool enabled) {
@@ -497,6 +494,18 @@ void MainWindow::selectTelemetryAxisColor() {
 
     telemetryChartsTabPresenter.onTelemetryAxisColorSelected(selectedTelemetryAxisId(),
                                                              MainWindowUiAdapter::toDomainColor(color));
+}
+
+void MainWindow::scheduleControlPlotRebuild() {
+    if (controlPlotRebuildScheduled) {
+        return;
+    }
+
+    controlPlotRebuildScheduled = true;
+    QTimer::singleShot(0, this, [this]() {
+        controlPlotRebuildScheduled = false;
+        controlChartsTabPresenter.onRebuildPlotPressed();
+    });
 }
 
 double MainWindow::selectedStandDirectionDegrees() const {

@@ -97,6 +97,7 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     QTimer *standImpactTransitionTimer{nullptr};
     QPushButton *standApplyButton{nullptr};
     QLabel *standConnectionStatusLabel{nullptr};
+    bool controlPlotRebuildScheduled{false};
 
     void setupTabs();
     void setupStandConnectionStatusIndicator();
@@ -112,6 +113,7 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     void applyStandInputs();
     void advanceStandImpactTransition();
     void selectTelemetryAxisColor();
+    void scheduleControlPlotRebuild();
     void updateStandControlModeSelection();
     void updateManualStandControlsEnabled();
     void updateControlFormulaTemplateSelection(const std::string &expression);

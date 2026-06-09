@@ -175,6 +175,16 @@ void application::session::SessionState::setStandControlMode(domain::StandContro
     notify();
 }
 
+void application::session::SessionState::setTestModeState(domain::TestMode testMode, domain::StandControlMode standMode,
+                                                          domain::TestTimeSource timeSource,
+                                                          domain::TestTimeDirection timeDirection) {
+    data.testProtocol.testMode = testMode;
+    data.standControlMode = standMode;
+    data.testTimeSource = timeSource;
+    data.testTimeDirection = timeDirection;
+    notify();
+}
+
 void application::session::SessionState::setAppliedStandImpact(domain::WindImpact profile) {
     data.appliedStandImpact = std::move(profile);
     data.windImpact = data.appliedStandImpact;

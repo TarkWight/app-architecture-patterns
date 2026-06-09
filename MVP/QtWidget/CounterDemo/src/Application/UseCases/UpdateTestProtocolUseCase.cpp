@@ -8,16 +8,17 @@ namespace application::useCases {
 
 namespace {
 
-void applyTimeRulesForTestMode(application::session::SessionState &state, domain::TestMode mode) {
+void applyTestModeState(application::session::SessionState &state, domain::TestMode mode) {
+    const auto standMode = domain::standControlModeForTestMode(mode);
+
     switch (mode) {
     case domain::TestMode::Manual:
-        state.setTestTimeSource(domain::TestTimeSource::FreeRun);
-        state.setTestTimeDirection(domain::TestTimeDirection::CountUp);
+        state.setTestModeState(mode, standMode, domain::TestTimeSource::FreeRun, domain::TestTimeDirection::CountUp);
         break;
     case domain::TestMode::Hybrid:
     case domain::TestMode::Automatic:
-        state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
-        state.setTestTimeDirection(domain::TestTimeDirection::CountDown);
+        state.setTestModeState(mode, standMode, domain::TestTimeSource::AutoCalculated,
+                               domain::TestTimeDirection::CountDown);
         break;
     }
 }
@@ -38,9 +39,7 @@ void UpdateTestProtocolUseCase::updateLine(int index, std::string line) {
 void UpdateTestProtocolUseCase::updateMode(std::string mode) {
     const auto testMode = domain::testModeFromKey(mode);
 
-    state.setTestProtocolMode(testMode);
-    state.setStandControlMode(domain::standControlModeForTestMode(testMode));
-    applyTimeRulesForTestMode(state, testMode);
+    applyTestModeState(state, testMode);
 }
 
 void UpdateTestProtocolUseCase::updateProgram(std::string program) {

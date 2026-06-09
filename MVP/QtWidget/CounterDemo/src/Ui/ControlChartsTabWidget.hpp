@@ -30,6 +30,14 @@ class ControlChartsTabWidget final : public QWidget, public presentation::contro
     void setAngleOfAttack(double value) override;
     void refreshPlot() override;
     void appendLog(const std::string &text) override;
+    void setFunctionExpression(const std::string &expression);
+
+  signals:
+    void functionEdited(const QString &expression);
+    void formulaTemplateSelected(const QString &key);
+    void calculateRequested();
+    void lineColorRequested();
+    void logMessage(const QString &text);
 
   private:
     Ui::ControlChartsTabWidget *ui;
@@ -39,6 +47,9 @@ class ControlChartsTabWidget final : public QWidget, public presentation::contro
 
     void connectSignals();
     void connectSessionSignals();
+    void updateMinutesInputEnabled();
+    void populateFormulaTemplates();
+    void updateFormulaTemplateSelection(const std::string &expression);
 };
 
 } // namespace ui

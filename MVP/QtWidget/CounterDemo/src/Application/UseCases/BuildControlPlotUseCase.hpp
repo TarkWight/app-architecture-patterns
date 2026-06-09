@@ -13,6 +13,7 @@ class BuildControlPlotUseCase final {
                             const application::ports::IFunctionEngine &engine);
 
     domain::PlotModel execute();
+    domain::PlotModel refreshFromState();
 
   private:
     application::session::SessionState &state;

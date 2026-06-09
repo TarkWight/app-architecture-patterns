@@ -2,9 +2,6 @@
 
 namespace domain {
 
-enum class TestTimeDirection {
-    CountUp,
-    CountDown
-};
+enum class TestTimeDirection { CountUp, CountDown };
 
 } // namespace domain

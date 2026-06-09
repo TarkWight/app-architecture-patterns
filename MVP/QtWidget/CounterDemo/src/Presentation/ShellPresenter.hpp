@@ -12,6 +12,10 @@
 #include "../Domain/Plot.hpp"
 #include "../Domain/TestExecutionStatus.hpp"
 #include "../Application/UseCases/SetTestTimeSourceUseCase.hpp"
+#include "../Application/UseCases/ConfigureTelemetryUseCase.hpp"
+#include "../Application/UseCases/ConnectStandUseCase.hpp"
+#include "../Application/UseCases/DisconnectStandUseCase.hpp"
+#include "../Domain/StandConnectionStatus.hpp"
 
 #include "IShellView.hpp"
 
@@ -29,6 +33,9 @@ class ShellPresenter final {
         application::useCases::SetFunctionExpressionUseCase &setFunctionExpressionUseCase;
         application::useCases::SetLineColorUseCase &setLineColorUseCase;
         application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
+        application::useCases::ConfigureTelemetryUseCase &configureTelemetryUseCase;
+        application::useCases::ConnectStandUseCase &connectStandUseCase;
+        application::useCases::DisconnectStandUseCase &disconnectStandUseCase;
     };
 
     explicit ShellPresenter(Dependencies deps);
@@ -40,13 +47,16 @@ class ShellPresenter final {
     void onStartPressed();
     void onStateChanged();
     void onPausePressed();
+    void onPauseResumePressed();
     void onResumePressed();
     void onStopPressed();
     void onCalculatePressed();
 
     void onFunctionEdited(std::string expression);
+    void onFormulaTemplateSelected(std::string key);
     void onLineColorSelected(domain::RgbColor color);
     void onTestTimeSourceChanged(domain::TestTimeSource source);
+    void onConnectTelemetryPressed(std::string configPath);
 
   private:
     application::session::SessionState &state;
@@ -58,8 +68,13 @@ class ShellPresenter final {
     application::useCases::SetLineColorUseCase &setLineColorUseCase;
     application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
     application::useCases::SetTestTimeSourceUseCase &setTestTimeSourceUseCase;
+    application::useCases::ConfigureTelemetryUseCase &configureTelemetryUseCase;
+    application::useCases::ConnectStandUseCase &connectStandUseCase;
+    application::useCases::DisconnectStandUseCase &disconnectStandUseCase;
 
     IShellView *view{nullptr};
+    domain::StandConnectionStatus lastStandConnectionStatus{domain::StandConnectionStatus::Disconnected};
+    bool standConnectionWarningShown{false};
 
     static std::string formatTimerText(int secondsValue);
     static bool canStart(domain::TestExecutionStatus status);
@@ -68,6 +83,9 @@ class ShellPresenter final {
     static bool canStop(domain::TestExecutionStatus status);
 
     void refreshFromState();
+    void refreshStandConnectionButton();
+    void refreshStandConnectionStatusText();
+    void notifyStandConnectionStatusChanged(domain::StandConnectionStatus status);
 };
 
 } // namespace presentation

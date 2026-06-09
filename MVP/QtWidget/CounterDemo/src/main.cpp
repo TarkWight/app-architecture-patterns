@@ -14,6 +14,8 @@ int main(int argc, char *argv[]) {
                                      .telemetryChartsTabPresenter = context.telemetryChartsTabPresenter,
                                      .controlChartsTabPresenter = context.controlChartsTabPresenter,
                                      .testProtocolTabPresenter = context.testProtocolTabPresenter,
+                                     .setStandControlModeUseCase = context.setStandControlModeUseCase,
+                                     .setStandImpactUseCase = context.setStandImpactUseCase,
                                      .sessionAdapter = context.sessionAdapter}};
 
     window.show();

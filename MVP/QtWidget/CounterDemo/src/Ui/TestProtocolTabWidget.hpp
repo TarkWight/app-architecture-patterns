@@ -7,6 +7,13 @@
 #include "../Presentation/TestProtocolTab/ITestProtocolTabView.hpp"
 #include "../Presentation/TestProtocolTab/TestProtocolTabPresenter.hpp"
 
+#include <vector>
+
+class QComboBox;
+class QGridLayout;
+class QLineEdit;
+class QPushButton;
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class TestProtocolTabWidget;
@@ -18,7 +25,7 @@ namespace ui {
 class TestProtocolTabWidget final : public QWidget, public presentation::testProtocolTab::ITestProtocolTabView {
     Q_OBJECT
 
-public:
+  public:
     explicit TestProtocolTabWidget(presentation::testProtocolTab::TestProtocolTabPresenter &presenter,
                                    infrastructure::SessionStateQtAdapter &sessionAdapter, QWidget *parent = nullptr);
     ~TestProtocolTabWidget() override;
@@ -26,16 +33,29 @@ public:
     void setOperatorTestDurationMinutes(int minutes) override;
     void setTestProtocolTitle(const std::string &title) override;
     void setTestProtocolLine(int index, const std::string &line) override;
+    void setTestProtocolMode(const std::string &mode) override;
+    void setTestProtocolProgram(const std::string &program) override;
+    void setTestProtocolDroneParameters(const std::vector<domain::TestProtocolParameter> &parameters) override;
     void showExportSuccess(const std::string &filePath) override;
     void appendLog(const std::string &text) override;
 
-private:
+  private:
     Ui::TestProtocolTabWidget *ui;
     presentation::testProtocolTab::TestProtocolTabPresenter &presenter;
     infrastructure::SessionStateQtAdapter &sessionAdapter;
+    QComboBox *testModeComboBox{nullptr};
+    QComboBox *testProgramComboBox{nullptr};
+    QPushButton *loadPdfTomlButton{nullptr};
+    QPushButton *savePdfTomlTemplateButton{nullptr};
+    QGridLayout *droneParametersLayout{nullptr};
+    std::vector<QLineEdit *> droneParameterEdits{};
 
     void connectSignals();
     void connectSessionSignals();
+    void setupScrollableContent();
+    void setupReportFormLabels();
+    void setupTestSelectionControls();
+    void setupDroneParametersEditor();
 };
 
 } // namespace ui

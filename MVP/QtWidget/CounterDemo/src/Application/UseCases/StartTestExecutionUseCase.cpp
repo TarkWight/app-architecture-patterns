@@ -122,15 +122,23 @@ void StartTestExecutionUseCase::applyScenarioImpact(int elapsedSeconds) {
         return;
     }
 
-    const auto transition = domain::StandImpactTransition{}.advance(session.appliedStandImpact, *impact);
+    // TODO:
+    // const auto transition = domain::StandImpactTransition{}.advance(session.appliedStandImpact, *impact);
+
+    // state.setTargetStandImpact(*impact);
+    // state.setAppliedStandImpact(transition.impact);
+    // state.appendControlTraceSample(domain::ControlTraceSample{.timeSeconds = static_cast<double>(elapsedSeconds),
+    //                                                           .targetValue = *impact,
+    //                                                           .safeCommandValue = transition.impact});
+    // buildControlPlotUseCase.refreshFromState();
+    // sendAppliedImpact(transition.impact);
 
     state.setTargetStandImpact(*impact);
-    state.setAppliedStandImpact(transition.impact);
-    state.appendControlTraceSample(domain::ControlTraceSample{.timeSeconds = static_cast<double>(elapsedSeconds),
-                                                              .targetValue = *impact,
-                                                              .safeCommandValue = transition.impact});
+    state.setAppliedStandImpact(*impact);
+    state.appendControlTraceSample(domain::ControlTraceSample{
+        .timeSeconds = static_cast<double>(elapsedSeconds), .targetValue = *impact, .safeCommandValue = *impact});
     buildControlPlotUseCase.refreshFromState();
-    sendAppliedImpact(transition.impact);
+    sendAppliedImpact(*impact);
 }
 
 void StartTestExecutionUseCase::sendAppliedImpact(const domain::WindImpact &profile) {

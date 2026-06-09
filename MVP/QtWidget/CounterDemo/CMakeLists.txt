@@ -216,6 +216,7 @@ if (BUILD_TESTING)
     tests/Domain/WindImpactTest.cpp
     tests/Domain/WindControlProfileImpactTest.cpp
     tests/Application/BuildControlPlotUseCaseTest.cpp
+    tests/Application/ConfigureTelemetryUseCaseTest.cpp
     tests/Application/ConnectStandUseCaseTest.cpp
     tests/Application/SessionStateTest.cpp
     tests/Application/SetControlChartsTabMinutesUseCaseTest.cpp
@@ -228,6 +229,7 @@ if (BUILD_TESTING)
     src/Application/Session/SessionState.cpp
     src/Application/Session/Subscription.cpp
     src/Application/UseCases/BuildControlPlotUseCase.cpp
+    src/Application/UseCases/ConfigureTelemetryUseCase.cpp
     src/Application/UseCases/ConnectStandUseCase.cpp
     src/Application/UseCases/SetControlChartsTabMinutesUseCase.cpp
     src/Application/UseCases/SetStandControlModeUseCase.cpp

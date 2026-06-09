@@ -3,8 +3,17 @@
 #include "../../Domain/StandConnectionStatus.hpp"
 #include "../../Domain/TelemetryConnectionStatus.hpp"
 #include "../../Domain/TelemetryStatus.hpp"
+#include "../../Domain/TestExecutionTransitions.hpp"
 
 namespace application::useCases {
+
+namespace {
+
+bool testExecutionIsActive(const application::session::SessionStateData &stateData) {
+    return domain::canStop(stateData.testExecutionStatus);
+}
+
+} // namespace
 
 ConfigureTelemetryUseCase::ConfigureTelemetryUseCase(application::session::SessionState &state,
                                                      application::ports::IConfigRepository &configRepository,
@@ -31,10 +40,23 @@ void ConfigureTelemetryUseCase::execute(const std::string &configPath) {
                 }
                 break;
             case domain::TelemetryConnectionStatus::Connected:
-                if (currentStatus != domain::StandConnectionStatus::Disconnecting) {
-                    state.setStandConnectionStatus(domain::StandConnectionStatus::Connected);
-                    state.setTelemetryStatus(domain::TelemetryStatus::Valid);
+                if (currentStatus == domain::StandConnectionStatus::Disconnecting) {
+                    break;
                 }
+
+                state.setTelemetryStatus(domain::TelemetryStatus::Valid);
+
+                if (currentStatus == domain::StandConnectionStatus::Polling) {
+                    break;
+                }
+
+                if (testExecutionIsActive(state.get())) {
+                    telemetryClient.startPolling(state.get().telemetryPollIntervalMs);
+                    state.setStandConnectionStatus(domain::StandConnectionStatus::Polling);
+                    break;
+                }
+
+                state.setStandConnectionStatus(domain::StandConnectionStatus::Connected);
                 break;
             case domain::TelemetryConnectionStatus::Polling:
                 if (currentStatus != domain::StandConnectionStatus::Disconnecting) {

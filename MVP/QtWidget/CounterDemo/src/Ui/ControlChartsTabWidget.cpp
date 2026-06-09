@@ -5,6 +5,7 @@
 #include "../Domain/TestTimeSource.hpp"
 #include "../Domain/WindImpact.hpp"
 
+#include <QSignalBlocker>
 #include <QString>
 
 namespace ui {
@@ -39,18 +40,22 @@ ControlChartsTabWidget::~ControlChartsTabWidget() {
 }
 
 void ControlChartsTabWidget::setMinutes(int minutes) {
+    const QSignalBlocker blocker{ui->spinBoxMinutes};
     ui->spinBoxMinutes->setValue(minutes);
 }
 
 void ControlChartsTabWidget::setBeaufort(double value) {
+    const QSignalBlocker blocker{ui->doubleSpinBoxBeaufort};
     ui->doubleSpinBoxBeaufort->setValue(value);
 }
 
 void ControlChartsTabWidget::setDirection(double value) {
+    const QSignalBlocker blocker{ui->doubleSpinBoxDirection};
     ui->doubleSpinBoxDirection->setValue(value);
 }
 
 void ControlChartsTabWidget::setAngleOfAttack(double value) {
+    const QSignalBlocker blocker{ui->doubleSpinBoxAngleOfAttack};
     ui->doubleSpinBoxAngleOfAttack->setValue(value);
 }
 
@@ -94,7 +99,7 @@ void ControlChartsTabWidget::connectSessionSignals() {
                              return;
                          }
 
-                         ui->spinBoxMinutes->setValue(minutes);
+                         setMinutes(minutes);
                      });
 
     QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::beaufortChanged, this,
@@ -103,7 +108,7 @@ void ControlChartsTabWidget::connectSessionSignals() {
                              return;
                          }
 
-                         ui->doubleSpinBoxBeaufort->setValue(value);
+                         setBeaufort(value);
                      });
 
     QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::directionChanged, this,
@@ -112,7 +117,7 @@ void ControlChartsTabWidget::connectSessionSignals() {
                              return;
                          }
 
-                         ui->doubleSpinBoxDirection->setValue(value);
+                         setDirection(value);
                      });
 
     QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::angleOfAttackChanged, this,
@@ -121,7 +126,7 @@ void ControlChartsTabWidget::connectSessionSignals() {
                              return;
                          }
 
-                         ui->doubleSpinBoxAngleOfAttack->setValue(value);
+                         setAngleOfAttack(value);
                      });
 
     QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::controlPlotChanged, this,

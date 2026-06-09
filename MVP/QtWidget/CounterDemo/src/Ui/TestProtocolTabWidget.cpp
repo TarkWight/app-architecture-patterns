@@ -68,10 +68,12 @@ TestProtocolTabWidget::~TestProtocolTabWidget() {
 }
 
 void TestProtocolTabWidget::setOperatorTestDurationMinutes(int minutes) {
+    const QSignalBlocker blocker{ui->spinBoxTimerMinutes};
     ui->spinBoxTimerMinutes->setValue(minutes);
 }
 
 void TestProtocolTabWidget::setTestProtocolTitle(const std::string &title) {
+    const QSignalBlocker blocker{ui->lineEditTitle};
     ui->lineEditTitle->setText(QString::fromStdString(title));
 }
 
@@ -81,6 +83,7 @@ void TestProtocolTabWidget::setTestProtocolLine(int index, const std::string &li
         return;
     }
 
+    const QSignalBlocker blocker{lineEdit};
     lineEdit->setText(QString::fromStdString(line));
 }
 
@@ -312,7 +315,7 @@ void TestProtocolTabWidget::connectSessionSignals() {
                              return;
                          }
 
-                         ui->spinBoxTimerMinutes->setValue(model.operatorDurationMinutes);
+                         setOperatorTestDurationMinutes(model.operatorDurationMinutes);
                      });
 
     QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testProtocolTitleChanged, this,
@@ -321,7 +324,7 @@ void TestProtocolTabWidget::connectSessionSignals() {
                              return;
                          }
 
-                         ui->lineEditTitle->setText(title);
+                         setTestProtocolTitle(title.toStdString());
                      });
 
     QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testProtocolLineChanged, this,
@@ -335,7 +338,7 @@ void TestProtocolTabWidget::connectSessionSignals() {
                              return;
                          }
 
-                         lineEdit->setText(line);
+                         setTestProtocolLine(index, line.toStdString());
                      });
 
     QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testProtocolModeChanged, this,

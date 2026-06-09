@@ -23,6 +23,9 @@
 
 namespace application::session {
 
+// SessionState is an in-memory application state container for the main Qt thread.
+// get() returns a reference under this single-thread contract; if worker threads are
+// introduced, state updates must be routed through queued snapshots on the UI thread.
 class SessionState {
   public:
     using Listener = std::function<void(const SessionStateData &)>;

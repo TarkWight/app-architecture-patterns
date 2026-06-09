@@ -3,6 +3,8 @@
 
 #include "../Session/SessionState.hpp"
 
+#include "../../Domain/TestTimeSource.hpp"
+
 namespace application::useCases {
 
 class SetControlChartsTabMinutesUseCase final {

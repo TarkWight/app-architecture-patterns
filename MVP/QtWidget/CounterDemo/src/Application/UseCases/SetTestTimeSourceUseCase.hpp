@@ -7,12 +7,12 @@
 namespace application::useCases {
 
 class SetTestTimeSourceUseCase final {
-public:
+  public:
     explicit SetTestTimeSourceUseCase(application::session::SessionState &state);
 
     void execute(domain::TestTimeSource source);
 
-private:
+  private:
     application::session::SessionState &state;
 };
 

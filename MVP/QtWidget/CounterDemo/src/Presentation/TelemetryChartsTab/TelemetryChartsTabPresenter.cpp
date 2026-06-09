@@ -2,9 +2,10 @@
 
 namespace presentation::telemetryChartsTab {
 
-TelemetryChartsTabPresenter::TelemetryChartsTabPresenter(
-    application::useCases::GenerateStairPlotUseCase &generateStairPlotUseCase)
-    : generateStairPlotUseCase(generateStairPlotUseCase) {
+TelemetryChartsTabPresenter::TelemetryChartsTabPresenter(Dependencies deps)
+    : setTelemetryWindowUseCase(deps.setTelemetryWindowUseCase),
+      setTelemetryAxisColorUseCase(deps.setTelemetryAxisColorUseCase),
+      setTelemetryAxisVisibleUseCase(deps.setTelemetryAxisVisibleUseCase) {
 }
 
 void TelemetryChartsTabPresenter::attachView(ITelemetryChartsTabView &view) {
@@ -16,15 +17,41 @@ void TelemetryChartsTabPresenter::detachView() {
 }
 
 void TelemetryChartsTabPresenter::onViewReady() {
-    onRebuildPlotPressed();
+    if (view != nullptr) {
+        view->refreshPlot();
+    }
 }
 
 void TelemetryChartsTabPresenter::onRebuildPlotPressed() {
-    generateStairPlotUseCase.execute();
+    setTelemetryWindowUseCase.followTail();
 
     if (view != nullptr) {
         view->refreshPlot();
-        view->appendLog("TelemetryChartsTab stair plot rebuilt");
+        view->appendLog("Telemetry tail selected");
+    }
+}
+
+void TelemetryChartsTabPresenter::onTelemetryWindowChanged(int windowEndSeconds) {
+    setTelemetryWindowUseCase.execute(static_cast<double>(windowEndSeconds));
+
+    if (view != nullptr) {
+        view->refreshPlot();
+    }
+}
+
+void TelemetryChartsTabPresenter::onTelemetryAxisColorSelected(domain::AxisId axisId, domain::RgbColor color) {
+    setTelemetryAxisColorUseCase.execute(axisId, color);
+
+    if (view != nullptr) {
+        view->refreshPlot();
+    }
+}
+
+void TelemetryChartsTabPresenter::onTelemetryAxisVisibilityChanged(domain::AxisId axisId, bool visible) {
+    setTelemetryAxisVisibleUseCase.execute(axisId, visible);
+
+    if (view != nullptr) {
+        view->refreshPlot();
     }
 }
 

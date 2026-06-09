@@ -13,6 +13,9 @@ class UpdateTestProtocolUseCase final {
 
     void updateTitle(std::string title);
     void updateLine(int index, std::string line);
+    void updateMode(std::string mode);
+    void updateProgram(std::string program);
+    void updateDroneParameterValue(int index, std::string value);
 
   private:
     application::session::SessionState &state;

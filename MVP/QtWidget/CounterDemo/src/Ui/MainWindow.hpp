@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <memory>
+#include <string>
 
 #include "../Infrastructure/SessionStateQtAdapter.hpp"
 #include "../Presentation/IShellView.hpp"
@@ -98,6 +99,7 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     QPushButton *standApplyButton{nullptr};
     QLabel *standConnectionStatusLabel{nullptr};
     bool controlPlotRebuildScheduled{false};
+    std::string observedTestProtocolModeKey{};
 
     void setupTabs();
     void setupStandConnectionStatusIndicator();

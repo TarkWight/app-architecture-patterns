@@ -122,8 +122,45 @@ double PlotWidget::interpolateValue(double current, double target) {
 
 bool PlotWidget::isClose(const domain::PlotModel &current, const domain::PlotModel &target) {
     constexpr double epsilon = 0.01;
-    return std::abs(current.x.min - target.x.min) < epsilon && std::abs(current.x.max - target.x.max) < epsilon &&
-           std::abs(current.y.min - target.y.min) < epsilon && std::abs(current.y.max - target.y.max) < epsilon;
+    if (!isClose(current.x, target.x) || !isClose(current.y, target.y) ||
+        std::abs(current.marker.x - target.marker.x) >= epsilon || !isClose(current.series, target.series) ||
+        current.seriesList.size() != target.seriesList.size()) {
+        return false;
+    }
+
+    for (std::size_t index = 0; index < current.seriesList.size(); ++index) {
+        if (!isClose(current.seriesList[index], target.seriesList[index])) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool PlotWidget::isClose(const domain::AxisSpec &current, const domain::AxisSpec &target) {
+    constexpr double epsilon = 0.01;
+    return std::abs(current.min - target.min) < epsilon && std::abs(current.max - target.max) < epsilon &&
+           std::abs(current.step - target.step) < epsilon;
+}
+
+bool PlotWidget::isClose(const domain::Series &current, const domain::Series &target) {
+    constexpr double epsilon = 0.01;
+    if (current.points.size() != target.points.size()) {
+        return false;
+    }
+
+    for (std::size_t index = 0; index < current.points.size(); ++index) {
+        if (std::abs(current.points[index].x - target.points[index].x) >= epsilon ||
+            std::abs(current.points[index].y - target.points[index].y) >= epsilon) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool PlotWidget::isClose(const domain::NamedSeries &current, const domain::NamedSeries &target) {
+    return isClose(current.series, target.series);
 }
 
 } // namespace ui

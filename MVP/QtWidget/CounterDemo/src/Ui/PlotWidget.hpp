@@ -33,6 +33,9 @@ class PlotWidget final : public QWidget {
     static domain::RgbColor interpolateColor(domain::RgbColor current, domain::RgbColor target);
     static double interpolateValue(double current, double target);
     static bool isClose(const domain::PlotModel &current, const domain::PlotModel &target);
+    static bool isClose(const domain::AxisSpec &current, const domain::AxisSpec &target);
+    static bool isClose(const domain::Series &current, const domain::Series &target);
+    static bool isClose(const domain::NamedSeries &current, const domain::NamedSeries &target);
 };
 
 } // namespace ui

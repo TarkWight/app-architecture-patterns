@@ -391,6 +391,9 @@ void MainWindow::connectShellSignals() {
 }
 
 void MainWindow::connectSessionSignals() {
+    observedTestProtocolModeKey =
+        std::string{domain::testModeKey(sessionAdapter.getState().get().testProtocol.testMode)};
+
     QObject::connect(
         &sessionAdapter, &infrastructure::SessionStateQtAdapter::testTimeModelChanged, this,
         [this](const presentation::viewModels::TestTimeViewModel & /*model*/) { shellPresenter.onStateChanged(); });
@@ -399,7 +402,13 @@ void MainWindow::connectSessionSignals() {
                      [this](const QString &expression) { setFunctionExpression(expression.toStdString()); });
 
     QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testProtocolModeChanged, this,
-                     [this](const QString & /*mode*/) {
+                     [this](const QString &mode) {
+                         const std::string modeKey = mode.toStdString();
+                         if (modeKey == observedTestProtocolModeKey) {
+                             return;
+                         }
+
+                         observedTestProtocolModeKey = modeKey;
                          updateStandControlModeSelection();
                          updateManualStandControlsEnabled();
                          scheduleControlPlotRebuild();

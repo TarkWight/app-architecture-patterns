@@ -1,8 +1,17 @@
 #include "QtTcpTelemetryClient.hpp"
 
 #include <QDateTime>
+#include <QThread>
 
 namespace infrastructure::axisTcp {
+
+namespace {
+
+void assertCurrentThreadOwns(const QObject &object) {
+    Q_ASSERT(object.thread() == QThread::currentThread());
+}
+
+} // namespace
 
 QtTcpTelemetryClient::QtTcpTelemetryClient(application::ports::IAxisProtocolCodec &codec, QObject *parent)
     : QObject(parent), codec(codec) {
@@ -27,6 +36,8 @@ void QtTcpTelemetryClient::setErrorCallback(ErrorCallback callback) {
 }
 
 void QtTcpTelemetryClient::configureAxis(domain::AxisId axisId, std::string host, int port) {
+    assertCurrentThreadOwns(*this);
+
     auto &connection = axes[axisId];
 
     connection.host = QString::fromStdString(host);
@@ -37,6 +48,8 @@ void QtTcpTelemetryClient::configureAxis(domain::AxisId axisId, std::string host
 }
 
 void QtTcpTelemetryClient::connectAxis(domain::AxisId axisId) {
+    assertCurrentThreadOwns(*this);
+
     auto *connection = findAxis(axisId);
     if (connection == nullptr) {
         emitError(axisId, "Axis is not configured");
@@ -65,6 +78,8 @@ void QtTcpTelemetryClient::connectAxis(domain::AxisId axisId) {
 }
 
 void QtTcpTelemetryClient::disconnectAxis(domain::AxisId axisId) {
+    assertCurrentThreadOwns(*this);
+
     auto *connection = findAxis(axisId);
     if (connection == nullptr || connection->socket == nullptr) {
         return;
@@ -78,6 +93,8 @@ void QtTcpTelemetryClient::disconnectAxis(domain::AxisId axisId) {
 }
 
 void QtTcpTelemetryClient::connectAll() {
+    assertCurrentThreadOwns(*this);
+
     for (auto &[axisId, connection] : axes) {
         if (!connection.configured) {
             continue;
@@ -88,6 +105,10 @@ void QtTcpTelemetryClient::connectAll() {
 }
 
 void QtTcpTelemetryClient::disconnectAll() {
+    assertCurrentThreadOwns(*this);
+
+    pollTimer.stop();
+
     for (auto &[axisId, connection] : axes) {
         if (connection.socket == nullptr) {
             continue;
@@ -102,6 +123,8 @@ void QtTcpTelemetryClient::disconnectAll() {
 }
 
 void QtTcpTelemetryClient::startPolling(int intervalMs) {
+    assertCurrentThreadOwns(*this);
+
     pollingIntervalMs = intervalMs > 0 ? intervalMs : 1000;
     pollTimer.setInterval(pollingIntervalMs);
     pollTimer.start();
@@ -114,6 +137,8 @@ void QtTcpTelemetryClient::startPolling(int intervalMs) {
 }
 
 void QtTcpTelemetryClient::stopPolling() {
+    assertCurrentThreadOwns(*this);
+
     pollTimer.stop();
 
     for (auto &[axisId, connection] : axes) {
@@ -126,6 +151,8 @@ void QtTcpTelemetryClient::stopPolling() {
 }
 
 void QtTcpTelemetryClient::setAxisCommand(domain::AxisId axisId, domain::AxisControlCommand command) {
+    assertCurrentThreadOwns(*this);
+
     auto *connection = findAxis(axisId);
     if (connection == nullptr) {
         emitError(axisId, "Axis is not configured");
@@ -136,6 +163,8 @@ void QtTcpTelemetryClient::setAxisCommand(domain::AxisId axisId, domain::AxisCon
 }
 
 void QtTcpTelemetryClient::pollOnce(domain::AxisId axisId) {
+    assertCurrentThreadOwns(*this);
+
     auto *connection = findAxis(axisId);
     if (connection == nullptr) {
         emitError(axisId, "Axis is not configured");

@@ -20,8 +20,6 @@ void ConnectStandUseCase::execute() {
     state.setStandConnectionStatus(domain::StandConnectionStatus::Connecting);
 
     telemetryClient.connectAll();
-
-    state.setStandConnectionStatus(domain::StandConnectionStatus::Connected);
 }
 
 } // namespace application::useCases

@@ -70,7 +70,7 @@ TEST(ConnectStandUseCaseTest, ConnectsStandWithoutStartingTelemetryPolling) {
 
     EXPECT_EQ(telemetryClient.connectAllCalls, 1);
     EXPECT_EQ(telemetryClient.startPollingCalls, 0);
-    EXPECT_EQ(state.get().standConnectionStatus, domain::StandConnectionStatus::Connected);
+    EXPECT_EQ(state.get().standConnectionStatus, domain::StandConnectionStatus::Connecting);
 }
 
 } // namespace

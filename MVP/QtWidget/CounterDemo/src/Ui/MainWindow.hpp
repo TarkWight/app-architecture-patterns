@@ -19,14 +19,9 @@
 class QComboBox;
 class QCheckBox;
 class QDoubleSpinBox;
-class QFormLayout;
 class QLabel;
-class QLineEdit;
-class QPushButton;
 class QString;
 class QTimer;
-class QVBoxLayout;
-class QWidget;
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -87,29 +82,12 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     ControlChartsTabWidget *controlChartsTabWidget{nullptr};
     TestProtocolTabWidget *testProtocolTabWidget{nullptr};
 
-    QDoubleSpinBox *standBeaufortSpinBox{nullptr};
-    QDoubleSpinBox *standAngleOfAttackSpinBox{nullptr};
-    QComboBox *standDirectionComboBox{nullptr};
-    QComboBox *standControlModeComboBox{nullptr};
-    QComboBox *telemetrySourceComboBox{nullptr};
-    QCheckBox *telemetryCurveVisibleCheckBox{nullptr};
-    QComboBox *controlFormulaTemplateComboBox{nullptr};
-    QLineEdit *controlFormulaLineEdit{nullptr};
     QTimer *standImpactTransitionTimer{nullptr};
-    QPushButton *standApplyButton{nullptr};
-    QLabel *standConnectionStatusLabel{nullptr};
     bool controlPlotRebuildScheduled{false};
     std::string observedTestProtocolModeKey{};
 
     void setupTabs();
-    void setupStandConnectionStatusIndicator();
-    void setupMainContentLayout();
-    QWidget *createStandControlPanel();
-    QWidget *createControlFormulaPanel();
-    QLabel *createPanelTitle(QWidget &parent, const QString &text) const;
-    void addStandImpactRows(QFormLayout &form, QWidget &parent);
-    void addTelemetryBindingRows(QFormLayout &form, QWidget &parent);
-    void addStandControlButtons(QVBoxLayout &layout, QWidget &parent);
+    void setupStandControlPanel();
     void connectShellSignals();
     void connectSessionSignals();
     void applyStandInputs();

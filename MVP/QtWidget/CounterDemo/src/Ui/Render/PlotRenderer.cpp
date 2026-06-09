@@ -1,5 +1,6 @@
 #include "PlotRenderer.hpp"
 
+#include <QColor>
 #include <QPen>
 #include <QString>
 
@@ -91,7 +92,8 @@ int PlotRenderer::tickCount(double minValue, double maxValue, double stepValue) 
 }
 
 void PlotRenderer::drawFrame(QPainter &painter, const QRect &plotRect) {
-    painter.setPen(QPen(Qt::black, 1));
+    painter.fillRect(plotRect, QColor(255, 255, 255));
+    painter.setPen(QPen(QColor(30, 41, 59), 1));
     painter.drawRect(plotRect);
 }
 
@@ -124,7 +126,7 @@ void PlotRenderer::drawXGrid(QPainter &painter, const QRect &plotRect, const dom
         return;
     }
 
-    painter.setPen(QPen(Qt::lightGray, 1, Qt::DashLine));
+    painter.setPen(QPen(QColor(203, 213, 225), 1, Qt::DashLine));
 
     for (int index = 0; index < count; ++index) {
         const double xValue = plot.x.min + (static_cast<double>(index) * plot.x.step);
@@ -132,9 +134,9 @@ void PlotRenderer::drawXGrid(QPainter &painter, const QRect &plotRect, const dom
 
         painter.drawLine(px, plotRect.top(), px, plotRect.bottom());
 
-        painter.setPen(QPen(Qt::black, 1));
+        painter.setPen(QPen(QColor(30, 41, 59), 1));
         painter.drawText(px - 15, plotRect.bottom() + 18, 30, 16, Qt::AlignCenter, QString::number(xValue));
-        painter.setPen(QPen(Qt::lightGray, 1, Qt::DashLine));
+        painter.setPen(QPen(QColor(203, 213, 225), 1, Qt::DashLine));
     }
 }
 
@@ -144,7 +146,7 @@ void PlotRenderer::drawYGrid(QPainter &painter, const QRect &plotRect, const dom
         return;
     }
 
-    painter.setPen(QPen(Qt::lightGray, 1, Qt::DashLine));
+    painter.setPen(QPen(QColor(203, 213, 225), 1, Qt::DashLine));
 
     for (int index = 0; index < count; ++index) {
         const double yValue = plot.y.min + (static_cast<double>(index) * plot.y.step);
@@ -152,10 +154,10 @@ void PlotRenderer::drawYGrid(QPainter &painter, const QRect &plotRect, const dom
 
         painter.drawLine(plotRect.left(), py, plotRect.right(), py);
 
-        painter.setPen(QPen(Qt::black, 1));
+        painter.setPen(QPen(QColor(30, 41, 59), 1));
         painter.drawText(plotRect.left() - leftMargin, py - 8, leftMargin - 5, 16, Qt::AlignRight | Qt::AlignVCenter,
                          QString::number(yValue));
-        painter.setPen(QPen(Qt::lightGray, 1, Qt::DashLine));
+        painter.setPen(QPen(QColor(203, 213, 225), 1, Qt::DashLine));
     }
 }
 
@@ -165,11 +167,11 @@ void PlotRenderer::drawMarker(QPainter &painter, const QRect &plotRect, const do
     }
 
     const int px = projectX(plotRect, plot, plot.marker.x);
-    painter.setPen(QPen(Qt::darkGray, 2, Qt::DashDotLine));
+    painter.setPen(QPen(QColor(71, 85, 105), 2, Qt::DashDotLine));
     painter.drawLine(px, plotRect.top(), px, plotRect.bottom());
 
     if (!plot.marker.label.empty()) {
-        painter.setPen(QPen(Qt::black, 1));
+        painter.setPen(QPen(QColor(30, 41, 59), 1));
         painter.drawText(px + 4, plotRect.top() + 4, 120, 18, Qt::AlignLeft | Qt::AlignVCenter,
                          QString::fromStdString(plot.marker.label));
     }
@@ -227,7 +229,16 @@ void PlotRenderer::drawLegend(QPainter &painter, const QRect &plotRect, const do
     int y = plotRect.top() + 8;
     const int x = plotRect.right() - 170;
 
-    painter.setPen(QPen(Qt::black, 1));
+    const int visibleLabels =
+        static_cast<int>(std::count_if(plot.seriesList.begin(), plot.seriesList.end(),
+                                       [](const domain::NamedSeries &series) { return !series.label.empty(); }));
+    if (visibleLabels > 0) {
+        painter.fillRect(QRect(x - 8, y - 5, 170, (visibleLabels * 20) + 10), QColor(255, 255, 255, 230));
+        painter.setPen(QPen(QColor(226, 232, 240), 1));
+        painter.drawRect(QRect(x - 8, y - 5, 170, (visibleLabels * 20) + 10));
+    }
+
+    painter.setPen(QPen(QColor(30, 41, 59), 1));
 
     for (const auto &series : plot.seriesList) {
         if (series.label.empty()) {
@@ -237,7 +248,7 @@ void PlotRenderer::drawLegend(QPainter &painter, const QRect &plotRect, const do
         painter.setPen(QPen(toQColor(series.color), 3));
         painter.drawLine(x, y + 8, x + 22, y + 8);
 
-        painter.setPen(QPen(Qt::black, 1));
+        painter.setPen(QPen(QColor(30, 41, 59), 1));
         painter.drawText(x + 28, y, 140, 18, Qt::AlignLeft | Qt::AlignVCenter, QString::fromStdString(series.label));
 
         y += 20;

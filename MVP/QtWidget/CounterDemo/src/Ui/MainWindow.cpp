@@ -14,21 +14,11 @@
 #include "../Domain/StandScenario.hpp"
 #include "../Domain/WindImpact.hpp"
 
-#include <QCheckBox>
 #include <QColorDialog>
-#include <QComboBox>
-#include <QDoubleSpinBox>
-#include <QFormLayout>
-#include <QFrame>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QLineEdit>
 #include <QMessageBox>
-#include <QPushButton>
 #include <QSignalBlocker>
 #include <QString>
 #include <QTimer>
-#include <QVBoxLayout>
 
 #include <array>
 #include <cmath>
@@ -78,9 +68,8 @@ MainWindow::MainWindow(Dependencies deps, QWidget *parent)
 
     shellPresenter.attachView(*this);
 
-    setupStandConnectionStatusIndicator();
     setupTabs();
-    setupMainContentLayout();
+    setupStandControlPanel();
     connectShellSignals();
     connectSessionSignals();
 
@@ -119,23 +108,11 @@ void MainWindow::setStandConnectionButtonText(const std::string &text) {
 }
 
 void MainWindow::setStandConnectionStatusText(const std::string &text) {
-    if (standConnectionStatusLabel == nullptr) {
-        return;
-    }
-
-    standConnectionStatusLabel->setText(QString::fromStdString(text));
+    ui->labelStandConnectionStatus->setText(QString::fromStdString(text));
 }
 
 void MainWindow::setFunctionExpression(const std::string &expression) {
-    updateControlFormulaTemplateSelection(expression);
-
-    if (controlFormulaLineEdit == nullptr || controlFormulaLineEdit->hasFocus() ||
-        controlFormulaLineEdit->text().toStdString() == expression) {
-        return;
-    }
-
-    const QSignalBlocker blocker{controlFormulaLineEdit};
-    controlFormulaLineEdit->setText(QString::fromStdString(expression));
+    controlChartsTabWidget->setFunctionExpression(expression);
 }
 
 void MainWindow::appendLog(const std::string &text) {
@@ -157,85 +134,16 @@ void MainWindow::setupTabs() {
     ui->tabWidget->addTab(testProtocolTabWidget, QStringLiteral("Вкладка 3"));
 }
 
-void MainWindow::setupStandConnectionStatusIndicator() {
-    standConnectionStatusLabel = new QLabel(QStringLiteral("Стенд: отключен"), this);
-    standConnectionStatusLabel->setMinimumWidth(170);
-    standConnectionStatusLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    ui->gridLayoutTopPanel->addWidget(standConnectionStatusLabel, 1, 7, 1, 4);
-}
+void MainWindow::setupStandControlPanel() {
+    ui->comboBoxStandControlMode->addItem(QStringLiteral("Ручной"), static_cast<int>(domain::StandControlMode::Manual));
+    ui->comboBoxStandControlMode->addItem(QStringLiteral("Гибридный"),
+                                          static_cast<int>(domain::StandControlMode::Hybrid));
+    ui->comboBoxStandControlMode->addItem(QStringLiteral("Заготовленный"),
+                                          static_cast<int>(domain::StandControlMode::PresetScenario));
 
-void MainWindow::setupMainContentLayout() {
-    ui->labelFormulaCaption->hide();
-    ui->lineEditFormula->hide();
-    ui->buttonPickColor->hide();
+    ui->doubleSpinBoxStandBeaufort->setRange(domain::minOperationalBeaufort, domain::maxOperationalBeaufort);
+    ui->doubleSpinBoxStandAngleOfAttack->setRange(domain::minAngleOfAttack, domain::maxAngleOfAttack);
 
-    const int tabIndex = ui->verticalLayoutRoot->indexOf(ui->tabWidget);
-    ui->verticalLayoutRoot->removeWidget(ui->tabWidget);
-
-    auto *contentWidget = new QWidget(this);
-    auto *contentLayout = new QHBoxLayout(contentWidget);
-    contentLayout->setContentsMargins(0, 0, 0, 0);
-    contentLayout->setSpacing(8);
-    contentLayout->addWidget(createStandControlPanel());
-    contentLayout->addWidget(ui->tabWidget, 1);
-
-    ui->verticalLayoutRoot->insertWidget(tabIndex, contentWidget, 1);
-
-    controlChartsTabWidget->insertTopPanel(*createControlFormulaPanel());
-}
-
-QWidget *MainWindow::createStandControlPanel() {
-    auto *panel = new QFrame(this);
-    panel->setFrameShape(QFrame::StyledPanel);
-    panel->setMinimumWidth(250);
-    panel->setMaximumWidth(290);
-
-    auto *layout = new QVBoxLayout(panel);
-    layout->setSpacing(8);
-    layout->addWidget(createPanelTitle(*panel, QStringLiteral("Управление стендом")));
-
-    auto *form = new QFormLayout();
-    form->setLabelAlignment(Qt::AlignLeft);
-    addStandImpactRows(*form, *panel);
-    addTelemetryBindingRows(*form, *panel);
-
-    layout->addLayout(form);
-    addStandControlButtons(*layout, *panel);
-    layout->addStretch(1);
-
-    return panel;
-}
-
-QLabel *MainWindow::createPanelTitle(QWidget &parent, const QString &text) const {
-    auto *title = new QLabel(text, &parent);
-    auto titleFont = title->font();
-    titleFont.setBold(true);
-    title->setFont(titleFont);
-    return title;
-}
-
-void MainWindow::addStandImpactRows(QFormLayout &form, QWidget &parent) {
-    standControlModeComboBox = new QComboBox(&parent);
-    standControlModeComboBox->addItem(QStringLiteral("Ручной"), static_cast<int>(domain::StandControlMode::Manual));
-    standControlModeComboBox->addItem(QStringLiteral("Гибридный"), static_cast<int>(domain::StandControlMode::Hybrid));
-    standControlModeComboBox->addItem(QStringLiteral("Заготовленный"),
-                                      static_cast<int>(domain::StandControlMode::PresetScenario));
-    form.addRow(QStringLiteral("Вид теста"), standControlModeComboBox);
-
-    standBeaufortSpinBox = new QDoubleSpinBox(&parent);
-    standBeaufortSpinBox->setDecimals(1);
-    standBeaufortSpinBox->setRange(domain::minOperationalBeaufort, domain::maxOperationalBeaufort);
-    standBeaufortSpinBox->setSingleStep(0.1);
-    form.addRow(QStringLiteral("Бофорт"), standBeaufortSpinBox);
-
-    standAngleOfAttackSpinBox = new QDoubleSpinBox(&parent);
-    standAngleOfAttackSpinBox->setDecimals(1);
-    standAngleOfAttackSpinBox->setRange(domain::minAngleOfAttack, domain::maxAngleOfAttack);
-    standAngleOfAttackSpinBox->setSingleStep(1.0);
-    standAngleOfAttackSpinBox->setSuffix(QStringLiteral(" °"));
-    form.addRow(QStringLiteral("Угол атаки"), standAngleOfAttackSpinBox);
-
-    standDirectionComboBox = new QComboBox(&parent);
     const std::array<std::pair<const char *, double>, 16> directions{{
         {"N", 0.0},
         {"NNE", 22.5},
@@ -256,74 +164,12 @@ void MainWindow::addStandImpactRows(QFormLayout &form, QWidget &parent) {
     }};
 
     for (const auto &[label, degrees] : directions) {
-        standDirectionComboBox->addItem(
+        ui->comboBoxStandDirection->addItem(
             QStringLiteral("%1 (%2°)").arg(QString::fromUtf8(label)).arg(degrees, 0, 'f', 1), degrees);
     }
-    form.addRow(QStringLiteral("Сторона света"), standDirectionComboBox);
-}
 
-void MainWindow::addTelemetryBindingRows(QFormLayout &form, QWidget &parent) {
-    telemetrySourceComboBox = new QComboBox(&parent);
-    telemetrySourceComboBox->addItem(QStringLiteral("Ось Y / тангаж"), 0);
-    telemetrySourceComboBox->addItem(QStringLiteral("Ось Z / направление"), 1);
-    form.addRow(QStringLiteral("Источник"), telemetrySourceComboBox);
-
-    telemetryCurveVisibleCheckBox = new QCheckBox(QStringLiteral("Показывать"), &parent);
-    telemetryCurveVisibleCheckBox->setChecked(true);
-    form.addRow(QStringLiteral("Отображение"), telemetryCurveVisibleCheckBox);
-}
-
-void MainWindow::addStandControlButtons(QVBoxLayout &layout, QWidget &parent) {
-    standApplyButton = new QPushButton(QStringLiteral("Применить воздействие"), &parent);
-    QObject::connect(standApplyButton, &QPushButton::clicked, this, [this]() { applyStandInputs(); });
-    layout.addWidget(standApplyButton);
-
-    auto *colorButton = new QPushButton(QStringLiteral("Цвет линии"), &parent);
-    QObject::connect(colorButton, &QPushButton::clicked, this, [this]() { selectTelemetryAxisColor(); });
-    layout.addWidget(colorButton);
-}
-
-QWidget *MainWindow::createControlFormulaPanel() {
-    auto *panel = new QFrame(controlChartsTabWidget);
-    panel->setFrameShape(QFrame::StyledPanel);
-
-    auto *layout = new QHBoxLayout(panel);
-    layout->setContentsMargins(8, 6, 8, 6);
-    layout->setSpacing(8);
-
-    layout->addWidget(new QLabel(QStringLiteral("Формула:"), panel));
-
-    controlFormulaTemplateComboBox = new QComboBox(panel);
-    controlFormulaTemplateComboBox->addItem(QStringLiteral("Своя формула"), QString{});
-    for (const auto &formulaTemplate : domain::formulaTemplates) {
-        controlFormulaTemplateComboBox->addItem(
-            QString::fromUtf8(formulaTemplate.title.data(), static_cast<qsizetype>(formulaTemplate.title.size())),
-            QString::fromUtf8(formulaTemplate.key.data(), static_cast<qsizetype>(formulaTemplate.key.size())));
-    }
-    layout->addWidget(controlFormulaTemplateComboBox);
-
-    controlFormulaLineEdit = new QLineEdit(panel);
-    controlFormulaLineEdit->setPlaceholderText(QStringLiteral("Введите формулу управляющего воздействия"));
-    controlFormulaLineEdit->setText(ui->lineEditFormula->text());
-    updateControlFormulaTemplateSelection(controlFormulaLineEdit->text().toStdString());
-    layout->addWidget(controlFormulaLineEdit, 1);
-
-    auto *calculateButton = new QPushButton(QStringLiteral("Рассчитать и построить"), panel);
-    QObject::connect(calculateButton, &QPushButton::clicked, this, [this]() { shellPresenter.onCalculatePressed(); });
-    layout->addWidget(calculateButton);
-
-    auto *colorButton = new QPushButton(QStringLiteral("Цвет графика"), panel);
-    QObject::connect(colorButton, &QPushButton::clicked, this, [this]() {
-        const QColor color = QColorDialog::getColor(Qt::red, this);
-        if (!color.isValid()) {
-            return;
-        }
-
-        shellPresenter.onLineColorSelected(MainWindowUiAdapter::toDomainColor(color));
-    });
-    layout->addWidget(colorButton);
-
-    return panel;
+    ui->comboBoxTelemetrySource->addItem(QStringLiteral("Ось Y / тангаж"), 0);
+    ui->comboBoxTelemetrySource->addItem(QStringLiteral("Ось Z / направление"), 1);
 }
 
 void MainWindow::connectShellSignals() {
@@ -333,17 +179,24 @@ void MainWindow::connectShellSignals() {
 
     QObject::connect(ui->buttonStop, &QPushButton::clicked, this, [this]() { shellPresenter.onStopPressed(); });
 
-    QObject::connect(controlFormulaLineEdit, &QLineEdit::editingFinished, this,
-                     [this]() { shellPresenter.onFunctionEdited(controlFormulaLineEdit->text().toStdString()); });
-
-    QObject::connect(controlFormulaTemplateComboBox, &QComboBox::currentIndexChanged, this, [this](int index) {
-        if (index <= 0) {
+    QObject::connect(controlChartsTabWidget, &ControlChartsTabWidget::functionEdited, this,
+                     [this](const QString &expression) { shellPresenter.onFunctionEdited(expression.toStdString()); });
+    QObject::connect(controlChartsTabWidget, &ControlChartsTabWidget::formulaTemplateSelected, this,
+                     [this](const QString &key) { shellPresenter.onFormulaTemplateSelected(key.toStdString()); });
+    QObject::connect(controlChartsTabWidget, &ControlChartsTabWidget::calculateRequested, this,
+                     [this]() { shellPresenter.onCalculatePressed(); });
+    QObject::connect(controlChartsTabWidget, &ControlChartsTabWidget::lineColorRequested, this, [this]() {
+        const QColor color = QColorDialog::getColor(Qt::red, this);
+        if (!color.isValid()) {
             return;
         }
 
-        shellPresenter.onFormulaTemplateSelected(
-            controlFormulaTemplateComboBox->currentData().toString().toStdString());
+        shellPresenter.onLineColorSelected(MainWindowUiAdapter::toDomainColor(color));
     });
+    QObject::connect(controlChartsTabWidget, &ControlChartsTabWidget::logMessage, this,
+                     [this](const QString &text) { appendLog(text.toStdString()); });
+    QObject::connect(telemetryChartsTabWidget, &TelemetryChartsTabWidget::logMessage, this,
+                     [this](const QString &text) { appendLog(text.toStdString()); });
 
     QObject::connect(ui->comboBoxTestTimeSource, &QComboBox::currentIndexChanged, this, [this](int index) {
         domain::TestTimeSource source = domain::TestTimeSource::AutoCalculated;
@@ -370,24 +223,28 @@ void MainWindow::connectShellSignals() {
             "/Users/tarkwight/Documents/Development/app-architecture-patterns/MVP/QtWidget/CounterDemo/telemetry.toml");
     });
 
-    QObject::connect(standControlModeComboBox, &QComboBox::currentIndexChanged, this, [this]() {
-        const auto mode = static_cast<domain::StandControlMode>(standControlModeComboBox->currentData().toInt());
+    QObject::connect(ui->comboBoxStandControlMode, &QComboBox::currentIndexChanged, this, [this]() {
+        const auto mode = static_cast<domain::StandControlMode>(ui->comboBoxStandControlMode->currentData().toInt());
         setStandControlModeUseCase.execute(mode);
         updateManualStandControlsEnabled();
         scheduleControlPlotRebuild();
     });
 
-    QObject::connect(telemetrySourceComboBox, &QComboBox::currentIndexChanged, this, [this](int index) {
-        const QSignalBlocker visibleBlocker{telemetryCurveVisibleCheckBox};
+    QObject::connect(ui->comboBoxTelemetrySource, &QComboBox::currentIndexChanged, this, [this](int index) {
+        const QSignalBlocker visibleBlocker{ui->checkBoxTelemetryCurveVisible};
 
         const auto &stateData = sessionAdapter.getState().get();
-        telemetryCurveVisibleCheckBox->setChecked(index == 0 ? stateData.telemetryAxisYVisible
-                                                             : stateData.telemetryAxisZVisible);
+        ui->checkBoxTelemetryCurveVisible->setChecked(index == 0 ? stateData.telemetryAxisYVisible
+                                                                 : stateData.telemetryAxisZVisible);
     });
 
-    QObject::connect(telemetryCurveVisibleCheckBox, &QCheckBox::toggled, this, [this](bool checked) {
+    QObject::connect(ui->checkBoxTelemetryCurveVisible, &QCheckBox::toggled, this, [this](bool checked) {
         telemetryChartsTabPresenter.onTelemetryAxisVisibilityChanged(selectedTelemetryAxisId(), checked);
     });
+
+    QObject::connect(ui->buttonApplyStandImpact, &QPushButton::clicked, this, [this]() { applyStandInputs(); });
+    QObject::connect(ui->buttonTelemetryLineColor, &QPushButton::clicked, this,
+                     [this]() { selectTelemetryAxisColor(); });
 }
 
 void MainWindow::connectSessionSignals() {
@@ -452,8 +309,9 @@ void MainWindow::applyStandInputs() {
         return;
     }
 
-    domain::WindImpact target = domain::makeWindImpact(standBeaufortSpinBox->value(), selectedStandDirectionDegrees(),
-                                                       standAngleOfAttackSpinBox->value());
+    domain::WindImpact target =
+        domain::makeWindImpact(ui->doubleSpinBoxStandBeaufort->value(), selectedStandDirectionDegrees(),
+                               ui->doubleSpinBoxStandAngleOfAttack->value());
 
     setStandImpactUseCase.setTarget(target);
     standImpactTransitionTimer->start();
@@ -518,49 +376,36 @@ void MainWindow::scheduleControlPlotRebuild() {
 }
 
 double MainWindow::selectedStandDirectionDegrees() const {
-    return standDirectionComboBox->currentData().toDouble();
+    return ui->comboBoxStandDirection->currentData().toDouble();
 }
 
 void MainWindow::updateControlFormulaTemplateSelection(const std::string &expression) {
-    if (controlFormulaTemplateComboBox == nullptr) {
-        return;
-    }
-
-    const QSignalBlocker blocker{controlFormulaTemplateComboBox};
-    const auto key = domain::formulaTemplateKeyByExpression(expression);
-    const int index = key.empty() ? 0
-                                  : controlFormulaTemplateComboBox->findData(
-                                        QString::fromUtf8(key.data(), static_cast<qsizetype>(key.size())));
-    controlFormulaTemplateComboBox->setCurrentIndex(index >= 0 ? index : 0);
+    controlChartsTabWidget->setFunctionExpression(expression);
 }
 
 void MainWindow::updateStandControlModeSelection() {
-    if (standControlModeComboBox == nullptr) {
-        return;
-    }
-
     const auto mode = sessionAdapter.getState().get().standControlMode;
-    const int index = standControlModeComboBox->findData(static_cast<int>(mode));
-    if (index < 0 || standControlModeComboBox->currentIndex() == index) {
+    const int index = ui->comboBoxStandControlMode->findData(static_cast<int>(mode));
+    if (index < 0 || ui->comboBoxStandControlMode->currentIndex() == index) {
         return;
     }
 
-    const QSignalBlocker blocker{standControlModeComboBox};
-    standControlModeComboBox->setCurrentIndex(index);
+    const QSignalBlocker blocker{ui->comboBoxStandControlMode};
+    ui->comboBoxStandControlMode->setCurrentIndex(index);
 }
 
 void MainWindow::updateManualStandControlsEnabled() {
-    const auto mode = static_cast<domain::StandControlMode>(standControlModeComboBox->currentData().toInt());
+    const auto mode = static_cast<domain::StandControlMode>(ui->comboBoxStandControlMode->currentData().toInt());
     const bool manualEnabled = !domain::StandScenario{mode}.locksManualControls();
 
-    standBeaufortSpinBox->setEnabled(manualEnabled);
-    standAngleOfAttackSpinBox->setEnabled(manualEnabled);
-    standDirectionComboBox->setEnabled(manualEnabled);
-    standApplyButton->setEnabled(manualEnabled);
+    ui->doubleSpinBoxStandBeaufort->setEnabled(manualEnabled);
+    ui->doubleSpinBoxStandAngleOfAttack->setEnabled(manualEnabled);
+    ui->comboBoxStandDirection->setEnabled(manualEnabled);
+    ui->buttonApplyStandImpact->setEnabled(manualEnabled);
 }
 
 domain::AxisId MainWindow::selectedTelemetryAxisId() const {
-    const int sourceIndex = telemetrySourceComboBox->currentData().toInt();
+    const int sourceIndex = ui->comboBoxTelemetrySource->currentData().toInt();
     return sourceIndex == 0 ? domain::axis0 : domain::axis1;
 }
 

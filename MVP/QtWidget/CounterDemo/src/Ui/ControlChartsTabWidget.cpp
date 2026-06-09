@@ -1,6 +1,7 @@
 #include "ControlChartsTabWidget.hpp"
 #include "ui_ControlChartsTabWidget.h"
 
+#include "../Domain/FormulaTemplate.hpp"
 #include "../Domain/TestProtocol.hpp"
 #include "../Domain/TestTimeSource.hpp"
 #include "../Domain/WindImpact.hpp"
@@ -15,6 +16,7 @@ ControlChartsTabWidget::ControlChartsTabWidget(presentation::controlChartsTab::C
     : QWidget(parent), ui(new Ui::ControlChartsTabWidget), presenter(presenter), sessionAdapter(sessionAdapter) {
     ui->setupUi(this);
     ui->doubleSpinBoxBeaufort->setRange(domain::minOperationalBeaufort, domain::maxOperationalBeaufort);
+    populateFormulaTemplates();
 
     ui->labelBeaufortCaption->hide();
     ui->doubleSpinBoxBeaufort->hide();
@@ -32,6 +34,7 @@ ControlChartsTabWidget::ControlChartsTabWidget(presentation::controlChartsTab::C
     connectSignals();
     connectSessionSignals();
     updateMinutesInputEnabled();
+    setFunctionExpression(sessionAdapter.getState().get().functionExpression.value);
 }
 
 ControlChartsTabWidget::~ControlChartsTabWidget() {
@@ -64,14 +67,35 @@ void ControlChartsTabWidget::refreshPlot() {
 }
 
 void ControlChartsTabWidget::appendLog(const std::string &text) {
-    ui->plainTextEditLog->appendPlainText(QString::fromStdString(text));
+    emit logMessage(QString::fromStdString(text));
 }
 
-void ControlChartsTabWidget::insertTopPanel(QWidget &panel) {
-    ui->verticalLayoutRoot->insertWidget(0, &panel);
+void ControlChartsTabWidget::setFunctionExpression(const std::string &expression) {
+    updateFormulaTemplateSelection(expression);
+
+    if (ui->lineEditFormula->hasFocus() || ui->lineEditFormula->text().toStdString() == expression) {
+        return;
+    }
+
+    const QSignalBlocker blocker{ui->lineEditFormula};
+    ui->lineEditFormula->setText(QString::fromStdString(expression));
 }
 
 void ControlChartsTabWidget::connectSignals() {
+    QObject::connect(ui->lineEditFormula, &QLineEdit::editingFinished, this,
+                     [this]() { emit functionEdited(ui->lineEditFormula->text()); });
+
+    QObject::connect(ui->comboBoxFormulaTemplate, &QComboBox::currentIndexChanged, this, [this](int index) {
+        if (index <= 0) {
+            return;
+        }
+
+        emit formulaTemplateSelected(ui->comboBoxFormulaTemplate->currentData().toString());
+    });
+
+    QObject::connect(ui->buttonCalculatePlot, &QPushButton::clicked, this, [this]() { emit calculateRequested(); });
+    QObject::connect(ui->buttonPickLineColor, &QPushButton::clicked, this, [this]() { emit lineColorRequested(); });
+
     QObject::connect(ui->spinBoxMinutes, qOverload<int>(&QSpinBox::valueChanged), this,
                      [this](int value) { presenter.onMinutesChanged(value); });
 
@@ -138,6 +162,26 @@ void ControlChartsTabWidget::updateMinutesInputEnabled() {
     const bool enabled = state.testProtocol.testMode == domain::TestMode::Hybrid &&
                          state.testTimeSource == domain::TestTimeSource::OperatorDefined;
     ui->spinBoxMinutes->setEnabled(enabled);
+}
+
+void ControlChartsTabWidget::populateFormulaTemplates() {
+    ui->comboBoxFormulaTemplate->addItem(QStringLiteral("Своя формула"), QString{});
+
+    for (const auto &formulaTemplate : domain::formulaTemplates) {
+        ui->comboBoxFormulaTemplate->addItem(
+            QString::fromUtf8(formulaTemplate.title.data(), static_cast<qsizetype>(formulaTemplate.title.size())),
+            QString::fromUtf8(formulaTemplate.key.data(), static_cast<qsizetype>(formulaTemplate.key.size())));
+    }
+}
+
+void ControlChartsTabWidget::updateFormulaTemplateSelection(const std::string &expression) {
+    const QSignalBlocker blocker{ui->comboBoxFormulaTemplate};
+    const auto key = domain::formulaTemplateKeyByExpression(expression);
+    const int index =
+        key.empty()
+            ? 0
+            : ui->comboBoxFormulaTemplate->findData(QString::fromUtf8(key.data(), static_cast<qsizetype>(key.size())));
+    ui->comboBoxFormulaTemplate->setCurrentIndex(index >= 0 ? index : 0);
 }
 
 } // namespace ui

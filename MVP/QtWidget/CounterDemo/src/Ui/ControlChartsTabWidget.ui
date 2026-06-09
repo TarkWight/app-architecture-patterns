@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>760</width>
-    <height>560</height>
+    <width>860</width>
+    <height>650</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayoutRoot">
@@ -26,7 +26,64 @@
    <property name="bottomMargin">
     <number>8</number>
    </property>
-
+   <item>
+    <widget class="QFrame" name="frameFormulaPanel">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayoutFormulaPanel">
+      <property name="spacing">
+       <number>8</number>
+      </property>
+      <property name="leftMargin">
+       <number>8</number>
+      </property>
+      <property name="topMargin">
+       <number>6</number>
+      </property>
+      <property name="rightMargin">
+       <number>8</number>
+      </property>
+      <property name="bottomMargin">
+       <number>6</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="labelFormulaCaption">
+        <property name="text">
+         <string>Формула:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="comboBoxFormulaTemplate"/>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="lineEditFormula">
+        <property name="text">
+         <string>sin(x)</string>
+        </property>
+        <property name="placeholderText">
+         <string>Введите формулу управляющего воздействия</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="buttonCalculatePlot">
+        <property name="text">
+         <string>Рассчитать и построить</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="buttonPickLineColor">
+        <property name="text">
+         <string>Цвет графика</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
    <item>
     <widget class="QFrame" name="frameControlSettings">
      <property name="frameShape">
@@ -39,7 +96,6 @@
       <property name="verticalSpacing">
        <number>6</number>
       </property>
-
       <item row="0" column="0">
        <widget class="QLabel" name="labelMinutesCaption">
         <property name="text">
@@ -60,7 +116,6 @@
         </property>
        </widget>
       </item>
-
       <item row="0" column="2">
        <widget class="QLabel" name="labelBeaufortCaption">
         <property name="text">
@@ -84,7 +139,6 @@
         </property>
        </widget>
       </item>
-
       <item row="1" column="0">
        <widget class="QLabel" name="labelDirectionCaption">
         <property name="text">
@@ -111,7 +165,6 @@
         </property>
        </widget>
       </item>
-
       <item row="1" column="2">
        <widget class="QLabel" name="labelAngleOfAttackCaption">
         <property name="text">
@@ -138,7 +191,6 @@
         </property>
        </widget>
       </item>
-
       <item row="0" column="4" rowspan="2">
        <spacer name="horizontalSpacer">
         <property name="orientation">
@@ -155,9 +207,14 @@
      </layout>
     </widget>
    </item>
-
    <item>
     <widget class="QFrame" name="framePlotArea">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>430</height>
+      </size>
+     </property>
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>
@@ -167,7 +224,7 @@
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>260</height>
+          <height>400</height>
          </size>
         </property>
         <property name="text">
@@ -179,23 +236,6 @@
        </widget>
       </item>
      </layout>
-    </widget>
-   </item>
-
-   <item>
-    <widget class="QPlainTextEdit" name="plainTextEditLog">
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>110</height>
-      </size>
-     </property>
-     <property name="readOnly">
-      <bool>true</bool>
-     </property>
-     <property name="placeholderText">
-      <string>Лог вкладки управления...</string>
-     </property>
     </widget>
    </item>
   </layout>

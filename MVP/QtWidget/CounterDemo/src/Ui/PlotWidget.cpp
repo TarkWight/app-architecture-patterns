@@ -4,6 +4,7 @@
 
 #include <QPaintEvent>
 #include <QPainter>
+#include <QColor>
 
 #include <algorithm>
 #include <cmath>
@@ -13,7 +14,8 @@
 namespace ui {
 
 PlotWidget::PlotWidget(QWidget *parent) : QWidget(parent) {
-    setMinimumHeight(220);
+    setMinimumHeight(400);
+    setAutoFillBackground(false);
 
     animationTimer.setInterval(33);
     QObject::connect(&animationTimer, &QTimer::timeout, this, &PlotWidget::advanceAnimationFrame);
@@ -42,7 +44,7 @@ void PlotWidget::paintEvent(QPaintEvent *event) {
 
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.fillRect(rect(), palette().base());
+    painter.fillRect(rect(), QColor(248, 250, 252));
 
     ui::render::PlotRenderer::drawPlot(painter, rect(), plot);
 }

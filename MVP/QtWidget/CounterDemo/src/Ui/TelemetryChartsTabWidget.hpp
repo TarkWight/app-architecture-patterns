@@ -10,6 +10,7 @@
 #include "PlotWidget.hpp"
 
 class QScrollBar;
+class QString;
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -30,6 +31,9 @@ class TelemetryChartsTabWidget final : public QWidget,
 
     void refreshPlot() override;
     void appendLog(const std::string &text) override;
+
+  signals:
+    void logMessage(const QString &text);
 
   private:
     Ui::TelemetryChartsTabWidget *ui;

@@ -41,7 +41,7 @@ void TelemetryChartsTabWidget::refreshPlot() {
 }
 
 void TelemetryChartsTabWidget::appendLog(const std::string &text) {
-    ui->plainTextEditLog->appendPlainText(QString::fromStdString(text));
+    emit logMessage(QString::fromStdString(text));
 }
 
 void TelemetryChartsTabWidget::connectSignals() {

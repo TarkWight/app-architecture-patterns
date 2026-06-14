@@ -15,10 +15,10 @@
 #include "../Domain/WindImpact.hpp"
 
 #include <QColorDialog>
+#include <QFileDialog>
 #include <QMessageBox>
 #include <QSignalBlocker>
 #include <QString>
-#include <QStringList>
 #include <QTimer>
 
 #include <array>
@@ -51,10 +51,6 @@ std::string formatImpact(const domain::WindImpact &profile) {
     return out.str();
 }
 
-QString formatConfigPath(const std::filesystem::path &path) {
-    return QString::fromStdString(path.string());
-}
-
 } // namespace
 
 MainWindow::MainWindow(Dependencies deps, QWidget *parent)
@@ -78,7 +74,6 @@ MainWindow::MainWindow(Dependencies deps, QWidget *parent)
 
     setupTabs();
     setupStandControlPanel();
-    refreshConfigTemplateStatus();
     connectShellSignals();
     connectSessionSignals();
 
@@ -237,8 +232,6 @@ void MainWindow::connectTestControlSignals() {
 void MainWindow::connectConfigTemplateSignals() {
     QObject::connect(ui->buttonConnectTelemetry, &QPushButton::clicked, this, [this]() {
         if (!configTemplateService.exists(configTemplates::ConfigTemplateType::Telemetry)) {
-            refreshConfigTemplateStatus();
-
             const auto path = configTemplateService.pathFor(configTemplates::ConfigTemplateType::Telemetry);
             appendLog("telemetry.toml not found: " + path.string());
             showOperatorWarning("telemetry.toml не найден",
@@ -252,10 +245,7 @@ void MainWindow::connectConfigTemplateSignals() {
     });
 
     QObject::connect(ui->buttonCreateTelemetryTemplate, &QPushButton::clicked, this,
-                     [this]() { createConfigTemplate(configTemplates::ConfigTemplateType::Telemetry); });
-
-    QObject::connect(ui->buttonCreatePdfReportTemplate, &QPushButton::clicked, this,
-                     [this]() { createConfigTemplate(configTemplates::ConfigTemplateType::PdfReport); });
+                     [this]() { createTelemetryTemplate(); });
 }
 
 void MainWindow::connectStandControlSignals() {
@@ -419,36 +409,22 @@ void MainWindow::updateControlFormulaTemplateSelection(const std::string &expres
     controlChartsTabWidget->setFunctionExpression(expression);
 }
 
-void MainWindow::refreshConfigTemplateStatus() {
-    const auto telemetryPath = configTemplateService.pathFor(configTemplates::ConfigTemplateType::Telemetry);
-    const auto pdfReportPath = configTemplateService.pathFor(configTemplates::ConfigTemplateType::PdfReport);
+void MainWindow::createTelemetryTemplate() {
+    const auto defaultPath = configTemplateService.pathFor(configTemplates::ConfigTemplateType::Telemetry);
+    const QString filePath = QFileDialog::getSaveFileName(this, QStringLiteral("Создать telemetry.toml"),
+                                                          QString::fromStdString(defaultPath.string()),
+                                                          QStringLiteral("TOML Files (*.toml);;All Files (*)"));
 
-    const bool telemetryExists = configTemplateService.exists(configTemplates::ConfigTemplateType::Telemetry);
-    const bool pdfReportExists = configTemplateService.exists(configTemplates::ConfigTemplateType::PdfReport);
+    if (filePath.isEmpty()) {
+        return;
+    }
 
-    ui->buttonCreateTelemetryTemplate->setEnabled(!telemetryExists);
-    ui->buttonCreatePdfReportTemplate->setEnabled(!pdfReportExists);
-
-    QStringList statusParts;
-    statusParts << QStringLiteral("telemetry.toml: %1")
-                       .arg(telemetryExists ? QStringLiteral("найден") : QStringLiteral("не найден"));
-    statusParts << QStringLiteral("pdf_report.toml: %1")
-                       .arg(pdfReportExists ? QStringLiteral("найден") : QStringLiteral("не найден"));
-
-    ui->labelConfigTemplatesStatus->setText(statusParts.join(QStringLiteral("; ")));
-    ui->labelConfigTemplatesStatus->setToolTip(
-        QStringLiteral("telemetry.toml: %1\npdf_report.toml: %2")
-            .arg(formatConfigPath(telemetryPath), formatConfigPath(pdfReportPath)));
-}
-
-void MainWindow::createConfigTemplate(configTemplates::ConfigTemplateType type) {
     try {
-        configTemplateService.createTemplate(type);
-        refreshConfigTemplateStatus();
-
-        appendLog("Config template created or already exists: " + configTemplateService.pathFor(type).string());
+        configTemplateService.createTemplate(configTemplates::ConfigTemplateType::Telemetry,
+                                             std::filesystem::path{filePath.toStdString()});
+        appendLog("telemetry.toml template created or already exists: " + filePath.toStdString());
     } catch (const std::exception &e) {
-        appendLog(std::string{"Config template creation failed: "} + e.what());
+        appendLog(std::string{"telemetry.toml template creation failed: "} + e.what());
         showOperatorWarning("Ошибка создания шаблона", e.what());
     }
 }

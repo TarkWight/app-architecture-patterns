@@ -14,7 +14,7 @@ class ConfigTemplateService final : public IConfigTemplateService {
     [[nodiscard]] bool exists(ConfigTemplateType type) const override;
     [[nodiscard]] std::vector<ConfigTemplateState> inspectAll() const override;
 
-    void createTemplate(ConfigTemplateType type) const override;
+    void createTemplate(ConfigTemplateType type, const std::filesystem::path &path) const override;
 
   private:
     const IAppFileLocationProvider &locationProvider;

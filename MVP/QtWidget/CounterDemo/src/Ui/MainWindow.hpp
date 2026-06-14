@@ -103,8 +103,7 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     void updateStandControlModeSelection();
     void updateManualStandControlsEnabled();
     void updateControlFormulaTemplateSelection(const std::string &expression);
-    void refreshConfigTemplateStatus();
-    void createConfigTemplate(infrastructure::configTemplates::ConfigTemplateType type);
+    void createTelemetryTemplate();
     double selectedStandDirectionDegrees() const;
     domain::AxisId selectedTelemetryAxisId() const;
 };

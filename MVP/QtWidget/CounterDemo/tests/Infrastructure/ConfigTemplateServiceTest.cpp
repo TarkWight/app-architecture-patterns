@@ -47,26 +47,27 @@ TEST(ConfigTemplateServiceTest, ExistsCheckDoesNotCreateTemplates) {
     EXPECT_FALSE(std::filesystem::exists(dir));
 }
 
-TEST(ConfigTemplateServiceTest, CreatesMissingTemplateWithoutOverwritingExistingFile) {
+TEST(ConfigTemplateServiceTest, CreatesTelemetryTemplateAtOperatorSelectedPathWithoutOverwritingExistingFile) {
     const auto dir = testDir();
     std::filesystem::remove_all(dir);
     std::filesystem::create_directories(dir);
 
-    const auto existingPdf = dir / "pdf_report.toml";
+    const auto existingTelemetry = dir / "existing-telemetry.toml";
     {
-        std::ofstream stream{existingPdf};
+        std::ofstream stream{existingTelemetry};
         stream << "custom = true\n";
     }
 
     FileLocationProviderStub provider{dir};
     infrastructure::configTemplates::ConfigTemplateService service{provider};
 
-    service.createTemplate(infrastructure::configTemplates::ConfigTemplateType::Telemetry);
-    service.createTemplate(infrastructure::configTemplates::ConfigTemplateType::PdfReport);
+    const auto selectedPath = dir / "operator-selected" / "telemetry.toml";
+    service.createTemplate(infrastructure::configTemplates::ConfigTemplateType::Telemetry, selectedPath);
+    service.createTemplate(infrastructure::configTemplates::ConfigTemplateType::Telemetry, existingTelemetry);
 
-    EXPECT_TRUE(std::filesystem::exists(dir / "telemetry.toml"));
+    EXPECT_TRUE(std::filesystem::exists(selectedPath));
 
-    std::ifstream stream{existingPdf};
+    std::ifstream stream{existingTelemetry};
     std::string content;
     std::getline(stream, content);
     EXPECT_EQ(content, "custom = true");

@@ -25,7 +25,7 @@ class IConfigTemplateService {
     [[nodiscard]] virtual bool exists(ConfigTemplateType type) const = 0;
     [[nodiscard]] virtual std::vector<ConfigTemplateState> inspectAll() const = 0;
 
-    virtual void createTemplate(ConfigTemplateType type) const = 0;
+    virtual void createTemplate(ConfigTemplateType type, const std::filesystem::path &path) const = 0;
 };
 
 } // namespace infrastructure::configTemplates

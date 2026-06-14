@@ -22,54 +22,6 @@ host = "192.168.1.101"
 port = 11520
 )";
 
-constexpr auto pdfReportTemplate = R"([pdf_report]
-title = ""
-organization = ""
-license_number = ""
-address = ""
-test_mode = ""
-test_program = ""
-operator_name = ""
-comment = ""
-conclusion = ""
-result = ""
-
-[pdf_report.drone_parameters]
-uav_model = ""
-serial_number = ""
-payload_kg = 0
-dr_percent = 0
-equipment_current_a = 0
-range_km = 0
-max_speed_kmh = 0
-max_height_m = 0
-max_flight_time_min = 0
-communication_type = ""
-propeller_model = ""
-configuration = ""
-diameter = 0
-power = 0
-max_rpm = 0
-blade_count = 0
-material = ""
-battery_model = ""
-battery_type = ""
-nominal_capacity_mah = 0
-cell_count_s = 0
-discharge_rate_c = 0
-weight_kg = 0
-cell_voltage_v = 0
-motor_model = ""
-shaft_diameter_mm = 0
-motor_count = 0
-manufacturer = ""
-kv = 0
-max_thrust_kg = 0
-peak_current_a = 0
-motor_weight_kg = 0
-firmware_version = ""
-)";
-
 } // namespace
 
 ConfigTemplateService::ConfigTemplateService(const IAppFileLocationProvider &locationProvider)
@@ -95,8 +47,7 @@ std::vector<ConfigTemplateState> ConfigTemplateService::inspectAll() const {
     };
 }
 
-void ConfigTemplateService::createTemplate(ConfigTemplateType type) const {
-    const auto path = pathFor(type);
+void ConfigTemplateService::createTemplate(ConfigTemplateType type, const std::filesystem::path &path) const {
     if (std::filesystem::exists(path)) {
         return;
     }
@@ -129,7 +80,7 @@ const char *ConfigTemplateService::templateContentFor(ConfigTemplateType type) {
     case ConfigTemplateType::Telemetry:
         return telemetryTemplate;
     case ConfigTemplateType::PdfReport:
-        return pdfReportTemplate;
+        throw std::logic_error{"PDF report template is created by TestProtocolTab"};
     }
 
     return telemetryTemplate;

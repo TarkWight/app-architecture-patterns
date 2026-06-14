@@ -117,6 +117,13 @@
         </widget>
        </item>
        <item row="0" column="9">
+        <widget class="QPushButton" name="buttonCreateTelemetryTemplate">
+         <property name="text">
+          <string>Создать telemetry.toml</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="10">
         <spacer name="horizontalSpacerTop">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -128,34 +135,6 @@
           </size>
          </property>
         </spacer>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="labelConfigTemplatesCaption">
-         <property name="text">
-          <string>Конфиги:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1" colspan="5">
-        <widget class="QLabel" name="labelConfigTemplatesStatus">
-         <property name="text">
-          <string>Проверка шаблонов...</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="6">
-        <widget class="QPushButton" name="buttonCreateTelemetryTemplate">
-         <property name="text">
-          <string>Создать telemetry.toml</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="7">
-        <widget class="QPushButton" name="buttonCreatePdfReportTemplate">
-         <property name="text">
-          <string>Создать pdf_report.toml</string>
-         </property>
-        </widget>
        </item>
       </layout>
      </widget>

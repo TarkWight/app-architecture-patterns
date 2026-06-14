@@ -1,7 +1,7 @@
 #include "SetStandImpactUseCase.hpp"
 
-#include "../../Domain/AxisControlCommand.hpp"
 #include "../../Domain/AxisId.hpp"
+#include "../../Domain/StandCommandMapper.hpp"
 
 #include <utility>
 
@@ -27,8 +27,9 @@ void SetStandImpactUseCase::setApplied(domain::WindImpact profile) {
 }
 
 void SetStandImpactUseCase::sendAppliedImpact(const domain::WindImpact &profile) {
-    telemetryClient.setAxisCommand(domain::axis0, domain::axis0WindCommand(profile));
-    telemetryClient.setAxisCommand(domain::axis1, domain::axis1WindCommand(profile));
+    const auto commands = domain::StandCommandMapper::map(profile);
+    telemetryClient.setAxisCommand(domain::axis0, commands.axis0);
+    telemetryClient.setAxisCommand(domain::axis1, commands.axis1);
 }
 
 } // namespace application::useCases

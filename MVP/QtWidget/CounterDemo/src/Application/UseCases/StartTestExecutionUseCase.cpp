@@ -1,7 +1,7 @@
 #include "StartTestExecutionUseCase.hpp"
 
-#include "../../Domain/AxisControlCommand.hpp"
 #include "../../Domain/AxisId.hpp"
+#include "../../Domain/StandCommandMapper.hpp"
 #include "../../Domain/StandConnectionStatus.hpp"
 #include "../../Domain/TestExecutionStatus.hpp"
 #include "../../Domain/TestExecutionTransitions.hpp"
@@ -130,8 +130,9 @@ void StartTestExecutionUseCase::applyScenarioImpact(int elapsedSeconds) {
 }
 
 void StartTestExecutionUseCase::sendAppliedImpact(const domain::WindImpact &profile) {
-    telemetryClient.setAxisCommand(domain::axis0, domain::axis0WindCommand(profile));
-    telemetryClient.setAxisCommand(domain::axis1, domain::axis1WindCommand(profile));
+    const auto commands = domain::StandCommandMapper::map(profile);
+    telemetryClient.setAxisCommand(domain::axis0, commands.axis0);
+    telemetryClient.setAxisCommand(domain::axis1, commands.axis1);
 }
 
 } // namespace application::useCases

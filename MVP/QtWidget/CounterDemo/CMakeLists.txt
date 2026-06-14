@@ -214,6 +214,7 @@ if (BUILD_TESTING)
     tests/Domain/AxisControlCommandTest.cpp
     tests/Domain/ControlTraceTest.cpp
     tests/Domain/ControlProfileTimingTest.cpp
+    tests/Domain/ScenarioExecutionEngineTest.cpp
     tests/Domain/StandScenarioTest.cpp
     tests/Domain/StandImpactTransitionTest.cpp
     tests/Domain/TestExecutionPlannerTest.cpp

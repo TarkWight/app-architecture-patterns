@@ -232,6 +232,7 @@ if (BUILD_TESTING)
     tests/Application/StopTestExecutionUseCaseTest.cpp
     tests/Application/UpdateTestProtocolUseCaseTest.cpp
     tests/Infrastructure/ConfigTemplateServiceTest.cpp
+    tests/Infrastructure/LegacyAxisProtocolCodecTest.cpp
     tests/Infrastructure/SimpleFunctionEngineTest.cpp
     src/Application/Session/SessionState.cpp
     src/Application/Session/Subscription.cpp
@@ -245,6 +246,7 @@ if (BUILD_TESTING)
     src/Application/UseCases/StopTestExecutionUseCase.cpp
     src/Application/UseCases/UpdateTestProtocolUseCase.cpp
     src/Infrastructure/ConfigTemplates/ConfigTemplateService.cpp
+    src/Infrastructure/AxisTcp/LegacyAxisProtocolCodec.cpp
   )
 
   target_include_directories(domain_tests

@@ -1,13 +1,13 @@
 #include "StartTestExecutionUseCase.hpp"
 
 #include "../../Domain/AxisId.hpp"
+#include "../../Domain/ScenarioExecutionEngine.hpp"
 #include "../../Domain/StandCommandMapper.hpp"
 #include "../../Domain/StandConnectionStatus.hpp"
 #include "../../Domain/TestExecutionPlanner.hpp"
 #include "../../Domain/TestExecutionStatus.hpp"
 #include "../../Domain/TestExecutionTransitions.hpp"
 #include "../../Domain/TestProtocol.hpp"
-#include "../../Domain/WindControlProfileImpact.hpp"
 
 namespace application::useCases {
 
@@ -82,18 +82,17 @@ void StartTestExecutionUseCase::applyScenarioImpact(int elapsedSeconds) {
         return;
     }
 
-    const auto impact = domain::windImpactAt(session.controlProfile, domain::ElapsedSeconds::from(elapsedSeconds),
-                                             session.targetStandImpact);
-    if (!impact.has_value()) {
+    const auto step = domain::ScenarioExecutionEngine::advance(
+        session.controlProfile, domain::ElapsedSeconds::from(elapsedSeconds), session.targetStandImpact);
+    if (!step.has_value()) {
         return;
     }
 
-    state.setTargetStandImpact(*impact);
-    state.setAppliedStandImpact(*impact);
-    state.appendControlTraceSample(domain::ControlTraceSample{
-        .timeSeconds = static_cast<double>(elapsedSeconds), .targetValue = *impact, .safeCommandValue = *impact});
+    state.setTargetStandImpact(step->impact);
+    state.setAppliedStandImpact(step->impact);
+    state.appendControlTraceSample(step->traceSample);
     buildControlPlotUseCase.refreshFromState();
-    sendAppliedImpact(*impact);
+    sendAppliedImpact(step->impact);
 }
 
 void StartTestExecutionUseCase::sendAppliedImpact(const domain::WindImpact &profile) {

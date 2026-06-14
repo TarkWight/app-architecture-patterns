@@ -1,4 +1,5 @@
 #include "../../src/Domain/AxisControlCommand.hpp"
+#include "../../src/Domain/StandCommandMapper.hpp"
 
 #include <gtest/gtest.h>
 
@@ -54,12 +55,11 @@ TEST_P(BeaufortCommandMappingTest, MapsBeaufortToAxisTorque_WhenBeaufortProvided
     const auto impact = domain::makeWindImpact(expected.beaufort, 0.0, 0.0);
 
     // Act
-    const auto axis0 = domain::axis0WindCommand(impact);
-    const auto axis1 = domain::axis1WindCommand(impact);
+    const auto commands = domain::StandCommandMapper::map(impact);
 
     // Assert
-    expectAxis0ActiveCommand(axis0, expected.axis0Torque);
-    expectAxis1ActiveCommand(axis1, 0.0F, expected.axis1Torque);
+    expectAxis0ActiveCommand(commands.axis0, expected.axis0Torque);
+    expectAxis1ActiveCommand(commands.axis1, 0.0F, expected.axis1Torque);
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -74,12 +74,11 @@ TEST(AxisControlCommandTest, MapsHistoricalEtalonBeaufort_WhenBeaufortIsSixPoint
     const auto impact = domain::makeWindImpact(6.9, 0.0, 0.0);
 
     // Act
-    const auto axis0 = domain::axis0WindCommand(impact);
-    const auto axis1 = domain::axis1WindCommand(impact);
+    const auto commands = domain::StandCommandMapper::map(impact);
 
     // Assert
-    EXPECT_NEAR(axis0.torque, 44.85F, 0.0001F);
-    EXPECT_FLOAT_EQ(axis1.torque, 34.5F);
+    EXPECT_NEAR(commands.axis0.torque, 44.85F, 0.0001F);
+    EXPECT_FLOAT_EQ(commands.axis1.torque, 34.5F);
 }
 
 TEST_P(DirectionCommandMappingTest, MapsDirectionToAxis1Position_WhenWindRoseDirectionProvided_ReturnsSamePosition) {
@@ -88,10 +87,10 @@ TEST_P(DirectionCommandMappingTest, MapsDirectionToAxis1Position_WhenWindRoseDir
     const auto impact = domain::makeWindImpact(0.0, direction, 0.0);
 
     // Act
-    const auto command = domain::axis1WindCommand(impact);
+    const auto commands = domain::StandCommandMapper::map(impact);
 
     // Assert
-    expectAxis1ActiveCommand(command, static_cast<float>(direction), 0.0F);
+    expectAxis1ActiveCommand(commands.axis1, static_cast<float>(direction), 0.0F);
 }
 
 INSTANTIATE_TEST_SUITE_P(SixteenPointWindRose, DirectionCommandMappingTest,
@@ -103,12 +102,11 @@ TEST(AxisControlCommandTest, MapsWindImpact_WhenBeaufortSevenAndDirectionEast_Re
     const auto impact = domain::makeWindImpact(7.0, 90.0, 0.0);
 
     // Act
-    const auto axis0 = domain::axis0WindCommand(impact);
-    const auto axis1 = domain::axis1WindCommand(impact);
+    const auto commands = domain::StandCommandMapper::map(impact);
 
     // Assert
-    expectAxis0ActiveCommand(axis0, 45.5F);
-    expectAxis1ActiveCommand(axis1, 90.0F, 35.0F);
+    expectAxis0ActiveCommand(commands.axis0, 45.5F);
+    expectAxis1ActiveCommand(commands.axis1, 90.0F, 35.0F);
 }
 
 TEST(AxisControlCommandTest, BoundedCommandClampsVelocityAndTorque) {

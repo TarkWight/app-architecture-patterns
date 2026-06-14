@@ -129,9 +129,9 @@ void MainWindow::setupTabs() {
     testProtocolTabWidget = new TestProtocolTabWidget(testProtocolTabPresenter, sessionAdapter, this);
 
     ui->tabWidget->clear();
-    ui->tabWidget->addTab(telemetryChartsTabWidget, QStringLiteral("Вкладка 1"));
-    ui->tabWidget->addTab(controlChartsTabWidget, QStringLiteral("Вкладка 2"));
-    ui->tabWidget->addTab(testProtocolTabWidget, QStringLiteral("Вкладка 3"));
+    ui->tabWidget->addTab(telemetryChartsTabWidget, QStringLiteral("Телеметрия"));
+    ui->tabWidget->addTab(controlChartsTabWidget, QStringLiteral("Управляющие воздействия"));
+    ui->tabWidget->addTab(testProtocolTabWidget, QStringLiteral("Протокол"));
 }
 
 void MainWindow::setupStandControlPanel() {
@@ -220,7 +220,7 @@ void MainWindow::connectShellSignals() {
 
     QObject::connect(ui->buttonConnectTelemetry, &QPushButton::clicked, this, [this]() {
         shellPresenter.onConnectTelemetryPressed(
-            "/Users/tarkwight/Documents/Development/app-architecture-patterns/MVP/QtWidget/CounterDemo/telemetry.toml");
+            "telemetry.toml");
     });
 
     QObject::connect(ui->comboBoxStandControlMode, &QComboBox::currentIndexChanged, this, [this]() {

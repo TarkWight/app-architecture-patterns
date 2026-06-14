@@ -216,6 +216,7 @@ if (BUILD_TESTING)
     tests/Domain/ControlProfileTimingTest.cpp
     tests/Domain/StandScenarioTest.cpp
     tests/Domain/StandImpactTransitionTest.cpp
+    tests/Domain/TestExecutionPlannerTest.cpp
     tests/Domain/TestExecutionTransitionsTest.cpp
     tests/Domain/TestProtocolTest.cpp
     tests/Domain/TimeTest.cpp

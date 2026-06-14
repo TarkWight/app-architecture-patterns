@@ -186,7 +186,7 @@ void ShellPresenter::onConnectTelemetryPressed(std::string configPath) {
 
         if (status == domain::StandConnectionStatus::Connected || status == domain::StandConnectionStatus::Polling ||
             status == domain::StandConnectionStatus::Connecting ||
-            status == domain::StandConnectionStatus::Disconnecting || status == domain::StandConnectionStatus::Error) {
+            status == domain::StandConnectionStatus::Disconnecting) {
             disconnectStandUseCase.execute();
 
             if (view != nullptr) {
@@ -226,13 +226,13 @@ void ShellPresenter::refreshStandConnectionButton() {
     switch (state.get().standConnectionStatus) {
     case domain::StandConnectionStatus::Disconnected:
     case domain::StandConnectionStatus::Configured:
+    case domain::StandConnectionStatus::Error:
         view->setStandConnectionButtonText("Подключить стенд");
         break;
     case domain::StandConnectionStatus::Connected:
     case domain::StandConnectionStatus::Connecting:
     case domain::StandConnectionStatus::Polling:
     case domain::StandConnectionStatus::Disconnecting:
-    case domain::StandConnectionStatus::Error:
         view->setStandConnectionButtonText("Отключить стенд");
         break;
     }

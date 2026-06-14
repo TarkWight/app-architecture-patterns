@@ -203,61 +203,60 @@ if (APPLE)
   set_target_properties(develop PROPERTIES MACOSX_BUNDLE TRUE)
 endif()
 
-# if (BUILD_TESTING)
-#   add_executable(domain_tests
-#     tests/Domain/AxisControlCommandTest.cpp
-#     tests/Domain/ControlTraceTest.cpp
-#     tests/Domain/ControlProfileTimingTest.cpp
-#     tests/Domain/StandScenarioTest.cpp
-#     tests/Domain/StandImpactTransitionTest.cpp
-#     tests/Domain/TestExecutionTransitionsTest.cpp
-#     tests/Domain/TestProtocolTest.cpp
-#     tests/Domain/TimeTest.cpp
-#     tests/Domain/WindImpactTest.cpp
-#     tests/Domain/WindControlProfileImpactTest.cpp
-#     tests/Application/BuildControlPlotUseCaseTest.cpp
-#     tests/Application/ConfigureTelemetryUseCaseTest.cpp
-#     tests/Application/ConnectStandUseCaseTest.cpp
-#     tests/Application/SessionStateTest.cpp
-#     tests/Application/SetControlChartsTabMinutesUseCaseTest.cpp
-#     tests/Application/SetStandControlModeUseCaseTest.cpp
-#     tests/Application/SetStandImpactUseCaseTest.cpp
-#     tests/Application/StartTestExecutionUseCaseTest.cpp
-#     tests/Application/StopTestExecutionUseCaseTest.cpp
-#     tests/Application/UpdateTestProtocolUseCaseTest.cpp
-#     tests/Infrastructure/SimpleFunctionEngineTest.cpp
-#     src/Application/Session/SessionState.cpp
-#     src/Application/Session/Subscription.cpp
-#     src/Application/UseCases/BuildControlPlotUseCase.cpp
-#     src/Application/UseCases/ConfigureTelemetryUseCase.cpp
-#     src/Application/UseCases/ConnectStandUseCase.cpp
-#     src/Application/UseCases/SetControlChartsTabMinutesUseCase.cpp
-#     src/Application/UseCases/SetStandControlModeUseCase.cpp
-#     src/Application/UseCases/SetStandImpactUseCase.cpp
-#     src/Application/UseCases/StartTestExecutionUseCase.cpp
-#     src/Application/UseCases/StopTestExecutionUseCase.cpp
-#     src/Application/UseCases/UpdateTestProtocolUseCase.cpp
-#   )
+if (BUILD_TESTING)
+  add_executable(domain_tests
+    tests/Domain/AxisControlCommandTest.cpp
+    tests/Domain/ControlTraceTest.cpp
+    tests/Domain/ControlProfileTimingTest.cpp
+    tests/Domain/StandScenarioTest.cpp
+    tests/Domain/StandImpactTransitionTest.cpp
+    tests/Domain/TestExecutionTransitionsTest.cpp
+    tests/Domain/TestProtocolTest.cpp
+    tests/Domain/TimeTest.cpp
+    tests/Domain/WindImpactTest.cpp
+    tests/Domain/WindControlProfileImpactTest.cpp
+    tests/Application/BuildControlPlotUseCaseTest.cpp
+    tests/Application/ConfigureTelemetryUseCaseTest.cpp
+    tests/Application/ConnectStandUseCaseTest.cpp
+    tests/Application/SessionStateTest.cpp
+    tests/Application/SetControlChartsTabMinutesUseCaseTest.cpp
+    tests/Application/SetStandControlModeUseCaseTest.cpp
+    tests/Application/SetStandImpactUseCaseTest.cpp
+    tests/Application/StartTestExecutionUseCaseTest.cpp
+    tests/Application/StopTestExecutionUseCaseTest.cpp
+    tests/Application/UpdateTestProtocolUseCaseTest.cpp
+    tests/Infrastructure/SimpleFunctionEngineTest.cpp
+    src/Application/Session/SessionState.cpp
+    src/Application/Session/Subscription.cpp
+    src/Application/UseCases/BuildControlPlotUseCase.cpp
+    src/Application/UseCases/ConfigureTelemetryUseCase.cpp
+    src/Application/UseCases/ConnectStandUseCase.cpp
+    src/Application/UseCases/SetControlChartsTabMinutesUseCase.cpp
+    src/Application/UseCases/SetStandControlModeUseCase.cpp
+    src/Application/UseCases/SetStandImpactUseCase.cpp
+    src/Application/UseCases/StartTestExecutionUseCase.cpp
+    src/Application/UseCases/StopTestExecutionUseCase.cpp
+    src/Application/UseCases/UpdateTestProtocolUseCase.cpp
+  )
 
-#   target_include_directories(domain_tests
-#     PRIVATE
-#       ${CMAKE_CURRENT_SOURCE_DIR}/src
-#   )
+  target_include_directories(domain_tests
+    PRIVATE
+      ${CMAKE_CURRENT_SOURCE_DIR}/src
+  )
 
-#   target_link_libraries(domain_tests
-#     PRIVATE
-#       GTest::gtest_main
-#       Qt::Core
-#   )
+  target_link_libraries(domain_tests
+    PRIVATE
+      GTest::gtest_main
+  )
 
-#   if (APPLE AND EXISTS "/opt/homebrew/opt/llvm/lib/c++")
-#     target_link_options(domain_tests
-#       PRIVATE
-#         -L/opt/homebrew/opt/llvm/lib/c++
-#         -Wl,-rpath,/opt/homebrew/opt/llvm/lib/c++
-#     )
-#   endif()
+  if (APPLE AND EXISTS "/opt/homebrew/opt/llvm/lib/c++")
+    target_link_options(domain_tests
+      PRIVATE
+        -L/opt/homebrew/opt/llvm/lib/c++
+        -Wl,-rpath,/opt/homebrew/opt/llvm/lib/c++
+    )
+  endif()
 
-#   include(GoogleTest)
-#   gtest_discover_tests(domain_tests)
-# endif()
+  include(GoogleTest)
+  gtest_discover_tests(domain_tests)
+endif()

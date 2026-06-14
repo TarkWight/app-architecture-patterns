@@ -72,7 +72,7 @@ class QtTcpTelemetryClient final : public QObject, public application::ports::IT
 
     int pollingIntervalMs{1000};
 
-    static constexpr int responseTimeoutMs{3000};
+    static constexpr int responseTimeoutMs{2000};
     static constexpr int reconnectIntervalMs{3000};
     static constexpr int expectedTelemetryResponseSize{30};
 

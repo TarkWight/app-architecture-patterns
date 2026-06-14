@@ -1,16 +1,11 @@
 #include "LegacyAxisProtocolCodec.hpp"
 
-#include <QByteArray>
-#include <QtCore/QLoggingCategory>
-
 #include <array>
 #include <cstring>
 
 namespace infrastructure::axisTcp {
 
 namespace {
-
-Q_LOGGING_CATEGORY(logCodec, "mvp.codec")
 
 // CRC-16/CCITT table, poly 0x1021.
 // Table-based implementation is used intentionally
@@ -44,34 +39,9 @@ constexpr std::size_t setTorqueOffset = 16;
 constexpr std::size_t voltageOffset = 20;
 constexpr std::size_t currentOffset = 24;
 
-QString axisName(domain::AxisId axisId) {
-    return axisId == domain::axis0 ? QStringLiteral("axis0") : QStringLiteral("axis1");
-}
-
-QByteArray toByteArray(const std::vector<std::uint8_t> &bytes) {
-    QByteArray out;
-    out.reserve(static_cast<qsizetype>(bytes.size()));
-
-    for (const auto byte : bytes) {
-        out.append(static_cast<char>(byte));
-    }
-
-    return out;
-}
-
-QString bytesToHex(const std::vector<std::uint8_t> &bytes) {
-    return QString::fromLatin1(toByteArray(bytes).toHex(' ').toUpper());
-}
-
 } // namespace
 
 std::vector<std::uint8_t> LegacyAxisProtocolCodec::encodeCommand(const domain::AxisControlCommand &command) const {
-    qCDebug(logCodec) << "encodeCommand input"
-                      << "position=" << command.position
-                      << "velocity=" << command.velocity
-                      << "torque=" << command.torque
-                      << "flags=" << command.cmd1 << command.cmd2 << command.cmd3 << command.cmd4;
-
     std::vector<std::uint8_t> packet{};
     packet.reserve(requestPacketWithCrcSize);
 
@@ -90,9 +60,6 @@ std::vector<std::uint8_t> LegacyAxisProtocolCodec::encodeCommand(const domain::A
     packet.push_back(command.cmd4 ? 1U : 0U);
 
     if (packet.size() != requestPacketWithoutCrcSize) {
-        qCWarning(logCodec) << "encodeCommand failed"
-                            << "unexpectedSize=" << packet.size()
-                            << "expected=" << requestPacketWithoutCrcSize;
         return {};
     }
 
@@ -101,30 +68,13 @@ std::vector<std::uint8_t> LegacyAxisProtocolCodec::encodeCommand(const domain::A
     packet.push_back(static_cast<std::uint8_t>((crc >> 8) & 0xFFU));
     packet.push_back(static_cast<std::uint8_t>(crc & 0xFFU));
 
-    qCInfo(logCodec) << "encodeCommand output"
-                     << "size=" << packet.size()
-                     << "crc=0x" << Qt::hex << crc << Qt::dec
-                     << bytesToHex(packet);
-
     return packet;
 }
 
 std::optional<domain::AxisTelemetrySample>
 LegacyAxisProtocolCodec::decodeTelemetry(domain::AxisId axisId, const std::vector<std::uint8_t> &bytes,
                                          double timestampSeconds) const {
-    qCDebug(logCodec) << "decodeTelemetry input"
-                      << axisName(axisId)
-                      << "size=" << bytes.size()
-                      << "timestamp=" << timestampSeconds
-                      << bytesToHex(bytes);
-
     if (bytes.size() < minTelemetryResponseSize) {
-        qCWarning(logCodec) << "decodeTelemetry rejected"
-                            << axisName(axisId)
-                            << "reason=short_response"
-                            << "size=" << bytes.size()
-                            << "min=" << minTelemetryResponseSize
-                            << bytesToHex(bytes);
         return std::nullopt;
     }
 
@@ -141,16 +91,6 @@ LegacyAxisProtocolCodec::decodeTelemetry(domain::AxisId axisId, const std::vecto
 
     sample.valid = true;
 
-    qCInfo(logCodec) << "decodeTelemetry output"
-                     << axisName(axisId)
-                     << "position=" << sample.position
-                     << "setPosition=" << sample.setPosition
-                     << "torque=" << sample.torque
-                     << "setTorque=" << sample.setTorque
-                     << "voltage=" << sample.voltage
-                     << "current=" << sample.current
-                     << "valid=" << sample.valid;
-
     return sample;
 }
 
@@ -165,14 +105,6 @@ void LegacyAxisProtocolCodec::appendFloatLe(std::vector<std::uint8_t> &buffer, f
 
 float LegacyAxisProtocolCodec::readFloatLe(const std::vector<std::uint8_t> &buffer, std::size_t offset) {
     float value{0.0F};
-
-    if (buffer.size() < offset + sizeof(float)) {
-        qCWarning(logCodec) << "readFloatLe out of range"
-                            << "offset=" << offset
-                            << "size=" << buffer.size();
-        return value;
-    }
-
     std::memcpy(&value, buffer.data() + offset, sizeof(float));
     return value;
 }
@@ -183,10 +115,6 @@ std::uint16_t LegacyAxisProtocolCodec::crc16(const std::vector<std::uint8_t> &bu
     for (const std::uint8_t byte : buffer) {
         crc = static_cast<std::uint16_t>(crc16Table[((crc >> 8U) ^ byte) & 0xFFU] ^ ((crc << 8U) & 0xFFFFU));
     }
-
-    qCDebug(logCodec) << "crc16"
-                      << "inputSize=" << buffer.size()
-                      << "crc=0x" << Qt::hex << crc << Qt::dec;
 
     return crc;
 }

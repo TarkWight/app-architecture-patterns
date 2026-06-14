@@ -8,7 +8,6 @@
 #include "../../Domain/TestProtocol.hpp"
 #include "../../Domain/TestTimeDirection.hpp"
 #include "../../Domain/TestTimeSource.hpp"
-#include "../../Domain/StandImpactTransition.hpp"
 #include "../../Domain/WindControlProfileImpact.hpp"
 
 namespace application::useCases {
@@ -121,17 +120,6 @@ void StartTestExecutionUseCase::applyScenarioImpact(int elapsedSeconds) {
     if (!impact.has_value()) {
         return;
     }
-
-    // TODO:
-    // const auto transition = domain::StandImpactTransition{}.advance(session.appliedStandImpact, *impact);
-
-    // state.setTargetStandImpact(*impact);
-    // state.setAppliedStandImpact(transition.impact);
-    // state.appendControlTraceSample(domain::ControlTraceSample{.timeSeconds = static_cast<double>(elapsedSeconds),
-    //                                                           .targetValue = *impact,
-    //                                                           .safeCommandValue = transition.impact});
-    // buildControlPlotUseCase.refreshFromState();
-    // sendAppliedImpact(transition.impact);
 
     state.setTargetStandImpact(*impact);
     state.setAppliedStandImpact(*impact);

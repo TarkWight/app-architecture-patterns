@@ -15,6 +15,7 @@
 #include "../Application/UseCases/SetStandImpactUseCase.hpp"
 #include "../Domain/AxisId.hpp"
 #include "../Domain/TestTimeSource.hpp"
+#include "../Infrastructure/ConfigTemplates/IConfigTemplateService.hpp"
 
 class QComboBox;
 class QCheckBox;
@@ -47,6 +48,7 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
         application::useCases::SetStandControlModeUseCase &setStandControlModeUseCase;
         application::useCases::SetStandImpactUseCase &setStandImpactUseCase;
         infrastructure::SessionStateQtAdapter &sessionAdapter;
+        infrastructure::configTemplates::IConfigTemplateService &configTemplateService;
     };
 
     explicit MainWindow(Dependencies deps, QWidget *parent = nullptr);
@@ -77,6 +79,7 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     application::useCases::SetStandControlModeUseCase &setStandControlModeUseCase;
     application::useCases::SetStandImpactUseCase &setStandImpactUseCase;
     infrastructure::SessionStateQtAdapter &sessionAdapter;
+    infrastructure::configTemplates::IConfigTemplateService &configTemplateService;
 
     TelemetryChartsTabWidget *telemetryChartsTabWidget{nullptr};
     ControlChartsTabWidget *controlChartsTabWidget{nullptr};
@@ -89,6 +92,9 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     void setupTabs();
     void setupStandControlPanel();
     void connectShellSignals();
+    void connectTestControlSignals();
+    void connectConfigTemplateSignals();
+    void connectStandControlSignals();
     void connectSessionSignals();
     void applyStandInputs();
     void advanceStandImpactTransition();
@@ -97,6 +103,8 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     void updateStandControlModeSelection();
     void updateManualStandControlsEnabled();
     void updateControlFormulaTemplateSelection(const std::string &expression);
+    void refreshConfigTemplateStatus();
+    void createConfigTemplate(infrastructure::configTemplates::ConfigTemplateType type);
     double selectedStandDirectionDegrees() const;
     domain::AxisId selectedTelemetryAxisId() const;
 };

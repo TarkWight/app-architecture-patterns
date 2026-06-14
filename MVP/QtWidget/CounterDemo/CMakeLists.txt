@@ -88,6 +88,12 @@ qt_add_executable(develop
 
   src/Infrastructure/Config/TomlConfigRepository.hpp
   src/Infrastructure/Config/TomlConfigRepository.cpp
+  src/Infrastructure/ConfigTemplates/IAppFileLocationProvider.hpp
+  src/Infrastructure/ConfigTemplates/IConfigTemplateService.hpp
+  src/Infrastructure/ConfigTemplates/QtAppFileLocationProvider.hpp
+  src/Infrastructure/ConfigTemplates/QtAppFileLocationProvider.cpp
+  src/Infrastructure/ConfigTemplates/ConfigTemplateService.hpp
+  src/Infrastructure/ConfigTemplates/ConfigTemplateService.cpp
 
   src/Application/ApplicationContext.hpp
 
@@ -225,6 +231,7 @@ if (BUILD_TESTING)
     tests/Application/StartTestExecutionUseCaseTest.cpp
     tests/Application/StopTestExecutionUseCaseTest.cpp
     tests/Application/UpdateTestProtocolUseCaseTest.cpp
+    tests/Infrastructure/ConfigTemplateServiceTest.cpp
     tests/Infrastructure/SimpleFunctionEngineTest.cpp
     src/Application/Session/SessionState.cpp
     src/Application/Session/Subscription.cpp
@@ -237,6 +244,7 @@ if (BUILD_TESTING)
     src/Application/UseCases/StartTestExecutionUseCase.cpp
     src/Application/UseCases/StopTestExecutionUseCase.cpp
     src/Application/UseCases/UpdateTestProtocolUseCase.cpp
+    src/Infrastructure/ConfigTemplates/ConfigTemplateService.cpp
   )
 
   target_include_directories(domain_tests

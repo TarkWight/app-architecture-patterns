@@ -18,10 +18,13 @@
 #include <QMessageBox>
 #include <QSignalBlocker>
 #include <QString>
+#include <QStringList>
 #include <QTimer>
 
 #include <array>
 #include <cmath>
+#include <exception>
+#include <filesystem>
 #include <iomanip>
 #include <sstream>
 #include <utility>
@@ -29,6 +32,7 @@
 namespace ui {
 
 namespace {
+namespace configTemplates = infrastructure::configTemplates;
 
 std::string compassLabel(double degrees) {
     constexpr std::array<const char *, 16> labels{"N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
@@ -47,6 +51,10 @@ std::string formatImpact(const domain::WindImpact &profile) {
     return out.str();
 }
 
+QString formatConfigPath(const std::filesystem::path &path) {
+    return QString::fromStdString(path.string());
+}
+
 } // namespace
 
 MainWindow::MainWindow(Dependencies deps, QWidget *parent)
@@ -55,7 +63,7 @@ MainWindow::MainWindow(Dependencies deps, QWidget *parent)
       controlChartsTabPresenter(deps.controlChartsTabPresenter),
       testProtocolTabPresenter(deps.testProtocolTabPresenter),
       setStandControlModeUseCase(deps.setStandControlModeUseCase), setStandImpactUseCase(deps.setStandImpactUseCase),
-      sessionAdapter(deps.sessionAdapter) {
+      sessionAdapter(deps.sessionAdapter), configTemplateService(deps.configTemplateService) {
     ui->setupUi(this);
 
     ui->comboBoxTestTimeSource->addItem(QStringLiteral("Авторасчёт"));
@@ -70,6 +78,7 @@ MainWindow::MainWindow(Dependencies deps, QWidget *parent)
 
     setupTabs();
     setupStandControlPanel();
+    refreshConfigTemplateStatus();
     connectShellSignals();
     connectSessionSignals();
 
@@ -173,6 +182,12 @@ void MainWindow::setupStandControlPanel() {
 }
 
 void MainWindow::connectShellSignals() {
+    connectTestControlSignals();
+    connectConfigTemplateSignals();
+    connectStandControlSignals();
+}
+
+void MainWindow::connectTestControlSignals() {
     QObject::connect(ui->buttonStart, &QPushButton::clicked, this, [this]() { shellPresenter.onStartPressed(); });
 
     QObject::connect(ui->buttonPause, &QPushButton::clicked, this, [this]() { shellPresenter.onPauseResumePressed(); });
@@ -217,12 +232,33 @@ void MainWindow::connectShellSignals() {
 
         shellPresenter.onTestTimeSourceChanged(source);
     });
+}
 
+void MainWindow::connectConfigTemplateSignals() {
     QObject::connect(ui->buttonConnectTelemetry, &QPushButton::clicked, this, [this]() {
+        if (!configTemplateService.exists(configTemplates::ConfigTemplateType::Telemetry)) {
+            refreshConfigTemplateStatus();
+
+            const auto path = configTemplateService.pathFor(configTemplates::ConfigTemplateType::Telemetry);
+            appendLog("telemetry.toml not found: " + path.string());
+            showOperatorWarning("telemetry.toml не найден",
+                                "Файл telemetry.toml не найден рядом с приложением. Создайте шаблон и заполните "
+                                "параметры подключения стенда.");
+            return;
+        }
+
         shellPresenter.onConnectTelemetryPressed(
-            "telemetry.toml");
+            configTemplateService.pathFor(configTemplates::ConfigTemplateType::Telemetry).string());
     });
 
+    QObject::connect(ui->buttonCreateTelemetryTemplate, &QPushButton::clicked, this,
+                     [this]() { createConfigTemplate(configTemplates::ConfigTemplateType::Telemetry); });
+
+    QObject::connect(ui->buttonCreatePdfReportTemplate, &QPushButton::clicked, this,
+                     [this]() { createConfigTemplate(configTemplates::ConfigTemplateType::PdfReport); });
+}
+
+void MainWindow::connectStandControlSignals() {
     QObject::connect(ui->comboBoxStandControlMode, &QComboBox::currentIndexChanged, this, [this]() {
         const auto mode = static_cast<domain::StandControlMode>(ui->comboBoxStandControlMode->currentData().toInt());
         setStandControlModeUseCase.execute(mode);
@@ -381,6 +417,40 @@ double MainWindow::selectedStandDirectionDegrees() const {
 
 void MainWindow::updateControlFormulaTemplateSelection(const std::string &expression) {
     controlChartsTabWidget->setFunctionExpression(expression);
+}
+
+void MainWindow::refreshConfigTemplateStatus() {
+    const auto telemetryPath = configTemplateService.pathFor(configTemplates::ConfigTemplateType::Telemetry);
+    const auto pdfReportPath = configTemplateService.pathFor(configTemplates::ConfigTemplateType::PdfReport);
+
+    const bool telemetryExists = configTemplateService.exists(configTemplates::ConfigTemplateType::Telemetry);
+    const bool pdfReportExists = configTemplateService.exists(configTemplates::ConfigTemplateType::PdfReport);
+
+    ui->buttonCreateTelemetryTemplate->setEnabled(!telemetryExists);
+    ui->buttonCreatePdfReportTemplate->setEnabled(!pdfReportExists);
+
+    QStringList statusParts;
+    statusParts << QStringLiteral("telemetry.toml: %1")
+                       .arg(telemetryExists ? QStringLiteral("найден") : QStringLiteral("не найден"));
+    statusParts << QStringLiteral("pdf_report.toml: %1")
+                       .arg(pdfReportExists ? QStringLiteral("найден") : QStringLiteral("не найден"));
+
+    ui->labelConfigTemplatesStatus->setText(statusParts.join(QStringLiteral("; ")));
+    ui->labelConfigTemplatesStatus->setToolTip(
+        QStringLiteral("telemetry.toml: %1\npdf_report.toml: %2")
+            .arg(formatConfigPath(telemetryPath), formatConfigPath(pdfReportPath)));
+}
+
+void MainWindow::createConfigTemplate(configTemplates::ConfigTemplateType type) {
+    try {
+        configTemplateService.createTemplate(type);
+        refreshConfigTemplateStatus();
+
+        appendLog("Config template created or already exists: " + configTemplateService.pathFor(type).string());
+    } catch (const std::exception &e) {
+        appendLog(std::string{"Config template creation failed: "} + e.what());
+        showOperatorWarning("Ошибка создания шаблона", e.what());
+    }
 }
 
 void MainWindow::updateStandControlModeSelection() {

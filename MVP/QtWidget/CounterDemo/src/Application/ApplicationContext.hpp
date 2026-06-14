@@ -28,6 +28,8 @@
 #include "UseCases/DisconnectStandUseCase.hpp"
 
 #include "../Infrastructure/Config/TomlConfigRepository.hpp"
+#include "../Infrastructure/ConfigTemplates/ConfigTemplateService.hpp"
+#include "../Infrastructure/ConfigTemplates/QtAppFileLocationProvider.hpp"
 
 #include "../Infrastructure/AxisTcp/LegacyAxisProtocolCodec.hpp"
 #include "../Infrastructure/AxisTcp/QtTcpTelemetryClient.hpp"
@@ -46,8 +48,10 @@
 #include <string>
 
 struct ApplicationContext {
+    infrastructure::configTemplates::QtAppFileLocationProvider appFileLocationProvider;
+    infrastructure::configTemplates::ConfigTemplateService configTemplateService{appFileLocationProvider};
     std::string pdfReportConfigPath{
-        "/Users/tarkwight/Documents/Development/app-architecture-patterns/MVP/QtWidget/CounterDemo/pdf_report.toml"};
+        configTemplateService.pathFor(infrastructure::configTemplates::ConfigTemplateType::PdfReport).string()};
 
     application::session::SessionState sessionState;
 

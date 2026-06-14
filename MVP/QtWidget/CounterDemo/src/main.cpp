@@ -16,7 +16,8 @@ int main(int argc, char *argv[]) {
                                      .testProtocolTabPresenter = context.testProtocolTabPresenter,
                                      .setStandControlModeUseCase = context.setStandControlModeUseCase,
                                      .setStandImpactUseCase = context.setStandImpactUseCase,
-                                     .sessionAdapter = context.sessionAdapter}};
+                                     .sessionAdapter = context.sessionAdapter,
+                                     .configTemplateService = context.configTemplateService}};
 
     window.show();
 

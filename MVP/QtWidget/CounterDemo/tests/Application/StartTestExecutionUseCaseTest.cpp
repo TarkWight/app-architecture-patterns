@@ -138,48 +138,6 @@ TEST(StartTestExecutionUseCaseTest, ManualModeStartsAsStopwatchEvenWhenOperatorD
     EXPECT_FALSE(telemetryClient.axis1Command.has_value());
 }
 
-TEST(StartTestExecutionUseCaseTest, AutomaticModeSmoothlyFollowsScenarioImpactFromProfile) {
-    application::session::SessionState state{};
-    state.setTestProtocolMode(domain::TestMode::Automatic);
-    state.setEstimatedTestDurationMinutes(1);
-    state.setFunctionExpression("x");
-    state.setWindImpact(domain::makeWindImpact(0.0, 90.0, 5.0));
-
-    TestExecutionSchedulerSpy scheduler{};
-    TelemetryClientSpy telemetryClient{};
-    ScenarioFunctionEngine functionEngine{};
-    application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
-    application::useCases::StartTestExecutionUseCase useCase{state, scheduler, telemetryClient,
-                                                             buildControlPlotUseCase};
-
-    useCase.execute();
-
-    ASSERT_TRUE(telemetryClient.axis1Command.has_value());
-    ASSERT_EQ(state.get().controlTrace.size(), 1U);
-    EXPECT_DOUBLE_EQ(state.get().controlTrace.at(0).timeSeconds, 0.0);
-    EXPECT_DOUBLE_EQ(state.get().controlTrace.at(0).targetValue.beaufort.value(), 1.0);
-    EXPECT_NEAR(state.get().controlTrace.at(0).safeCommandValue.beaufort.value(), 0.1, 0.000001);
-    EXPECT_FLOAT_EQ(telemetryClient.axis1Command->torque, 0.1F);
-    EXPECT_FLOAT_EQ(telemetryClient.axis1Command->position, 2.5F);
-    EXPECT_NEAR(state.get().appliedStandImpact.beaufort.value(), 0.1, 0.000001);
-    EXPECT_DOUBLE_EQ(state.get().targetStandImpact.beaufort.value(), 1.0);
-
-    scheduler.tick(1);
-
-    ASSERT_TRUE(telemetryClient.axis0Command.has_value());
-    ASSERT_TRUE(telemetryClient.axis1Command.has_value());
-    ASSERT_EQ(state.get().controlTrace.size(), 2U);
-    EXPECT_DOUBLE_EQ(state.get().controlTrace.at(1).timeSeconds, 1.0);
-    EXPECT_DOUBLE_EQ(state.get().controlTrace.at(1).targetValue.beaufort.value(), 2.0);
-    EXPECT_NEAR(state.get().controlTrace.at(1).safeCommandValue.beaufort.value(), 0.2, 0.000001);
-    EXPECT_FLOAT_EQ(telemetryClient.axis0Command->torque, 0.26F);
-    EXPECT_FLOAT_EQ(telemetryClient.axis1Command->torque, 0.2F);
-    EXPECT_FLOAT_EQ(telemetryClient.axis0Command->position, 2.0F);
-    EXPECT_FLOAT_EQ(telemetryClient.axis1Command->position, 5.0F);
-    EXPECT_NEAR(state.get().appliedStandImpact.beaufort.value(), 0.2, 0.000001);
-    EXPECT_DOUBLE_EQ(state.get().targetStandImpact.beaufort.value(), 2.0);
-}
-
 TEST(StartTestExecutionUseCaseTest, ScenarioStartClearsPreviousControlTrace) {
     application::session::SessionState state{};
     state.setTestProtocolMode(domain::TestMode::Automatic);

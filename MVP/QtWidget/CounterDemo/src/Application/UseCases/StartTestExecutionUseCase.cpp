@@ -3,11 +3,10 @@
 #include "../../Domain/AxisId.hpp"
 #include "../../Domain/StandCommandMapper.hpp"
 #include "../../Domain/StandConnectionStatus.hpp"
+#include "../../Domain/TestExecutionPlanner.hpp"
 #include "../../Domain/TestExecutionStatus.hpp"
 #include "../../Domain/TestExecutionTransitions.hpp"
 #include "../../Domain/TestProtocol.hpp"
-#include "../../Domain/TestTimeDirection.hpp"
-#include "../../Domain/TestTimeSource.hpp"
 #include "../../Domain/WindControlProfileImpact.hpp"
 
 namespace application::useCases {
@@ -31,62 +30,30 @@ void StartTestExecutionUseCase::execute() {
         state.clearControlTrace();
     }
 
-    int activeDurationMinutes = 0;
-    domain::TestTimeDirection direction = domain::TestTimeDirection::CountUp;
+    const auto plan = domain::TestExecutionPlanner::plan(session.testProtocol, session.testTimeSource,
+                                                         session.estimatedTestDuration, session.operatorTestDuration);
 
-    if (session.testProtocol.testMode == domain::TestMode::Manual) {
-        activeDurationMinutes = 0;
-        direction = domain::TestTimeDirection::CountUp;
-    } else {
-        switch (session.testTimeSource) {
-        case domain::TestTimeSource::AutoCalculated:
-            activeDurationMinutes = session.estimatedTestDuration.value();
-            direction = domain::TestTimeDirection::CountDown;
-            break;
-
-        case domain::TestTimeSource::OperatorDefined:
-            activeDurationMinutes = session.operatorTestDuration.value();
-            direction = domain::TestTimeDirection::CountDown;
-            break;
-
-        case domain::TestTimeSource::FreeRun:
-            activeDurationMinutes = 0;
-            direction = domain::TestTimeDirection::CountUp;
-            break;
-        }
-    }
-
-    state.setActiveTestDurationMinutes(activeDurationMinutes);
-    state.setTestTimeDirection(direction);
+    state.setActiveTestDurationMinutes(plan.activeDuration.value());
+    state.setTestTimeDirection(plan.direction);
     state.setElapsedSeconds(0);
-
-    if (direction == domain::TestTimeDirection::CountDown) {
-        state.setRemainingSeconds(activeDurationMinutes * 60);
-    } else {
-        state.setRemainingSeconds(0);
-    }
+    state.setRemainingSeconds(plan.initialRemaining().value());
 
     state.setTestExecutionStatus(domain::TestExecutionStatus::Running);
     startTelemetryPollingIfConnected();
     applyScenarioImpact(0);
 
-    testExecutionScheduler.start(0, [this](int elapsedSeconds) {
+    testExecutionScheduler.start(0, [this, plan](int elapsedSeconds) {
         state.setElapsedSeconds(elapsedSeconds);
         applyScenarioImpact(elapsedSeconds);
 
-        const auto &current = state.get();
+        const auto remaining = plan.remainingAt(domain::ElapsedSeconds::from(elapsedSeconds));
 
-        if (current.testTimeDirection == domain::TestTimeDirection::CountDown) {
-            const int totalSeconds = current.activeTestDuration.value() * 60;
-            const int remainingSeconds = (elapsedSeconds < totalSeconds) ? (totalSeconds - elapsedSeconds) : 0;
+        state.setRemainingSeconds(remaining.value());
 
-            state.setRemainingSeconds(remainingSeconds);
-
-            if (remainingSeconds == 0) {
-                testExecutionScheduler.stop();
-                stopTelemetryPollingIfActive();
-                state.setTestExecutionStatus(domain::TestExecutionStatus::Completed);
-            }
+        if (plan.isCompletedAt(domain::ElapsedSeconds::from(elapsedSeconds))) {
+            testExecutionScheduler.stop();
+            stopTelemetryPollingIfActive();
+            state.setTestExecutionStatus(domain::TestExecutionStatus::Completed);
         }
     });
 }

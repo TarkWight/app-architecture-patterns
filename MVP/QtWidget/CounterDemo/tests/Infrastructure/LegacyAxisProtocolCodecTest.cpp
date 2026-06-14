@@ -77,6 +77,37 @@ TEST(LegacyAxisProtocolCodecTest, EncodesLegacyCommand_WhenAxisCommandProvided_R
     EXPECT_EQ(packet.at(21), static_cast<std::uint8_t>(expectedCrc & 0xFFU));
 }
 
+TEST(LegacyAxisProtocolCodecTest,
+     EncodesZeroCommand_WhenStopCommandProvided_ReturnsTwentyTwoBytePacketWithZeroPayload) {
+    // Arrange
+    const infrastructure::axisTcp::LegacyAxisProtocolCodec codec{};
+    const auto command = domain::stopAxisCommand();
+
+    // Act
+    const auto packet = codec.encodeCommand(command);
+
+    // Assert
+    ASSERT_EQ(packet.size(), 22U);
+    EXPECT_EQ(packet.at(0), 0x03);
+    EXPECT_EQ(packet.at(1), 0x82);
+    EXPECT_EQ(packet.at(2), 0x00);
+    EXPECT_EQ(packet.at(3), 0x0C);
+
+    expectFloatLeAt(packet, 4, 0.0F);
+    expectFloatLeAt(packet, 8, 0.0F);
+    expectFloatLeAt(packet, 12, 0.0F);
+
+    EXPECT_EQ(packet.at(16), 0U);
+    EXPECT_EQ(packet.at(17), 0U);
+    EXPECT_EQ(packet.at(18), 0U);
+    EXPECT_EQ(packet.at(19), 0U);
+
+    const std::vector<std::uint8_t> bytesWithoutCrc{packet.begin(), packet.begin() + 20};
+    const std::uint16_t expectedCrc = crc16Ccitt(bytesWithoutCrc);
+    EXPECT_EQ(packet.at(20), static_cast<std::uint8_t>((expectedCrc >> 8U) & 0xFFU));
+    EXPECT_EQ(packet.at(21), static_cast<std::uint8_t>(expectedCrc & 0xFFU));
+}
+
 TEST(LegacyAxisProtocolCodecTest, DecodesTelemetryFrame_WhenThirtyByteFrameProvided_ReturnsExpectedFields) {
     // Arrange
     const infrastructure::axisTcp::LegacyAxisProtocolCodec codec{};

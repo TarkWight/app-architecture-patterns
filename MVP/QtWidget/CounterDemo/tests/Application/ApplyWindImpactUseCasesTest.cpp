@@ -51,4 +51,16 @@ TEST(ApplyAngleOfAttackUseCaseTest, WhenExecuted_ChangesOnlyAngleOfAttack) {
     EXPECT_DOUBLE_EQ(state.get().targetStandImpact.angleOfAttack.degrees(), 45.0);
 }
 
+TEST(ApplyAngleOfAttackUseCaseTest, WhenExecuted_DoesNotOverwriteWindDirection) {
+    application::session::SessionState state{};
+    state.setTargetStandImpact(domain::makeWindImpact(2.0, 90.0, 0.0));
+    application::useCases::ApplyAngleOfAttackUseCase useCase{state};
+
+    const auto accepted = useCase.execute(domain::AngleOfAttack::from(15.0));
+
+    EXPECT_TRUE(accepted);
+    EXPECT_DOUBLE_EQ(state.get().targetStandImpact.direction.degrees(), 90.0);
+    EXPECT_DOUBLE_EQ(state.get().targetStandImpact.angleOfAttack.degrees(), 15.0);
+}
+
 } // namespace

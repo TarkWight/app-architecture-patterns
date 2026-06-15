@@ -81,6 +81,32 @@ TEST(AxisControlCommandTest, MapsHistoricalEtalonBeaufort_WhenBeaufortIsSixPoint
     EXPECT_FLOAT_EQ(commands.axis1.torque, 34.5F);
 }
 
+TEST(StandCommandMapperTest, WhenBeaufortIsApplied_ReturnsExpectedTorqueCommands) {
+    const auto impact = domain::makeWindImpact(3.0, 0.0, 0.0);
+
+    const auto commands = domain::StandCommandMapper::map(impact);
+
+    EXPECT_FLOAT_EQ(commands.axis0.torque, 19.5F);
+    EXPECT_FLOAT_EQ(commands.axis1.torque, 15.0F);
+}
+
+TEST(StandCommandMapperTest, WhenDirectionIsApplied_ReturnsAxis1Position) {
+    const auto impact = domain::makeWindImpact(0.0, 90.0, 0.0);
+
+    const auto commands = domain::StandCommandMapper::map(impact);
+
+    EXPECT_FLOAT_EQ(commands.axis1.position, 90.0F);
+}
+
+TEST(StandCommandMapperTest, WhenAngleOfAttackIsApplied_TargetsAxis1SectorInsteadOfOverwritingDirection) {
+    const auto impact = domain::makeWindImpact(0.0, 90.0, 15.0);
+
+    const auto commands = domain::StandCommandMapper::map(impact);
+
+    EXPECT_FLOAT_EQ(commands.axis0.position, 0.0F);
+    EXPECT_FLOAT_EQ(commands.axis1.position, 97.5F);
+}
+
 TEST_P(DirectionCommandMappingTest, MapsDirectionToAxis1Position_WhenWindRoseDirectionProvided_ReturnsSamePosition) {
     // Arrange
     const double direction = GetParam();

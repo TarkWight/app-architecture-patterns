@@ -219,6 +219,7 @@ if (BUILD_TESTING)
     tests/Domain/StandImpactTransitionTest.cpp
     tests/Domain/TestExecutionPlannerTest.cpp
     tests/Domain/TestExecutionTransitionsTest.cpp
+    tests/Domain/TestModeStatePolicyTest.cpp
     tests/Domain/TestProtocolTest.cpp
     tests/Domain/TimeTest.cpp
     tests/Domain/WindImpactTest.cpp

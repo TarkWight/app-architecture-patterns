@@ -32,6 +32,11 @@ struct TestExecutionPlan {
     }
 };
 
+struct TestExecutionStopPlan {
+    ElapsedSeconds elapsed{ElapsedSeconds::from(0)};
+    RemainingSeconds remaining{RemainingSeconds::from(0)};
+};
+
 class TestExecutionPlanner final {
   public:
     [[nodiscard]] static TestExecutionPlan plan(const TestProtocol &protocol, TestTimeSource timeSource,
@@ -50,6 +55,16 @@ class TestExecutionPlanner final {
         }
 
         return TestExecutionPlan{};
+    }
+
+    [[nodiscard]] static TestExecutionStopPlan resetAfterStop(DurationMinutes activeDuration,
+                                                              TestTimeDirection direction) {
+        if (direction == TestTimeDirection::CountDown) {
+            return TestExecutionStopPlan{.elapsed = ElapsedSeconds::from(0),
+                                         .remaining = RemainingSeconds::from(activeDuration.value() * 60)};
+        }
+
+        return TestExecutionStopPlan{};
     }
 };
 

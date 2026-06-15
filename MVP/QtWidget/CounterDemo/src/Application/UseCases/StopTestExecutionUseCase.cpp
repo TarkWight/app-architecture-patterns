@@ -1,9 +1,9 @@
 #include "StopTestExecutionUseCase.hpp"
 
 #include "../../Domain/StandConnectionStatus.hpp"
+#include "../../Domain/TestExecutionPlanner.hpp"
 #include "../../Domain/TestExecutionStatus.hpp"
 #include "../../Domain/TestExecutionTransitions.hpp"
-#include "../../Domain/TestTimeDirection.hpp"
 
 namespace application::useCases {
 
@@ -26,14 +26,11 @@ void StopTestExecutionUseCase::execute() {
     }
 
     const auto &session = state.get();
+    const auto stopPlan =
+        domain::TestExecutionPlanner::resetAfterStop(session.activeTestDuration, session.testTimeDirection);
 
-    state.setElapsedSeconds(0);
-
-    if (session.testTimeDirection == domain::TestTimeDirection::CountDown) {
-        state.setRemainingSeconds(session.activeTestDuration.value() * 60);
-    } else {
-        state.setRemainingSeconds(0);
-    }
+    state.setElapsedSeconds(stopPlan.elapsed.value());
+    state.setRemainingSeconds(stopPlan.remaining.value());
 
     state.setTestExecutionStatus(domain::TestExecutionStatus::Ready);
 }

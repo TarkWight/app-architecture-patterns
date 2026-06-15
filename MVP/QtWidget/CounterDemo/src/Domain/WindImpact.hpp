@@ -73,6 +73,18 @@ struct WindImpact {
     Beaufort beaufort{Beaufort::from(0.0)};
     WindDirection direction{WindDirection::from(0.0)};
     AngleOfAttack angleOfAttack{AngleOfAttack::from(0.0)};
+
+    [[nodiscard]] WindImpact withBeaufort(Beaufort value) const {
+        return WindImpact{.beaufort = value, .direction = direction, .angleOfAttack = angleOfAttack};
+    }
+
+    [[nodiscard]] WindImpact withDirection(WindDirection value) const {
+        return WindImpact{.beaufort = beaufort, .direction = value, .angleOfAttack = angleOfAttack};
+    }
+
+    [[nodiscard]] WindImpact withAngleOfAttack(AngleOfAttack value) const {
+        return WindImpact{.beaufort = beaufort, .direction = direction, .angleOfAttack = value};
+    }
 };
 
 inline WindImpact makeWindImpact(double beaufort, double direction, double angleOfAttack) {

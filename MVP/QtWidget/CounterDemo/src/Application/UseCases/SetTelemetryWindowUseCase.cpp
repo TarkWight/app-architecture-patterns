@@ -6,7 +6,7 @@ SetTelemetryWindowUseCase::SetTelemetryWindowUseCase(application::session::Sessi
 }
 
 void SetTelemetryWindowUseCase::execute(domain::TelemetryWindowEnd windowEndSeconds) {
-    state.setTelemetryWindowEndSeconds(windowEndSeconds);
+    state.setTelemetryWindowEnd(windowEndSeconds);
 }
 
 void SetTelemetryWindowUseCase::followTail() {

@@ -131,9 +131,9 @@ void application::session::SessionState::appendTelemetrySample(domain::AxisTelem
     notify();
 }
 
-void application::session::SessionState::setTelemetryWindowEndSeconds(domain::TelemetryWindowEnd endSeconds) {
+void application::session::SessionState::setTelemetryWindowEnd(domain::TelemetryWindowEnd end) {
     data.telemetryFollowTail = false;
-    data.telemetryWindowEndSeconds = endSeconds;
+    data.telemetryWindowEndSeconds = end;
 
     rebuildTelemetryPlot();
     notify();

@@ -59,7 +59,7 @@ class SessionState {
     void clearControlTrace();
     void appendControlTraceSample(domain::ControlTraceSample sample);
     void appendTelemetrySample(domain::AxisTelemetrySample sample);
-    void setTelemetryWindowEndSeconds(domain::TelemetryWindowEnd endSeconds);
+    void setTelemetryWindowEnd(domain::TelemetryWindowEnd end);
     void followTelemetryTail();
     void setTelemetryAxisColor(domain::AxisId axisId, domain::RgbColor color);
     void setTelemetryAxisVisible(domain::AxisId axisId, bool visible);

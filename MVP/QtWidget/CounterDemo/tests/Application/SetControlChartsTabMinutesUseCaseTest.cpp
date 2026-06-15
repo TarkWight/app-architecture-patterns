@@ -13,7 +13,7 @@ TEST(SetControlChartsTabMinutesUseCaseTest, AcceptsOperatorDurationOnlyInHybridM
     state.setTestProtocolMode(domain::TestMode::Hybrid);
     state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
 
-    useCase.execute(37);
+    useCase.execute(domain::DurationMinutes::required(37));
 
     EXPECT_EQ(state.get().controlChartsTabMinutes.value(), 37);
     EXPECT_EQ(state.get().operatorTestDuration.value(), 37);
@@ -29,7 +29,7 @@ TEST(SetControlChartsTabMinutesUseCaseTest, IgnoresOperatorDurationInManualMode)
     state.setOperatorTestDurationMinutes(20);
     state.setTestTimeSource(domain::TestTimeSource::FreeRun);
 
-    useCase.execute(37);
+    useCase.execute(domain::DurationMinutes::required(37));
 
     EXPECT_EQ(state.get().controlChartsTabMinutes.value(), 20);
     EXPECT_EQ(state.get().operatorTestDuration.value(), 20);
@@ -45,7 +45,7 @@ TEST(SetControlChartsTabMinutesUseCaseTest, IgnoresOperatorDurationInAutomaticMo
     state.setOperatorTestDurationMinutes(20);
     state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
 
-    useCase.execute(37);
+    useCase.execute(domain::DurationMinutes::required(37));
 
     EXPECT_EQ(state.get().controlChartsTabMinutes.value(), 20);
     EXPECT_EQ(state.get().operatorTestDuration.value(), 20);

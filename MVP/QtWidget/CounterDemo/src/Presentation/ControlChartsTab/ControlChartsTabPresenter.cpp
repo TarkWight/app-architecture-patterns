@@ -31,7 +31,7 @@ void ControlChartsTabPresenter::onViewReady() {
 }
 
 void ControlChartsTabPresenter::onMinutesChanged(int minutes) {
-    setControlChartsTabMinutesUseCase.execute(minutes);
+    setControlChartsTabMinutesUseCase.execute(domain::DurationMinutes::required(minutes));
 
     if (view != nullptr) {
         view->appendLog("ControlChartsTab minutes updated");

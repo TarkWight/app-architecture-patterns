@@ -1,7 +1,6 @@
 #include "SetControlChartsTabMinutesUseCase.hpp"
 
-#include "../../Domain/TestProtocol.hpp"
-#include "../../Domain/Time.hpp"
+#include "../../Domain/TestModeStatePolicy.hpp"
 
 namespace application::useCases {
 
@@ -9,16 +8,16 @@ SetControlChartsTabMinutesUseCase::SetControlChartsTabMinutesUseCase(application
     : state(state) {
 }
 
-void SetControlChartsTabMinutesUseCase::execute(int minutes) {
+void SetControlChartsTabMinutesUseCase::execute(domain::DurationMinutes minutes) {
     const auto &session = state.get();
-    if (session.testProtocol.testMode != domain::TestMode::Hybrid) {
+    if (!domain::TestModeStatePolicy::allowsOperatorDuration(session.testProtocol.testMode)) {
         return;
     }
 
-    const auto duration = domain::DurationMinutes::required(minutes);
-    state.setControlChartsTabMinutes(duration);
-    state.setOperatorTestDurationMinutes(duration);
-    state.setTestTimeSource(domain::TestTimeSource::OperatorDefined);
+    state.setControlChartsTabMinutes(minutes);
+    state.setOperatorTestDurationMinutes(minutes);
+    state.setTestTimeSource(domain::TestModeStatePolicy::timeSourceAfterOperatorDuration(session.testProtocol.testMode,
+                                                                                         session.testTimeSource));
 }
 
 } // namespace application::useCases

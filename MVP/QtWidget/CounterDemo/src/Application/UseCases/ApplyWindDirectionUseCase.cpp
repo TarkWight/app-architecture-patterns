@@ -8,13 +8,13 @@ namespace application::useCases {
 ApplyWindDirectionUseCase::ApplyWindDirectionUseCase(application::session::SessionState &state) : state(state) {
 }
 
-bool ApplyWindDirectionUseCase::execute(double directionDegrees) {
+bool ApplyWindDirectionUseCase::execute(domain::WindDirection direction) {
     const auto &session = state.get();
     if (!domain::StandScenario{session.standControlMode}.allowsManualImpact()) {
         return false;
     }
 
-    state.setTargetStandImpact(session.targetStandImpact.withDirection(domain::WindDirection::from(directionDegrees)));
+    state.setTargetStandImpact(session.targetStandImpact.withDirection(direction));
     return true;
 }
 

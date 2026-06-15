@@ -8,14 +8,13 @@ namespace application::useCases {
 ApplyAngleOfAttackUseCase::ApplyAngleOfAttackUseCase(application::session::SessionState &state) : state(state) {
 }
 
-bool ApplyAngleOfAttackUseCase::execute(double angleOfAttackDegrees) {
+bool ApplyAngleOfAttackUseCase::execute(domain::AngleOfAttack angleOfAttack) {
     const auto &session = state.get();
     if (!domain::StandScenario{session.standControlMode}.allowsManualImpact()) {
         return false;
     }
 
-    state.setTargetStandImpact(
-        session.targetStandImpact.withAngleOfAttack(domain::AngleOfAttack::from(angleOfAttackDegrees)));
+    state.setTargetStandImpact(session.targetStandImpact.withAngleOfAttack(angleOfAttack));
     return true;
 }
 

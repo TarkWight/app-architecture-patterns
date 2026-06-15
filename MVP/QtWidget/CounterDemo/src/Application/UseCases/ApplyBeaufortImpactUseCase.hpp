@@ -2,6 +2,7 @@
 #define APPLYBEAUFORTIMPACTUSECASE_HPP
 
 #include "../Session/SessionState.hpp"
+#include "../../Domain/WindImpact.hpp"
 
 namespace application::useCases {
 
@@ -9,7 +10,7 @@ class ApplyBeaufortImpactUseCase final {
   public:
     explicit ApplyBeaufortImpactUseCase(application::session::SessionState &state);
 
-    bool execute(double beaufort);
+    bool execute(domain::Beaufort beaufort);
 
   private:
     application::session::SessionState &state;

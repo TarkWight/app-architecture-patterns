@@ -2,6 +2,7 @@
 #define APPLYWINDDIRECTIONUSECASE_HPP
 
 #include "../Session/SessionState.hpp"
+#include "../../Domain/WindImpact.hpp"
 
 namespace application::useCases {
 
@@ -9,7 +10,7 @@ class ApplyWindDirectionUseCase final {
   public:
     explicit ApplyWindDirectionUseCase(application::session::SessionState &state);
 
-    bool execute(double directionDegrees);
+    bool execute(domain::WindDirection direction);
 
   private:
     application::session::SessionState &state;

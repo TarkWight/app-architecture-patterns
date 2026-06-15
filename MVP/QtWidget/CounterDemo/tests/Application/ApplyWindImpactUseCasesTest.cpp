@@ -17,7 +17,7 @@ TEST(ApplyBeaufortImpactUseCaseTest, WhenExecuted_ChangesOnlyBeaufort) {
     seedTargetImpact(state);
     application::useCases::ApplyBeaufortImpactUseCase useCase{state};
 
-    const auto accepted = useCase.execute(6.0);
+    const auto accepted = useCase.execute(domain::Beaufort::from(6.0));
 
     EXPECT_TRUE(accepted);
     EXPECT_DOUBLE_EQ(state.get().targetStandImpact.beaufort.value(), 6.0);
@@ -30,7 +30,7 @@ TEST(ApplyWindDirectionUseCaseTest, WhenExecuted_ChangesOnlyDirection) {
     seedTargetImpact(state);
     application::useCases::ApplyWindDirectionUseCase useCase{state};
 
-    const auto accepted = useCase.execute(270.0);
+    const auto accepted = useCase.execute(domain::WindDirection::from(270.0));
 
     EXPECT_TRUE(accepted);
     EXPECT_DOUBLE_EQ(state.get().targetStandImpact.beaufort.value(), 2.0);
@@ -43,7 +43,7 @@ TEST(ApplyAngleOfAttackUseCaseTest, WhenExecuted_ChangesOnlyAngleOfAttack) {
     seedTargetImpact(state);
     application::useCases::ApplyAngleOfAttackUseCase useCase{state};
 
-    const auto accepted = useCase.execute(45.0);
+    const auto accepted = useCase.execute(domain::AngleOfAttack::from(45.0));
 
     EXPECT_TRUE(accepted);
     EXPECT_DOUBLE_EQ(state.get().targetStandImpact.beaufort.value(), 2.0);

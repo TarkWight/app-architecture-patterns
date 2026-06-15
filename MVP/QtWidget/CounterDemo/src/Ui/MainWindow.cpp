@@ -334,7 +334,7 @@ void MainWindow::setTestTimeSourceEnabled(bool enabled) {
 
 void MainWindow::applyBeaufortImpact() {
     const auto previousTarget = sessionAdapter.getState().get().targetStandImpact;
-    if (!applyBeaufortImpactUseCase.execute(ui->doubleSpinBoxStandBeaufort->value())) {
+    if (!applyBeaufortImpactUseCase.execute(domain::Beaufort::from(ui->doubleSpinBoxStandBeaufort->value()))) {
         handleManualImpactRejected();
         return;
     }
@@ -344,7 +344,7 @@ void MainWindow::applyBeaufortImpact() {
 
 void MainWindow::applyWindDirectionImpact() {
     const auto previousTarget = sessionAdapter.getState().get().targetStandImpact;
-    if (!applyWindDirectionUseCase.execute(selectedStandDirectionDegrees())) {
+    if (!applyWindDirectionUseCase.execute(domain::WindDirection::from(selectedStandDirectionDegrees()))) {
         handleManualImpactRejected();
         return;
     }
@@ -354,7 +354,7 @@ void MainWindow::applyWindDirectionImpact() {
 
 void MainWindow::applyAngleOfAttackImpact() {
     const auto previousTarget = sessionAdapter.getState().get().targetStandImpact;
-    if (!applyAngleOfAttackUseCase.execute(ui->doubleSpinBoxStandAngleOfAttack->value())) {
+    if (!applyAngleOfAttackUseCase.execute(domain::AngleOfAttack::from(ui->doubleSpinBoxStandAngleOfAttack->value()))) {
         handleManualImpactRejected();
         return;
     }

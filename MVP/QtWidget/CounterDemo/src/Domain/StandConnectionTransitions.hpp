@@ -74,6 +74,10 @@ inline std::optional<StandConnectionStatus> transitionAfterPollingStopped(StandC
     return StandConnectionStatus::Connected;
 }
 
+constexpr StandConnectionStatus transitionAfterTelemetryConfigured() {
+    return StandConnectionStatus::Configured;
+}
+
 } // namespace domain
 
 #endif // STANDCONNECTIONTRANSITIONS_HPP

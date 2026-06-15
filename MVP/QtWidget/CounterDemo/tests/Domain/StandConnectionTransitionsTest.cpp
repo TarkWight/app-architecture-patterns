@@ -111,4 +111,8 @@ TEST(StandConnectionTransitionsTest, PollingStopTransitionsOnlyPollingToConnecte
     EXPECT_FALSE(domain::transitionAfterPollingStopped(domain::StandConnectionStatus::Error).has_value());
 }
 
+TEST(StandConnectionTransitionsTest, TelemetryConfigurationTransitionsToConfigured) {
+    EXPECT_EQ(domain::transitionAfterTelemetryConfigured(), domain::StandConnectionStatus::Configured);
+}
+
 } // namespace

@@ -1,5 +1,6 @@
 #include "ConfigureTelemetryUseCase.hpp"
 
+#include "../../Domain/StandConnectionTransitions.hpp"
 #include "../../Domain/TelemetryConnectionPolicy.hpp"
 #include "../../Domain/TelemetryConnectionStatus.hpp"
 #include "../../Domain/TelemetryStatus.hpp"
@@ -65,7 +66,7 @@ void ConfigureTelemetryUseCase::execute(const std::string &configPath) {
     }
 
     state.setTelemetryPollIntervalMs(config.pollIntervalMs);
-    state.setStandConnectionStatus(domain::StandConnectionStatus::Configured);
+    state.setStandConnectionStatus(domain::transitionAfterTelemetryConfigured());
 }
 
 } // namespace application::useCases

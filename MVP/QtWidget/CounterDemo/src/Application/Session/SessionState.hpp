@@ -50,9 +50,7 @@ class SessionState {
     void setOperatorTestDurationMinutes(domain::DurationMinutes minutes);
     void setActiveTestDurationMinutes(domain::DurationMinutes minutes);
 
-    void setElapsedSeconds(int seconds);
     void setElapsedSeconds(domain::ElapsedSeconds seconds);
-    void setRemainingSeconds(int seconds);
     void setRemainingSeconds(domain::RemainingSeconds seconds);
 
     void setTelemetryPlot(domain::PlotModel plot);

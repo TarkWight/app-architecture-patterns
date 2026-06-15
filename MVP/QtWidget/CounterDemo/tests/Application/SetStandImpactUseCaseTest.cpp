@@ -67,7 +67,7 @@ class TelemetryClientSpy final : public application::ports::ITelemetryClient {
 
 TEST(SetStandImpactUseCaseTest, RecordsManualTargetAndSafeCommandTraceWhenAppliedImpactIsSent) {
     application::session::SessionState state{};
-    state.setElapsedSeconds(7);
+    state.setElapsedSeconds(domain::ElapsedSeconds::from(7));
     const auto target = domain::makeWindImpact(5.0, 90.0, 4.0);
     const auto safeCommand = domain::makeWindImpact(1.2, 20.0, 2.0);
 

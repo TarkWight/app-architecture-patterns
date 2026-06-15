@@ -92,17 +92,9 @@ void application::session::SessionState::setActiveTestDurationMinutes(domain::Du
     notify();
 }
 
-void application::session::SessionState::setElapsedSeconds(int seconds) {
-    setElapsedSeconds(domain::ElapsedSeconds::from(seconds));
-}
-
 void application::session::SessionState::setElapsedSeconds(domain::ElapsedSeconds seconds) {
     data.elapsed = seconds;
     notify();
-}
-
-void application::session::SessionState::setRemainingSeconds(int seconds) {
-    setRemainingSeconds(domain::RemainingSeconds::from(seconds));
 }
 
 void application::session::SessionState::setRemainingSeconds(domain::RemainingSeconds seconds) {

@@ -55,6 +55,10 @@ class TestModeStatePolicy final {
         return mode == TestMode::Hybrid;
     }
 
+    [[nodiscard]] static bool usesControlProfile(TestMode mode) {
+        return mode != TestMode::Manual;
+    }
+
     [[nodiscard]] static TestTimeSource timeSourceAfterOperatorDuration(TestMode mode, TestTimeSource currentSource) {
         if (allowsOperatorDuration(mode)) {
             return TestTimeSource::OperatorDefined;

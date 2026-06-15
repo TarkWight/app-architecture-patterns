@@ -58,6 +58,13 @@ TEST(TestModeStatePolicyTest, AllowsOperatorDurationOnlyInHybridMode) {
     EXPECT_FALSE(domain::TestModeStatePolicy::allowsOperatorDuration(domain::TestMode::Automatic));
 }
 
+TEST(TestModeStatePolicyTest, UsesControlProfileOnlyInScenarioBasedModes) {
+    // Arrange / Act / Assert
+    EXPECT_FALSE(domain::TestModeStatePolicy::usesControlProfile(domain::TestMode::Manual));
+    EXPECT_TRUE(domain::TestModeStatePolicy::usesControlProfile(domain::TestMode::Hybrid));
+    EXPECT_TRUE(domain::TestModeStatePolicy::usesControlProfile(domain::TestMode::Automatic));
+}
+
 TEST(TestModeStatePolicyTest, MapsTimeSourceAfterOperatorDuration_WhenHybrid_ReturnsOperatorDefined) {
     // Arrange / Act / Assert
     EXPECT_EQ(domain::TestModeStatePolicy::timeSourceAfterOperatorDuration(domain::TestMode::Hybrid,

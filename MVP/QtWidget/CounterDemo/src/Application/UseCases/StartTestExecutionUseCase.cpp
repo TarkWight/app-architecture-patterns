@@ -8,6 +8,7 @@
 #include "../../Domain/TestExecutionPlanner.hpp"
 #include "../../Domain/TestExecutionStatus.hpp"
 #include "../../Domain/TestExecutionTransitions.hpp"
+#include "../../Domain/TestModeStatePolicy.hpp"
 #include "../../Domain/TestProtocol.hpp"
 
 namespace application::useCases {
@@ -25,7 +26,7 @@ void StartTestExecutionUseCase::execute() {
         return;
     }
 
-    if (session.testProtocol.testMode != domain::TestMode::Manual) {
+    if (domain::TestModeStatePolicy::usesControlProfile(session.testProtocol.testMode)) {
         buildControlPlotUseCase.execute();
         state.setTargetStandImpact(state.get().windImpact);
         state.clearControlTrace();
@@ -80,7 +81,7 @@ void StartTestExecutionUseCase::stopTelemetryPollingIfActive() {
 
 void StartTestExecutionUseCase::applyScenarioImpact(domain::ElapsedSeconds elapsed) {
     const auto &session = state.get();
-    if (session.testProtocol.testMode == domain::TestMode::Manual) {
+    if (!domain::TestModeStatePolicy::usesControlProfile(session.testProtocol.testMode)) {
         return;
     }
 

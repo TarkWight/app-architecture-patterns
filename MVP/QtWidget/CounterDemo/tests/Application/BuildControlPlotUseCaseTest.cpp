@@ -103,12 +103,12 @@ TEST(BuildControlPlotUseCaseTest, UsesControlTraceAsTargetAndSafeCommandSeriesWh
     application::session::SessionState state{};
     state.setEstimatedTestDurationMinutes(1);
     state.appendControlTraceSample(domain::ControlTraceSample{
-        .timeSeconds = 0.0,
+        .time = domain::ControlTraceTime::fromSeconds(0.0),
         .targetValue = domain::makeWindImpact(2.0, 0.0, 0.0),
         .safeCommandValue = domain::makeWindImpact(0.1, 0.0, 0.0),
     });
     state.appendControlTraceSample(domain::ControlTraceSample{
-        .timeSeconds = 1.0,
+        .time = domain::ControlTraceTime::fromSeconds(1.0),
         .targetValue = domain::makeWindImpact(3.0, 0.0, 0.0),
         .safeCommandValue = domain::makeWindImpact(0.2, 0.0, 0.0),
     });
@@ -138,12 +138,12 @@ TEST(BuildControlPlotUseCaseTest, KeepsFormulaSeriesWhenControlTraceIsAvailableF
     state.setTestProtocolMode(domain::TestMode::Hybrid);
     state.setEstimatedTestDurationMinutes(2);
     state.appendControlTraceSample(domain::ControlTraceSample{
-        .timeSeconds = 0.0,
+        .time = domain::ControlTraceTime::fromSeconds(0.0),
         .targetValue = domain::makeWindImpact(2.0, 0.0, 0.0),
         .safeCommandValue = domain::makeWindImpact(0.1, 0.0, 0.0),
     });
     state.appendControlTraceSample(domain::ControlTraceSample{
-        .timeSeconds = 1.0,
+        .time = domain::ControlTraceTime::fromSeconds(1.0),
         .targetValue = domain::makeWindImpact(3.0, 0.0, 0.0),
         .safeCommandValue = domain::makeWindImpact(0.2, 0.0, 0.0),
     });
@@ -176,7 +176,7 @@ TEST(BuildControlPlotUseCaseTest, RefreshFromStateKeepsExistingProfileAndUpdates
 
     const auto profileSize = state.get().controlProfile.samples.size();
     state.appendControlTraceSample(domain::ControlTraceSample{
-        .timeSeconds = 0.0,
+        .time = domain::ControlTraceTime::fromSeconds(0.0),
         .targetValue = domain::makeWindImpact(2.0, 0.0, 0.0),
         .safeCommandValue = domain::makeWindImpact(0.1, 0.0, 0.0),
     });

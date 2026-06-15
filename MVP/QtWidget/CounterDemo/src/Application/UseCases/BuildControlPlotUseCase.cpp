@@ -24,7 +24,7 @@ domain::DurationMinutes determinePreviewDuration(const session::SessionStateData
 
 domain::DurationMinutes determineGridDuration(const session::SessionStateData &stateData) {
     if (!stateData.controlTrace.empty()) {
-        const double lastTraceMinute = stateData.controlTrace.back().timeSeconds / 60.0;
+        const double lastTraceMinute = stateData.controlTrace.back().time.minutes();
         return domain::DurationMinutes::required(std::max(1, static_cast<int>(std::ceil(lastTraceMinute))));
     }
 
@@ -100,13 +100,13 @@ void addControlTraceSeries(domain::PlotModel &plot, const domain::ControlTrace &
     safeCommand.series.points.reserve(trace.size());
 
     for (const auto &sample : trace.samples()) {
-        const double x = overlayFormula ? sample.timeSeconds / 60.0 : sample.timeSeconds;
+        const double x = overlayFormula ? sample.time.minutes() : sample.time.seconds();
         target.series.points.push_back(domain::Point{.x = x, .y = sample.targetValue.beaufort.value()});
         safeCommand.series.points.push_back(domain::Point{.x = x, .y = sample.safeCommandValue.beaufort.value()});
     }
 
-    const double markerTimeSeconds = trace.back().timeSeconds;
-    const double markerX = overlayFormula ? markerTimeSeconds / 60.0 : markerTimeSeconds;
+    const double markerTimeSeconds = trace.back().time.seconds();
+    const double markerX = overlayFormula ? trace.back().time.minutes() : markerTimeSeconds;
 
     if (!overlayFormula) {
         const double maxSeconds = std::max(10.0, std::ceil(markerTimeSeconds));

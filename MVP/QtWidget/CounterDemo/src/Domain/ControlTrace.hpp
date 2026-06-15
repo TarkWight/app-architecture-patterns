@@ -4,20 +4,50 @@
 #include "Time.hpp"
 #include "WindImpact.hpp"
 
+#include <algorithm>
 #include <cstddef>
 #include <utility>
 #include <vector>
 
 namespace domain {
 
+class ControlTraceTime final {
+  public:
+    static ControlTraceTime fromSeconds(double rawSeconds) {
+        return ControlTraceTime{std::max(0.0, rawSeconds)};
+    }
+
+    static ControlTraceTime fromElapsed(ElapsedSeconds elapsed) {
+        return fromSeconds(static_cast<double>(elapsed.value()));
+    }
+
+    [[nodiscard]] double seconds() const {
+        return rawSeconds;
+    }
+
+    [[nodiscard]] double minutes() const {
+        return rawSeconds / 60.0;
+    }
+
+    [[nodiscard]] bool operator<=(const ControlTraceTime &other) const {
+        return rawSeconds <= other.rawSeconds;
+    }
+
+  private:
+    explicit ControlTraceTime(double seconds) : rawSeconds(seconds) {
+    }
+
+    double rawSeconds{0.0};
+};
+
 struct ControlTraceSample {
-    double timeSeconds{0.0};
+    ControlTraceTime time{ControlTraceTime::fromSeconds(0.0)};
     WindImpact targetValue{};
     WindImpact safeCommandValue{};
 
     [[nodiscard]] static ControlTraceSample manualCommand(ElapsedSeconds elapsed, WindImpact target,
                                                           WindImpact safeCommand) {
-        return ControlTraceSample{.timeSeconds = static_cast<double>(elapsed.value()),
+        return ControlTraceSample{.time = ControlTraceTime::fromElapsed(elapsed),
                                   .targetValue = std::move(target),
                                   .safeCommandValue = std::move(safeCommand)};
     }
@@ -33,8 +63,8 @@ class ControlTrace final {
     }
 
     void append(ControlTraceSample sample) {
-        if (!sampleList.empty() && sample.timeSeconds <= sampleList.back().timeSeconds) {
-            sample.timeSeconds = sampleList.back().timeSeconds + minimumStepSeconds;
+        if (!sampleList.empty() && sample.time <= sampleList.back().time) {
+            sample.time = ControlTraceTime::fromSeconds(sampleList.back().time.seconds() + minimumStepSeconds);
         }
 
         sampleList.push_back(std::move(sample));

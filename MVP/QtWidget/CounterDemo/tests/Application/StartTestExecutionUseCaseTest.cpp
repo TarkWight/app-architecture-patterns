@@ -143,7 +143,7 @@ TEST(StartTestExecutionUseCaseTest, ScenarioStartClearsPreviousControlTrace) {
     state.setTestProtocolMode(domain::TestMode::Automatic);
     state.setEstimatedTestDurationMinutes(1);
     state.appendControlTraceSample(
-        domain::ControlTraceSample{.timeSeconds = 42.0,
+        domain::ControlTraceSample{.time = domain::ControlTraceTime::fromSeconds(42.0),
                                    .targetValue = domain::makeWindImpact(7.0, 0.0, 0.0),
                                    .safeCommandValue = domain::makeWindImpact(6.0, 0.0, 0.0)});
 
@@ -157,7 +157,7 @@ TEST(StartTestExecutionUseCaseTest, ScenarioStartClearsPreviousControlTrace) {
     useCase.execute();
 
     ASSERT_EQ(state.get().controlTrace.size(), 1U);
-    EXPECT_DOUBLE_EQ(state.get().controlTrace.front().timeSeconds, 0.0);
+    EXPECT_DOUBLE_EQ(state.get().controlTrace.front().time.seconds(), 0.0);
 }
 
 TEST(StartTestExecutionUseCaseTest, StartsTelemetryPollingWhenStandIsConnected) {

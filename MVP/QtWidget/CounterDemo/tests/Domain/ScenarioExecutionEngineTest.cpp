@@ -31,7 +31,7 @@ TEST(ScenarioExecutionEngineTest, AdvancesScenario_WhenProfileHasSample_ReturnsI
     EXPECT_DOUBLE_EQ(step->impact.beaufort.value(), 2.0);
     EXPECT_DOUBLE_EQ(step->impact.direction.degrees(), 90.0);
     EXPECT_DOUBLE_EQ(step->impact.angleOfAttack.degrees(), 12.0);
-    EXPECT_DOUBLE_EQ(step->traceSample.timeSeconds, 1.0);
+    EXPECT_DOUBLE_EQ(step->traceSample.time.seconds(), 1.0);
     EXPECT_DOUBLE_EQ(step->traceSample.targetValue.beaufort.value(), 2.0);
     EXPECT_DOUBLE_EQ(step->traceSample.safeCommandValue.beaufort.value(), 2.0);
 }
@@ -49,7 +49,7 @@ TEST(ScenarioExecutionEngineTest, AdvancesScenario_WhenElapsedExceedsProfile_Ret
     EXPECT_DOUBLE_EQ(step->impact.beaufort.value(), 2.0);
     EXPECT_DOUBLE_EQ(step->impact.direction.degrees(), 180.0);
     EXPECT_DOUBLE_EQ(step->impact.angleOfAttack.degrees(), 5.0);
-    EXPECT_DOUBLE_EQ(step->traceSample.timeSeconds, 120.0);
+    EXPECT_DOUBLE_EQ(step->traceSample.time.seconds(), 120.0);
 }
 
 TEST(ScenarioExecutionEngineTest, AdvancesScenario_WhenProfileIsEmpty_ReturnsNoStep) {

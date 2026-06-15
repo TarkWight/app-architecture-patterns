@@ -4,10 +4,10 @@
 #include "../../Domain/ControlProfileTiming.hpp"
 #include "../../Domain/TestTimeSource.hpp"
 #include "../../Domain/WindControlProfile.hpp"
+#include "../../Domain/WindControlProfileCalculator.hpp"
 
 #include <algorithm>
 #include <cmath>
-#include <cstddef>
 #include <utility>
 
 namespace application::useCases {
@@ -53,31 +53,6 @@ double traceAxisStepSeconds(double maxSeconds) {
 
 bool hasFormulaSeries(const domain::PlotModel &plot) {
     return !plot.series.points.empty();
-}
-
-domain::WindControlProfile buildProfile(const session::SessionStateData &stateData,
-                                        const ports::IFunctionEngine &engine) {
-    domain::WindControlProfile profile{};
-    profile.sampleIntervalSeconds = domain::windControlProfileSampleIntervalSeconds;
-
-    profile.durationMinutes = determinePreviewDuration(stateData).value();
-    const int sampleCount =
-        static_cast<int>(static_cast<double>(profile.durationMinutes * 60) / profile.sampleIntervalSeconds);
-    profile.samples.reserve(static_cast<std::size_t>(sampleCount));
-
-    for (int index = 0; index < sampleCount; ++index) {
-        const double timeSeconds = static_cast<double>(index) * profile.sampleIntervalSeconds;
-        const double timeMinutes = timeSeconds / 60.0;
-        const double rawBeaufort = engine.eval(stateData.functionExpression.value, timeMinutes);
-
-        profile.samples.push_back(domain::WindControlSample{
-            .timeSeconds = timeSeconds,
-            .timeMinutes = timeMinutes,
-            .beaufort = domain::Beaufort::from(rawBeaufort),
-        });
-    }
-
-    return profile;
 }
 
 domain::PlotModel buildPlot(const session::SessionStateData &stateData, const domain::WindControlProfile &profile) {
@@ -158,7 +133,13 @@ domain::PlotModel BuildControlPlotUseCase::execute() {
         domain::determineControlProfileTiming(stateData.testProtocol.testMode, stateData.testTimeSource,
                                               stateData.estimatedTestDuration, stateData.operatorTestDuration);
 
-    auto profile = timing.formulaEnabled ? buildProfile(stateData, engine) : domain::WindControlProfile{};
+    auto profile =
+        timing.formulaEnabled
+            ? domain::buildWindControlProfile(timing.duration,
+                                              [this, &stateData](double timeMinutes) {
+                                                  return engine.eval(stateData.functionExpression.value, timeMinutes);
+                                              })
+            : domain::WindControlProfile{};
     auto plot = buildPlot(stateData, profile);
     addControlTraceSeries(plot, stateData.controlTrace);
 

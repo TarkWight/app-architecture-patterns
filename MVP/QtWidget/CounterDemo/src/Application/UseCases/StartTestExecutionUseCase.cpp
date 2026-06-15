@@ -33,24 +33,25 @@ void StartTestExecutionUseCase::execute() {
     const auto plan = domain::TestExecutionPlanner::plan(session.testProtocol, session.testTimeSource,
                                                          session.estimatedTestDuration, session.operatorTestDuration);
 
-    state.setActiveTestDurationMinutes(plan.activeDuration.value());
+    state.setActiveTestDurationMinutes(plan.activeDuration);
     state.setTestTimeDirection(plan.direction);
-    state.setElapsedSeconds(0);
-    state.setRemainingSeconds(plan.initialRemaining().value());
+    state.setElapsedSeconds(domain::ElapsedSeconds::from(0));
+    state.setRemainingSeconds(plan.initialRemaining());
 
     state.setTestExecutionStatus(domain::TestExecutionStatus::Running);
     startTelemetryPollingIfConnected();
     applyScenarioImpact(0);
 
     testExecutionScheduler.start(0, [this, plan](int elapsedSeconds) {
-        state.setElapsedSeconds(elapsedSeconds);
-        applyScenarioImpact(elapsedSeconds);
+        const auto elapsed = domain::ElapsedSeconds::from(elapsedSeconds);
+        state.setElapsedSeconds(elapsed);
+        applyScenarioImpact(elapsed.value());
 
-        const auto remaining = plan.remainingAt(domain::ElapsedSeconds::from(elapsedSeconds));
+        const auto remaining = plan.remainingAt(elapsed);
 
-        state.setRemainingSeconds(remaining.value());
+        state.setRemainingSeconds(remaining);
 
-        if (plan.isCompletedAt(domain::ElapsedSeconds::from(elapsedSeconds))) {
+        if (plan.isCompletedAt(elapsed)) {
             testExecutionScheduler.stop();
             stopTelemetryPollingIfActive();
             state.setTestExecutionStatus(domain::TestExecutionStatus::Completed);

@@ -1,6 +1,7 @@
 #include "SetControlChartsTabMinutesUseCase.hpp"
 
 #include "../../Domain/TestProtocol.hpp"
+#include "../../Domain/Time.hpp"
 
 namespace application::useCases {
 
@@ -14,8 +15,9 @@ void SetControlChartsTabMinutesUseCase::execute(int minutes) {
         return;
     }
 
-    state.setControlChartsTabMinutes(minutes);
-    state.setOperatorTestDurationMinutes(minutes);
+    const auto duration = domain::DurationMinutes::required(minutes);
+    state.setControlChartsTabMinutes(duration);
+    state.setOperatorTestDurationMinutes(duration);
     state.setTestTimeSource(domain::TestTimeSource::OperatorDefined);
 }
 

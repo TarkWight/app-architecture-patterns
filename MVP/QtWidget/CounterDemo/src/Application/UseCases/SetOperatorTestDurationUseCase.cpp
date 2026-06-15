@@ -1,5 +1,7 @@
 #include "SetOperatorTestDurationUseCase.hpp"
 
+#include "../../Domain/Time.hpp"
+
 namespace application::useCases {
 
 SetOperatorTestDurationUseCase::SetOperatorTestDurationUseCase(application::session::SessionState &state)
@@ -7,7 +9,7 @@ SetOperatorTestDurationUseCase::SetOperatorTestDurationUseCase(application::sess
 }
 
 void SetOperatorTestDurationUseCase::execute(int minutes) {
-    state.setOperatorTestDurationMinutes(minutes);
+    state.setOperatorTestDurationMinutes(domain::DurationMinutes::required(minutes));
 }
 
 } // namespace application::useCases

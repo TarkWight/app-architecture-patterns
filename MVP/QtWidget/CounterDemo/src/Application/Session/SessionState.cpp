@@ -54,7 +54,11 @@ void application::session::SessionState::setLineColor(domain::RgbColor color) {
 }
 
 void application::session::SessionState::setControlChartsTabMinutes(int minutes) {
-    data.controlChartsTabMinutes = domain::DurationMinutes::required(minutes);
+    setControlChartsTabMinutes(domain::DurationMinutes::required(minutes));
+}
+
+void application::session::SessionState::setControlChartsTabMinutes(domain::DurationMinutes minutes) {
+    data.controlChartsTabMinutes = minutes;
     notify();
 }
 
@@ -79,22 +83,38 @@ void application::session::SessionState::setEstimatedTestDurationMinutes(int min
 }
 
 void application::session::SessionState::setOperatorTestDurationMinutes(int minutes) {
-    data.operatorTestDuration = domain::DurationMinutes::required(minutes);
+    setOperatorTestDurationMinutes(domain::DurationMinutes::required(minutes));
+}
+
+void application::session::SessionState::setOperatorTestDurationMinutes(domain::DurationMinutes minutes) {
+    data.operatorTestDuration = minutes;
     notify();
 }
 
 void application::session::SessionState::setActiveTestDurationMinutes(int minutes) {
-    data.activeTestDuration = domain::DurationMinutes::optional(minutes);
+    setActiveTestDurationMinutes(domain::DurationMinutes::optional(minutes));
+}
+
+void application::session::SessionState::setActiveTestDurationMinutes(domain::DurationMinutes minutes) {
+    data.activeTestDuration = minutes;
     notify();
 }
 
 void application::session::SessionState::setElapsedSeconds(int seconds) {
-    data.elapsed = domain::ElapsedSeconds::from(seconds);
+    setElapsedSeconds(domain::ElapsedSeconds::from(seconds));
+}
+
+void application::session::SessionState::setElapsedSeconds(domain::ElapsedSeconds seconds) {
+    data.elapsed = seconds;
     notify();
 }
 
 void application::session::SessionState::setRemainingSeconds(int seconds) {
-    data.remaining = domain::RemainingSeconds::from(seconds);
+    setRemainingSeconds(domain::RemainingSeconds::from(seconds));
+}
+
+void application::session::SessionState::setRemainingSeconds(domain::RemainingSeconds seconds) {
+    data.remaining = seconds;
     notify();
 }
 

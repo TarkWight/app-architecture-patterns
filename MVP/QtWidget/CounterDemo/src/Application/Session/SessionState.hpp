@@ -38,6 +38,7 @@ class SessionState {
     void setWindImpact(domain::WindImpact profile);
     void setLineColor(domain::RgbColor color);
     void setControlChartsTabMinutes(int minutes);
+    void setControlChartsTabMinutes(domain::DurationMinutes minutes);
 
     void setTestExecutionStatus(domain::TestExecutionStatus status);
 
@@ -46,10 +47,14 @@ class SessionState {
 
     void setEstimatedTestDurationMinutes(int minutes);
     void setOperatorTestDurationMinutes(int minutes);
+    void setOperatorTestDurationMinutes(domain::DurationMinutes minutes);
     void setActiveTestDurationMinutes(int minutes);
+    void setActiveTestDurationMinutes(domain::DurationMinutes minutes);
 
     void setElapsedSeconds(int seconds);
+    void setElapsedSeconds(domain::ElapsedSeconds seconds);
     void setRemainingSeconds(int seconds);
+    void setRemainingSeconds(domain::RemainingSeconds seconds);
 
     void setTelemetryPlot(domain::PlotModel plot);
     void setControlPlot(domain::PlotModel plot);

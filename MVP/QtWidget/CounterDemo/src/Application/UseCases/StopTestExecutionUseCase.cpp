@@ -29,8 +29,8 @@ void StopTestExecutionUseCase::execute() {
     const auto stopPlan =
         domain::TestExecutionPlanner::resetAfterStop(session.activeTestDuration, session.testTimeDirection);
 
-    state.setElapsedSeconds(stopPlan.elapsed.value());
-    state.setRemainingSeconds(stopPlan.remaining.value());
+    state.setElapsedSeconds(stopPlan.elapsed);
+    state.setRemainingSeconds(stopPlan.remaining);
 
     state.setTestExecutionStatus(domain::TestExecutionStatus::Ready);
 }

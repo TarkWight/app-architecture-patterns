@@ -24,6 +24,7 @@ class ControlChartsTabPresenter final {
     void detachView();
 
     void onViewReady();
+    void onTimeSettingsChanged();
 
     void onMinutesChanged(int minutes);
 
@@ -42,6 +43,7 @@ class ControlChartsTabPresenter final {
     IControlChartsTabView *view{nullptr};
 
     void updateWindImpact(double beaufort, double direction, double angleOfAttack);
+    void refreshMinutesInputEnabled();
 };
 
 } // namespace presentation::controlChartsTab

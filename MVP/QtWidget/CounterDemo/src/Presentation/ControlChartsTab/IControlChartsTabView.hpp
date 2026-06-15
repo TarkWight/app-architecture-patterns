@@ -10,6 +10,7 @@ class IControlChartsTabView {
     virtual ~IControlChartsTabView() = default;
 
     virtual void setMinutes(int minutes) = 0;
+    virtual void setMinutesInputEnabled(bool enabled) = 0;
 
     virtual void setBeaufort(double value) = 0;
     virtual void setDirection(double value) = 0;

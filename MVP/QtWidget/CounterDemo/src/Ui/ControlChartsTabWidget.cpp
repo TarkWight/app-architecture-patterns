@@ -2,8 +2,6 @@
 #include "ui_ControlChartsTabWidget.h"
 
 #include "../Domain/FormulaTemplate.hpp"
-#include "../Domain/TestProtocol.hpp"
-#include "../Domain/TestTimeSource.hpp"
 #include "../Domain/WindImpact.hpp"
 
 #include <QSignalBlocker>
@@ -33,7 +31,7 @@ ControlChartsTabWidget::ControlChartsTabWidget(presentation::controlChartsTab::C
 
     connectSignals();
     connectSessionSignals();
-    updateMinutesInputEnabled();
+    presenter.onTimeSettingsChanged();
     setFunctionExpression(sessionAdapter.getState().get().functionExpression.value);
 }
 
@@ -45,6 +43,10 @@ ControlChartsTabWidget::~ControlChartsTabWidget() {
 void ControlChartsTabWidget::setMinutes(int minutes) {
     const QSignalBlocker blocker{ui->spinBoxMinutes};
     ui->spinBoxMinutes->setValue(minutes);
+}
+
+void ControlChartsTabWidget::setMinutesInputEnabled(bool enabled) {
+    ui->spinBoxMinutes->setEnabled(enabled);
 }
 
 void ControlChartsTabWidget::setBeaufort(double value) {
@@ -112,10 +114,10 @@ void ControlChartsTabWidget::connectSignals() {
 void ControlChartsTabWidget::connectSessionSignals() {
     QObject::connect(
         &sessionAdapter, &infrastructure::SessionStateQtAdapter::testTimeModelChanged, this,
-        [this](const presentation::viewModels::TestTimeViewModel & /*model*/) { updateMinutesInputEnabled(); });
+        [this](const presentation::viewModels::TestTimeViewModel & /*model*/) { presenter.onTimeSettingsChanged(); });
 
     QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testProtocolModeChanged, this,
-                     [this](const QString & /*mode*/) { updateMinutesInputEnabled(); });
+                     [this](const QString & /*mode*/) { presenter.onTimeSettingsChanged(); });
 
     QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::controlChartsTabMinutesChanged, this,
                      [this](int minutes) {
@@ -155,13 +157,6 @@ void ControlChartsTabWidget::connectSessionSignals() {
 
     QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::controlPlotChanged, this,
                      [this]() { refreshPlot(); });
-}
-
-void ControlChartsTabWidget::updateMinutesInputEnabled() {
-    const auto &state = sessionAdapter.getState().get();
-    const bool enabled = state.testProtocol.testMode == domain::TestMode::Hybrid &&
-                         state.testTimeSource == domain::TestTimeSource::OperatorDefined;
-    ui->spinBoxMinutes->setEnabled(enabled);
 }
 
 void ControlChartsTabWidget::populateFormulaTemplates() {

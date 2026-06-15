@@ -25,6 +25,7 @@ class ControlChartsTabWidget final : public QWidget, public presentation::contro
     ~ControlChartsTabWidget() override;
 
     void setMinutes(int minutes) override;
+    void setMinutesInputEnabled(bool enabled) override;
     void setBeaufort(double value) override;
     void setDirection(double value) override;
     void setAngleOfAttack(double value) override;
@@ -47,7 +48,6 @@ class ControlChartsTabWidget final : public QWidget, public presentation::contro
 
     void connectSignals();
     void connectSessionSignals();
-    void updateMinutesInputEnabled();
     void populateFormulaTemplates();
     void updateFormulaTemplateSelection(const std::string &expression);
 };

@@ -55,6 +55,10 @@ class TestModeStatePolicy final {
         return mode == TestMode::Hybrid;
     }
 
+    [[nodiscard]] static bool operatorDurationInputEnabled(TestMode mode, TestTimeSource source) {
+        return allowsOperatorDuration(mode) && source == TestTimeSource::OperatorDefined;
+    }
+
     [[nodiscard]] static bool usesControlProfile(TestMode mode) {
         return mode != TestMode::Manual;
     }

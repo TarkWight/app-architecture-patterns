@@ -137,6 +137,12 @@ qt_add_executable(develop
   src/Application/UseCases/SetStandControlModeUseCase.cpp
   src/Application/UseCases/SetStandImpactUseCase.hpp
   src/Application/UseCases/SetStandImpactUseCase.cpp
+  src/Application/UseCases/ApplyBeaufortImpactUseCase.hpp
+  src/Application/UseCases/ApplyBeaufortImpactUseCase.cpp
+  src/Application/UseCases/ApplyWindDirectionUseCase.hpp
+  src/Application/UseCases/ApplyWindDirectionUseCase.cpp
+  src/Application/UseCases/ApplyAngleOfAttackUseCase.hpp
+  src/Application/UseCases/ApplyAngleOfAttackUseCase.cpp
   src/Application/UseCases/ConfigureTelemetryUseCase.hpp
   src/Application/UseCases/ConfigureTelemetryUseCase.cpp
   src/Application/UseCases/ConnectStandUseCase.hpp
@@ -248,6 +254,9 @@ if (BUILD_TESTING)
     src/Application/UseCases/SetControlChartsTabMinutesUseCase.cpp
     src/Application/UseCases/SetStandControlModeUseCase.cpp
     src/Application/UseCases/SetStandImpactUseCase.cpp
+    src/Application/UseCases/ApplyBeaufortImpactUseCase.cpp
+    src/Application/UseCases/ApplyWindDirectionUseCase.cpp
+    src/Application/UseCases/ApplyAngleOfAttackUseCase.cpp
     src/Application/UseCases/StartTestExecutionUseCase.cpp
     src/Application/UseCases/StopTestExecutionUseCase.cpp
     src/Application/UseCases/UpdateTestProtocolUseCase.cpp

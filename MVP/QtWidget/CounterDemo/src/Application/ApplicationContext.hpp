@@ -19,6 +19,9 @@
 #include "UseCases/SetTelemetryWindowUseCase.hpp"
 #include "UseCases/SetStandControlModeUseCase.hpp"
 #include "UseCases/SetStandImpactUseCase.hpp"
+#include "UseCases/ApplyBeaufortImpactUseCase.hpp"
+#include "UseCases/ApplyWindDirectionUseCase.hpp"
+#include "UseCases/ApplyAngleOfAttackUseCase.hpp"
 #include "UseCases/StartTestExecutionUseCase.hpp"
 #include "UseCases/StopTestExecutionUseCase.hpp"
 #include "UseCases/UpdateTestProtocolUseCase.hpp"
@@ -99,6 +102,12 @@ struct ApplicationContext {
     application::useCases::SetStandControlModeUseCase setStandControlModeUseCase{sessionState};
 
     application::useCases::SetStandImpactUseCase setStandImpactUseCase{sessionState, telemetryClient};
+
+    application::useCases::ApplyBeaufortImpactUseCase applyBeaufortImpactUseCase{sessionState};
+
+    application::useCases::ApplyWindDirectionUseCase applyWindDirectionUseCase{sessionState};
+
+    application::useCases::ApplyAngleOfAttackUseCase applyAngleOfAttackUseCase{sessionState};
 
     application::useCases::SetFunctionExpressionUseCase setFunctionExpressionUseCase{sessionState};
 

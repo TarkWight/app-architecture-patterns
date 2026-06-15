@@ -40,10 +40,10 @@ TEST(BuildControlPlotUseCaseTest, BuildsOneSecondWindControlProfileForCalculated
     EXPECT_EQ(profile.samples.size(), static_cast<std::size_t>(48 * 60));
     EXPECT_EQ(plot.series.points.size(), profile.samples.size());
 
-    EXPECT_DOUBLE_EQ(profile.samples.at(0).timeSeconds, 0.0);
-    EXPECT_DOUBLE_EQ(profile.samples.at(0).timeMinutes, 0.0);
-    EXPECT_DOUBLE_EQ(profile.samples.at(60).timeSeconds, 60.0);
-    EXPECT_DOUBLE_EQ(profile.samples.at(60).timeMinutes, 1.0);
+    EXPECT_DOUBLE_EQ(profile.samples.at(0).time.seconds(), 0.0);
+    EXPECT_DOUBLE_EQ(profile.samples.at(0).time.minutes(), 0.0);
+    EXPECT_DOUBLE_EQ(profile.samples.at(60).time.seconds(), 60.0);
+    EXPECT_DOUBLE_EQ(profile.samples.at(60).time.minutes(), 1.0);
     EXPECT_DOUBLE_EQ(profile.samples.at(60).beaufort.value(), 1.0);
 
     EXPECT_DOUBLE_EQ(plot.x.min, 0.0);

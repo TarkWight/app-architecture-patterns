@@ -66,7 +66,7 @@ domain::PlotModel buildPlot(const session::SessionStateData &stateData, const do
 
     plot.series.points.reserve(profile.samples.size());
     for (const auto &sample : profile.samples) {
-        plot.series.points.push_back(domain::Point{.x = sample.timeMinutes, .y = sample.beaufort.value()});
+        plot.series.points.push_back(domain::Point{.x = sample.time.minutes(), .y = sample.beaufort.value()});
     }
 
     return plot;

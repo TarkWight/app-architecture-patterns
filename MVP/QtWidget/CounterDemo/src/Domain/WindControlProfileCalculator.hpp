@@ -21,12 +21,11 @@ inline WindControlProfile buildWindControlProfile(DurationMinutes duration,
 
     for (int index = 0; index < sampleCount; ++index) {
         const double timeSeconds = static_cast<double>(index) * profile.sampleIntervalSeconds;
-        const double timeMinutes = timeSeconds / 60.0;
-        const double rawBeaufort = beaufortAtMinute(timeMinutes);
+        const auto time = WindControlSampleTime::fromSeconds(timeSeconds);
+        const double rawBeaufort = beaufortAtMinute(time.minutes());
 
         profile.samples.push_back(WindControlSample{
-            .timeSeconds = timeSeconds,
-            .timeMinutes = timeMinutes,
+            .time = time,
             .beaufort = Beaufort::from(rawBeaufort),
         });
     }

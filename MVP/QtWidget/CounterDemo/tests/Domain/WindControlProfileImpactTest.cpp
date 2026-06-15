@@ -8,11 +8,12 @@ TEST(WindControlProfileImpactTest, ResolvesWindImpactByElapsedSeconds) {
     domain::WindControlProfile profile{};
     profile.sampleIntervalSeconds = 1.0;
     profile.samples = {
-        domain::WindControlSample{.timeSeconds = 0.0, .timeMinutes = 0.0, .beaufort = domain::Beaufort::from(1.0)},
-        domain::WindControlSample{
-            .timeSeconds = 1.0, .timeMinutes = 1.0 / 60.0, .beaufort = domain::Beaufort::from(2.0)},
-        domain::WindControlSample{
-            .timeSeconds = 2.0, .timeMinutes = 2.0 / 60.0, .beaufort = domain::Beaufort::from(3.0)},
+        domain::WindControlSample{.time = domain::WindControlSampleTime::fromSeconds(0.0),
+                                  .beaufort = domain::Beaufort::from(1.0)},
+        domain::WindControlSample{.time = domain::WindControlSampleTime::fromSeconds(1.0),
+                                  .beaufort = domain::Beaufort::from(2.0)},
+        domain::WindControlSample{.time = domain::WindControlSampleTime::fromSeconds(2.0),
+                                  .beaufort = domain::Beaufort::from(3.0)},
     };
     const auto base = domain::makeWindImpact(0.0, 90.0, 4.0);
 
@@ -28,9 +29,10 @@ TEST(WindControlProfileImpactTest, ClampsElapsedTimeToLastProfileSample) {
     domain::WindControlProfile profile{};
     profile.sampleIntervalSeconds = 1.0;
     profile.samples = {
-        domain::WindControlSample{.timeSeconds = 0.0, .timeMinutes = 0.0, .beaufort = domain::Beaufort::from(1.0)},
-        domain::WindControlSample{
-            .timeSeconds = 1.0, .timeMinutes = 1.0 / 60.0, .beaufort = domain::Beaufort::from(2.0)},
+        domain::WindControlSample{.time = domain::WindControlSampleTime::fromSeconds(0.0),
+                                  .beaufort = domain::Beaufort::from(1.0)},
+        domain::WindControlSample{.time = domain::WindControlSampleTime::fromSeconds(1.0),
+                                  .beaufort = domain::Beaufort::from(2.0)},
     };
 
     const auto impact = domain::windImpactAt(profile, domain::ElapsedSeconds::from(100), domain::WindImpact{});

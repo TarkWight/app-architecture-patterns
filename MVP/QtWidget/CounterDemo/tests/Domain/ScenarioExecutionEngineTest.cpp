@@ -10,10 +10,10 @@ domain::WindControlProfile profileWithSamples() {
         .sampleIntervalSeconds = 1.0,
         .samples =
             {
-                domain::WindControlSample{
-                    .timeSeconds = 0.0, .timeMinutes = 0.0, .beaufort = domain::Beaufort::from(1.0)},
-                domain::WindControlSample{
-                    .timeSeconds = 1.0, .timeMinutes = 1.0 / 60.0, .beaufort = domain::Beaufort::from(2.0)},
+                domain::WindControlSample{.time = domain::WindControlSampleTime::fromSeconds(0.0),
+                                          .beaufort = domain::Beaufort::from(1.0)},
+                domain::WindControlSample{.time = domain::WindControlSampleTime::fromSeconds(1.0),
+                                          .beaufort = domain::Beaufort::from(2.0)},
             },
     };
 }

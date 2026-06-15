@@ -12,11 +12,18 @@ TEST(WindControlProfileCalculatorTest, BuildsOneSecondSamplesForDuration) {
     EXPECT_DOUBLE_EQ(profile.sampleIntervalSeconds, domain::windControlProfileSampleIntervalSeconds);
     EXPECT_EQ(profile.samples.size(), static_cast<std::size_t>(2 * 60));
 
-    EXPECT_DOUBLE_EQ(profile.samples.at(0).timeSeconds, 0.0);
-    EXPECT_DOUBLE_EQ(profile.samples.at(0).timeMinutes, 0.0);
-    EXPECT_DOUBLE_EQ(profile.samples.at(60).timeSeconds, 60.0);
-    EXPECT_DOUBLE_EQ(profile.samples.at(60).timeMinutes, 1.0);
+    EXPECT_DOUBLE_EQ(profile.samples.at(0).time.seconds(), 0.0);
+    EXPECT_DOUBLE_EQ(profile.samples.at(0).time.minutes(), 0.0);
+    EXPECT_DOUBLE_EQ(profile.samples.at(60).time.seconds(), 60.0);
+    EXPECT_DOUBLE_EQ(profile.samples.at(60).time.minutes(), 1.0);
     EXPECT_DOUBLE_EQ(profile.samples.at(60).beaufort.value(), 1.0);
+}
+
+TEST(WindControlSampleTimeTest, ClampsNegativeSecondsToZero) {
+    const auto time = domain::WindControlSampleTime::fromSeconds(-1.0);
+
+    EXPECT_DOUBLE_EQ(time.seconds(), 0.0);
+    EXPECT_DOUBLE_EQ(time.minutes(), 0.0);
 }
 
 TEST(WindControlProfileCalculatorTest, ClampsFunctionOutputToOperationalBeaufortRange) {

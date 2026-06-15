@@ -7,6 +7,8 @@
 #include "../Ports/ITestExecutionScheduler.hpp"
 #include "../Session/SessionState.hpp"
 
+#include "../../Domain/Time.hpp"
+
 namespace application::useCases {
 
 class StartTestExecutionUseCase final {
@@ -26,7 +28,7 @@ class StartTestExecutionUseCase final {
 
     void startTelemetryPollingIfConnected();
     void stopTelemetryPollingIfActive();
-    void applyScenarioImpact(int elapsedSeconds);
+    void applyScenarioImpact(domain::ElapsedSeconds elapsed);
     void sendAppliedImpact(const domain::WindImpact &profile);
 };
 

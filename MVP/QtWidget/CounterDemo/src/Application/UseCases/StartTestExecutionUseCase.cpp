@@ -40,12 +40,12 @@ void StartTestExecutionUseCase::execute() {
 
     state.setTestExecutionStatus(domain::TestExecutionStatus::Running);
     startTelemetryPollingIfConnected();
-    applyScenarioImpact(0);
+    applyScenarioImpact(domain::ElapsedSeconds::from(0));
 
     testExecutionScheduler.start(0, [this, plan](int elapsedSeconds) {
         const auto elapsed = domain::ElapsedSeconds::from(elapsedSeconds);
         state.setElapsedSeconds(elapsed);
-        applyScenarioImpact(elapsed.value());
+        applyScenarioImpact(elapsed);
 
         const auto remaining = plan.remainingAt(elapsed);
 
@@ -77,14 +77,14 @@ void StartTestExecutionUseCase::stopTelemetryPollingIfActive() {
     state.setStandConnectionStatus(domain::StandConnectionStatus::Connected);
 }
 
-void StartTestExecutionUseCase::applyScenarioImpact(int elapsedSeconds) {
+void StartTestExecutionUseCase::applyScenarioImpact(domain::ElapsedSeconds elapsed) {
     const auto &session = state.get();
     if (session.testProtocol.testMode == domain::TestMode::Manual) {
         return;
     }
 
-    const auto step = domain::ScenarioExecutionEngine::advance(
-        session.controlProfile, domain::ElapsedSeconds::from(elapsedSeconds), session.targetStandImpact);
+    const auto step =
+        domain::ScenarioExecutionEngine::advance(session.controlProfile, elapsed, session.targetStandImpact);
     if (!step.has_value()) {
         return;
     }

@@ -7,6 +7,12 @@
 
 namespace domain {
 
+enum class StandConnectionButtonAction {
+    ConfigureAndConnect,
+    Connect,
+    Disconnect,
+};
+
 constexpr bool canConnect(StandConnectionStatus status) {
     switch (status) {
     case StandConnectionStatus::Disconnected:
@@ -76,6 +82,23 @@ inline std::optional<StandConnectionStatus> transitionAfterPollingStopped(StandC
 
 constexpr StandConnectionStatus transitionAfterTelemetryConfigured() {
     return StandConnectionStatus::Configured;
+}
+
+constexpr StandConnectionButtonAction connectionButtonAction(StandConnectionStatus status) {
+    switch (status) {
+    case StandConnectionStatus::Disconnected:
+    case StandConnectionStatus::Error:
+        return StandConnectionButtonAction::ConfigureAndConnect;
+    case StandConnectionStatus::Configured:
+        return StandConnectionButtonAction::Connect;
+    case StandConnectionStatus::Connecting:
+    case StandConnectionStatus::Connected:
+    case StandConnectionStatus::Polling:
+    case StandConnectionStatus::Disconnecting:
+        return StandConnectionButtonAction::Disconnect;
+    }
+
+    return StandConnectionButtonAction::ConfigureAndConnect;
 }
 
 } // namespace domain

@@ -115,4 +115,22 @@ TEST(StandConnectionTransitionsTest, TelemetryConfigurationTransitionsToConfigur
     EXPECT_EQ(domain::transitionAfterTelemetryConfigured(), domain::StandConnectionStatus::Configured);
 }
 
+TEST(StandConnectionTransitionsTest, ConnectionButtonActionMapsStandStatusToOperatorIntent) {
+    EXPECT_EQ(domain::connectionButtonAction(domain::StandConnectionStatus::Disconnected),
+              domain::StandConnectionButtonAction::ConfigureAndConnect);
+    EXPECT_EQ(domain::connectionButtonAction(domain::StandConnectionStatus::Error),
+              domain::StandConnectionButtonAction::ConfigureAndConnect);
+    EXPECT_EQ(domain::connectionButtonAction(domain::StandConnectionStatus::Configured),
+              domain::StandConnectionButtonAction::Connect);
+
+    EXPECT_EQ(domain::connectionButtonAction(domain::StandConnectionStatus::Connecting),
+              domain::StandConnectionButtonAction::Disconnect);
+    EXPECT_EQ(domain::connectionButtonAction(domain::StandConnectionStatus::Connected),
+              domain::StandConnectionButtonAction::Disconnect);
+    EXPECT_EQ(domain::connectionButtonAction(domain::StandConnectionStatus::Polling),
+              domain::StandConnectionButtonAction::Disconnect);
+    EXPECT_EQ(domain::connectionButtonAction(domain::StandConnectionStatus::Disconnecting),
+              domain::StandConnectionButtonAction::Disconnect);
+}
+
 } // namespace

@@ -2,6 +2,7 @@
 
 #include "../Domain/FormulaTemplate.hpp"
 #include "../Domain/StandConnectionStatus.hpp"
+#include "../Domain/StandConnectionTransitions.hpp"
 #include "../Domain/TestExecutionTransitions.hpp"
 #include "../Domain/TestProtocol.hpp"
 #include "../Domain/TestTimeSource.hpp"
@@ -182,11 +183,8 @@ void ShellPresenter::onTestTimeSourceChanged(domain::TestTimeSource source) {
 
 void ShellPresenter::onConnectTelemetryPressed(std::string configPath) {
     try {
-        const auto status = state.get().standConnectionStatus;
-
-        if (status == domain::StandConnectionStatus::Connected || status == domain::StandConnectionStatus::Polling ||
-            status == domain::StandConnectionStatus::Connecting ||
-            status == domain::StandConnectionStatus::Disconnecting) {
+        switch (domain::connectionButtonAction(state.get().standConnectionStatus)) {
+        case domain::StandConnectionButtonAction::Disconnect:
             disconnectStandUseCase.execute();
 
             if (view != nullptr) {
@@ -195,13 +193,14 @@ void ShellPresenter::onConnectTelemetryPressed(std::string configPath) {
 
             refreshFromState();
             return;
-        }
 
-        if (status == domain::StandConnectionStatus::Disconnected || status == domain::StandConnectionStatus::Error) {
+        case domain::StandConnectionButtonAction::ConfigureAndConnect:
             configureTelemetryUseCase.execute(configPath);
+            [[fallthrough]];
+        case domain::StandConnectionButtonAction::Connect:
+            connectStandUseCase.execute();
+            break;
         }
-
-        connectStandUseCase.execute();
 
         if (view != nullptr) {
             view->appendLog("Stand connection started");
@@ -223,16 +222,12 @@ void ShellPresenter::refreshStandConnectionButton() {
         return;
     }
 
-    switch (state.get().standConnectionStatus) {
-    case domain::StandConnectionStatus::Disconnected:
-    case domain::StandConnectionStatus::Configured:
-    case domain::StandConnectionStatus::Error:
+    switch (domain::connectionButtonAction(state.get().standConnectionStatus)) {
+    case domain::StandConnectionButtonAction::ConfigureAndConnect:
+    case domain::StandConnectionButtonAction::Connect:
         view->setStandConnectionButtonText("Подключить стенд");
         break;
-    case domain::StandConnectionStatus::Connected:
-    case domain::StandConnectionStatus::Connecting:
-    case domain::StandConnectionStatus::Polling:
-    case domain::StandConnectionStatus::Disconnecting:
+    case domain::StandConnectionButtonAction::Disconnect:
         view->setStandConnectionButtonText("Отключить стенд");
         break;
     }

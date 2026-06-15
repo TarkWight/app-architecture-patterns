@@ -5,6 +5,7 @@
 #include "../../src/Application/Session/SessionState.hpp"
 #include "../../src/Domain/StandConnectionStatus.hpp"
 #include "../../src/Domain/TestExecutionStatus.hpp"
+#include "../../src/Domain/TestTimeDirection.hpp"
 
 #include <gtest/gtest.h>
 
@@ -103,6 +104,44 @@ TEST(StopTestExecutionUseCaseTest, StopsTelemetryPollingAndKeepsStandConnected) 
     EXPECT_EQ(scheduler.stopCalls, 1);
     EXPECT_EQ(telemetryClient.stopPollingCalls, 1);
     EXPECT_EQ(state.get().standConnectionStatus, domain::StandConnectionStatus::Connected);
+    EXPECT_EQ(state.get().testExecutionStatus, domain::TestExecutionStatus::Ready);
+}
+
+TEST(StopTestExecutionUseCaseTest, ResetsCountdownTimeUsingDomainStopPlan) {
+    application::session::SessionState state{};
+    state.setTestExecutionStatus(domain::TestExecutionStatus::Running);
+    state.setTestTimeDirection(domain::TestTimeDirection::CountDown);
+    state.setActiveTestDurationMinutes(domain::DurationMinutes::required(12));
+    state.setElapsedSeconds(domain::ElapsedSeconds::from(50));
+    state.setRemainingSeconds(domain::RemainingSeconds::from(670));
+
+    TestExecutionSchedulerSpy scheduler{};
+    TelemetryClientSpy telemetryClient{};
+    application::useCases::StopTestExecutionUseCase useCase{state, scheduler, telemetryClient};
+
+    useCase.execute();
+
+    EXPECT_EQ(state.get().elapsed.value(), 0);
+    EXPECT_EQ(state.get().remaining.value(), 720);
+    EXPECT_EQ(state.get().testExecutionStatus, domain::TestExecutionStatus::Ready);
+}
+
+TEST(StopTestExecutionUseCaseTest, ResetsCountUpTimeUsingDomainStopPlan) {
+    application::session::SessionState state{};
+    state.setTestExecutionStatus(domain::TestExecutionStatus::Running);
+    state.setTestTimeDirection(domain::TestTimeDirection::CountUp);
+    state.setActiveTestDurationMinutes(domain::DurationMinutes::required(12));
+    state.setElapsedSeconds(domain::ElapsedSeconds::from(50));
+    state.setRemainingSeconds(domain::RemainingSeconds::from(0));
+
+    TestExecutionSchedulerSpy scheduler{};
+    TelemetryClientSpy telemetryClient{};
+    application::useCases::StopTestExecutionUseCase useCase{state, scheduler, telemetryClient};
+
+    useCase.execute();
+
+    EXPECT_EQ(state.get().elapsed.value(), 0);
+    EXPECT_EQ(state.get().remaining.value(), 0);
     EXPECT_EQ(state.get().testExecutionStatus, domain::TestExecutionStatus::Ready);
 }
 

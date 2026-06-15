@@ -225,6 +225,7 @@ if (BUILD_TESTING)
     tests/Domain/StandConnectionTransitionsTest.cpp
     tests/Domain/StandImpactTransitionTest.cpp
     tests/Domain/TelemetryConnectionPolicyTest.cpp
+    tests/Domain/TelemetryWindowTest.cpp
     tests/Domain/TelemetryPollIntervalTest.cpp
     tests/Domain/TestExecutionPlannerTest.cpp
     tests/Domain/TestExecutionTransitionsTest.cpp

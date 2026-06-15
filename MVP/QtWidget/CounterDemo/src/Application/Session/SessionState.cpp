@@ -77,22 +77,14 @@ void application::session::SessionState::setTestTimeDirection(domain::TestTimeDi
     notify();
 }
 
-void application::session::SessionState::setEstimatedTestDurationMinutes(int minutes) {
-    data.estimatedTestDuration = domain::DurationMinutes::required(minutes);
+void application::session::SessionState::setEstimatedTestDurationMinutes(domain::DurationMinutes minutes) {
+    data.estimatedTestDuration = minutes;
     notify();
-}
-
-void application::session::SessionState::setOperatorTestDurationMinutes(int minutes) {
-    setOperatorTestDurationMinutes(domain::DurationMinutes::required(minutes));
 }
 
 void application::session::SessionState::setOperatorTestDurationMinutes(domain::DurationMinutes minutes) {
     data.operatorTestDuration = minutes;
     notify();
-}
-
-void application::session::SessionState::setActiveTestDurationMinutes(int minutes) {
-    setActiveTestDurationMinutes(domain::DurationMinutes::optional(minutes));
 }
 
 void application::session::SessionState::setActiveTestDurationMinutes(domain::DurationMinutes minutes) {

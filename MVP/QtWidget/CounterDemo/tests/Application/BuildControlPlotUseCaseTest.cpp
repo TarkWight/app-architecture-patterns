@@ -28,7 +28,7 @@ class OutOfRangeFunctionEngine final : public application::ports::IFunctionEngin
 TEST(BuildControlPlotUseCaseTest, BuildsOneSecondWindControlProfileForCalculatedAutomaticDuration) {
     application::session::SessionState state{};
     state.setTestProtocolMode(domain::TestMode::Automatic);
-    state.setEstimatedTestDurationMinutes(48);
+    state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(48));
     const LinearFunctionEngine engine{};
     application::useCases::BuildControlPlotUseCase useCase{state, engine};
 
@@ -68,7 +68,7 @@ TEST(BuildControlPlotUseCaseTest, ClampsFormulaOutputToOperationalBeaufortRange)
 TEST(BuildControlPlotUseCaseTest, ManualModeShowsEmptyControlGridUntilCommandsAreSent) {
     application::session::SessionState state{};
     state.setTestProtocolMode(domain::TestMode::Manual);
-    state.setEstimatedTestDurationMinutes(20);
+    state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(20));
     const LinearFunctionEngine engine{};
     application::useCases::BuildControlPlotUseCase useCase{state, engine};
 
@@ -85,7 +85,7 @@ TEST(BuildControlPlotUseCaseTest, ManualModeShowsEmptyControlGridUntilCommandsAr
 
 TEST(BuildControlPlotUseCaseTest, PresetScenarioStandModeBuildsFormulaProfileForControlChart) {
     application::session::SessionState state{};
-    state.setEstimatedTestDurationMinutes(1);
+    state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(1));
     application::useCases::SetStandControlModeUseCase setModeUseCase{state};
     setModeUseCase.execute(domain::StandControlMode::PresetScenario);
     const LinearFunctionEngine engine{};
@@ -101,7 +101,7 @@ TEST(BuildControlPlotUseCaseTest, PresetScenarioStandModeBuildsFormulaProfileFor
 
 TEST(BuildControlPlotUseCaseTest, UsesControlTraceAsTargetAndSafeCommandSeriesWhenAvailable) {
     application::session::SessionState state{};
-    state.setEstimatedTestDurationMinutes(1);
+    state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(1));
     state.appendControlTraceSample(domain::ControlTraceSample{
         .time = domain::ControlTraceTime::fromSeconds(0.0),
         .targetValue = domain::makeWindImpact(2.0, 0.0, 0.0),
@@ -136,7 +136,7 @@ TEST(BuildControlPlotUseCaseTest, UsesControlTraceAsTargetAndSafeCommandSeriesWh
 TEST(BuildControlPlotUseCaseTest, KeepsFormulaSeriesWhenControlTraceIsAvailableForScenarioMode) {
     application::session::SessionState state{};
     state.setTestProtocolMode(domain::TestMode::Hybrid);
-    state.setEstimatedTestDurationMinutes(2);
+    state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(2));
     state.appendControlTraceSample(domain::ControlTraceSample{
         .time = domain::ControlTraceTime::fromSeconds(0.0),
         .targetValue = domain::makeWindImpact(2.0, 0.0, 0.0),
@@ -169,7 +169,7 @@ TEST(BuildControlPlotUseCaseTest, KeepsFormulaSeriesWhenControlTraceIsAvailableF
 
 TEST(BuildControlPlotUseCaseTest, RefreshFromStateKeepsExistingProfileAndUpdatesTraceSeries) {
     application::session::SessionState state{};
-    state.setEstimatedTestDurationMinutes(1);
+    state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(1));
     const LinearFunctionEngine engine{};
     application::useCases::BuildControlPlotUseCase useCase{state, engine};
     useCase.execute();

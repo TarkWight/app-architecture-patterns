@@ -118,7 +118,7 @@ TEST(StartTestExecutionUseCaseTest, ManualModeStartsAsStopwatchEvenWhenOperatorD
     application::session::SessionState state{};
     state.setTestProtocolMode(domain::TestMode::Manual);
     state.setTestTimeSource(domain::TestTimeSource::OperatorDefined);
-    state.setOperatorTestDurationMinutes(20);
+    state.setOperatorTestDurationMinutes(domain::DurationMinutes::required(20));
 
     TestExecutionSchedulerSpy scheduler{};
     TelemetryClientSpy telemetryClient{};
@@ -141,7 +141,7 @@ TEST(StartTestExecutionUseCaseTest, ManualModeStartsAsStopwatchEvenWhenOperatorD
 TEST(StartTestExecutionUseCaseTest, ScenarioStartClearsPreviousControlTrace) {
     application::session::SessionState state{};
     state.setTestProtocolMode(domain::TestMode::Automatic);
-    state.setEstimatedTestDurationMinutes(1);
+    state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(1));
     state.appendControlTraceSample(
         domain::ControlTraceSample{.time = domain::ControlTraceTime::fromSeconds(42.0),
                                    .targetValue = domain::makeWindImpact(7.0, 0.0, 0.0),
@@ -182,7 +182,7 @@ TEST(StartTestExecutionUseCaseTest, StopsTelemetryPollingWhenTimedScenarioComple
     application::session::SessionState state{};
     state.setTestProtocolMode(domain::TestMode::Automatic);
     state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
-    state.setEstimatedTestDurationMinutes(1);
+    state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(1));
     state.setStandConnectionStatus(domain::StandConnectionStatus::Connected);
 
     TestExecutionSchedulerSpy scheduler{};

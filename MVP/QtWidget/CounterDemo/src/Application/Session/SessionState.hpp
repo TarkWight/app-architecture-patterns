@@ -46,10 +46,8 @@ class SessionState {
     void setTestTimeSource(domain::TestTimeSource source);
     void setTestTimeDirection(domain::TestTimeDirection direction);
 
-    void setEstimatedTestDurationMinutes(int minutes);
-    void setOperatorTestDurationMinutes(int minutes);
+    void setEstimatedTestDurationMinutes(domain::DurationMinutes minutes);
     void setOperatorTestDurationMinutes(domain::DurationMinutes minutes);
-    void setActiveTestDurationMinutes(int minutes);
     void setActiveTestDurationMinutes(domain::DurationMinutes minutes);
 
     void setElapsedSeconds(int seconds);

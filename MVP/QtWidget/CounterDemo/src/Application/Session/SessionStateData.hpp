@@ -9,6 +9,7 @@
 #include "../../Domain/StandConnectionStatus.hpp"
 #include "../../Domain/TelemetryStatus.hpp"
 #include "../../Domain/TelemetryPollInterval.hpp"
+#include "../../Domain/TelemetryWindow.hpp"
 #include "../../Domain/TestExecutionStatus.hpp"
 #include "../../Domain/TestProtocol.hpp"
 #include "../../Domain/TestTimeDirection.hpp"
@@ -60,7 +61,7 @@ struct SessionStateData {
 
     std::vector<domain::AxisTelemetrySample> telemetryHistory{};
     double telemetryWindowSeconds{60.0};
-    double telemetryWindowEndSeconds{0.0};
+    domain::TelemetryWindowEnd telemetryWindowEndSeconds{domain::TelemetryWindowEnd::fromSeconds(0.0)};
     bool telemetryFollowTail{true};
     domain::RgbColor telemetryAxisYColor{220, 60, 50};
     domain::RgbColor telemetryAxisZColor{40, 110, 210};

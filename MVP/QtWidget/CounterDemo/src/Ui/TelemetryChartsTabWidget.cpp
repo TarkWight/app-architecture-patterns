@@ -70,7 +70,7 @@ void TelemetryChartsTabWidget::connectSessionSignals() {
 void TelemetryChartsTabWidget::refreshTelemetryScrollBar() {
     const auto &stateData = sessionAdapter.getState().get();
     const int historyEndSeconds = telemetryHistoryEndSeconds();
-    const int selectedEndSeconds = static_cast<int>(std::ceil(stateData.telemetryWindowEndSeconds));
+    const int selectedEndSeconds = static_cast<int>(std::ceil(stateData.telemetryWindowEndSeconds.seconds()));
     const int windowSeconds = static_cast<int>(std::ceil(stateData.telemetryWindowSeconds));
 
     const QSignalBlocker blocker{telemetryScrollBar};

@@ -9,6 +9,7 @@
 #include "../../Domain/TestProtocol.hpp"
 #include "../../Domain/TestTimeDirection.hpp"
 #include "../../Domain/TestTimeSource.hpp"
+#include "../../Domain/TelemetryWindow.hpp"
 #include "../../Domain/WindControlProfile.hpp"
 #include "../../Domain/AxisTelemetrySample.hpp"
 
@@ -62,7 +63,7 @@ class SessionState {
     void clearControlTrace();
     void appendControlTraceSample(domain::ControlTraceSample sample);
     void appendTelemetrySample(domain::AxisTelemetrySample sample);
-    void setTelemetryWindowEndSeconds(double endSeconds);
+    void setTelemetryWindowEndSeconds(domain::TelemetryWindowEnd endSeconds);
     void followTelemetryTail();
     void setTelemetryAxisColor(domain::AxisId axisId, domain::RgbColor color);
     void setTelemetryAxisVisible(domain::AxisId axisId, bool visible);

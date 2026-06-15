@@ -32,7 +32,7 @@ void TelemetryChartsTabPresenter::onRebuildPlotPressed() {
 }
 
 void TelemetryChartsTabPresenter::onTelemetryWindowChanged(int windowEndSeconds) {
-    setTelemetryWindowUseCase.execute(static_cast<double>(windowEndSeconds));
+    setTelemetryWindowUseCase.execute(domain::TelemetryWindowEnd::fromSeconds(static_cast<double>(windowEndSeconds)));
 
     if (view != nullptr) {
         view->refreshPlot();

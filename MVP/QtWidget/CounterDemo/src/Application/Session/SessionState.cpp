@@ -140,17 +140,16 @@ void application::session::SessionState::appendTelemetrySample(domain::AxisTelem
     }
 
     if (data.telemetryFollowTail && !data.telemetryHistory.empty()) {
-        const double baseTimestamp = data.telemetryHistory.front().timestampSeconds;
-        data.telemetryWindowEndSeconds = std::max(0.0, sample.timestampSeconds - baseTimestamp);
+        data.telemetryWindowEndSeconds = domain::TelemetryWindowEnd::fromTail(data.telemetryHistory.front(), sample);
     }
 
     rebuildTelemetryPlot();
     notify();
 }
 
-void application::session::SessionState::setTelemetryWindowEndSeconds(double endSeconds) {
+void application::session::SessionState::setTelemetryWindowEndSeconds(domain::TelemetryWindowEnd endSeconds) {
     data.telemetryFollowTail = false;
-    data.telemetryWindowEndSeconds = std::max(0.0, endSeconds);
+    data.telemetryWindowEndSeconds = endSeconds;
 
     rebuildTelemetryPlot();
     notify();
@@ -160,8 +159,8 @@ void application::session::SessionState::followTelemetryTail() {
     data.telemetryFollowTail = true;
 
     if (!data.telemetryHistory.empty()) {
-        const double baseTimestamp = data.telemetryHistory.front().timestampSeconds;
-        data.telemetryWindowEndSeconds = std::max(0.0, data.telemetryHistory.back().timestampSeconds - baseTimestamp);
+        data.telemetryWindowEndSeconds =
+            domain::TelemetryWindowEnd::fromTail(data.telemetryHistory.front(), data.telemetryHistory.back());
     }
 
     rebuildTelemetryPlot();
@@ -323,7 +322,7 @@ void application::session::SessionState::rebuildTelemetryPlot() {
     plot.y = domain::AxisSpec{.min = -180.0, .max = 360.0, .step = 45.0, .label = "degrees"};
 
     const double windowSeconds = std::max(1.0, data.telemetryWindowSeconds);
-    const double endSeconds = std::max(windowSeconds, data.telemetryWindowEndSeconds);
+    const double endSeconds = std::max(windowSeconds, data.telemetryWindowEndSeconds.seconds());
     const double startSeconds = std::max(0.0, endSeconds - windowSeconds);
 
     plot.x =

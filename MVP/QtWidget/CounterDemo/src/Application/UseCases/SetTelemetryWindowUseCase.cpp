@@ -5,7 +5,7 @@ namespace application::useCases {
 SetTelemetryWindowUseCase::SetTelemetryWindowUseCase(application::session::SessionState &state) : state(state) {
 }
 
-void SetTelemetryWindowUseCase::execute(double windowEndSeconds) {
+void SetTelemetryWindowUseCase::execute(domain::TelemetryWindowEnd windowEndSeconds) {
     state.setTelemetryWindowEndSeconds(windowEndSeconds);
 }
 

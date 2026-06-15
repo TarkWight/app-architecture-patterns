@@ -4,6 +4,7 @@
 #include "../../Domain/ScenarioExecutionEngine.hpp"
 #include "../../Domain/StandCommandMapper.hpp"
 #include "../../Domain/StandConnectionStatus.hpp"
+#include "../../Domain/StandConnectionTransitions.hpp"
 #include "../../Domain/TestExecutionPlanner.hpp"
 #include "../../Domain/TestExecutionStatus.hpp"
 #include "../../Domain/TestExecutionTransitions.hpp"
@@ -60,7 +61,7 @@ void StartTestExecutionUseCase::execute() {
 }
 
 void StartTestExecutionUseCase::startTelemetryPollingIfConnected() {
-    if (state.get().standConnectionStatus != domain::StandConnectionStatus::Connected) {
+    if (!domain::canStartPolling(state.get().standConnectionStatus)) {
         return;
     }
 
@@ -69,7 +70,7 @@ void StartTestExecutionUseCase::startTelemetryPollingIfConnected() {
 }
 
 void StartTestExecutionUseCase::stopTelemetryPollingIfActive() {
-    if (state.get().standConnectionStatus != domain::StandConnectionStatus::Polling) {
+    if (!domain::canStopPolling(state.get().standConnectionStatus)) {
         return;
     }
 

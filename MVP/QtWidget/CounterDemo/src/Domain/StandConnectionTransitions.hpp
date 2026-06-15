@@ -24,6 +24,14 @@ constexpr bool canDisconnect(StandConnectionStatus status) {
     return status != StandConnectionStatus::Disconnected;
 }
 
+constexpr bool canStartPolling(StandConnectionStatus status) {
+    return status == StandConnectionStatus::Connected;
+}
+
+constexpr bool canStopPolling(StandConnectionStatus status) {
+    return status == StandConnectionStatus::Polling;
+}
+
 } // namespace domain
 
 #endif // STANDCONNECTIONTRANSITIONS_HPP

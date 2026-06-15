@@ -27,4 +27,24 @@ TEST(StandConnectionTransitionsTest, DisconnectIsAllowedFromEveryStateExceptDisc
     EXPECT_TRUE(domain::canDisconnect(domain::StandConnectionStatus::Error));
 }
 
+TEST(StandConnectionTransitionsTest, PollingCanStartOnlyFromConnectedStand) {
+    EXPECT_FALSE(domain::canStartPolling(domain::StandConnectionStatus::Disconnected));
+    EXPECT_FALSE(domain::canStartPolling(domain::StandConnectionStatus::Configured));
+    EXPECT_FALSE(domain::canStartPolling(domain::StandConnectionStatus::Connecting));
+    EXPECT_TRUE(domain::canStartPolling(domain::StandConnectionStatus::Connected));
+    EXPECT_FALSE(domain::canStartPolling(domain::StandConnectionStatus::Polling));
+    EXPECT_FALSE(domain::canStartPolling(domain::StandConnectionStatus::Disconnecting));
+    EXPECT_FALSE(domain::canStartPolling(domain::StandConnectionStatus::Error));
+}
+
+TEST(StandConnectionTransitionsTest, PollingCanStopOnlyFromPollingStand) {
+    EXPECT_FALSE(domain::canStopPolling(domain::StandConnectionStatus::Disconnected));
+    EXPECT_FALSE(domain::canStopPolling(domain::StandConnectionStatus::Configured));
+    EXPECT_FALSE(domain::canStopPolling(domain::StandConnectionStatus::Connecting));
+    EXPECT_FALSE(domain::canStopPolling(domain::StandConnectionStatus::Connected));
+    EXPECT_TRUE(domain::canStopPolling(domain::StandConnectionStatus::Polling));
+    EXPECT_FALSE(domain::canStopPolling(domain::StandConnectionStatus::Disconnecting));
+    EXPECT_FALSE(domain::canStopPolling(domain::StandConnectionStatus::Error));
+}
+
 } // namespace

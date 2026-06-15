@@ -1,6 +1,7 @@
 #include "StopTestExecutionUseCase.hpp"
 
 #include "../../Domain/StandConnectionStatus.hpp"
+#include "../../Domain/StandConnectionTransitions.hpp"
 #include "../../Domain/TestExecutionPlanner.hpp"
 #include "../../Domain/TestExecutionStatus.hpp"
 #include "../../Domain/TestExecutionTransitions.hpp"
@@ -20,7 +21,7 @@ void StopTestExecutionUseCase::execute() {
 
     testExecutionScheduler.stop();
 
-    if (state.get().standConnectionStatus == domain::StandConnectionStatus::Polling) {
+    if (domain::canStopPolling(state.get().standConnectionStatus)) {
         telemetryClient.stopPolling();
         state.setStandConnectionStatus(domain::StandConnectionStatus::Connected);
     }

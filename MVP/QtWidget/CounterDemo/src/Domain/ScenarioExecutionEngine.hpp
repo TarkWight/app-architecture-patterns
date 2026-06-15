@@ -24,9 +24,7 @@ class ScenarioExecutionEngine final {
 
         return ScenarioExecutionStep{
             .impact = *impact,
-            .traceSample = ControlTraceSample{.timeSeconds = static_cast<double>(elapsed.value()),
-                                              .targetValue = *impact,
-                                              .safeCommandValue = *impact},
+            .traceSample = ControlTraceSample::manualCommand(elapsed, *impact, *impact),
         };
     }
 };

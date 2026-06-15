@@ -1,6 +1,7 @@
 #ifndef CONTROLTRACE_HPP
 #define CONTROLTRACE_HPP
 
+#include "Time.hpp"
 #include "WindImpact.hpp"
 
 #include <cstddef>
@@ -13,6 +14,13 @@ struct ControlTraceSample {
     double timeSeconds{0.0};
     WindImpact targetValue{};
     WindImpact safeCommandValue{};
+
+    [[nodiscard]] static ControlTraceSample manualCommand(ElapsedSeconds elapsed, WindImpact target,
+                                                          WindImpact safeCommand) {
+        return ControlTraceSample{.timeSeconds = static_cast<double>(elapsed.value()),
+                                  .targetValue = std::move(target),
+                                  .safeCommandValue = std::move(safeCommand)};
+    }
 };
 
 class ControlTrace final {

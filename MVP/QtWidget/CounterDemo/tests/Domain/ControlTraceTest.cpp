@@ -34,4 +34,17 @@ TEST(ControlTraceTest, KeepsOnlyRecentSamplesInsideHistoryLimit) {
     EXPECT_DOUBLE_EQ(trace.back().timeSeconds, static_cast<double>(domain::ControlTrace::maxSamples + 1U));
 }
 
+TEST(ControlTraceTest, ManualCommandSampleCapturesElapsedTargetAndSafeCommandValues) {
+    const auto target = domain::makeWindImpact(5.0, 90.0, 4.0);
+    const auto safeCommand = domain::makeWindImpact(1.2, 20.0, 2.0);
+
+    const auto sample = domain::ControlTraceSample::manualCommand(domain::ElapsedSeconds::from(7), target, safeCommand);
+
+    EXPECT_DOUBLE_EQ(sample.timeSeconds, 7.0);
+    EXPECT_DOUBLE_EQ(sample.targetValue.beaufort.value(), 5.0);
+    EXPECT_DOUBLE_EQ(sample.targetValue.direction.degrees(), 90.0);
+    EXPECT_DOUBLE_EQ(sample.safeCommandValue.beaufort.value(), 1.2);
+    EXPECT_DOUBLE_EQ(sample.safeCommandValue.direction.degrees(), 20.0);
+}
+
 } // namespace

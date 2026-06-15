@@ -233,6 +233,7 @@ if (BUILD_TESTING)
     tests/Domain/TimeTest.cpp
     tests/Domain/WindImpactTest.cpp
     tests/Domain/WindControlProfileImpactTest.cpp
+    tests/Application/ApplyWindImpactUseCasesTest.cpp
     tests/Application/BuildControlPlotUseCaseTest.cpp
     tests/Application/ConfigureTelemetryUseCaseTest.cpp
     tests/Application/ConnectStandUseCaseTest.cpp

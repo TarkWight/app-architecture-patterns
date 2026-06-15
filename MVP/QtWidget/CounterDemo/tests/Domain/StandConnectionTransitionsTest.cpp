@@ -47,4 +47,46 @@ TEST(StandConnectionTransitionsTest, PollingCanStopOnlyFromPollingStand) {
     EXPECT_FALSE(domain::canStopPolling(domain::StandConnectionStatus::Error));
 }
 
+TEST(StandConnectionTransitionsTest, ConnectRequestTransitionsOnlyAllowedStatesToConnecting) {
+    EXPECT_EQ(domain::transitionToConnecting(domain::StandConnectionStatus::Disconnected),
+              domain::StandConnectionStatus::Connecting);
+    EXPECT_EQ(domain::transitionToConnecting(domain::StandConnectionStatus::Configured),
+              domain::StandConnectionStatus::Connecting);
+    EXPECT_EQ(domain::transitionToConnecting(domain::StandConnectionStatus::Disconnecting),
+              domain::StandConnectionStatus::Connecting);
+    EXPECT_EQ(domain::transitionToConnecting(domain::StandConnectionStatus::Error),
+              domain::StandConnectionStatus::Connecting);
+
+    EXPECT_FALSE(domain::transitionToConnecting(domain::StandConnectionStatus::Connecting).has_value());
+    EXPECT_FALSE(domain::transitionToConnecting(domain::StandConnectionStatus::Connected).has_value());
+    EXPECT_FALSE(domain::transitionToConnecting(domain::StandConnectionStatus::Polling).has_value());
+}
+
+TEST(StandConnectionTransitionsTest, DisconnectRequestTransitionsEveryConnectedStateToDisconnecting) {
+    EXPECT_FALSE(domain::transitionToDisconnecting(domain::StandConnectionStatus::Disconnected).has_value());
+    EXPECT_EQ(domain::transitionToDisconnecting(domain::StandConnectionStatus::Configured),
+              domain::StandConnectionStatus::Disconnecting);
+    EXPECT_EQ(domain::transitionToDisconnecting(domain::StandConnectionStatus::Connecting),
+              domain::StandConnectionStatus::Disconnecting);
+    EXPECT_EQ(domain::transitionToDisconnecting(domain::StandConnectionStatus::Connected),
+              domain::StandConnectionStatus::Disconnecting);
+    EXPECT_EQ(domain::transitionToDisconnecting(domain::StandConnectionStatus::Polling),
+              domain::StandConnectionStatus::Disconnecting);
+    EXPECT_EQ(domain::transitionToDisconnecting(domain::StandConnectionStatus::Disconnecting),
+              domain::StandConnectionStatus::Disconnecting);
+    EXPECT_EQ(domain::transitionToDisconnecting(domain::StandConnectionStatus::Error),
+              domain::StandConnectionStatus::Disconnecting);
+}
+
+TEST(StandConnectionTransitionsTest, DisconnectCompletionTransitionsOnlyDisconnectingToDisconnected) {
+    EXPECT_FALSE(domain::transitionAfterDisconnectCompleted(domain::StandConnectionStatus::Disconnected).has_value());
+    EXPECT_FALSE(domain::transitionAfterDisconnectCompleted(domain::StandConnectionStatus::Configured).has_value());
+    EXPECT_FALSE(domain::transitionAfterDisconnectCompleted(domain::StandConnectionStatus::Connecting).has_value());
+    EXPECT_FALSE(domain::transitionAfterDisconnectCompleted(domain::StandConnectionStatus::Connected).has_value());
+    EXPECT_FALSE(domain::transitionAfterDisconnectCompleted(domain::StandConnectionStatus::Polling).has_value());
+    EXPECT_EQ(domain::transitionAfterDisconnectCompleted(domain::StandConnectionStatus::Disconnecting),
+              domain::StandConnectionStatus::Disconnected);
+    EXPECT_FALSE(domain::transitionAfterDisconnectCompleted(domain::StandConnectionStatus::Error).has_value());
+}
+
 } // namespace

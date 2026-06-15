@@ -10,11 +10,12 @@ ConnectStandUseCase::ConnectStandUseCase(application::session::SessionState &sta
 }
 
 void ConnectStandUseCase::execute() {
-    if (!domain::canConnect(state.get().standConnectionStatus)) {
+    const auto transition = domain::transitionToConnecting(state.get().standConnectionStatus);
+    if (!transition.has_value()) {
         return;
     }
 
-    state.setStandConnectionStatus(domain::StandConnectionStatus::Connecting);
+    state.setStandConnectionStatus(*transition);
 
     telemetryClient.connectAll();
 }

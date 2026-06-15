@@ -10,16 +10,20 @@ DisconnectStandUseCase::DisconnectStandUseCase(application::session::SessionStat
 }
 
 void DisconnectStandUseCase::execute() {
-    if (!domain::canDisconnect(state.get().standConnectionStatus)) {
+    const auto transition = domain::transitionToDisconnecting(state.get().standConnectionStatus);
+    if (!transition.has_value()) {
         return;
     }
 
-    state.setStandConnectionStatus(domain::StandConnectionStatus::Disconnecting);
+    state.setStandConnectionStatus(*transition);
 
     telemetryClient.stopPolling();
     telemetryClient.disconnectAll();
 
-    state.setStandConnectionStatus(domain::StandConnectionStatus::Disconnected);
+    const auto completion = domain::transitionAfterDisconnectCompleted(state.get().standConnectionStatus);
+    if (completion.has_value()) {
+        state.setStandConnectionStatus(*completion);
+    }
 }
 
 } // namespace application::useCases

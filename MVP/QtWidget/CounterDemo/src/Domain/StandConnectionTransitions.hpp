@@ -3,6 +3,8 @@
 
 #include "StandConnectionStatus.hpp"
 
+#include <optional>
+
 namespace domain {
 
 constexpr bool canConnect(StandConnectionStatus status) {
@@ -30,6 +32,30 @@ constexpr bool canStartPolling(StandConnectionStatus status) {
 
 constexpr bool canStopPolling(StandConnectionStatus status) {
     return status == StandConnectionStatus::Polling;
+}
+
+inline std::optional<StandConnectionStatus> transitionToConnecting(StandConnectionStatus status) {
+    if (!canConnect(status)) {
+        return std::nullopt;
+    }
+
+    return StandConnectionStatus::Connecting;
+}
+
+inline std::optional<StandConnectionStatus> transitionToDisconnecting(StandConnectionStatus status) {
+    if (!canDisconnect(status)) {
+        return std::nullopt;
+    }
+
+    return StandConnectionStatus::Disconnecting;
+}
+
+inline std::optional<StandConnectionStatus> transitionAfterDisconnectCompleted(StandConnectionStatus status) {
+    if (status != StandConnectionStatus::Disconnecting) {
+        return std::nullopt;
+    }
+
+    return StandConnectionStatus::Disconnected;
 }
 
 } // namespace domain

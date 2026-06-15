@@ -4,6 +4,7 @@
 #include "../Domain/StandConnectionStatus.hpp"
 #include "../Domain/StandConnectionTransitions.hpp"
 #include "../Domain/TestExecutionTransitions.hpp"
+#include "../Domain/TestModeStatePolicy.hpp"
 #include "../Domain/TestProtocol.hpp"
 #include "../Domain/TestTimeSource.hpp"
 #include "../Domain/TestTimeDirection.hpp"
@@ -141,7 +142,7 @@ bool ShellPresenter::canResume(domain::TestExecutionStatus status) {
 }
 
 bool testTimeSourceCanBeChanged(domain::TestMode mode) {
-    return mode == domain::TestMode::Hybrid;
+    return domain::TestModeStatePolicy::allowsOperatorDuration(mode);
 }
 
 bool ShellPresenter::canStop(domain::TestExecutionStatus status) {

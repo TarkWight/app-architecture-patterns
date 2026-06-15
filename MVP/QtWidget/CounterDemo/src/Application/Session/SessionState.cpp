@@ -278,10 +278,6 @@ void application::session::SessionState::setStandConnectionStatus(domain::StandC
     notify();
 }
 
-void application::session::SessionState::setTelemetryPollIntervalMs(int intervalMs) {
-    setTelemetryPollInterval(domain::TelemetryPollInterval::fromMilliseconds(intervalMs));
-}
-
 void application::session::SessionState::setTelemetryPollInterval(domain::TelemetryPollInterval interval) {
     data.telemetryPollInterval = interval;
     notify();

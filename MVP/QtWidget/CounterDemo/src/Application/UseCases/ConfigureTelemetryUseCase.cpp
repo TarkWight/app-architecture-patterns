@@ -3,6 +3,7 @@
 #include "../../Domain/StandConnectionTransitions.hpp"
 #include "../../Domain/TelemetryConnectionPolicy.hpp"
 #include "../../Domain/TelemetryConnectionStatus.hpp"
+#include "../../Domain/TelemetryPollInterval.hpp"
 #include "../../Domain/TelemetryStatus.hpp"
 #include "../../Domain/TestExecutionTransitions.hpp"
 
@@ -65,7 +66,7 @@ void ConfigureTelemetryUseCase::execute(const std::string &configPath) {
         telemetryClient.configureAxis(domain::axis1, config.axis1.host, config.axis1.port);
     }
 
-    state.setTelemetryPollIntervalMs(config.pollIntervalMs);
+    state.setTelemetryPollInterval(domain::TelemetryPollInterval::fromMilliseconds(config.pollIntervalMs));
     state.setStandConnectionStatus(domain::transitionAfterTelemetryConfigured());
 }
 

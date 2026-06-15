@@ -80,7 +80,6 @@ class SessionState {
     void setAxis2State(domain::AxisState state);
     void setTelemetryStatus(domain::TelemetryStatus status);
     void setStandConnectionStatus(domain::StandConnectionStatus status);
-    void setTelemetryPollIntervalMs(int intervalMs);
     void setTelemetryPollInterval(domain::TelemetryPollInterval interval);
 
   private:

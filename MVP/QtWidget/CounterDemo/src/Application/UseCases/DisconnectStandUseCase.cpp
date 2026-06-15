@@ -1,6 +1,6 @@
 #include "DisconnectStandUseCase.hpp"
 
-#include "../../Domain/StandConnectionStatus.hpp"
+#include "../../Domain/StandConnectionTransitions.hpp"
 
 namespace application::useCases {
 
@@ -10,8 +10,7 @@ DisconnectStandUseCase::DisconnectStandUseCase(application::session::SessionStat
 }
 
 void DisconnectStandUseCase::execute() {
-    const auto currentStatus = state.get().standConnectionStatus;
-    if (currentStatus == domain::StandConnectionStatus::Disconnected) {
+    if (!domain::canDisconnect(state.get().standConnectionStatus)) {
         return;
     }
 

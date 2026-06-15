@@ -1,6 +1,6 @@
 #include "ConnectStandUseCase.hpp"
 
-#include "../../Domain/StandConnectionStatus.hpp"
+#include "../../Domain/StandConnectionTransitions.hpp"
 
 namespace application::useCases {
 
@@ -10,10 +10,7 @@ ConnectStandUseCase::ConnectStandUseCase(application::session::SessionState &sta
 }
 
 void ConnectStandUseCase::execute() {
-    const auto currentStatus = state.get().standConnectionStatus;
-    if (currentStatus == domain::StandConnectionStatus::Connecting ||
-        currentStatus == domain::StandConnectionStatus::Connected ||
-        currentStatus == domain::StandConnectionStatus::Polling) {
+    if (!domain::canConnect(state.get().standConnectionStatus)) {
         return;
     }
 

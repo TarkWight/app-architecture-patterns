@@ -11,7 +11,8 @@ ResumeTestExecutionUseCase::ResumeTestExecutionUseCase(
 }
 
 void ResumeTestExecutionUseCase::execute() {
-    if (!domain::canResume(state.get().testExecutionStatus)) {
+    const auto transition = domain::transitionAfterResumeRequested(state.get().testExecutionStatus);
+    if (!transition.has_value()) {
         return;
     }
 
@@ -20,7 +21,7 @@ void ResumeTestExecutionUseCase::execute() {
     }
 
     testExecutionScheduler.resume();
-    state.setTestExecutionStatus(domain::TestExecutionStatus::Running);
+    state.setTestExecutionStatus(*transition);
 }
 
 } // namespace application::useCases

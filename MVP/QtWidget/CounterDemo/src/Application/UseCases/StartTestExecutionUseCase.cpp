@@ -22,7 +22,8 @@ StartTestExecutionUseCase::StartTestExecutionUseCase(
 
 void StartTestExecutionUseCase::execute() {
     const auto &session = state.get();
-    if (!domain::canStart(session.testExecutionStatus)) {
+    const auto transition = domain::transitionAfterStartRequested(session.testExecutionStatus);
+    if (!transition.has_value()) {
         return;
     }
 
@@ -40,7 +41,7 @@ void StartTestExecutionUseCase::execute() {
     state.setElapsedSeconds(domain::ElapsedSeconds::from(0));
     state.setRemainingSeconds(plan.initialRemaining());
 
-    state.setTestExecutionStatus(domain::TestExecutionStatus::Running);
+    state.setTestExecutionStatus(*transition);
     startTelemetryPollingIfConnected();
     applyScenarioImpact(domain::ElapsedSeconds::from(0));
 
@@ -56,7 +57,10 @@ void StartTestExecutionUseCase::execute() {
         if (plan.isCompletedAt(elapsed)) {
             testExecutionScheduler.stop();
             stopTelemetryPollingIfActive();
-            state.setTestExecutionStatus(domain::TestExecutionStatus::Completed);
+            const auto completion = domain::transitionAfterExecutionCompleted(state.get().testExecutionStatus);
+            if (completion.has_value()) {
+                state.setTestExecutionStatus(*completion);
+            }
         }
     });
 }

@@ -15,7 +15,8 @@ StopTestExecutionUseCase::StopTestExecutionUseCase(application::session::Session
 }
 
 void StopTestExecutionUseCase::execute() {
-    if (!domain::canStop(state.get().testExecutionStatus)) {
+    const auto transition = domain::transitionAfterStopRequested(state.get().testExecutionStatus);
+    if (!transition.has_value()) {
         return;
     }
 
@@ -33,7 +34,7 @@ void StopTestExecutionUseCase::execute() {
     state.setElapsedSeconds(stopPlan.elapsed);
     state.setRemainingSeconds(stopPlan.remaining);
 
-    state.setTestExecutionStatus(domain::TestExecutionStatus::Ready);
+    state.setTestExecutionStatus(*transition);
 }
 
 } // namespace application::useCases

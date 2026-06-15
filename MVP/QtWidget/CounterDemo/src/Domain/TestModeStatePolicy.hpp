@@ -50,6 +50,18 @@ class TestModeStatePolicy final {
 
         return TestTimeDirection::CountUp;
     }
+
+    [[nodiscard]] static bool allowsOperatorDuration(TestMode mode) {
+        return mode == TestMode::Hybrid;
+    }
+
+    [[nodiscard]] static TestTimeSource timeSourceAfterOperatorDuration(TestMode mode, TestTimeSource currentSource) {
+        if (allowsOperatorDuration(mode)) {
+            return TestTimeSource::OperatorDefined;
+        }
+
+        return currentSource;
+    }
 };
 
 } // namespace domain

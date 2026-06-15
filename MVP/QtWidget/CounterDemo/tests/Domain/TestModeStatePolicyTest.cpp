@@ -51,4 +51,28 @@ TEST(TestModeStatePolicyTest, MapsTimeSource_WhenFreeRunSelected_ReturnsCountUp)
               domain::TestTimeDirection::CountUp);
 }
 
+TEST(TestModeStatePolicyTest, AllowsOperatorDurationOnlyInHybridMode) {
+    // Arrange / Act / Assert
+    EXPECT_FALSE(domain::TestModeStatePolicy::allowsOperatorDuration(domain::TestMode::Manual));
+    EXPECT_TRUE(domain::TestModeStatePolicy::allowsOperatorDuration(domain::TestMode::Hybrid));
+    EXPECT_FALSE(domain::TestModeStatePolicy::allowsOperatorDuration(domain::TestMode::Automatic));
+}
+
+TEST(TestModeStatePolicyTest, MapsTimeSourceAfterOperatorDuration_WhenHybrid_ReturnsOperatorDefined) {
+    // Arrange / Act / Assert
+    EXPECT_EQ(domain::TestModeStatePolicy::timeSourceAfterOperatorDuration(domain::TestMode::Hybrid,
+                                                                           domain::TestTimeSource::AutoCalculated),
+              domain::TestTimeSource::OperatorDefined);
+}
+
+TEST(TestModeStatePolicyTest, MapsTimeSourceAfterOperatorDuration_WhenManualOrAutomatic_ReturnsCurrentSource) {
+    // Arrange / Act / Assert
+    EXPECT_EQ(domain::TestModeStatePolicy::timeSourceAfterOperatorDuration(domain::TestMode::Manual,
+                                                                           domain::TestTimeSource::FreeRun),
+              domain::TestTimeSource::FreeRun);
+    EXPECT_EQ(domain::TestModeStatePolicy::timeSourceAfterOperatorDuration(domain::TestMode::Automatic,
+                                                                           domain::TestTimeSource::AutoCalculated),
+              domain::TestTimeSource::AutoCalculated);
+}
+
 } // namespace

@@ -16,6 +16,9 @@ int main(int argc, char *argv[]) {
                                      .testProtocolTabPresenter = context.testProtocolTabPresenter,
                                      .setStandControlModeUseCase = context.setStandControlModeUseCase,
                                      .setStandImpactUseCase = context.setStandImpactUseCase,
+                                     .applyBeaufortImpactUseCase = context.applyBeaufortImpactUseCase,
+                                     .applyWindDirectionUseCase = context.applyWindDirectionUseCase,
+                                     .applyAngleOfAttackUseCase = context.applyAngleOfAttackUseCase,
                                      .sessionAdapter = context.sessionAdapter,
                                      .configTemplateService = context.configTemplateService}};
 

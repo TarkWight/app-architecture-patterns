@@ -59,7 +59,10 @@ MainWindow::MainWindow(Dependencies deps, QWidget *parent)
       controlChartsTabPresenter(deps.controlChartsTabPresenter),
       testProtocolTabPresenter(deps.testProtocolTabPresenter),
       setStandControlModeUseCase(deps.setStandControlModeUseCase), setStandImpactUseCase(deps.setStandImpactUseCase),
-      sessionAdapter(deps.sessionAdapter), configTemplateService(deps.configTemplateService) {
+      applyBeaufortImpactUseCase(deps.applyBeaufortImpactUseCase),
+      applyWindDirectionUseCase(deps.applyWindDirectionUseCase),
+      applyAngleOfAttackUseCase(deps.applyAngleOfAttackUseCase), sessionAdapter(deps.sessionAdapter),
+      configTemplateService(deps.configTemplateService) {
     ui->setupUi(this);
 
     ui->comboBoxTestTimeSource->addItem(QStringLiteral("Авторасчёт"));
@@ -268,7 +271,11 @@ void MainWindow::connectStandControlSignals() {
         telemetryChartsTabPresenter.onTelemetryAxisVisibilityChanged(selectedTelemetryAxisId(), checked);
     });
 
-    QObject::connect(ui->buttonApplyStandImpact, &QPushButton::clicked, this, [this]() { applyStandInputs(); });
+    QObject::connect(ui->buttonApplyStandBeaufort, &QPushButton::clicked, this, [this]() { applyBeaufortImpact(); });
+    QObject::connect(ui->buttonApplyStandDirection, &QPushButton::clicked, this,
+                     [this]() { applyWindDirectionImpact(); });
+    QObject::connect(ui->buttonApplyStandAngleOfAttack, &QPushButton::clicked, this,
+                     [this]() { applyAngleOfAttackImpact(); });
     QObject::connect(ui->buttonTelemetryLineColor, &QPushButton::clicked, this,
                      [this]() { selectTelemetryAxisColor(); });
 }
@@ -325,29 +332,54 @@ void MainWindow::setTestTimeSourceEnabled(bool enabled) {
     ui->comboBoxTestTimeSource->setEnabled(enabled);
 }
 
-void MainWindow::applyStandInputs() {
-    const auto &stateData = sessionAdapter.getState().get();
-    const domain::StandScenario scenario{stateData.standControlMode};
-    if (!scenario.allowsManualImpact()) {
-        const std::string message = "Manual stand control is disabled for this test mode";
-        appendLog(message);
-        showOperatorWarning("Ручное управление заблокировано", message);
+void MainWindow::applyBeaufortImpact() {
+    const auto previousTarget = sessionAdapter.getState().get().targetStandImpact;
+    if (!applyBeaufortImpactUseCase.execute(ui->doubleSpinBoxStandBeaufort->value())) {
+        handleManualImpactRejected();
         return;
     }
 
-    domain::WindImpact target =
-        domain::makeWindImpact(ui->doubleSpinBoxStandBeaufort->value(), selectedStandDirectionDegrees(),
-                               ui->doubleSpinBoxStandAngleOfAttack->value());
+    handleManualImpactAccepted(previousTarget, "beaufort");
+}
 
-    setStandImpactUseCase.setTarget(target);
+void MainWindow::applyWindDirectionImpact() {
+    const auto previousTarget = sessionAdapter.getState().get().targetStandImpact;
+    if (!applyWindDirectionUseCase.execute(selectedStandDirectionDegrees())) {
+        handleManualImpactRejected();
+        return;
+    }
+
+    handleManualImpactAccepted(previousTarget, "direction");
+}
+
+void MainWindow::applyAngleOfAttackImpact() {
+    const auto previousTarget = sessionAdapter.getState().get().targetStandImpact;
+    if (!applyAngleOfAttackUseCase.execute(ui->doubleSpinBoxStandAngleOfAttack->value())) {
+        handleManualImpactRejected();
+        return;
+    }
+
+    handleManualImpactAccepted(previousTarget, "angle of attack");
+}
+
+void MainWindow::handleManualImpactAccepted(const domain::WindImpact &previousTarget,
+                                            const std::string &changedParameter) {
+    const auto &stateData = sessionAdapter.getState().get();
+    const domain::StandScenario scenario{stateData.standControlMode};
     standImpactTransitionTimer->start();
 
-    appendLog("Manual stand impact target accepted: " + formatImpact(stateData.appliedStandImpact) + " -> " +
-              formatImpact(target));
+    appendLog("Manual stand " + changedParameter + " target accepted: target " + formatImpact(previousTarget) + " -> " +
+              formatImpact(stateData.targetStandImpact) + ", applied " + formatImpact(stateData.appliedStandImpact));
 
     if (scenario.manualImpactPolicy() == domain::ManualImpactPolicy::ReturnToScenarioAfterManualImpact) {
         appendLog("Hybrid stand mode accepted manual impact as a temporary override");
     }
+}
+
+void MainWindow::handleManualImpactRejected() {
+    const std::string message = "Manual stand control is disabled for this test mode";
+    appendLog(message);
+    showOperatorWarning("Ручное управление заблокировано", message);
 }
 
 void MainWindow::advanceStandImpactTransition() {
@@ -447,7 +479,9 @@ void MainWindow::updateManualStandControlsEnabled() {
     ui->doubleSpinBoxStandBeaufort->setEnabled(manualEnabled);
     ui->doubleSpinBoxStandAngleOfAttack->setEnabled(manualEnabled);
     ui->comboBoxStandDirection->setEnabled(manualEnabled);
-    ui->buttonApplyStandImpact->setEnabled(manualEnabled);
+    ui->buttonApplyStandBeaufort->setEnabled(manualEnabled);
+    ui->buttonApplyStandDirection->setEnabled(manualEnabled);
+    ui->buttonApplyStandAngleOfAttack->setEnabled(manualEnabled);
 }
 
 domain::AxisId MainWindow::selectedTelemetryAxisId() const {

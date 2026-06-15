@@ -11,6 +11,9 @@
 #include "../Presentation/TelemetryChartsTab/TelemetryChartsTabPresenter.hpp"
 #include "../Presentation/ControlChartsTab/ControlChartsTabPresenter.hpp"
 #include "../Presentation/TestProtocolTab/TestProtocolTabPresenter.hpp"
+#include "../Application/UseCases/ApplyAngleOfAttackUseCase.hpp"
+#include "../Application/UseCases/ApplyBeaufortImpactUseCase.hpp"
+#include "../Application/UseCases/ApplyWindDirectionUseCase.hpp"
 #include "../Application/UseCases/SetStandControlModeUseCase.hpp"
 #include "../Application/UseCases/SetStandImpactUseCase.hpp"
 #include "../Domain/AxisId.hpp"
@@ -47,6 +50,9 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
         presentation::testProtocolTab::TestProtocolTabPresenter &testProtocolTabPresenter;
         application::useCases::SetStandControlModeUseCase &setStandControlModeUseCase;
         application::useCases::SetStandImpactUseCase &setStandImpactUseCase;
+        application::useCases::ApplyBeaufortImpactUseCase &applyBeaufortImpactUseCase;
+        application::useCases::ApplyWindDirectionUseCase &applyWindDirectionUseCase;
+        application::useCases::ApplyAngleOfAttackUseCase &applyAngleOfAttackUseCase;
         infrastructure::SessionStateQtAdapter &sessionAdapter;
         infrastructure::configTemplates::IConfigTemplateService &configTemplateService;
     };
@@ -78,6 +84,9 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     presentation::testProtocolTab::TestProtocolTabPresenter &testProtocolTabPresenter;
     application::useCases::SetStandControlModeUseCase &setStandControlModeUseCase;
     application::useCases::SetStandImpactUseCase &setStandImpactUseCase;
+    application::useCases::ApplyBeaufortImpactUseCase &applyBeaufortImpactUseCase;
+    application::useCases::ApplyWindDirectionUseCase &applyWindDirectionUseCase;
+    application::useCases::ApplyAngleOfAttackUseCase &applyAngleOfAttackUseCase;
     infrastructure::SessionStateQtAdapter &sessionAdapter;
     infrastructure::configTemplates::IConfigTemplateService &configTemplateService;
 
@@ -96,7 +105,11 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     void connectConfigTemplateSignals();
     void connectStandControlSignals();
     void connectSessionSignals();
-    void applyStandInputs();
+    void applyBeaufortImpact();
+    void applyWindDirectionImpact();
+    void applyAngleOfAttackImpact();
+    void handleManualImpactAccepted(const domain::WindImpact &previousTarget, const std::string &changedParameter);
+    void handleManualImpactRejected();
     void advanceStandImpactTransition();
     void selectTelemetryAxisColor();
     void scheduleControlPlotRebuild();

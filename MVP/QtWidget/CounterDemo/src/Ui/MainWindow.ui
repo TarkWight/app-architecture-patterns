@@ -282,11 +282,29 @@
            </layout>
           </item>
           <item>
-           <widget class="QPushButton" name="buttonApplyStandImpact">
-            <property name="text">
-             <string>Применить воздействие</string>
-            </property>
-           </widget>
+           <layout class="QVBoxLayout" name="layoutApplyStandImpactButtons">
+            <item>
+             <widget class="QPushButton" name="buttonApplyStandBeaufort">
+              <property name="text">
+               <string>Применить Бофорт</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="buttonApplyStandDirection">
+              <property name="text">
+               <string>Применить направление</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="buttonApplyStandAngleOfAttack">
+              <property name="text">
+               <string>Применить угол атаки</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
           <item>
            <widget class="QPushButton" name="buttonTelemetryLineColor">

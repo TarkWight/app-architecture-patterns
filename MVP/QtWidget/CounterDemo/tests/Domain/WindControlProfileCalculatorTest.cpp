@@ -8,7 +8,7 @@ TEST(WindControlProfileCalculatorTest, BuildsOneSecondSamplesForDuration) {
     const auto profile =
         domain::buildWindControlProfile(domain::DurationMinutes::required(2), [](double minute) { return minute; });
 
-    EXPECT_EQ(profile.durationMinutes, 2);
+    EXPECT_EQ(profile.duration.value(), 2);
     EXPECT_DOUBLE_EQ(profile.sampleIntervalSeconds, domain::windControlProfileSampleIntervalSeconds);
     EXPECT_EQ(profile.samples.size(), static_cast<std::size_t>(2 * 60));
 

@@ -6,7 +6,7 @@ namespace {
 
 domain::WindControlProfile profileWithSamples() {
     return domain::WindControlProfile{
-        .durationMinutes = 1,
+        .duration = domain::DurationMinutes::required(1),
         .sampleIntervalSeconds = 1.0,
         .samples =
             {

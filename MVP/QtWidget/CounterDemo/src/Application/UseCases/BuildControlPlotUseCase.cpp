@@ -60,7 +60,7 @@ domain::PlotModel buildPlot(const session::SessionStateData &stateData, const do
     plot.title = "Control chart";
     plot.color = stateData.lineColor;
     const int durationMinutes =
-        profile.durationMinutes > 0 ? profile.durationMinutes : determineGridDuration(stateData).value();
+        profile.duration.value() > 0 ? profile.duration.value() : determineGridDuration(stateData).value();
     plot.x = domain::AxisSpec{0.0, static_cast<double>(std::max(1, durationMinutes)), 1.0, "minutes"};
     plot.y = domain::AxisSpec{0.0, domain::maxOperationalBeaufort, 0.5, "Beaufort"};
 

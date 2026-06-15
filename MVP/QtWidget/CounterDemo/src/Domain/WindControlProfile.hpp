@@ -1,6 +1,7 @@
 #ifndef WINDCONTROLPROFILE_HPP
 #define WINDCONTROLPROFILE_HPP
 
+#include "Time.hpp"
 #include "WindImpact.hpp"
 
 #include <algorithm>
@@ -37,7 +38,7 @@ struct WindControlSample {
 };
 
 struct WindControlProfile {
-    int durationMinutes{0};
+    DurationMinutes duration{DurationMinutes::optional(0)};
     double sampleIntervalSeconds{windControlProfileSampleIntervalSeconds};
     std::vector<WindControlSample> samples{};
 };

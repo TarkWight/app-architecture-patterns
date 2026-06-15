@@ -35,7 +35,7 @@ TEST(BuildControlPlotUseCaseTest, BuildsOneSecondWindControlProfileForCalculated
     const auto plot = useCase.execute();
     const auto &profile = state.get().controlProfile;
 
-    EXPECT_EQ(profile.durationMinutes, 48);
+    EXPECT_EQ(profile.duration.value(), 48);
     EXPECT_DOUBLE_EQ(profile.sampleIntervalSeconds, domain::windControlProfileSampleIntervalSeconds);
     EXPECT_EQ(profile.samples.size(), static_cast<std::size_t>(48 * 60));
     EXPECT_EQ(plot.series.points.size(), profile.samples.size());

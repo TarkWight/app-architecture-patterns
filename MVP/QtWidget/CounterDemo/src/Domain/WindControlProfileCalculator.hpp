@@ -13,10 +13,10 @@ inline WindControlProfile buildWindControlProfile(DurationMinutes duration,
                                                   const std::function<double(double)> &beaufortAtMinute) {
     WindControlProfile profile{};
     profile.sampleIntervalSeconds = windControlProfileSampleIntervalSeconds;
-    profile.durationMinutes = duration.value();
+    profile.duration = duration;
 
     const int sampleCount =
-        static_cast<int>(static_cast<double>(profile.durationMinutes * 60) / profile.sampleIntervalSeconds);
+        static_cast<int>(static_cast<double>(profile.duration.value() * 60) / profile.sampleIntervalSeconds);
     profile.samples.reserve(static_cast<std::size_t>(sampleCount));
 
     for (int index = 0; index < sampleCount; ++index) {

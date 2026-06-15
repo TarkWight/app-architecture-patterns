@@ -58,6 +58,22 @@ inline std::optional<StandConnectionStatus> transitionAfterDisconnectCompleted(S
     return StandConnectionStatus::Disconnected;
 }
 
+inline std::optional<StandConnectionStatus> transitionAfterPollingStarted(StandConnectionStatus status) {
+    if (!canStartPolling(status)) {
+        return std::nullopt;
+    }
+
+    return StandConnectionStatus::Polling;
+}
+
+inline std::optional<StandConnectionStatus> transitionAfterPollingStopped(StandConnectionStatus status) {
+    if (!canStopPolling(status)) {
+        return std::nullopt;
+    }
+
+    return StandConnectionStatus::Connected;
+}
+
 } // namespace domain
 
 #endif // STANDCONNECTIONTRANSITIONS_HPP

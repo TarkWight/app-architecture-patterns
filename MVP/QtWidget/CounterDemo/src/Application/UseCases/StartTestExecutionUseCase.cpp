@@ -66,21 +66,23 @@ void StartTestExecutionUseCase::execute() {
 }
 
 void StartTestExecutionUseCase::startTelemetryPollingIfConnected() {
-    if (!domain::canStartPolling(state.get().standConnectionStatus)) {
+    const auto transition = domain::transitionAfterPollingStarted(state.get().standConnectionStatus);
+    if (!transition.has_value()) {
         return;
     }
 
     telemetryClient.startPolling(state.get().telemetryPollInterval.milliseconds());
-    state.setStandConnectionStatus(domain::StandConnectionStatus::Polling);
+    state.setStandConnectionStatus(*transition);
 }
 
 void StartTestExecutionUseCase::stopTelemetryPollingIfActive() {
-    if (!domain::canStopPolling(state.get().standConnectionStatus)) {
+    const auto transition = domain::transitionAfterPollingStopped(state.get().standConnectionStatus);
+    if (!transition.has_value()) {
         return;
     }
 
     telemetryClient.stopPolling();
-    state.setStandConnectionStatus(domain::StandConnectionStatus::Connected);
+    state.setStandConnectionStatus(*transition);
 }
 
 void StartTestExecutionUseCase::applyScenarioImpact(domain::ElapsedSeconds elapsed) {

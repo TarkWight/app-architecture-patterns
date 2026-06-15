@@ -89,4 +89,26 @@ TEST(StandConnectionTransitionsTest, DisconnectCompletionTransitionsOnlyDisconne
     EXPECT_FALSE(domain::transitionAfterDisconnectCompleted(domain::StandConnectionStatus::Error).has_value());
 }
 
+TEST(StandConnectionTransitionsTest, PollingStartTransitionsOnlyConnectedToPolling) {
+    EXPECT_FALSE(domain::transitionAfterPollingStarted(domain::StandConnectionStatus::Disconnected).has_value());
+    EXPECT_FALSE(domain::transitionAfterPollingStarted(domain::StandConnectionStatus::Configured).has_value());
+    EXPECT_FALSE(domain::transitionAfterPollingStarted(domain::StandConnectionStatus::Connecting).has_value());
+    EXPECT_EQ(domain::transitionAfterPollingStarted(domain::StandConnectionStatus::Connected),
+              domain::StandConnectionStatus::Polling);
+    EXPECT_FALSE(domain::transitionAfterPollingStarted(domain::StandConnectionStatus::Polling).has_value());
+    EXPECT_FALSE(domain::transitionAfterPollingStarted(domain::StandConnectionStatus::Disconnecting).has_value());
+    EXPECT_FALSE(domain::transitionAfterPollingStarted(domain::StandConnectionStatus::Error).has_value());
+}
+
+TEST(StandConnectionTransitionsTest, PollingStopTransitionsOnlyPollingToConnected) {
+    EXPECT_FALSE(domain::transitionAfterPollingStopped(domain::StandConnectionStatus::Disconnected).has_value());
+    EXPECT_FALSE(domain::transitionAfterPollingStopped(domain::StandConnectionStatus::Configured).has_value());
+    EXPECT_FALSE(domain::transitionAfterPollingStopped(domain::StandConnectionStatus::Connecting).has_value());
+    EXPECT_FALSE(domain::transitionAfterPollingStopped(domain::StandConnectionStatus::Connected).has_value());
+    EXPECT_EQ(domain::transitionAfterPollingStopped(domain::StandConnectionStatus::Polling),
+              domain::StandConnectionStatus::Connected);
+    EXPECT_FALSE(domain::transitionAfterPollingStopped(domain::StandConnectionStatus::Disconnecting).has_value());
+    EXPECT_FALSE(domain::transitionAfterPollingStopped(domain::StandConnectionStatus::Error).has_value());
+}
+
 } // namespace

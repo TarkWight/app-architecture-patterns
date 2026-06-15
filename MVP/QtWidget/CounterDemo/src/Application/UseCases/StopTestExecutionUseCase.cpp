@@ -22,9 +22,10 @@ void StopTestExecutionUseCase::execute() {
 
     testExecutionScheduler.stop();
 
-    if (domain::canStopPolling(state.get().standConnectionStatus)) {
+    const auto pollingTransition = domain::transitionAfterPollingStopped(state.get().standConnectionStatus);
+    if (pollingTransition.has_value()) {
         telemetryClient.stopPolling();
-        state.setStandConnectionStatus(domain::StandConnectionStatus::Connected);
+        state.setStandConnectionStatus(*pollingTransition);
     }
 
     const auto &session = state.get();

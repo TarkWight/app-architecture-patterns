@@ -218,6 +218,7 @@ if (BUILD_TESTING)
     tests/Domain/StandScenarioTest.cpp
     tests/Domain/StandConnectionTransitionsTest.cpp
     tests/Domain/StandImpactTransitionTest.cpp
+    tests/Domain/TelemetryConnectionPolicyTest.cpp
     tests/Domain/TestExecutionPlannerTest.cpp
     tests/Domain/TestExecutionTransitionsTest.cpp
     tests/Domain/TestModeStatePolicyTest.cpp

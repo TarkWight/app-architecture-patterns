@@ -27,4 +27,31 @@ TEST(WindImpactTest, FactoryCreatesImpactWithNormalizedValues) {
     EXPECT_DOUBLE_EQ(impact.angleOfAttack.degrees(), domain::maxAngleOfAttack);
 }
 
+TEST(WindImpactTest, WithBeaufortChangesOnlyBeaufort) {
+    const auto original = domain::makeWindImpact(2.0, 90.0, 15.0);
+    const auto updated = original.withBeaufort(domain::Beaufort::from(6.0));
+
+    EXPECT_DOUBLE_EQ(updated.beaufort.value(), 6.0);
+    EXPECT_DOUBLE_EQ(updated.direction.degrees(), 90.0);
+    EXPECT_DOUBLE_EQ(updated.angleOfAttack.degrees(), 15.0);
+}
+
+TEST(WindImpactTest, WithDirectionChangesOnlyDirection) {
+    const auto original = domain::makeWindImpact(2.0, 90.0, 15.0);
+    const auto updated = original.withDirection(domain::WindDirection::from(270.0));
+
+    EXPECT_DOUBLE_EQ(updated.beaufort.value(), 2.0);
+    EXPECT_DOUBLE_EQ(updated.direction.degrees(), 270.0);
+    EXPECT_DOUBLE_EQ(updated.angleOfAttack.degrees(), 15.0);
+}
+
+TEST(WindImpactTest, WithAngleOfAttackChangesOnlyAngleOfAttack) {
+    const auto original = domain::makeWindImpact(2.0, 90.0, 15.0);
+    const auto updated = original.withAngleOfAttack(domain::AngleOfAttack::from(45.0));
+
+    EXPECT_DOUBLE_EQ(updated.beaufort.value(), 2.0);
+    EXPECT_DOUBLE_EQ(updated.direction.degrees(), 90.0);
+    EXPECT_DOUBLE_EQ(updated.angleOfAttack.degrees(), 45.0);
+}
+
 } // namespace

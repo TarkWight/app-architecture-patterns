@@ -84,6 +84,7 @@ class SessionState {
     void setTelemetryStatus(domain::TelemetryStatus status);
     void setStandConnectionStatus(domain::StandConnectionStatus status);
     void setTelemetryPollIntervalMs(int intervalMs);
+    void setTelemetryPollInterval(domain::TelemetryPollInterval interval);
 
   private:
     SessionStateData data{};

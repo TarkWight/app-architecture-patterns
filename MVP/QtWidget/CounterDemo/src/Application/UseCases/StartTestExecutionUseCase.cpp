@@ -64,7 +64,7 @@ void StartTestExecutionUseCase::startTelemetryPollingIfConnected() {
         return;
     }
 
-    telemetryClient.startPolling(state.get().telemetryPollIntervalMs);
+    telemetryClient.startPolling(state.get().telemetryPollInterval.milliseconds());
     state.setStandConnectionStatus(domain::StandConnectionStatus::Polling);
 }
 

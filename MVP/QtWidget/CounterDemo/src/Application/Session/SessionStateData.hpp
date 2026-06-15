@@ -8,6 +8,7 @@
 #include "../../Domain/StandControlMode.hpp"
 #include "../../Domain/StandConnectionStatus.hpp"
 #include "../../Domain/TelemetryStatus.hpp"
+#include "../../Domain/TelemetryPollInterval.hpp"
 #include "../../Domain/TestExecutionStatus.hpp"
 #include "../../Domain/TestProtocol.hpp"
 #include "../../Domain/TestTimeDirection.hpp"
@@ -81,7 +82,7 @@ struct SessionStateData {
     domain::TelemetryStatus telemetryStatus{domain::TelemetryStatus::Unavailable};
 
     domain::StandConnectionStatus standConnectionStatus{domain::StandConnectionStatus::Disconnected};
-    int telemetryPollIntervalMs{1000};
+    domain::TelemetryPollInterval telemetryPollInterval{domain::TelemetryPollInterval::fromMilliseconds(1000)};
 };
 
 } // namespace application::session

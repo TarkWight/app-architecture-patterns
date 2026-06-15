@@ -296,7 +296,11 @@ void application::session::SessionState::setStandConnectionStatus(domain::StandC
 }
 
 void application::session::SessionState::setTelemetryPollIntervalMs(int intervalMs) {
-    data.telemetryPollIntervalMs = std::clamp(intervalMs, 20, 60'000);
+    setTelemetryPollInterval(domain::TelemetryPollInterval::fromMilliseconds(intervalMs));
+}
+
+void application::session::SessionState::setTelemetryPollInterval(domain::TelemetryPollInterval interval) {
+    data.telemetryPollInterval = interval;
     notify();
 }
 

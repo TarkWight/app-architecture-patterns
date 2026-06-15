@@ -21,7 +21,7 @@ void applyTelemetryConnectionDecision(application::session::SessionState &state,
     }
 
     if (decision.shouldStartPolling) {
-        telemetryClient.startPolling(state.get().telemetryPollIntervalMs);
+        telemetryClient.startPolling(state.get().telemetryPollInterval.milliseconds());
     }
 
     if (decision.standConnectionStatus.has_value()) {

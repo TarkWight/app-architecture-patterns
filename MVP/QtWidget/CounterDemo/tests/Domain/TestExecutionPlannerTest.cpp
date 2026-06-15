@@ -78,4 +78,24 @@ TEST(TestExecutionPlannerTest, PlansScenarioMode_WhenFreeRunSelected_ReturnsCoun
     EXPECT_FALSE(plan.isCompletedAt(domain::ElapsedSeconds::from(3600)));
 }
 
+TEST(TestExecutionPlannerTest, ResetsCountdownAfterStop_WhenDurationIsActive_ReturnsFullRemainingTime) {
+    // Arrange / Act
+    const auto stopPlan = domain::TestExecutionPlanner::resetAfterStop(domain::DurationMinutes::required(12),
+                                                                       domain::TestTimeDirection::CountDown);
+
+    // Assert
+    EXPECT_EQ(stopPlan.elapsed.value(), 0);
+    EXPECT_EQ(stopPlan.remaining.value(), 720);
+}
+
+TEST(TestExecutionPlannerTest, ResetsCountUpAfterStop_WhenManualTimerIsActive_ReturnsZeroRemainingTime) {
+    // Arrange / Act
+    const auto stopPlan = domain::TestExecutionPlanner::resetAfterStop(domain::DurationMinutes::required(12),
+                                                                       domain::TestTimeDirection::CountUp);
+
+    // Assert
+    EXPECT_EQ(stopPlan.elapsed.value(), 0);
+    EXPECT_EQ(stopPlan.remaining.value(), 0);
+}
+
 } // namespace

@@ -10,7 +10,6 @@
 #include "../Domain/AxisId.hpp"
 #include "../Domain/FormulaTemplate.hpp"
 #include "../Domain/StandControlMode.hpp"
-#include "../Domain/StandConnectionTransitions.hpp"
 #include "../Domain/StandImpactTransition.hpp"
 #include "../Domain/StandScenario.hpp"
 #include "../Domain/WindImpact.hpp"
@@ -235,31 +234,30 @@ void MainWindow::connectTestControlSignals() {
 
 void MainWindow::connectConfigTemplateSignals() {
     QObject::connect(ui->buttonConnectTelemetry, &QPushButton::clicked, this, [this]() {
-        const auto action = domain::connectionButtonAction(sessionAdapter.getState().get().standConnectionStatus);
-        const auto configPath = telemetryConfigPathForConnection();
-
-        if (action != domain::StandConnectionButtonAction::ConfigureAndConnect) {
-            shellPresenter.onConnectTelemetryPressed(configPath);
+        if (!shellPresenter.telemetryConfigRequiredForConnection()) {
+            shellPresenter.onConnectTelemetryPressed({});
             return;
         }
 
-        if (configPath.empty()) {
-            if (!selectedTelemetryConfigPath.empty()) {
-                appendLog("selected telemetry.toml is not available: " + selectedTelemetryConfigPath);
+        const auto telemetryConfig = configTemplateService.resolvePath(configTemplates::ConfigTemplateType::Telemetry,
+                                                                       selectedTelemetryConfigPath);
+
+        if (!telemetryConfig.exists()) {
+            if (telemetryConfig.status == configTemplates::ConfigTemplateResolutionStatus::MissingOperatorSelected) {
+                appendLog("selected telemetry.toml is not available: " + telemetryConfig.path.string());
                 showOperatorWarning("telemetry.toml недоступен",
                                     "Выбранный файл telemetry.toml недоступен. Выберите существующий файл.");
                 return;
             }
 
-            const auto path = configTemplateService.pathFor(configTemplates::ConfigTemplateType::Telemetry);
-            appendLog("telemetry.toml not found: " + path.string());
+            appendLog("telemetry.toml not found: " + telemetryConfig.path.string());
             showOperatorWarning("telemetry.toml не найден",
                                 "Файл telemetry.toml не найден рядом с приложением. Создайте шаблон и заполните "
                                 "параметры подключения стенда или выберите файл вручную.");
             return;
         }
 
-        shellPresenter.onConnectTelemetryPressed(configPath);
+        shellPresenter.onConnectTelemetryPressed(telemetryConfig.path.string());
     });
 
     QObject::connect(ui->buttonCreateTelemetryTemplate, &QPushButton::clicked, this,
@@ -491,22 +489,6 @@ void MainWindow::selectTelemetryConfig() {
 
     selectedTelemetryConfigPath = filePath.toStdString();
     appendLog("telemetry.toml selected: " + selectedTelemetryConfigPath);
-}
-
-std::string MainWindow::telemetryConfigPathForConnection() const {
-    if (!selectedTelemetryConfigPath.empty()) {
-        if (std::filesystem::exists(std::filesystem::path{selectedTelemetryConfigPath})) {
-            return selectedTelemetryConfigPath;
-        }
-
-        return {};
-    }
-
-    if (!configTemplateService.exists(configTemplates::ConfigTemplateType::Telemetry)) {
-        return {};
-    }
-
-    return configTemplateService.pathFor(configTemplates::ConfigTemplateType::Telemetry).string();
 }
 
 void MainWindow::updateStandControlModeSelection() {

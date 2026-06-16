@@ -74,3 +74,79 @@ TEST(ConfigTemplateServiceTest, CreatesTelemetryTemplateAtOperatorSelectedPathWi
 
     std::filesystem::remove_all(dir);
 }
+
+TEST(ConfigTemplateServiceTest, ResolvesDefaultTelemetryPathWhenOperatorPathIsEmpty) {
+    const auto dir = testDir();
+    std::filesystem::remove_all(dir);
+    std::filesystem::create_directories(dir);
+
+    const auto defaultTelemetry = dir / "telemetry.toml";
+    {
+        std::ofstream stream{defaultTelemetry};
+        stream << "custom = true\n";
+    }
+
+    FileLocationProviderStub provider{dir};
+    infrastructure::configTemplates::ConfigTemplateService service{provider};
+
+    const auto resolution =
+        service.resolvePath(infrastructure::configTemplates::ConfigTemplateType::Telemetry, std::filesystem::path{});
+
+    EXPECT_TRUE(resolution.exists());
+    EXPECT_EQ(resolution.path, defaultTelemetry);
+    EXPECT_EQ(resolution.status, infrastructure::configTemplates::ConfigTemplateResolutionStatus::Found);
+
+    std::filesystem::remove_all(dir);
+}
+
+TEST(ConfigTemplateServiceTest, ResolvesOperatorSelectedTelemetryPathWhenItExists) {
+    const auto dir = testDir();
+    std::filesystem::remove_all(dir);
+    std::filesystem::create_directories(dir);
+
+    const auto selectedTelemetry = dir / "selected" / "telemetry.toml";
+    std::filesystem::create_directories(selectedTelemetry.parent_path());
+    {
+        std::ofstream stream{selectedTelemetry};
+        stream << "custom = true\n";
+    }
+
+    FileLocationProviderStub provider{dir};
+    infrastructure::configTemplates::ConfigTemplateService service{provider};
+
+    const auto resolution =
+        service.resolvePath(infrastructure::configTemplates::ConfigTemplateType::Telemetry, selectedTelemetry);
+
+    EXPECT_TRUE(resolution.exists());
+    EXPECT_EQ(resolution.path, selectedTelemetry);
+    EXPECT_EQ(resolution.status, infrastructure::configTemplates::ConfigTemplateResolutionStatus::Found);
+
+    std::filesystem::remove_all(dir);
+}
+
+TEST(ConfigTemplateServiceTest, DoesNotFallbackToDefaultWhenOperatorSelectedPathIsMissing) {
+    const auto dir = testDir();
+    std::filesystem::remove_all(dir);
+    std::filesystem::create_directories(dir);
+
+    const auto defaultTelemetry = dir / "telemetry.toml";
+    {
+        std::ofstream stream{defaultTelemetry};
+        stream << "custom = true\n";
+    }
+
+    const auto missingSelectedTelemetry = dir / "missing" / "telemetry.toml";
+
+    FileLocationProviderStub provider{dir};
+    infrastructure::configTemplates::ConfigTemplateService service{provider};
+
+    const auto resolution =
+        service.resolvePath(infrastructure::configTemplates::ConfigTemplateType::Telemetry, missingSelectedTelemetry);
+
+    EXPECT_FALSE(resolution.exists());
+    EXPECT_EQ(resolution.path, missingSelectedTelemetry);
+    EXPECT_EQ(resolution.status,
+              infrastructure::configTemplates::ConfigTemplateResolutionStatus::MissingOperatorSelected);
+
+    std::filesystem::remove_all(dir);
+}

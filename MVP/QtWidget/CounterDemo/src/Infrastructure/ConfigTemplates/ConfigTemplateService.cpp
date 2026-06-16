@@ -36,6 +36,22 @@ bool ConfigTemplateService::exists(ConfigTemplateType type) const {
     return std::filesystem::exists(pathFor(type));
 }
 
+ConfigTemplateResolution ConfigTemplateService::resolvePath(ConfigTemplateType type,
+                                                            const std::filesystem::path &operatorSelectedPath) const {
+    const bool operatorPathProvided = !operatorSelectedPath.empty();
+    const auto path = operatorPathProvided ? operatorSelectedPath : pathFor(type);
+
+    if (std::filesystem::exists(path)) {
+        return ConfigTemplateResolution{.type = type, .path = path, .status = ConfigTemplateResolutionStatus::Found};
+    }
+
+    return ConfigTemplateResolution{.type = type,
+                                    .path = path,
+                                    .status = operatorPathProvided
+                                                  ? ConfigTemplateResolutionStatus::MissingOperatorSelected
+                                                  : ConfigTemplateResolutionStatus::MissingDefault};
+}
+
 std::vector<ConfigTemplateState> ConfigTemplateService::inspectAll() const {
     return std::vector<ConfigTemplateState>{
         ConfigTemplateState{.type = ConfigTemplateType::Telemetry,

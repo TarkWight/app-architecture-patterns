@@ -218,6 +218,11 @@ void ShellPresenter::onConnectTelemetryPressed(std::string configPath) {
     }
 }
 
+bool ShellPresenter::telemetryConfigRequiredForConnection() const {
+    return domain::connectionButtonAction(state.get().standConnectionStatus) ==
+           domain::StandConnectionButtonAction::ConfigureAndConnect;
+}
+
 void ShellPresenter::refreshStandConnectionButton() {
     if (view == nullptr) {
         return;

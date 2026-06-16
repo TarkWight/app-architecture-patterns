@@ -57,6 +57,7 @@ class ShellPresenter final {
     void onLineColorSelected(domain::RgbColor color);
     void onTestTimeSourceChanged(domain::TestTimeSource source);
     void onConnectTelemetryPressed(std::string configPath);
+    [[nodiscard]] bool telemetryConfigRequiredForConnection() const;
 
   private:
     application::session::SessionState &state;

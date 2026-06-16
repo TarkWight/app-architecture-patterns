@@ -12,6 +12,8 @@ class ConfigTemplateService final : public IConfigTemplateService {
 
     [[nodiscard]] std::filesystem::path pathFor(ConfigTemplateType type) const override;
     [[nodiscard]] bool exists(ConfigTemplateType type) const override;
+    [[nodiscard]] ConfigTemplateResolution
+    resolvePath(ConfigTemplateType type, const std::filesystem::path &operatorSelectedPath) const override;
     [[nodiscard]] std::vector<ConfigTemplateState> inspectAll() const override;
 
     void createTemplate(ConfigTemplateType type, const std::filesystem::path &path) const override;

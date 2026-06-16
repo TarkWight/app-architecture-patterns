@@ -7,9 +7,10 @@ BuildControlPlotUseCase::BuildControlPlotUseCase(session::SessionState &state, c
 }
 
 application::dto::PlotModel BuildControlPlotUseCase::execute() {
-    const auto &stateData = state.get();
-    auto profile = profilePreviewService.build(stateData.protocol, stateData.control, engine);
-    auto plot = plotBuilder.build(stateData.protocol, stateData.control, profile);
+    const auto &protocol = state.protocol();
+    const auto &control = state.control();
+    auto profile = profilePreviewService.build(protocol, control, engine);
+    auto plot = plotBuilder.build(protocol, control, profile);
 
     state.setControlProfile(std::move(profile));
     state.setControlPlot(plot);
@@ -17,9 +18,10 @@ application::dto::PlotModel BuildControlPlotUseCase::execute() {
 }
 
 application::dto::PlotModel BuildControlPlotUseCase::refreshFromState() {
-    const auto &stateData = state.get();
+    const auto &protocol = state.protocol();
+    const auto &control = state.control();
 
-    auto plot = plotBuilder.build(stateData.protocol, stateData.control, stateData.control.controlProfile);
+    auto plot = plotBuilder.build(protocol, control, control.controlProfile);
 
     state.setControlPlot(plot);
     return plot;

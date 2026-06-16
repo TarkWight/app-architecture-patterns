@@ -12,16 +12,16 @@ namespace application::services {
 namespace {
 
 domain::DurationMinutes determinePreviewDuration(const session::SessionStateData &stateData) {
-    if (stateData.testTimeSource == domain::TestTimeSource::OperatorDefined) {
-        return stateData.operatorTestDuration;
+    if (stateData.protocol.testTimeSource == domain::TestTimeSource::OperatorDefined) {
+        return stateData.protocol.operatorTestDuration;
     }
 
-    return stateData.estimatedTestDuration;
+    return stateData.protocol.estimatedTestDuration;
 }
 
 domain::DurationMinutes determineGridDuration(const session::SessionStateData &stateData) {
-    if (!stateData.controlTrace.empty()) {
-        const double lastTraceMinute = stateData.controlTrace.back().time.minutes();
+    if (!stateData.control.controlTrace.empty()) {
+        const double lastTraceMinute = stateData.control.controlTrace.back().time.minutes();
         return domain::DurationMinutes::required(std::max(1, static_cast<int>(std::ceil(lastTraceMinute))));
     }
 
@@ -112,7 +112,7 @@ application::dto::PlotModel ControlPlotBuilder::build(const session::SessionStat
                                                       const domain::WindControlProfile &profile) const {
     application::dto::PlotModel plot{};
     plot.title = "Control chart";
-    plot.color = stateData.lineColor;
+    plot.color = stateData.control.lineColor;
 
     const int durationMinutes =
         profile.duration.value() > 0 ? profile.duration.value() : determineGridDuration(stateData).value();
@@ -124,7 +124,7 @@ application::dto::PlotModel ControlPlotBuilder::build(const session::SessionStat
         plot.series.points.push_back(application::dto::Point{.x = sample.time.minutes(), .y = sample.beaufort.value()});
     }
 
-    addControlTraceSeries(plot, stateData.controlTrace);
+    addControlTraceSeries(plot, stateData.control.controlTrace);
     return plot;
 }
 

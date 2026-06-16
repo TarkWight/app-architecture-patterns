@@ -15,9 +15,9 @@ TEST(SetControlChartsTabMinutesUseCaseTest, AcceptsOperatorDurationOnlyInHybridM
 
     useCase.execute(domain::DurationMinutes::required(37));
 
-    EXPECT_EQ(state.get().controlChartsTabMinutes.value(), 37);
-    EXPECT_EQ(state.get().operatorTestDuration.value(), 37);
-    EXPECT_EQ(state.get().testTimeSource, domain::TestTimeSource::OperatorDefined);
+    EXPECT_EQ(state.get().control.controlChartsTabMinutes.value(), 37);
+    EXPECT_EQ(state.get().protocol.operatorTestDuration.value(), 37);
+    EXPECT_EQ(state.get().protocol.testTimeSource, domain::TestTimeSource::OperatorDefined);
 }
 
 TEST(SetControlChartsTabMinutesUseCaseTest, IgnoresOperatorDurationInManualMode) {
@@ -31,9 +31,9 @@ TEST(SetControlChartsTabMinutesUseCaseTest, IgnoresOperatorDurationInManualMode)
 
     useCase.execute(domain::DurationMinutes::required(37));
 
-    EXPECT_EQ(state.get().controlChartsTabMinutes.value(), 20);
-    EXPECT_EQ(state.get().operatorTestDuration.value(), 20);
-    EXPECT_EQ(state.get().testTimeSource, domain::TestTimeSource::FreeRun);
+    EXPECT_EQ(state.get().control.controlChartsTabMinutes.value(), 20);
+    EXPECT_EQ(state.get().protocol.operatorTestDuration.value(), 20);
+    EXPECT_EQ(state.get().protocol.testTimeSource, domain::TestTimeSource::FreeRun);
 }
 
 TEST(SetControlChartsTabMinutesUseCaseTest, IgnoresOperatorDurationInAutomaticMode) {
@@ -47,9 +47,9 @@ TEST(SetControlChartsTabMinutesUseCaseTest, IgnoresOperatorDurationInAutomaticMo
 
     useCase.execute(domain::DurationMinutes::required(37));
 
-    EXPECT_EQ(state.get().controlChartsTabMinutes.value(), 20);
-    EXPECT_EQ(state.get().operatorTestDuration.value(), 20);
-    EXPECT_EQ(state.get().testTimeSource, domain::TestTimeSource::AutoCalculated);
+    EXPECT_EQ(state.get().control.controlChartsTabMinutes.value(), 20);
+    EXPECT_EQ(state.get().protocol.operatorTestDuration.value(), 20);
+    EXPECT_EQ(state.get().protocol.testTimeSource, domain::TestTimeSource::AutoCalculated);
 }
 
 } // namespace

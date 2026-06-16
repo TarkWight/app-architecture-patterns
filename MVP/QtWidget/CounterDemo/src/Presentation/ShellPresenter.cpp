@@ -67,7 +67,7 @@ void ShellPresenter::onResumePressed() {
 }
 
 void ShellPresenter::onPauseResumePressed() {
-    const auto status = state.get().testExecutionStatus;
+    const auto status = state.get().execution.testExecutionStatus;
     if (canPause(status)) {
         onPausePressed();
         return;
@@ -156,21 +156,22 @@ void ShellPresenter::refreshFromState() {
 
     const auto &session = state.get();
 
-    const int displayedSeconds = (session.testTimeDirection == domain::TestTimeDirection::CountDown)
-                                     ? session.remaining.value()
-                                     : session.elapsed.value();
+    const int displayedSeconds = (session.execution.testTimeDirection == domain::TestTimeDirection::CountDown)
+                                     ? session.execution.remaining.value()
+                                     : session.execution.elapsed.value();
 
     view->setTimerText(formatTimerText(displayedSeconds));
-    view->setStartEnabled(canStart(session.testExecutionStatus));
-    view->setPauseResumeEnabled(canPause(session.testExecutionStatus) || canResume(session.testExecutionStatus));
-    view->setPauseResumeText(canResume(session.testExecutionStatus) ? "Продолжить" : "Пауза");
-    view->setStopEnabled(canStop(session.testExecutionStatus));
-    view->setFunctionExpression(session.functionExpression.value);
-    view->setTestTimeSource(session.testTimeSource);
-    view->setTestTimeSourceEnabled(testTimeSourceCanBeChanged(session.testProtocol.testMode));
+    view->setStartEnabled(canStart(session.execution.testExecutionStatus));
+    view->setPauseResumeEnabled(canPause(session.execution.testExecutionStatus) ||
+                                canResume(session.execution.testExecutionStatus));
+    view->setPauseResumeText(canResume(session.execution.testExecutionStatus) ? "Продолжить" : "Пауза");
+    view->setStopEnabled(canStop(session.execution.testExecutionStatus));
+    view->setFunctionExpression(session.control.functionExpression.value);
+    view->setTestTimeSource(session.protocol.testTimeSource);
+    view->setTestTimeSourceEnabled(testTimeSourceCanBeChanged(session.protocol.testProtocol.testMode));
     refreshStandConnectionButton();
     refreshStandConnectionStatusText();
-    notifyStandConnectionStatusChanged(session.standConnectionStatus);
+    notifyStandConnectionStatusChanged(session.connection.standConnectionStatus);
 }
 
 void ShellPresenter::onTestTimeSourceChanged(domain::TestTimeSource source) {
@@ -192,7 +193,7 @@ void ShellPresenter::onStandControlModeChanged(domain::StandControlMode mode) {
 
 void ShellPresenter::onConnectTelemetryPressed(std::string configPath) {
     try {
-        switch (domain::connectionButtonAction(state.get().standConnectionStatus)) {
+        switch (domain::connectionButtonAction(state.get().connection.standConnectionStatus)) {
         case domain::StandConnectionButtonAction::Disconnect:
             disconnectStandUseCase.execute();
 
@@ -227,7 +228,7 @@ void ShellPresenter::onConnectTelemetryPressed(std::string configPath) {
 }
 
 bool ShellPresenter::telemetryConfigRequiredForConnection() const {
-    return domain::connectionButtonAction(state.get().standConnectionStatus) ==
+    return domain::connectionButtonAction(state.get().connection.standConnectionStatus) ==
            domain::StandConnectionButtonAction::ConfigureAndConnect;
 }
 
@@ -236,7 +237,7 @@ void ShellPresenter::refreshStandConnectionButton() {
         return;
     }
 
-    switch (domain::connectionButtonAction(state.get().standConnectionStatus)) {
+    switch (domain::connectionButtonAction(state.get().connection.standConnectionStatus)) {
     case domain::StandConnectionButtonAction::ConfigureAndConnect:
     case domain::StandConnectionButtonAction::Connect:
         view->setStandConnectionButtonText("Подключить стенд");
@@ -252,7 +253,7 @@ void ShellPresenter::refreshStandConnectionStatusText() {
         return;
     }
 
-    switch (state.get().standConnectionStatus) {
+    switch (state.get().connection.standConnectionStatus) {
     case domain::StandConnectionStatus::Disconnected:
         view->setStandConnectionStatusText("Стенд: отключен");
         break;

@@ -10,7 +10,7 @@ DisconnectStandUseCase::DisconnectStandUseCase(application::session::SessionStat
 }
 
 void DisconnectStandUseCase::execute() {
-    const auto transition = domain::transitionToDisconnecting(state.get().standConnectionStatus);
+    const auto transition = domain::transitionToDisconnecting(state.get().connection.standConnectionStatus);
     if (!transition.has_value()) {
         return;
     }
@@ -20,7 +20,7 @@ void DisconnectStandUseCase::execute() {
     telemetryClient.stopPolling();
     telemetryClient.disconnectAll();
 
-    const auto completion = domain::transitionAfterDisconnectCompleted(state.get().standConnectionStatus);
+    const auto completion = domain::transitionAfterDisconnectCompleted(state.get().connection.standConnectionStatus);
     if (completion.has_value()) {
         state.setStandConnectionStatus(*completion);
     }

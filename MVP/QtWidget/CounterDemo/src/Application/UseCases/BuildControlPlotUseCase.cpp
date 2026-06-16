@@ -19,7 +19,7 @@ application::dto::PlotModel BuildControlPlotUseCase::execute() {
 application::dto::PlotModel BuildControlPlotUseCase::refreshFromState() {
     const auto &stateData = state.get();
 
-    auto plot = plotBuilder.build(stateData, stateData.controlProfile);
+    auto plot = plotBuilder.build(stateData, stateData.control.controlProfile);
 
     state.setControlPlot(plot);
     return plot;

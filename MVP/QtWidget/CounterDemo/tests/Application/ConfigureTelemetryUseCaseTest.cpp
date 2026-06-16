@@ -101,8 +101,8 @@ TEST(ConfigureTelemetryUseCaseTest, StartsPollingWhenAxisConnectsDuringActiveTes
 
     EXPECT_EQ(telemetryClient.startPollingCalls, 1);
     EXPECT_EQ(telemetryClient.lastPollingIntervalMs, 250);
-    EXPECT_EQ(state.get().standConnectionStatus, domain::StandConnectionStatus::Polling);
-    EXPECT_EQ(state.get().telemetryStatus, domain::TelemetryStatus::Valid);
+    EXPECT_EQ(state.get().connection.standConnectionStatus, domain::StandConnectionStatus::Polling);
+    EXPECT_EQ(state.get().telemetry.telemetryStatus, domain::TelemetryStatus::Valid);
 }
 
 TEST(ConfigureTelemetryUseCaseTest, ConnectedStatusDoesNotDowngradeActivePolling) {
@@ -118,8 +118,8 @@ TEST(ConfigureTelemetryUseCaseTest, ConnectedStatusDoesNotDowngradeActivePolling
     telemetryClient.statusCallback(domain::axis1, domain::TelemetryConnectionStatus::Connected, "Connected");
 
     EXPECT_EQ(telemetryClient.startPollingCalls, 0);
-    EXPECT_EQ(state.get().standConnectionStatus, domain::StandConnectionStatus::Polling);
-    EXPECT_EQ(state.get().telemetryStatus, domain::TelemetryStatus::Valid);
+    EXPECT_EQ(state.get().connection.standConnectionStatus, domain::StandConnectionStatus::Polling);
+    EXPECT_EQ(state.get().telemetry.telemetryStatus, domain::TelemetryStatus::Valid);
 }
 
 TEST(ConfigureTelemetryUseCaseTest, ConnectedStatusMarksStandConnectedWhenNoTestIsActive) {
@@ -135,8 +135,8 @@ TEST(ConfigureTelemetryUseCaseTest, ConnectedStatusMarksStandConnectedWhenNoTest
     telemetryClient.statusCallback(domain::axis0, domain::TelemetryConnectionStatus::Connected, "Connected");
 
     EXPECT_EQ(telemetryClient.startPollingCalls, 0);
-    EXPECT_EQ(state.get().standConnectionStatus, domain::StandConnectionStatus::Connected);
-    EXPECT_EQ(state.get().telemetryStatus, domain::TelemetryStatus::Valid);
+    EXPECT_EQ(state.get().connection.standConnectionStatus, domain::StandConnectionStatus::Connected);
+    EXPECT_EQ(state.get().telemetry.telemetryStatus, domain::TelemetryStatus::Valid);
 }
 
 } // namespace

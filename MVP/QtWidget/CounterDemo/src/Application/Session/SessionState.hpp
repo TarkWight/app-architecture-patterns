@@ -32,6 +32,11 @@ class SessionState {
     using Listener = std::function<void(const SessionStateData &)>;
 
     const SessionStateData &get() const;
+    const ExecutionStateData &execution() const;
+    const ConnectionStateData &connection() const;
+    const TelemetryStateData &telemetry() const;
+    const ControlStateData &control() const;
+    const ProtocolStateData &protocol() const;
 
     Subscription subscribe(Listener listener);
 

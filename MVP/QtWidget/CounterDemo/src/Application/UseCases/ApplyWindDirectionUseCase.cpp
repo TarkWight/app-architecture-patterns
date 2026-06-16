@@ -10,11 +10,11 @@ ApplyWindDirectionUseCase::ApplyWindDirectionUseCase(application::session::Sessi
 
 bool ApplyWindDirectionUseCase::execute(domain::WindDirection direction) {
     const auto &session = state.get();
-    if (!domain::StandScenario{session.standControlMode}.allowsManualImpact()) {
+    if (!domain::StandScenario{session.control.standControlMode}.allowsManualImpact()) {
         return false;
     }
 
-    state.setTargetStandImpact(session.targetStandImpact.withDirection(direction));
+    state.setTargetStandImpact(session.control.targetStandImpact.withDirection(direction));
     return true;
 }
 

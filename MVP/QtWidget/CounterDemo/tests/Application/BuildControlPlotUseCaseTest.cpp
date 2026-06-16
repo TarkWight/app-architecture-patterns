@@ -33,7 +33,7 @@ TEST(BuildControlPlotUseCaseTest, BuildsOneSecondWindControlProfileForCalculated
     application::useCases::BuildControlPlotUseCase useCase{state, engine};
 
     const auto plot = useCase.execute();
-    const auto &profile = state.get().controlProfile;
+    const auto &profile = state.get().control.controlProfile;
 
     EXPECT_EQ(profile.duration.value(), 48);
     EXPECT_DOUBLE_EQ(profile.sampleIntervalSeconds, domain::windControlProfileSampleIntervalSeconds);
@@ -59,7 +59,7 @@ TEST(BuildControlPlotUseCaseTest, ClampsFormulaOutputToOperationalBeaufortRange)
     application::useCases::BuildControlPlotUseCase useCase{state, engine};
 
     useCase.execute();
-    const auto &profile = state.get().controlProfile;
+    const auto &profile = state.get().control.controlProfile;
 
     EXPECT_DOUBLE_EQ(profile.samples.at(0).beaufort.value(), domain::minOperationalBeaufort);
     EXPECT_DOUBLE_EQ(profile.samples.at(60).beaufort.value(), domain::maxOperationalBeaufort);
@@ -74,7 +74,7 @@ TEST(BuildControlPlotUseCaseTest, ManualModeShowsEmptyControlGridUntilCommandsAr
 
     const auto plot = useCase.execute();
 
-    EXPECT_TRUE(state.get().controlProfile.samples.empty());
+    EXPECT_TRUE(state.get().control.controlProfile.samples.empty());
     EXPECT_TRUE(plot.series.points.empty());
     EXPECT_TRUE(plot.seriesList.empty());
     EXPECT_DOUBLE_EQ(plot.x.min, 0.0);
@@ -93,9 +93,9 @@ TEST(BuildControlPlotUseCaseTest, PresetScenarioStandModeBuildsFormulaProfileFor
 
     const auto plot = useCase.execute();
 
-    EXPECT_EQ(state.get().testProtocol.testMode, domain::TestMode::Automatic);
-    EXPECT_EQ(state.get().controlProfile.samples.size(), static_cast<std::size_t>(60));
-    EXPECT_EQ(plot.series.points.size(), state.get().controlProfile.samples.size());
+    EXPECT_EQ(state.get().protocol.testProtocol.testMode, domain::TestMode::Automatic);
+    EXPECT_EQ(state.get().control.controlProfile.samples.size(), static_cast<std::size_t>(60));
+    EXPECT_EQ(plot.series.points.size(), state.get().control.controlProfile.samples.size());
     EXPECT_FALSE(plot.series.points.empty());
 }
 
@@ -174,7 +174,7 @@ TEST(BuildControlPlotUseCaseTest, RefreshFromStateKeepsExistingProfileAndUpdates
     application::useCases::BuildControlPlotUseCase useCase{state, engine};
     useCase.execute();
 
-    const auto profileSize = state.get().controlProfile.samples.size();
+    const auto profileSize = state.get().control.controlProfile.samples.size();
     state.appendControlTraceSample(domain::ControlTraceSample{
         .time = domain::ControlTraceTime::fromSeconds(0.0),
         .targetValue = domain::makeWindImpact(2.0, 0.0, 0.0),
@@ -183,7 +183,7 @@ TEST(BuildControlPlotUseCaseTest, RefreshFromStateKeepsExistingProfileAndUpdates
 
     const auto plot = useCase.refreshFromState();
 
-    EXPECT_EQ(state.get().controlProfile.samples.size(), profileSize);
+    EXPECT_EQ(state.get().control.controlProfile.samples.size(), profileSize);
     ASSERT_EQ(plot.seriesList.size(), 2U);
     EXPECT_TRUE(plot.marker.visible);
     EXPECT_DOUBLE_EQ(plot.marker.x, 0.0);

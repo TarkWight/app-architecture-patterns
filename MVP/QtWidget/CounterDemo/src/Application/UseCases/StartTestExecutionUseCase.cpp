@@ -22,19 +22,20 @@ StartTestExecutionUseCase::StartTestExecutionUseCase(
 
 void StartTestExecutionUseCase::execute() {
     const auto &session = state.get();
-    const auto transition = domain::transitionAfterStartRequested(session.testExecutionStatus);
+    const auto transition = domain::transitionAfterStartRequested(session.execution.testExecutionStatus);
     if (!transition.has_value()) {
         return;
     }
 
-    if (domain::TestModeStatePolicy::usesControlProfile(session.testProtocol.testMode)) {
+    if (domain::TestModeStatePolicy::usesControlProfile(session.protocol.testProtocol.testMode)) {
         buildControlPlotUseCase.execute();
-        state.setTargetStandImpact(state.get().windImpact);
+        state.setTargetStandImpact(state.get().control.windImpact);
         state.clearControlTrace();
     }
 
-    const auto plan = domain::TestExecutionPlanner::plan(session.testProtocol, session.testTimeSource,
-                                                         session.estimatedTestDuration, session.operatorTestDuration);
+    const auto plan = domain::TestExecutionPlanner::plan(session.protocol.testProtocol, session.protocol.testTimeSource,
+                                                         session.protocol.estimatedTestDuration,
+                                                         session.protocol.operatorTestDuration);
 
     state.setActiveTestDurationMinutes(plan.activeDuration);
     state.setTestTimeDirection(plan.direction);
@@ -57,7 +58,8 @@ void StartTestExecutionUseCase::execute() {
         if (plan.isCompletedAt(elapsed)) {
             testExecutionScheduler.stop();
             stopTelemetryPollingIfActive();
-            const auto completion = domain::transitionAfterExecutionCompleted(state.get().testExecutionStatus);
+            const auto completion =
+                domain::transitionAfterExecutionCompleted(state.get().execution.testExecutionStatus);
             if (completion.has_value()) {
                 state.setTestExecutionStatus(*completion);
             }
@@ -66,17 +68,17 @@ void StartTestExecutionUseCase::execute() {
 }
 
 void StartTestExecutionUseCase::startTelemetryPollingIfConnected() {
-    const auto transition = domain::transitionAfterPollingStarted(state.get().standConnectionStatus);
+    const auto transition = domain::transitionAfterPollingStarted(state.get().connection.standConnectionStatus);
     if (!transition.has_value()) {
         return;
     }
 
-    telemetryClient.startPolling(state.get().telemetryPollInterval.milliseconds());
+    telemetryClient.startPolling(state.get().connection.telemetryPollInterval.milliseconds());
     state.setStandConnectionStatus(*transition);
 }
 
 void StartTestExecutionUseCase::stopTelemetryPollingIfActive() {
-    const auto transition = domain::transitionAfterPollingStopped(state.get().standConnectionStatus);
+    const auto transition = domain::transitionAfterPollingStopped(state.get().connection.standConnectionStatus);
     if (!transition.has_value()) {
         return;
     }
@@ -87,12 +89,12 @@ void StartTestExecutionUseCase::stopTelemetryPollingIfActive() {
 
 void StartTestExecutionUseCase::applyScenarioImpact(domain::ElapsedSeconds elapsed) {
     const auto &session = state.get();
-    if (!domain::TestModeStatePolicy::usesControlProfile(session.testProtocol.testMode)) {
+    if (!domain::TestModeStatePolicy::usesControlProfile(session.protocol.testProtocol.testMode)) {
         return;
     }
 
-    const auto step =
-        domain::ScenarioExecutionEngine::advance(session.controlProfile, elapsed, session.targetStandImpact);
+    const auto step = domain::ScenarioExecutionEngine::advance(session.control.controlProfile, elapsed,
+                                                               session.control.targetStandImpact);
     if (!step.has_value()) {
         return;
     }

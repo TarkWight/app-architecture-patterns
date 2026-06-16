@@ -10,11 +10,11 @@ ApplyBeaufortImpactUseCase::ApplyBeaufortImpactUseCase(application::session::Ses
 
 bool ApplyBeaufortImpactUseCase::execute(domain::Beaufort beaufort) {
     const auto &session = state.get();
-    if (!domain::StandScenario{session.standControlMode}.allowsManualImpact()) {
+    if (!domain::StandScenario{session.control.standControlMode}.allowsManualImpact()) {
         return false;
     }
 
-    state.setTargetStandImpact(session.targetStandImpact.withBeaufort(beaufort));
+    state.setTargetStandImpact(session.control.targetStandImpact.withBeaufort(beaufort));
     return true;
 }
 

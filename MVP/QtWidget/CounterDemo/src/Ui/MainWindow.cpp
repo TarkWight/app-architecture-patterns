@@ -278,8 +278,8 @@ void MainWindow::connectStandControlSignals() {
         const QSignalBlocker visibleBlocker{ui->checkBoxTelemetryCurveVisible};
 
         const auto &stateData = sessionAdapter.getState().get();
-        ui->checkBoxTelemetryCurveVisible->setChecked(index == 0 ? stateData.telemetryAxisYVisible
-                                                                 : stateData.telemetryAxisZVisible);
+        ui->checkBoxTelemetryCurveVisible->setChecked(index == 0 ? stateData.telemetry.telemetryAxisYVisible
+                                                                 : stateData.telemetry.telemetryAxisZVisible);
     });
 
     QObject::connect(ui->checkBoxTelemetryCurveVisible, &QCheckBox::toggled, this, [this](bool checked) {
@@ -297,7 +297,7 @@ void MainWindow::connectStandControlSignals() {
 
 void MainWindow::connectSessionSignals() {
     observedTestProtocolModeKey =
-        std::string{domain::testModeKey(sessionAdapter.getState().get().testProtocol.testMode)};
+        std::string{domain::testModeKey(sessionAdapter.getState().get().protocol.testProtocol.testMode)};
 
     QObject::connect(
         &sessionAdapter, &infrastructure::SessionStateQtAdapter::testTimeModelChanged, this,
@@ -348,7 +348,7 @@ void MainWindow::setTestTimeSourceEnabled(bool enabled) {
 }
 
 void MainWindow::applyBeaufortImpact() {
-    const auto previousTarget = sessionAdapter.getState().get().targetStandImpact;
+    const auto previousTarget = sessionAdapter.getState().get().control.targetStandImpact;
     if (!applyBeaufortImpactUseCase.execute(domain::Beaufort::from(ui->doubleSpinBoxStandBeaufort->value()))) {
         handleManualImpactRejected();
         return;
@@ -358,7 +358,7 @@ void MainWindow::applyBeaufortImpact() {
 }
 
 void MainWindow::applyWindDirectionImpact() {
-    const auto previousTarget = sessionAdapter.getState().get().targetStandImpact;
+    const auto previousTarget = sessionAdapter.getState().get().control.targetStandImpact;
     if (!applyWindDirectionUseCase.execute(domain::WindDirection::from(selectedStandDirectionDegrees()))) {
         handleManualImpactRejected();
         return;
@@ -368,7 +368,7 @@ void MainWindow::applyWindDirectionImpact() {
 }
 
 void MainWindow::applyAngleOfAttackImpact() {
-    const auto previousTarget = sessionAdapter.getState().get().targetStandImpact;
+    const auto previousTarget = sessionAdapter.getState().get().control.targetStandImpact;
     if (!applyAngleOfAttackUseCase.execute(domain::AngleOfAttack::from(ui->doubleSpinBoxStandAngleOfAttack->value()))) {
         handleManualImpactRejected();
         return;
@@ -380,11 +380,12 @@ void MainWindow::applyAngleOfAttackImpact() {
 void MainWindow::handleManualImpactAccepted(const domain::WindImpact &previousTarget,
                                             const std::string &changedParameter) {
     const auto &stateData = sessionAdapter.getState().get();
-    const domain::StandScenario scenario{stateData.standControlMode};
+    const domain::StandScenario scenario{stateData.control.standControlMode};
     standImpactTransitionTimer->start();
 
     appendLog("Manual stand " + changedParameter + " target accepted: target " + formatImpact(previousTarget) + " -> " +
-              formatImpact(stateData.targetStandImpact) + ", applied " + formatImpact(stateData.appliedStandImpact));
+              formatImpact(stateData.control.targetStandImpact) + ", applied " +
+              formatImpact(stateData.control.appliedStandImpact));
 
     if (scenario.manualImpactPolicy() == domain::ManualImpactPolicy::ReturnToScenarioAfterManualImpact) {
         appendLog("Hybrid stand mode accepted manual impact as a temporary override");
@@ -399,14 +400,14 @@ void MainWindow::handleManualImpactRejected() {
 
 void MainWindow::advanceStandImpactTransition() {
     const auto &stateData = sessionAdapter.getState().get();
-    const domain::StandScenario scenario{stateData.standControlMode};
+    const domain::StandScenario scenario{stateData.control.standControlMode};
     if (!scenario.allowsManualImpact()) {
         standImpactTransitionTimer->stop();
         return;
     }
 
-    const auto transition =
-        domain::StandImpactTransition{}.advance(stateData.appliedStandImpact, stateData.targetStandImpact);
+    const auto transition = domain::StandImpactTransition{}.advance(stateData.control.appliedStandImpact,
+                                                                    stateData.control.targetStandImpact);
     const auto &next = transition.impact;
 
     setStandImpactUseCase.setApplied(next);
@@ -487,7 +488,7 @@ void MainWindow::selectTelemetryConfig() {
 }
 
 void MainWindow::updateStandControlModeSelection() {
-    const auto mode = sessionAdapter.getState().get().standControlMode;
+    const auto mode = sessionAdapter.getState().get().control.standControlMode;
     const int index = ui->comboBoxStandControlMode->findData(static_cast<int>(mode));
     if (index < 0 || ui->comboBoxStandControlMode->currentIndex() == index) {
         return;

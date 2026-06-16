@@ -15,19 +15,20 @@ presentation::viewModels::TestTimeViewModel
 SessionStateQtAdapter::toTestTimeViewModel(const application::session::SessionStateData &data) {
 
     presentation::viewModels::TestTimeViewModel model{};
-    model.executionStatus = data.testExecutionStatus;
-    model.timeSource = data.testTimeSource;
-    model.timeDirection = data.testTimeDirection;
+    model.executionStatus = data.execution.testExecutionStatus;
+    model.timeSource = data.protocol.testTimeSource;
+    model.timeDirection = data.execution.testTimeDirection;
 
-    model.estimatedDurationMinutes = data.estimatedTestDuration.value();
-    model.operatorDurationMinutes = data.operatorTestDuration.value();
-    model.activeDurationMinutes = data.activeTestDuration.value();
+    model.estimatedDurationMinutes = data.protocol.estimatedTestDuration.value();
+    model.operatorDurationMinutes = data.protocol.operatorTestDuration.value();
+    model.activeDurationMinutes = data.execution.activeTestDuration.value();
 
-    model.elapsedSeconds = data.elapsed.value();
-    model.remainingSeconds = data.remaining.value();
+    model.elapsedSeconds = data.execution.elapsed.value();
+    model.remainingSeconds = data.execution.remaining.value();
 
-    model.displayedSeconds = (data.testTimeDirection == domain::TestTimeDirection::CountDown) ? data.remaining.value()
-                                                                                              : data.elapsed.value();
+    model.displayedSeconds = (data.execution.testTimeDirection == domain::TestTimeDirection::CountDown)
+                                 ? data.execution.remaining.value()
+                                 : data.execution.elapsed.value();
 
     return model;
 }
@@ -35,22 +36,24 @@ SessionStateQtAdapter::toTestTimeViewModel(const application::session::SessionSt
 void SessionStateQtAdapter::emitState(const application::session::SessionStateData &data) {
     emit testTimeModelChanged(toTestTimeViewModel(data));
 
-    emit functionExpressionChanged(QString::fromStdString(data.functionExpression.value));
-    emit lineColorChanged(toQColor(data.lineColor));
+    emit functionExpressionChanged(QString::fromStdString(data.control.functionExpression.value));
+    emit lineColorChanged(toQColor(data.control.lineColor));
 
-    emit controlChartsTabMinutesChanged(data.controlChartsTabMinutes.value());
+    emit controlChartsTabMinutesChanged(data.control.controlChartsTabMinutes.value());
 
-    emit beaufortChanged(data.windImpact.beaufort.value());
-    emit directionChanged(data.windImpact.direction.degrees());
-    emit angleOfAttackChanged(data.windImpact.angleOfAttack.degrees());
+    emit beaufortChanged(data.control.windImpact.beaufort.value());
+    emit directionChanged(data.control.windImpact.direction.degrees());
+    emit angleOfAttackChanged(data.control.windImpact.angleOfAttack.degrees());
 
-    emit testProtocolTitleChanged(QString::fromStdString(data.testProtocol.title));
-    emit testProtocolModeChanged(QString::fromUtf8(domain::testModeKey(data.testProtocol.testMode).data()));
-    emit testProtocolProgramChanged(QString::fromUtf8(domain::testProgramKey(data.testProtocol.testProgram).data()));
-    emit testProtocolDroneParametersChanged(data.testProtocol.droneParameters);
+    emit testProtocolTitleChanged(QString::fromStdString(data.protocol.testProtocol.title));
+    emit testProtocolModeChanged(QString::fromUtf8(domain::testModeKey(data.protocol.testProtocol.testMode).data()));
+    emit testProtocolProgramChanged(
+        QString::fromUtf8(domain::testProgramKey(data.protocol.testProtocol.testProgram).data()));
+    emit testProtocolDroneParametersChanged(data.protocol.testProtocol.droneParameters);
 
     for (int i = 0; i < 8; ++i) {
-        emit testProtocolLineChanged(i, QString::fromStdString(data.testProtocol.lines[static_cast<std::size_t>(i)]));
+        emit testProtocolLineChanged(
+            i, QString::fromStdString(data.protocol.testProtocol.lines[static_cast<std::size_t>(i)]));
     }
 
     emit telemetryPlotChanged();

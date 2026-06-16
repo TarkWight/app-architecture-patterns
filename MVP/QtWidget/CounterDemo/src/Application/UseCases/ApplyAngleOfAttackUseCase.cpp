@@ -10,11 +10,11 @@ ApplyAngleOfAttackUseCase::ApplyAngleOfAttackUseCase(application::session::Sessi
 
 bool ApplyAngleOfAttackUseCase::execute(domain::AngleOfAttack angleOfAttack) {
     const auto &session = state.get();
-    if (!domain::StandScenario{session.standControlMode}.allowsManualImpact()) {
+    if (!domain::StandScenario{session.control.standControlMode}.allowsManualImpact()) {
         return false;
     }
 
-    state.setTargetStandImpact(session.targetStandImpact.withAngleOfAttack(angleOfAttack));
+    state.setTargetStandImpact(session.control.targetStandImpact.withAngleOfAttack(angleOfAttack));
     return true;
 }
 

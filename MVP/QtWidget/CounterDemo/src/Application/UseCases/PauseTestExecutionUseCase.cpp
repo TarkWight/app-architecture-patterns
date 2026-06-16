@@ -11,7 +11,7 @@ PauseTestExecutionUseCase::PauseTestExecutionUseCase(
 }
 
 void PauseTestExecutionUseCase::execute() {
-    const auto transition = domain::transitionAfterPauseRequested(state.get().testExecutionStatus);
+    const auto transition = domain::transitionAfterPauseRequested(state.get().execution.testExecutionStatus);
     if (!transition.has_value()) {
         return;
     }

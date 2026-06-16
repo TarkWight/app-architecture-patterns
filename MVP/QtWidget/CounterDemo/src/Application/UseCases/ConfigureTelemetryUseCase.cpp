@@ -12,7 +12,7 @@ namespace application::useCases {
 namespace {
 
 bool testExecutionIsActive(const application::session::SessionStateData &stateData) {
-    return domain::canStop(stateData.testExecutionStatus);
+    return domain::canStop(stateData.execution.testExecutionStatus);
 }
 
 void applyTelemetryConnectionDecision(application::session::SessionState &state,
@@ -23,7 +23,7 @@ void applyTelemetryConnectionDecision(application::session::SessionState &state,
     }
 
     if (decision.shouldStartPolling) {
-        telemetryClient.startPolling(state.get().telemetryPollInterval.milliseconds());
+        telemetryClient.startPolling(state.get().connection.telemetryPollInterval.milliseconds());
     }
 
     if (decision.standConnectionStatus.has_value()) {
@@ -47,12 +47,12 @@ void ConfigureTelemetryUseCase::execute(const std::string &configPath) {
         state.setTelemetryStatus(domain::TelemetryStatus::Valid);
     });
 
-    telemetryClient.setStatusCallback([this](domain::AxisId /*axisId*/, domain::TelemetryConnectionStatus status,
-                                             const std::string & /*message*/) {
-        const auto decision = domain::TelemetryConnectionPolicy::handleStatus(state.get().standConnectionStatus, status,
-                                                                              testExecutionIsActive(state.get()));
-        applyTelemetryConnectionDecision(state, telemetryClient, decision);
-    });
+    telemetryClient.setStatusCallback(
+        [this](domain::AxisId /*axisId*/, domain::TelemetryConnectionStatus status, const std::string & /*message*/) {
+            const auto decision = domain::TelemetryConnectionPolicy::handleStatus(
+                state.get().connection.standConnectionStatus, status, testExecutionIsActive(state.get()));
+            applyTelemetryConnectionDecision(state, telemetryClient, decision);
+        });
 
     telemetryClient.setErrorCallback([this](domain::AxisId /*axisId*/, const std::string & /*message*/) {
         applyTelemetryConnectionDecision(state, telemetryClient, domain::TelemetryConnectionPolicy::failure());

@@ -20,8 +20,8 @@ TEST(SetTelemetryWindowUseCaseTest, ManualWindowSelectionDisablesTailFollowing) 
 
     useCase.execute(domain::TelemetryWindowEnd::fromSeconds(42.5));
 
-    EXPECT_FALSE(state.get().telemetryFollowTail);
-    EXPECT_DOUBLE_EQ(state.get().telemetryWindowEndSeconds.seconds(), 42.5);
+    EXPECT_FALSE(state.get().telemetry.telemetryFollowTail);
+    EXPECT_DOUBLE_EQ(state.get().telemetry.telemetryWindowEndSeconds.seconds(), 42.5);
 }
 
 TEST(SetTelemetryWindowUseCaseTest, FollowTailMovesWindowToTelemetryHistoryEnd) {
@@ -33,8 +33,8 @@ TEST(SetTelemetryWindowUseCaseTest, FollowTailMovesWindowToTelemetryHistoryEnd) 
 
     useCase.followTail();
 
-    EXPECT_TRUE(state.get().telemetryFollowTail);
-    EXPECT_DOUBLE_EQ(state.get().telemetryWindowEndSeconds.seconds(), 32.5);
+    EXPECT_TRUE(state.get().telemetry.telemetryFollowTail);
+    EXPECT_DOUBLE_EQ(state.get().telemetry.telemetryWindowEndSeconds.seconds(), 32.5);
 }
 
 } // namespace

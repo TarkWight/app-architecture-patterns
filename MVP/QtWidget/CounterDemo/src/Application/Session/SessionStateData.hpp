@@ -31,34 +31,41 @@ inline application::dto::PlotModel makeInitialTelemetryPlot() {
     return plot;
 }
 
-struct SessionStateData {
-    // ===== Execution =====
+struct ExecutionStateData {
     domain::TestExecutionStatus testExecutionStatus{domain::TestExecutionStatus::Idle};
 
-    // ===== Time model =====
-    domain::TestTimeSource testTimeSource{domain::TestTimeSource::FreeRun};
     domain::TestTimeDirection testTimeDirection{domain::TestTimeDirection::CountUp};
-
-    domain::DurationMinutes estimatedTestDuration{domain::DurationMinutes::required(20)}; // рассчитано программой
-    domain::DurationMinutes operatorTestDuration{domain::DurationMinutes::required(20)};  // введено оператором
     domain::DurationMinutes activeTestDuration{
         domain::DurationMinutes::required(20)}; // реально используемое при запуске
 
     domain::ElapsedSeconds elapsed{domain::ElapsedSeconds::from(0)};
     domain::RemainingSeconds remaining{domain::RemainingSeconds::from(0)};
+};
 
-    // ===== UI / scenario input =====
+struct ProtocolStateData {
+    domain::TestProtocol testProtocol{};
+    domain::TestTimeSource testTimeSource{domain::TestTimeSource::FreeRun};
+    domain::DurationMinutes estimatedTestDuration{domain::DurationMinutes::required(20)}; // рассчитано программой
+    domain::DurationMinutes operatorTestDuration{domain::DurationMinutes::required(20)};  // введено оператором
+};
+
+struct ControlStateData {
     domain::Expression functionExpression{};
     domain::WindImpact windImpact{};
     application::dto::RgbColor lineColor{};
     domain::DurationMinutes controlChartsTabMinutes{domain::DurationMinutes::required(20)};
 
-    // ===== Plots =====
-    application::dto::PlotModel telemetryPlot{makeInitialTelemetryPlot()};
     application::dto::PlotModel controlPlot{};
     domain::WindControlProfile controlProfile{};
     domain::ControlTrace controlTrace{};
 
+    domain::StandControlMode standControlMode{domain::StandControlMode::Manual};
+    domain::WindImpact appliedStandImpact{};
+    domain::WindImpact targetStandImpact{};
+};
+
+struct TelemetryStateData {
+    application::dto::PlotModel telemetryPlot{makeInitialTelemetryPlot()};
     std::vector<domain::AxisTelemetrySample> telemetryHistory{};
     double telemetryWindowSeconds{60.0};
     domain::TelemetryWindowEnd telemetryWindowEndSeconds{domain::TelemetryWindowEnd::fromSeconds(0.0)};
@@ -68,21 +75,23 @@ struct SessionStateData {
     bool telemetryAxisYVisible{true};
     bool telemetryAxisZVisible{true};
 
-    // ===== Stand control =====
-    domain::StandControlMode standControlMode{domain::StandControlMode::Manual};
-    domain::WindImpact appliedStandImpact{};
-    domain::WindImpact targetStandImpact{};
-    // ===== Protocol / report =====
-    domain::TestProtocol testProtocol{};
+    domain::TelemetryStatus telemetryStatus{domain::TelemetryStatus::Unavailable};
+};
 
-    // ===== Optional runtime/device state =====
+struct ConnectionStateData {
     domain::AxisState axis1State{domain::AxisState::Disconnected};
     domain::AxisState axis2State{domain::AxisState::Disconnected};
 
-    domain::TelemetryStatus telemetryStatus{domain::TelemetryStatus::Unavailable};
-
     domain::StandConnectionStatus standConnectionStatus{domain::StandConnectionStatus::Disconnected};
     domain::TelemetryPollInterval telemetryPollInterval{domain::TelemetryPollInterval::fromMilliseconds(1000)};
+};
+
+struct SessionStateData {
+    ExecutionStateData execution{};
+    ConnectionStateData connection{};
+    TelemetryStateData telemetry{};
+    ControlStateData control{};
+    ProtocolStateData protocol{};
 };
 
 } // namespace application::session

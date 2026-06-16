@@ -10,7 +10,7 @@ application::dto::PlotModel GenerateStairPlotUseCase::execute() {
 
     application::dto::PlotModel plot{};
     plot.title = "Stair plot";
-    plot.color = session.lineColor;
+    plot.color = session.control.lineColor;
 
     plot.x = application::dto::AxisSpec{.min = 0.0, .max = 20.0, .step = 1.0, .label = "steps"};
 

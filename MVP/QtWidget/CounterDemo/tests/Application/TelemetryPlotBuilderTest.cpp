@@ -37,11 +37,11 @@ TEST(TelemetryPlotBuilderTest, BuildsVisibleGridWhenHistoryIsEmpty) {
 
 TEST(TelemetryPlotBuilderTest, BuildsAxisSeriesInsideSelectedWindow) {
     application::session::SessionStateData stateData{};
-    stateData.telemetryWindowEndSeconds = domain::TelemetryWindowEnd::fromSeconds(70.0);
-    stateData.telemetryHistory.push_back(validSample(domain::axis0, 100.0, 1.0F));
-    stateData.telemetryHistory.push_back(validSample(domain::axis1, 120.0, 2.0F));
-    stateData.telemetryHistory.push_back(validSample(domain::axis0, 160.0, 3.0F));
-    stateData.telemetryHistory.push_back(validSample(domain::axis1, 180.0, 4.0F));
+    stateData.telemetry.telemetryWindowEndSeconds = domain::TelemetryWindowEnd::fromSeconds(70.0);
+    stateData.telemetry.telemetryHistory.push_back(validSample(domain::axis0, 100.0, 1.0F));
+    stateData.telemetry.telemetryHistory.push_back(validSample(domain::axis1, 120.0, 2.0F));
+    stateData.telemetry.telemetryHistory.push_back(validSample(domain::axis0, 160.0, 3.0F));
+    stateData.telemetry.telemetryHistory.push_back(validSample(domain::axis1, 180.0, 4.0F));
     const application::services::TelemetryPlotBuilder builder{};
 
     const auto plot = builder.build(stateData);
@@ -59,10 +59,10 @@ TEST(TelemetryPlotBuilderTest, BuildsAxisSeriesInsideSelectedWindow) {
 
 TEST(TelemetryPlotBuilderTest, AppliesAxisVisibilityAndColors) {
     application::session::SessionStateData stateData{};
-    stateData.telemetryAxisYVisible = false;
-    stateData.telemetryAxisZColor = application::dto::RgbColor{1, 2, 3};
-    stateData.telemetryHistory.push_back(validSample(domain::axis0, 10.0, 1.0F));
-    stateData.telemetryHistory.push_back(validSample(domain::axis1, 20.0, 2.0F));
+    stateData.telemetry.telemetryAxisYVisible = false;
+    stateData.telemetry.telemetryAxisZColor = application::dto::RgbColor{1, 2, 3};
+    stateData.telemetry.telemetryHistory.push_back(validSample(domain::axis0, 10.0, 1.0F));
+    stateData.telemetry.telemetryHistory.push_back(validSample(domain::axis1, 20.0, 2.0F));
     const application::services::TelemetryPlotBuilder builder{};
 
     const auto plot = builder.build(stateData);

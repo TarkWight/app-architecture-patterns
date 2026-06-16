@@ -32,7 +32,7 @@ ControlChartsTabWidget::ControlChartsTabWidget(presentation::controlChartsTab::C
     connectSignals();
     connectSessionSignals();
     presenter.onTimeSettingsChanged();
-    setFunctionExpression(sessionAdapter.getState().get().functionExpression.value);
+    setFunctionExpression(sessionAdapter.getState().get().control.functionExpression.value);
 }
 
 ControlChartsTabWidget::~ControlChartsTabWidget() {
@@ -65,7 +65,7 @@ void ControlChartsTabWidget::setAngleOfAttack(double value) {
 }
 
 void ControlChartsTabWidget::refreshPlot() {
-    plotWidget->setPlot(sessionAdapter.getState().get().controlPlot);
+    plotWidget->setPlot(sessionAdapter.getState().get().control.controlPlot);
 }
 
 void ControlChartsTabWidget::appendLog(const std::string &text) {

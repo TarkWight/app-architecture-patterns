@@ -36,7 +36,7 @@ TelemetryChartsTabWidget::~TelemetryChartsTabWidget() {
 }
 
 void TelemetryChartsTabWidget::refreshPlot() {
-    plotWidget->setPlot(sessionAdapter.getState().get().telemetryPlot);
+    plotWidget->setPlot(sessionAdapter.getState().get().telemetry.telemetryPlot);
     refreshTelemetryScrollBar();
 }
 
@@ -70,8 +70,8 @@ void TelemetryChartsTabWidget::connectSessionSignals() {
 void TelemetryChartsTabWidget::refreshTelemetryScrollBar() {
     const auto &stateData = sessionAdapter.getState().get();
     const int historyEndSeconds = telemetryHistoryEndSeconds();
-    const int selectedEndSeconds = static_cast<int>(std::ceil(stateData.telemetryWindowEndSeconds.seconds()));
-    const int windowSeconds = static_cast<int>(std::ceil(stateData.telemetryWindowSeconds));
+    const int selectedEndSeconds = static_cast<int>(std::ceil(stateData.telemetry.telemetryWindowEndSeconds.seconds()));
+    const int windowSeconds = static_cast<int>(std::ceil(stateData.telemetry.telemetryWindowSeconds));
 
     const QSignalBlocker blocker{telemetryScrollBar};
 
@@ -90,13 +90,13 @@ void TelemetryChartsTabWidget::refreshTelemetryScrollBar() {
 
 int TelemetryChartsTabWidget::telemetryHistoryEndSeconds() const {
     const auto &stateData = sessionAdapter.getState().get();
-    if (stateData.telemetryHistory.empty()) {
+    if (stateData.telemetry.telemetryHistory.empty()) {
         return 0;
     }
 
-    const double baseTimestamp = stateData.telemetryHistory.front().timestampSeconds;
+    const double baseTimestamp = stateData.telemetry.telemetryHistory.front().timestampSeconds;
     return static_cast<int>(
-        std::ceil(std::max(0.0, stateData.telemetryHistory.back().timestampSeconds - baseTimestamp)));
+        std::ceil(std::max(0.0, stateData.telemetry.telemetryHistory.back().timestampSeconds - baseTimestamp)));
 }
 
 } // namespace ui

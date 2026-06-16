@@ -10,7 +10,7 @@ TEST(SetOperatorTestDurationUseCaseTest, WhenExecuted_StoresOperatorDurationValu
 
     useCase.execute(domain::DurationMinutes::required(37));
 
-    EXPECT_EQ(state.get().operatorTestDuration.value(), 37);
+    EXPECT_EQ(state.get().protocol.operatorTestDuration.value(), 37);
 }
 
 } // namespace

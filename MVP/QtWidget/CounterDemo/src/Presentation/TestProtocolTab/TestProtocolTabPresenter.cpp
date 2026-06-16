@@ -43,16 +43,16 @@ void TestProtocolTabPresenter::syncViewFromState() {
 
     const auto &session = state.get();
 
-    view->setOperatorTestDurationMinutes(session.operatorTestDuration.value());
-    view->setTestProtocolTitle(session.testProtocol.title);
+    view->setOperatorTestDurationMinutes(session.protocol.operatorTestDuration.value());
+    view->setTestProtocolTitle(session.protocol.testProtocol.title);
 
     for (int i = 0; i < 8; ++i) {
-        view->setTestProtocolLine(i, session.testProtocol.lines[static_cast<std::size_t>(i)]);
+        view->setTestProtocolLine(i, session.protocol.testProtocol.lines[static_cast<std::size_t>(i)]);
     }
 
-    view->setTestProtocolMode(std::string{domain::testModeKey(session.testProtocol.testMode)});
-    view->setTestProtocolProgram(std::string{domain::testProgramKey(session.testProtocol.testProgram)});
-    view->setTestProtocolDroneParameters(session.testProtocol.droneParameters);
+    view->setTestProtocolMode(std::string{domain::testModeKey(session.protocol.testProtocol.testMode)});
+    view->setTestProtocolProgram(std::string{domain::testProgramKey(session.protocol.testProtocol.testProgram)});
+    view->setTestProtocolDroneParameters(session.protocol.testProtocol.droneParameters);
 }
 
 void TestProtocolTabPresenter::onOperatorTestDurationChanged(int minutes) {

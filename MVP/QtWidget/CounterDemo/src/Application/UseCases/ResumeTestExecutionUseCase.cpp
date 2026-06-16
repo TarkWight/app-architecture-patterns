@@ -11,7 +11,7 @@ ResumeTestExecutionUseCase::ResumeTestExecutionUseCase(
 }
 
 void ResumeTestExecutionUseCase::execute() {
-    const auto transition = domain::transitionAfterResumeRequested(state.get().testExecutionStatus);
+    const auto transition = domain::transitionAfterResumeRequested(state.get().execution.testExecutionStatus);
     if (!transition.has_value()) {
         return;
     }

@@ -15,22 +15,22 @@ StopTestExecutionUseCase::StopTestExecutionUseCase(application::session::Session
 }
 
 void StopTestExecutionUseCase::execute() {
-    const auto transition = domain::transitionAfterStopRequested(state.get().testExecutionStatus);
+    const auto transition = domain::transitionAfterStopRequested(state.get().execution.testExecutionStatus);
     if (!transition.has_value()) {
         return;
     }
 
     testExecutionScheduler.stop();
 
-    const auto pollingTransition = domain::transitionAfterPollingStopped(state.get().standConnectionStatus);
+    const auto pollingTransition = domain::transitionAfterPollingStopped(state.get().connection.standConnectionStatus);
     if (pollingTransition.has_value()) {
         telemetryClient.stopPolling();
         state.setStandConnectionStatus(*pollingTransition);
     }
 
     const auto &session = state.get();
-    const auto stopPlan =
-        domain::TestExecutionPlanner::resetAfterStop(session.activeTestDuration, session.testTimeDirection);
+    const auto stopPlan = domain::TestExecutionPlanner::resetAfterStop(session.execution.activeTestDuration,
+                                                                       session.execution.testTimeDirection);
 
     state.setElapsedSeconds(stopPlan.elapsed);
     state.setRemainingSeconds(stopPlan.remaining);

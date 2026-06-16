@@ -24,10 +24,10 @@ void ControlChartsTabPresenter::onViewReady() {
 
     const auto &stateData = state.get();
 
-    view->setMinutes(stateData.controlChartsTabMinutes.value());
-    view->setBeaufort(stateData.windImpact.beaufort.value());
-    view->setDirection(stateData.windImpact.direction.degrees());
-    view->setAngleOfAttack(stateData.windImpact.angleOfAttack.degrees());
+    view->setMinutes(stateData.control.controlChartsTabMinutes.value());
+    view->setBeaufort(stateData.control.windImpact.beaufort.value());
+    view->setDirection(stateData.control.windImpact.direction.degrees());
+    view->setAngleOfAttack(stateData.control.windImpact.angleOfAttack.degrees());
 
     refreshMinutesInputEnabled();
     onRebuildPlotPressed();
@@ -48,7 +48,8 @@ void ControlChartsTabPresenter::onMinutesChanged(int minutes) {
 void ControlChartsTabPresenter::onBeaufortChanged(double value) {
     const auto &stateData = state.get();
 
-    updateWindImpact(value, stateData.windImpact.direction.degrees(), stateData.windImpact.angleOfAttack.degrees());
+    updateWindImpact(value, stateData.control.windImpact.direction.degrees(),
+                     stateData.control.windImpact.angleOfAttack.degrees());
 
     if (view != nullptr) {
         view->appendLog("Beaufort value updated");
@@ -58,7 +59,8 @@ void ControlChartsTabPresenter::onBeaufortChanged(double value) {
 void ControlChartsTabPresenter::onDirectionChanged(double value) {
     const auto &stateData = state.get();
 
-    updateWindImpact(stateData.windImpact.beaufort.value(), value, stateData.windImpact.angleOfAttack.degrees());
+    updateWindImpact(stateData.control.windImpact.beaufort.value(), value,
+                     stateData.control.windImpact.angleOfAttack.degrees());
 
     if (view != nullptr) {
         view->appendLog("Wind direction updated");
@@ -68,7 +70,8 @@ void ControlChartsTabPresenter::onDirectionChanged(double value) {
 void ControlChartsTabPresenter::onAngleOfAttackChanged(double value) {
     const auto &stateData = state.get();
 
-    updateWindImpact(stateData.windImpact.beaufort.value(), stateData.windImpact.direction.degrees(), value);
+    updateWindImpact(stateData.control.windImpact.beaufort.value(), stateData.control.windImpact.direction.degrees(),
+                     value);
 
     if (view != nullptr) {
         view->appendLog("Angle of attack updated");
@@ -95,7 +98,7 @@ void ControlChartsTabPresenter::refreshMinutesInputEnabled() {
 
     const auto &stateData = state.get();
     view->setMinutesInputEnabled(domain::TestModeStatePolicy::operatorDurationInputEnabled(
-        stateData.testProtocol.testMode, stateData.testTimeSource));
+        stateData.protocol.testProtocol.testMode, stateData.protocol.testTimeSource));
 }
 
 } // namespace presentation::controlChartsTab

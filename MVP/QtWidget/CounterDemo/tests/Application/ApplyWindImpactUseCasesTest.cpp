@@ -20,9 +20,9 @@ TEST(ApplyBeaufortImpactUseCaseTest, WhenExecuted_ChangesOnlyBeaufort) {
     const auto accepted = useCase.execute(domain::Beaufort::from(6.0));
 
     EXPECT_TRUE(accepted);
-    EXPECT_DOUBLE_EQ(state.get().targetStandImpact.beaufort.value(), 6.0);
-    EXPECT_DOUBLE_EQ(state.get().targetStandImpact.direction.degrees(), 90.0);
-    EXPECT_DOUBLE_EQ(state.get().targetStandImpact.angleOfAttack.degrees(), 15.0);
+    EXPECT_DOUBLE_EQ(state.get().control.targetStandImpact.beaufort.value(), 6.0);
+    EXPECT_DOUBLE_EQ(state.get().control.targetStandImpact.direction.degrees(), 90.0);
+    EXPECT_DOUBLE_EQ(state.get().control.targetStandImpact.angleOfAttack.degrees(), 15.0);
 }
 
 TEST(ApplyWindDirectionUseCaseTest, WhenExecuted_ChangesOnlyDirection) {
@@ -33,9 +33,9 @@ TEST(ApplyWindDirectionUseCaseTest, WhenExecuted_ChangesOnlyDirection) {
     const auto accepted = useCase.execute(domain::WindDirection::from(270.0));
 
     EXPECT_TRUE(accepted);
-    EXPECT_DOUBLE_EQ(state.get().targetStandImpact.beaufort.value(), 2.0);
-    EXPECT_DOUBLE_EQ(state.get().targetStandImpact.direction.degrees(), 270.0);
-    EXPECT_DOUBLE_EQ(state.get().targetStandImpact.angleOfAttack.degrees(), 15.0);
+    EXPECT_DOUBLE_EQ(state.get().control.targetStandImpact.beaufort.value(), 2.0);
+    EXPECT_DOUBLE_EQ(state.get().control.targetStandImpact.direction.degrees(), 270.0);
+    EXPECT_DOUBLE_EQ(state.get().control.targetStandImpact.angleOfAttack.degrees(), 15.0);
 }
 
 TEST(ApplyAngleOfAttackUseCaseTest, WhenExecuted_ChangesOnlyAngleOfAttack) {
@@ -46,9 +46,9 @@ TEST(ApplyAngleOfAttackUseCaseTest, WhenExecuted_ChangesOnlyAngleOfAttack) {
     const auto accepted = useCase.execute(domain::AngleOfAttack::from(45.0));
 
     EXPECT_TRUE(accepted);
-    EXPECT_DOUBLE_EQ(state.get().targetStandImpact.beaufort.value(), 2.0);
-    EXPECT_DOUBLE_EQ(state.get().targetStandImpact.direction.degrees(), 90.0);
-    EXPECT_DOUBLE_EQ(state.get().targetStandImpact.angleOfAttack.degrees(), 45.0);
+    EXPECT_DOUBLE_EQ(state.get().control.targetStandImpact.beaufort.value(), 2.0);
+    EXPECT_DOUBLE_EQ(state.get().control.targetStandImpact.direction.degrees(), 90.0);
+    EXPECT_DOUBLE_EQ(state.get().control.targetStandImpact.angleOfAttack.degrees(), 45.0);
 }
 
 TEST(ApplyAngleOfAttackUseCaseTest, WhenExecuted_DoesNotOverwriteWindDirection) {
@@ -59,8 +59,8 @@ TEST(ApplyAngleOfAttackUseCaseTest, WhenExecuted_DoesNotOverwriteWindDirection) 
     const auto accepted = useCase.execute(domain::AngleOfAttack::from(15.0));
 
     EXPECT_TRUE(accepted);
-    EXPECT_DOUBLE_EQ(state.get().targetStandImpact.direction.degrees(), 90.0);
-    EXPECT_DOUBLE_EQ(state.get().targetStandImpact.angleOfAttack.degrees(), 15.0);
+    EXPECT_DOUBLE_EQ(state.get().control.targetStandImpact.direction.degrees(), 90.0);
+    EXPECT_DOUBLE_EQ(state.get().control.targetStandImpact.angleOfAttack.degrees(), 15.0);
 }
 
 } // namespace

@@ -20,8 +20,8 @@ void SetStandImpactUseCase::setTarget(domain::WindImpact profile) {
 }
 
 void SetStandImpactUseCase::setApplied(domain::WindImpact profile) {
-    const auto target = state.get().control.targetStandImpact;
-    const auto elapsed = state.get().execution.elapsed;
+    const auto target = state.control().targetStandImpact;
+    const auto elapsed = state.execution().elapsed;
 
     state.setAppliedStandImpact(profile);
     state.appendControlTraceSample(domain::ControlTraceSample::manualCommand(elapsed, target, profile));
@@ -29,8 +29,7 @@ void SetStandImpactUseCase::setApplied(domain::WindImpact profile) {
 }
 
 void SetStandImpactUseCase::sendAppliedImpact(const domain::WindImpact &profile, domain::ElapsedSeconds elapsed) {
-    const auto uavSpecification =
-        application::services::UavSpecificationMapper{}.map(state.get().protocol.testProtocol);
+    const auto uavSpecification = application::services::UavSpecificationMapper{}.map(state.protocol().testProtocol);
     const auto yawOffset = domain::YawOscillationPolicy::calculate(domain::StandImpactCalculationContext{
         .impact = profile, .elapsed = elapsed, .uavSpecification = uavSpecification});
     const auto commands = domain::StandCommandMapper::map(profile, yawOffset);

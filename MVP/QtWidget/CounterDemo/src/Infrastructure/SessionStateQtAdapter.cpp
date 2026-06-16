@@ -7,7 +7,7 @@ SessionStateQtAdapter::SessionStateQtAdapter(application::session::SessionState 
     subscription = state.subscribe([this](const application::session::SessionStateData &data) { emitState(data); });
 }
 
-QColor SessionStateQtAdapter::toQColor(domain::RgbColor color) {
+QColor SessionStateQtAdapter::toQColor(application::dto::RgbColor color) {
     return QColor(static_cast<int>(color.r), static_cast<int>(color.g), static_cast<int>(color.b));
 }
 

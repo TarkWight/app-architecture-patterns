@@ -5,7 +5,7 @@ namespace application::useCases {
 SetTelemetryAxisColorUseCase::SetTelemetryAxisColorUseCase(application::session::SessionState &state) : state(state) {
 }
 
-void SetTelemetryAxisColorUseCase::execute(domain::AxisId axisId, domain::RgbColor color) {
+void SetTelemetryAxisColorUseCase::execute(domain::AxisId axisId, application::dto::RgbColor color) {
     state.setTelemetryAxisColor(axisId, color);
 }
 

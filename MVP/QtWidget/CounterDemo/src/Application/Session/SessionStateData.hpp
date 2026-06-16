@@ -4,7 +4,7 @@
 #include "../../Domain/AxisState.hpp"
 #include "../../Domain/AxisTelemetrySample.hpp"
 #include "../../Domain/ControlTrace.hpp"
-#include "../../Domain/Plot.hpp"
+#include "../../Application/Dto/PlotModel.hpp"
 #include "../../Domain/StandControlMode.hpp"
 #include "../../Domain/StandConnectionStatus.hpp"
 #include "../../Domain/TelemetryStatus.hpp"
@@ -23,11 +23,11 @@
 
 namespace application::session {
 
-inline domain::PlotModel makeInitialTelemetryPlot() {
-    domain::PlotModel plot{};
+inline application::dto::PlotModel makeInitialTelemetryPlot() {
+    application::dto::PlotModel plot{};
     plot.title = "Telemetry";
-    plot.x = domain::AxisSpec{.min = 0.0, .max = 60.0, .step = 10.0, .label = "seconds"};
-    plot.y = domain::AxisSpec{.min = -180.0, .max = 360.0, .step = 45.0, .label = "degrees"};
+    plot.x = application::dto::AxisSpec{.min = 0.0, .max = 60.0, .step = 10.0, .label = "seconds"};
+    plot.y = application::dto::AxisSpec{.min = -180.0, .max = 360.0, .step = 45.0, .label = "degrees"};
     return plot;
 }
 
@@ -50,12 +50,12 @@ struct SessionStateData {
     // ===== UI / scenario input =====
     domain::Expression functionExpression{};
     domain::WindImpact windImpact{};
-    domain::RgbColor lineColor{};
+    application::dto::RgbColor lineColor{};
     domain::DurationMinutes controlChartsTabMinutes{domain::DurationMinutes::required(20)};
 
     // ===== Plots =====
-    domain::PlotModel telemetryPlot{makeInitialTelemetryPlot()};
-    domain::PlotModel controlPlot{};
+    application::dto::PlotModel telemetryPlot{makeInitialTelemetryPlot()};
+    application::dto::PlotModel controlPlot{};
     domain::WindControlProfile controlProfile{};
     domain::ControlTrace controlTrace{};
 
@@ -63,8 +63,8 @@ struct SessionStateData {
     double telemetryWindowSeconds{60.0};
     domain::TelemetryWindowEnd telemetryWindowEndSeconds{domain::TelemetryWindowEnd::fromSeconds(0.0)};
     bool telemetryFollowTail{true};
-    domain::RgbColor telemetryAxisYColor{220, 60, 50};
-    domain::RgbColor telemetryAxisZColor{40, 110, 210};
+    application::dto::RgbColor telemetryAxisYColor{220, 60, 50};
+    application::dto::RgbColor telemetryAxisZColor{40, 110, 210};
     bool telemetryAxisYVisible{true};
     bool telemetryAxisZVisible{true};
 

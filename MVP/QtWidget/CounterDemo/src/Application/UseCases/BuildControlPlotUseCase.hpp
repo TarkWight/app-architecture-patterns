@@ -3,7 +3,7 @@
 
 #include "../Ports/IFunctionEngine.hpp"
 #include "../Session/SessionState.hpp"
-#include "../../Domain/Plot.hpp"
+#include "../../Application/Dto/PlotModel.hpp"
 
 namespace application::useCases {
 
@@ -12,8 +12,8 @@ class BuildControlPlotUseCase final {
     BuildControlPlotUseCase(application::session::SessionState &state,
                             const application::ports::IFunctionEngine &engine);
 
-    domain::PlotModel execute();
-    domain::PlotModel refreshFromState();
+    application::dto::PlotModel execute();
+    application::dto::PlotModel refreshFromState();
 
   private:
     application::session::SessionState &state;

@@ -51,28 +51,29 @@ double traceAxisStepSeconds(double maxSeconds) {
     return 600.0;
 }
 
-bool hasFormulaSeries(const domain::PlotModel &plot) {
+bool hasFormulaSeries(const application::dto::PlotModel &plot) {
     return !plot.series.points.empty();
 }
 
-domain::PlotModel buildPlot(const session::SessionStateData &stateData, const domain::WindControlProfile &profile) {
-    domain::PlotModel plot{};
+application::dto::PlotModel buildPlot(const session::SessionStateData &stateData,
+                                      const domain::WindControlProfile &profile) {
+    application::dto::PlotModel plot{};
     plot.title = "Control chart";
     plot.color = stateData.lineColor;
     const int durationMinutes =
         profile.duration.value() > 0 ? profile.duration.value() : determineGridDuration(stateData).value();
-    plot.x = domain::AxisSpec{0.0, static_cast<double>(std::max(1, durationMinutes)), 1.0, "minutes"};
-    plot.y = domain::AxisSpec{0.0, domain::maxOperationalBeaufort, 0.5, "Beaufort"};
+    plot.x = application::dto::AxisSpec{0.0, static_cast<double>(std::max(1, durationMinutes)), 1.0, "minutes"};
+    plot.y = application::dto::AxisSpec{0.0, domain::maxOperationalBeaufort, 0.5, "Beaufort"};
 
     plot.series.points.reserve(profile.samples.size());
     for (const auto &sample : profile.samples) {
-        plot.series.points.push_back(domain::Point{.x = sample.time.minutes(), .y = sample.beaufort.value()});
+        plot.series.points.push_back(application::dto::Point{.x = sample.time.minutes(), .y = sample.beaufort.value()});
     }
 
     return plot;
 }
 
-void addControlTraceSeries(domain::PlotModel &plot, const domain::ControlTrace &trace) {
+void addControlTraceSeries(application::dto::PlotModel &plot, const domain::ControlTrace &trace) {
     if (trace.empty()) {
         return;
     }
@@ -80,7 +81,7 @@ void addControlTraceSeries(domain::PlotModel &plot, const domain::ControlTrace &
     const bool overlayFormula = hasFormulaSeries(plot);
 
     if (overlayFormula) {
-        domain::NamedSeries formula{};
+        application::dto::NamedSeries formula{};
         formula.label = "Формула";
         formula.color = plot.color;
         formula.series = std::move(plot.series);
@@ -88,21 +89,22 @@ void addControlTraceSeries(domain::PlotModel &plot, const domain::ControlTrace &
         plot.seriesList.push_back(std::move(formula));
     }
 
-    domain::NamedSeries target{};
+    application::dto::NamedSeries target{};
     target.label = "Цель";
-    target.color = domain::RgbColor{220, 60, 50};
+    target.color = application::dto::RgbColor{220, 60, 50};
 
-    domain::NamedSeries safeCommand{};
+    application::dto::NamedSeries safeCommand{};
     safeCommand.label = "Безопасная команда";
-    safeCommand.color = domain::RgbColor{40, 110, 210};
+    safeCommand.color = application::dto::RgbColor{40, 110, 210};
 
     target.series.points.reserve(trace.size());
     safeCommand.series.points.reserve(trace.size());
 
     for (const auto &sample : trace.samples()) {
         const double x = overlayFormula ? sample.time.minutes() : sample.time.seconds();
-        target.series.points.push_back(domain::Point{.x = x, .y = sample.targetValue.beaufort.value()});
-        safeCommand.series.points.push_back(domain::Point{.x = x, .y = sample.safeCommandValue.beaufort.value()});
+        target.series.points.push_back(application::dto::Point{.x = x, .y = sample.targetValue.beaufort.value()});
+        safeCommand.series.points.push_back(
+            application::dto::Point{.x = x, .y = sample.safeCommandValue.beaufort.value()});
     }
 
     const double markerTimeSeconds = trace.back().time.seconds();
@@ -110,7 +112,7 @@ void addControlTraceSeries(domain::PlotModel &plot, const domain::ControlTrace &
 
     if (!overlayFormula) {
         const double maxSeconds = std::max(10.0, std::ceil(markerTimeSeconds));
-        plot.x = domain::AxisSpec{
+        plot.x = application::dto::AxisSpec{
             .min = 0.0, .max = maxSeconds, .step = traceAxisStepSeconds(maxSeconds), .label = "seconds"};
     }
 
@@ -118,7 +120,7 @@ void addControlTraceSeries(domain::PlotModel &plot, const domain::ControlTrace &
     plot.seriesList.push_back(std::move(target));
     plot.seriesList.push_back(std::move(safeCommand));
 
-    plot.marker = domain::PlotMarker{.x = markerX, .label = "Сейчас", .visible = true};
+    plot.marker = application::dto::PlotMarker{.x = markerX, .label = "Сейчас", .visible = true};
 }
 
 } // namespace
@@ -127,7 +129,7 @@ BuildControlPlotUseCase::BuildControlPlotUseCase(session::SessionState &state, c
     : state(state), engine(engine) {
 }
 
-domain::PlotModel BuildControlPlotUseCase::execute() {
+application::dto::PlotModel BuildControlPlotUseCase::execute() {
     const auto &stateData = state.get();
     const auto timing =
         domain::determineControlProfileTiming(stateData.testProtocol.testMode, stateData.testTimeSource,
@@ -148,7 +150,7 @@ domain::PlotModel BuildControlPlotUseCase::execute() {
     return plot;
 }
 
-domain::PlotModel BuildControlPlotUseCase::refreshFromState() {
+application::dto::PlotModel BuildControlPlotUseCase::refreshFromState() {
     const auto &stateData = state.get();
 
     auto plot = buildPlot(stateData, stateData.controlProfile);

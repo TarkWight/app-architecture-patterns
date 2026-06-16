@@ -9,7 +9,7 @@
 #include "../Application/UseCases/PauseTestExecutionUseCase.hpp"
 #include "../Application/UseCases/ResumeTestExecutionUseCase.hpp"
 #include "../Application/UseCases/StopTestExecutionUseCase.hpp"
-#include "../Domain/Plot.hpp"
+#include "../Application/Dto/PlotModel.hpp"
 #include "../Domain/TestExecutionStatus.hpp"
 #include "../Application/UseCases/SetTestTimeSourceUseCase.hpp"
 #include "../Application/UseCases/ConfigureTelemetryUseCase.hpp"
@@ -54,7 +54,7 @@ class ShellPresenter final {
 
     void onFunctionEdited(std::string expression);
     void onFormulaTemplateSelected(std::string key);
-    void onLineColorSelected(domain::RgbColor color);
+    void onLineColorSelected(application::dto::RgbColor color);
     void onTestTimeSourceChanged(domain::TestTimeSource source);
     void onConnectTelemetryPressed(std::string configPath);
     [[nodiscard]] bool telemetryConfigRequiredForConnection() const;

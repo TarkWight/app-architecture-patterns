@@ -41,7 +41,7 @@ endif()
 qt_add_executable(develop
   src/main.cpp
 
-  src/Domain/Plot.hpp
+  src/Application/Dto/PlotModel.hpp
   src/Domain/FormulaTemplate.hpp
   src/Domain/ControlTrace.hpp
   src/Domain/ControlProfileTiming.hpp

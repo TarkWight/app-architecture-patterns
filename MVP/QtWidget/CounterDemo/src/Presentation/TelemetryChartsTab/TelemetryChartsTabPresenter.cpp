@@ -39,7 +39,8 @@ void TelemetryChartsTabPresenter::onTelemetryWindowChanged(int windowEndSeconds)
     }
 }
 
-void TelemetryChartsTabPresenter::onTelemetryAxisColorSelected(domain::AxisId axisId, domain::RgbColor color) {
+void TelemetryChartsTabPresenter::onTelemetryAxisColorSelected(domain::AxisId axisId,
+                                                               application::dto::RgbColor color) {
     setTelemetryAxisColorUseCase.execute(axisId, color);
 
     if (view != nullptr) {

@@ -4,46 +4,49 @@
 #include <QPainter>
 #include <QRect>
 
-#include "../../Domain/Plot.hpp"
+#include "../../Application/Dto/PlotModel.hpp"
 
 namespace ui::render {
 
 class PlotRenderer final {
   public:
-    static void drawPlot(QPainter &painter, const QRect &rect, const domain::PlotModel &plot);
+    static void drawPlot(QPainter &painter, const QRect &rect, const application::dto::PlotModel &plot);
 
   private:
-    static bool hasRenderablePlot(const domain::PlotModel &plot);
+    static bool hasRenderablePlot(const application::dto::PlotModel &plot);
     static double normalize(double value, double min, double max);
 
-    static QColor toQColor(domain::RgbColor color);
+    static QColor toQColor(application::dto::RgbColor color);
 
-    static int projectX(const QRect &plotRect, const domain::PlotModel &plot, double xValue);
+    static int projectX(const QRect &plotRect, const application::dto::PlotModel &plot, double xValue);
 
-    static int projectY(const QRect &plotRect, const domain::PlotModel &plot, double yValue);
+    static int projectY(const QRect &plotRect, const application::dto::PlotModel &plot, double yValue);
 
     static int tickCount(double minValue, double maxValue, double stepValue);
 
     static void drawFrame(QPainter &painter, const QRect &plotRect);
 
-    static void drawTitle(QPainter &painter, const QRect &outerRect, const domain::PlotModel &plot);
+    static void drawTitle(QPainter &painter, const QRect &outerRect, const application::dto::PlotModel &plot);
 
-    static void drawAxisLabels(QPainter &painter, const QRect &plotRect, const domain::PlotModel &plot);
+    static void drawAxisLabels(QPainter &painter, const QRect &plotRect, const application::dto::PlotModel &plot);
 
-    static void drawXGrid(QPainter &painter, const QRect &plotRect, const domain::PlotModel &plot, int leftMargin);
+    static void drawXGrid(QPainter &painter, const QRect &plotRect, const application::dto::PlotModel &plot,
+                          int leftMargin);
 
-    static void drawYGrid(QPainter &painter, const QRect &plotRect, const domain::PlotModel &plot, int leftMargin);
+    static void drawYGrid(QPainter &painter, const QRect &plotRect, const application::dto::PlotModel &plot,
+                          int leftMargin);
 
-    static void drawMarker(QPainter &painter, const QRect &plotRect, const domain::PlotModel &plot);
+    static void drawMarker(QPainter &painter, const QRect &plotRect, const application::dto::PlotModel &plot);
 
-    static QPolygon buildPolyline(const QRect &plotRect, const domain::PlotModel &plot, const domain::Series &series);
+    static QPolygon buildPolyline(const QRect &plotRect, const application::dto::PlotModel &plot,
+                                  const application::dto::Series &series);
 
-    static void drawPoint(QPainter &painter, const QRect &plotRect, const domain::PlotModel &plot,
-                          const domain::Point &point);
+    static void drawPoint(QPainter &painter, const QRect &plotRect, const application::dto::PlotModel &plot,
+                          const application::dto::Point &point);
 
-    static void drawSeries(QPainter &painter, const QRect &plotRect, const domain::PlotModel &plot);
+    static void drawSeries(QPainter &painter, const QRect &plotRect, const application::dto::PlotModel &plot);
 
-    static void drawLegend(QPainter &painter, const QRect &plotRect, const domain::PlotModel &plot);
+    static void drawLegend(QPainter &painter, const QRect &plotRect, const application::dto::PlotModel &plot);
 };
 
 } // namespace ui::render

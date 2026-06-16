@@ -2,7 +2,7 @@
 #define SESSIONSTATE_HPP
 
 #include "../../Domain/ControlTrace.hpp"
-#include "../../Domain/Plot.hpp"
+#include "../../Application/Dto/PlotModel.hpp"
 #include "../../Domain/StandControlMode.hpp"
 #include "../../Domain/StandConnectionStatus.hpp"
 #include "../../Domain/TestExecutionStatus.hpp"
@@ -37,7 +37,7 @@ class SessionState {
 
     void setFunctionExpression(std::string expr);
     void setWindImpact(domain::WindImpact profile);
-    void setLineColor(domain::RgbColor color);
+    void setLineColor(application::dto::RgbColor color);
     void setControlChartsTabMinutes(domain::DurationMinutes minutes);
 
     void setTestExecutionStatus(domain::TestExecutionStatus status);
@@ -52,15 +52,15 @@ class SessionState {
     void setElapsedSeconds(domain::ElapsedSeconds seconds);
     void setRemainingSeconds(domain::RemainingSeconds seconds);
 
-    void setTelemetryPlot(domain::PlotModel plot);
-    void setControlPlot(domain::PlotModel plot);
+    void setTelemetryPlot(application::dto::PlotModel plot);
+    void setControlPlot(application::dto::PlotModel plot);
     void setControlProfile(domain::WindControlProfile profile);
     void clearControlTrace();
     void appendControlTraceSample(domain::ControlTraceSample sample);
     void appendTelemetrySample(domain::AxisTelemetrySample sample);
     void setTelemetryWindowEnd(domain::TelemetryWindowEnd end);
     void followTelemetryTail();
-    void setTelemetryAxisColor(domain::AxisId axisId, domain::RgbColor color);
+    void setTelemetryAxisColor(domain::AxisId axisId, application::dto::RgbColor color);
     void setTelemetryAxisVisible(domain::AxisId axisId, bool visible);
     void setStandControlMode(domain::StandControlMode mode);
     void setTestModeState(domain::TestMode testMode, domain::StandControlMode standMode,

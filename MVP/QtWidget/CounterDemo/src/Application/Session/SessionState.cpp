@@ -2,7 +2,7 @@
 
 #include "../../Domain/AxisId.hpp"
 #include "../../Domain/ControlTrace.hpp"
-#include "../../Domain/Plot.hpp"
+#include "../../Application/Dto/PlotModel.hpp"
 #include "../../Domain/TestProtocol.hpp"
 #include "../../Domain/Time.hpp"
 #include "../../Domain/WindControlProfile.hpp"
@@ -48,7 +48,7 @@ void application::session::SessionState::setWindImpact(domain::WindImpact profil
     notify();
 }
 
-void application::session::SessionState::setLineColor(domain::RgbColor color) {
+void application::session::SessionState::setLineColor(application::dto::RgbColor color) {
     data.lineColor = color;
     notify();
 }
@@ -98,7 +98,7 @@ void application::session::SessionState::setRemainingSeconds(domain::RemainingSe
     notify();
 }
 
-void application::session::SessionState::setTelemetryPlot(domain::PlotModel plot) {
+void application::session::SessionState::setTelemetryPlot(application::dto::PlotModel plot) {
     data.telemetryPlot = std::move(plot);
     notify();
 }
@@ -147,7 +147,8 @@ void application::session::SessionState::followTelemetryTail() {
     notify();
 }
 
-void application::session::SessionState::setTelemetryAxisColor(domain::AxisId axisId, domain::RgbColor color) {
+void application::session::SessionState::setTelemetryAxisColor(domain::AxisId axisId,
+                                                               application::dto::RgbColor color) {
     if (axisId == domain::axis0) {
         data.telemetryAxisYColor = color;
     } else if (axisId == domain::axis1) {
@@ -195,7 +196,7 @@ void application::session::SessionState::setTargetStandImpact(domain::WindImpact
     notify();
 }
 
-void application::session::SessionState::setControlPlot(domain::PlotModel plot) {
+void application::session::SessionState::setControlPlot(application::dto::PlotModel plot) {
     data.controlPlot = std::move(plot);
     notify();
 }
@@ -292,23 +293,23 @@ void application::session::SessionState::notify() {
 }
 
 void application::session::SessionState::rebuildTelemetryPlot() {
-    domain::PlotModel plot{};
+    application::dto::PlotModel plot{};
     plot.title = "Telemetry";
     plot.x.label = "seconds";
-    plot.y = domain::AxisSpec{.min = -180.0, .max = 360.0, .step = 45.0, .label = "degrees"};
+    plot.y = application::dto::AxisSpec{.min = -180.0, .max = 360.0, .step = 45.0, .label = "degrees"};
 
     const double windowSeconds = std::max(1.0, data.telemetryWindowSeconds);
     const double endSeconds = std::max(windowSeconds, data.telemetryWindowEndSeconds.seconds());
     const double startSeconds = std::max(0.0, endSeconds - windowSeconds);
 
-    plot.x =
-        domain::AxisSpec{.min = startSeconds, .max = startSeconds + windowSeconds, .step = 10.0, .label = "seconds"};
+    plot.x = application::dto::AxisSpec{
+        .min = startSeconds, .max = startSeconds + windowSeconds, .step = 10.0, .label = "seconds"};
 
-    domain::NamedSeries axisY{};
+    application::dto::NamedSeries axisY{};
     axisY.label = "Ось Y / тангаж";
     axisY.color = data.telemetryAxisYColor;
 
-    domain::NamedSeries axisZ{};
+    application::dto::NamedSeries axisZ{};
     axisZ.label = "Ось Z / направление";
     axisZ.color = data.telemetryAxisZColor;
 
@@ -322,9 +323,9 @@ void application::session::SessionState::rebuildTelemetryPlot() {
             }
 
             if (sample.axisId == domain::axis0 && data.telemetryAxisYVisible) {
-                axisY.series.points.push_back(domain::Point{.x = x, .y = sample.position});
+                axisY.series.points.push_back(application::dto::Point{.x = x, .y = sample.position});
             } else if (sample.axisId == domain::axis1 && data.telemetryAxisZVisible) {
-                axisZ.series.points.push_back(domain::Point{.x = x, .y = sample.position});
+                axisZ.series.points.push_back(application::dto::Point{.x = x, .y = sample.position});
             }
         }
     }

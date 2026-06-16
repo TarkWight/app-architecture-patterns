@@ -112,7 +112,7 @@ void ShellPresenter::onFormulaTemplateSelected(std::string key) {
     }
 }
 
-void ShellPresenter::onLineColorSelected(domain::RgbColor color) {
+void ShellPresenter::onLineColorSelected(application::dto::RgbColor color) {
     setLineColorUseCase.execute(color);
 
     if (view != nullptr) {

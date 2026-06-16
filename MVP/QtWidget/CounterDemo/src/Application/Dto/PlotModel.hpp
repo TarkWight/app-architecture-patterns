@@ -1,11 +1,11 @@
-#ifndef PLOT_HPP
-#define PLOT_HPP
+#ifndef PLOTMODEL_HPP
+#define PLOTMODEL_HPP
 
 #include <cstdint>
 #include <string>
 #include <vector>
 
-namespace domain {
+namespace application::dto {
 
 struct RgbColor {
     std::uint8_t r{255};
@@ -51,6 +51,6 @@ struct PlotModel {
     std::string title{};
 };
 
-} // namespace domain
+} // namespace application::dto
 
-#endif // PLOT_HPP
+#endif // PLOTMODEL_HPP

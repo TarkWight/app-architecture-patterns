@@ -25,7 +25,7 @@ TEST(SetControlChartsTabMinutesUseCaseTest, IgnoresOperatorDurationInManualMode)
     application::useCases::SetControlChartsTabMinutesUseCase useCase{state};
 
     state.setTestProtocolMode(domain::TestMode::Manual);
-    state.setControlChartsTabMinutes(20);
+    state.setControlChartsTabMinutes(domain::DurationMinutes::required(20));
     state.setOperatorTestDurationMinutes(domain::DurationMinutes::required(20));
     state.setTestTimeSource(domain::TestTimeSource::FreeRun);
 
@@ -41,7 +41,7 @@ TEST(SetControlChartsTabMinutesUseCaseTest, IgnoresOperatorDurationInAutomaticMo
     application::useCases::SetControlChartsTabMinutesUseCase useCase{state};
 
     state.setTestProtocolMode(domain::TestMode::Automatic);
-    state.setControlChartsTabMinutes(20);
+    state.setControlChartsTabMinutes(domain::DurationMinutes::required(20));
     state.setOperatorTestDurationMinutes(domain::DurationMinutes::required(20));
     state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
 

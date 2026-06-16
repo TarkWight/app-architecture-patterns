@@ -53,10 +53,6 @@ void application::session::SessionState::setLineColor(domain::RgbColor color) {
     notify();
 }
 
-void application::session::SessionState::setControlChartsTabMinutes(int minutes) {
-    setControlChartsTabMinutes(domain::DurationMinutes::required(minutes));
-}
-
 void application::session::SessionState::setControlChartsTabMinutes(domain::DurationMinutes minutes) {
     data.controlChartsTabMinutes = minutes;
     notify();

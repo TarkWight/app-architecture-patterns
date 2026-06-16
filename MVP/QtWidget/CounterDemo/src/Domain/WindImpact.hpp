@@ -7,7 +7,7 @@
 namespace domain {
 
 constexpr double minOperationalBeaufort = 0.0;
-// TODO(post-MVP): verify real stand/wind-model limits; 0..7 is inherited from the legacy application.
+// Operational test scope is limited to Beaufort 0..7; drones are not tested above this range.
 constexpr double maxOperationalBeaufort = 7.0;
 // TODO(post-MVP): verify real stand limits; signed +/-360 is an MVP relative-angle guard.
 constexpr double minAngleOfAttack = -360.0;

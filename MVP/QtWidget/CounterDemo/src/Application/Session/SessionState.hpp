@@ -38,7 +38,6 @@ class SessionState {
     void setFunctionExpression(std::string expr);
     void setWindImpact(domain::WindImpact profile);
     void setLineColor(domain::RgbColor color);
-    void setControlChartsTabMinutes(int minutes);
     void setControlChartsTabMinutes(domain::DurationMinutes minutes);
 
     void setTestExecutionStatus(domain::TestExecutionStatus status);

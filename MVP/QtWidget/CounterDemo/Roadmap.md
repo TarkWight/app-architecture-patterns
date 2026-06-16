@@ -270,14 +270,20 @@ Already completed:
 * `7d58dfd`
   * replaced `SetOperatorTestDurationUseCase::execute(int)` with `execute(DurationMinutes)`;
   * moved raw UI `int` conversion to presentation boundary.
+* current cleanup
+  * removed `SessionState::setControlChartsTabMinutes(int)` compatibility overload.
 
 Next safe value-object cleanup order:
 
-1. `SessionState` compatibility overload:
-   * remove `setControlChartsTabMinutes(int minutes)` if no production code needs it.
-2. `StartTestExecutionUseCase` scheduler callback:
-   * keep raw `int elapsedSeconds` at `ITestExecutionScheduler` port boundary;
-   * convert to `ElapsedSeconds` immediately inside use case.
+No immediate value-object cleanup remains inside the application/domain flow.
+
+Explicitly deferred:
+
+* `ITestExecutionScheduler`
+  * keeps raw `int elapsedSeconds` at the infrastructure-facing port boundary;
+  * `StartTestExecutionUseCase` converts it to `ElapsedSeconds` immediately.
+* `ITelemetryClient::startPolling`
+  * keeps raw `int intervalMs` at the infrastructure-facing port boundary.
 
 Goal
 
@@ -364,11 +370,10 @@ Already moved to Domain:
 Remaining value object leaks:
 
 1. `src/Application/Session/SessionState.hpp`
-   * Remaining raw compatibility setter:
-     * `setControlChartsTabMinutes(int minutes)`;
-   * Expected cleanup:
-     * remove the raw overload if tests and production code no longer need it;
-     * keep raw `int/double` only at UI/Infrastructure boundaries.
+   * `setControlChartsTabMinutes(int minutes)` compatibility overload removed.
+   * Current status:
+     * stores `DurationMinutes`;
+     * accepts `DurationMinutes` from application use cases.
 
 2. `src/Application/UseCases/SetControlChartsTabMinutesUseCase.cpp`
    * Already accepts `DurationMinutes`.
@@ -408,17 +413,14 @@ Remaining value object leaks:
    * Current API:
      * `start(int initialElapsedSeconds, TickCallback onTick)`;
      * `TickCallback` emits raw `int`.
-   * This is an application port boundary.
-   * Future cleanup:
-     * consider using `ElapsedSeconds` in the application port if Qt adapter remains simple;
-     * otherwise convert raw values immediately in use cases.
+   * This is an infrastructure-facing port boundary and remains raw by design for MVP.
+   * Rule:
+     * convert to `ElapsedSeconds` immediately after the callback enters application logic.
 
 8. `src/Application/Ports/ITelemetryClient.hpp`
    * Current API:
      * `startPolling(int intervalMs)`.
-   * This is an infrastructure-facing port boundary.
-   * Future cleanup:
-     * consider `startPolling(TelemetryPollInterval)` if the application port should become stricter.
+   * This is an infrastructure-facing port boundary and remains raw by design for MVP.
 
 Remaining MVP behavior gaps:
 
@@ -437,10 +439,17 @@ Remaining MVP behavior gaps:
 
 3. Confirm legacy operational limits
    * Current TODOs:
-     * Beaufort `0..7`;
      * signed angle of attack `-360..360`.
+   * Confirmed:
+     * Beaufort `0..7` is an explicit operational limit; drones are not tested above 7.
    * Expected cleanup:
-     * verify real stand constraints and replace legacy assumptions if needed.
+     * verify real stand constraints for signed angle of attack and replace MVP guard if needed.
+
+4. Additional impact smoothing
+   * Current status:
+     * real stand/business flow already prevents unsafe hard jumps during tests.
+   * Decision:
+     * do not add another smoothing layer in MVP.
 
 ⸻
 

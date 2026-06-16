@@ -131,9 +131,9 @@ TEST(StartTestExecutionUseCaseTest, ManualModeStartsAsStopwatchEvenWhenOperatorD
 
     EXPECT_TRUE(scheduler.started);
     EXPECT_EQ(scheduler.initialElapsed, 0);
-    EXPECT_EQ(state.get().execution.testTimeDirection, domain::TestTimeDirection::CountUp);
-    EXPECT_EQ(state.get().execution.activeTestDuration.value(), 0);
-    EXPECT_EQ(state.get().execution.remaining.value(), 0);
+    EXPECT_EQ(state.execution().testTimeDirection, domain::TestTimeDirection::CountUp);
+    EXPECT_EQ(state.execution().activeTestDuration.value(), 0);
+    EXPECT_EQ(state.execution().remaining.value(), 0);
     EXPECT_FALSE(telemetryClient.axis0Command.has_value());
     EXPECT_FALSE(telemetryClient.axis1Command.has_value());
 }
@@ -156,8 +156,8 @@ TEST(StartTestExecutionUseCaseTest, ScenarioStartClearsPreviousControlTrace) {
 
     useCase.execute();
 
-    ASSERT_EQ(state.get().control.controlTrace.size(), 1U);
-    EXPECT_DOUBLE_EQ(state.get().control.controlTrace.front().time.seconds(), 0.0);
+    ASSERT_EQ(state.control().controlTrace.size(), 1U);
+    EXPECT_DOUBLE_EQ(state.control().controlTrace.front().time.seconds(), 0.0);
 }
 
 TEST(StartTestExecutionUseCaseTest, StartsTelemetryPollingWhenStandIsConnected) {
@@ -175,7 +175,7 @@ TEST(StartTestExecutionUseCaseTest, StartsTelemetryPollingWhenStandIsConnected) 
     useCase.execute();
 
     EXPECT_EQ(telemetryClient.startPollingCalls, 1);
-    EXPECT_EQ(state.get().connection.standConnectionStatus, domain::StandConnectionStatus::Polling);
+    EXPECT_EQ(state.connection().standConnectionStatus, domain::StandConnectionStatus::Polling);
 }
 
 TEST(StartTestExecutionUseCaseTest, StopsTelemetryPollingWhenTimedScenarioCompletes) {
@@ -197,8 +197,8 @@ TEST(StartTestExecutionUseCaseTest, StopsTelemetryPollingWhenTimedScenarioComple
 
     EXPECT_EQ(telemetryClient.startPollingCalls, 1);
     EXPECT_EQ(telemetryClient.stopPollingCalls, 1);
-    EXPECT_EQ(state.get().connection.standConnectionStatus, domain::StandConnectionStatus::Connected);
-    EXPECT_EQ(state.get().execution.testExecutionStatus, domain::TestExecutionStatus::Completed);
+    EXPECT_EQ(state.connection().standConnectionStatus, domain::StandConnectionStatus::Connected);
+    EXPECT_EQ(state.execution().testExecutionStatus, domain::TestExecutionStatus::Completed);
 }
 
 } // namespace

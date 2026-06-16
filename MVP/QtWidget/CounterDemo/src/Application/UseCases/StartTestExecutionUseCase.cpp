@@ -24,21 +24,20 @@ StartTestExecutionUseCase::StartTestExecutionUseCase(
 }
 
 void StartTestExecutionUseCase::execute() {
-    const auto &session = state.get();
-    const auto transition = domain::transitionAfterStartRequested(session.execution.testExecutionStatus);
+    const auto transition = domain::transitionAfterStartRequested(state.execution().testExecutionStatus);
     if (!transition.has_value()) {
         return;
     }
 
-    if (domain::TestModeStatePolicy::usesControlProfile(session.protocol.testProtocol.testMode)) {
+    if (domain::TestModeStatePolicy::usesControlProfile(state.protocol().testProtocol.testMode)) {
         buildControlPlotUseCase.execute();
-        state.setTargetStandImpact(state.get().control.windImpact);
+        state.setTargetStandImpact(state.control().windImpact);
         state.clearControlTrace();
     }
 
-    const auto plan = domain::TestExecutionPlanner::plan(session.protocol.testProtocol, session.protocol.testTimeSource,
-                                                         session.protocol.estimatedTestDuration,
-                                                         session.protocol.operatorTestDuration);
+    const auto &protocol = state.protocol();
+    const auto plan = domain::TestExecutionPlanner::plan(protocol.testProtocol, protocol.testTimeSource,
+                                                         protocol.estimatedTestDuration, protocol.operatorTestDuration);
 
     state.setActiveTestDurationMinutes(plan.activeDuration);
     state.setTestTimeDirection(plan.direction);
@@ -61,8 +60,7 @@ void StartTestExecutionUseCase::execute() {
         if (plan.isCompletedAt(elapsed)) {
             testExecutionScheduler.stop();
             stopTelemetryPollingIfActive();
-            const auto completion =
-                domain::transitionAfterExecutionCompleted(state.get().execution.testExecutionStatus);
+            const auto completion = domain::transitionAfterExecutionCompleted(state.execution().testExecutionStatus);
             if (completion.has_value()) {
                 state.setTestExecutionStatus(*completion);
             }
@@ -71,17 +69,17 @@ void StartTestExecutionUseCase::execute() {
 }
 
 void StartTestExecutionUseCase::startTelemetryPollingIfConnected() {
-    const auto transition = domain::transitionAfterPollingStarted(state.get().connection.standConnectionStatus);
+    const auto transition = domain::transitionAfterPollingStarted(state.connection().standConnectionStatus);
     if (!transition.has_value()) {
         return;
     }
 
-    telemetryClient.startPolling(state.get().connection.telemetryPollInterval.milliseconds());
+    telemetryClient.startPolling(state.connection().telemetryPollInterval.milliseconds());
     state.setStandConnectionStatus(*transition);
 }
 
 void StartTestExecutionUseCase::stopTelemetryPollingIfActive() {
-    const auto transition = domain::transitionAfterPollingStopped(state.get().connection.standConnectionStatus);
+    const auto transition = domain::transitionAfterPollingStopped(state.connection().standConnectionStatus);
     if (!transition.has_value()) {
         return;
     }
@@ -91,13 +89,14 @@ void StartTestExecutionUseCase::stopTelemetryPollingIfActive() {
 }
 
 void StartTestExecutionUseCase::applyScenarioImpact(domain::ElapsedSeconds elapsed) {
-    const auto &session = state.get();
-    if (!domain::TestModeStatePolicy::usesControlProfile(session.protocol.testProtocol.testMode)) {
+    const auto &protocol = state.protocol();
+    if (!domain::TestModeStatePolicy::usesControlProfile(protocol.testProtocol.testMode)) {
         return;
     }
 
-    const auto step = domain::ScenarioExecutionEngine::advance(session.control.controlProfile, elapsed,
-                                                               session.control.targetStandImpact);
+    const auto &control = state.control();
+    const auto step =
+        domain::ScenarioExecutionEngine::advance(control.controlProfile, elapsed, control.targetStandImpact);
     if (!step.has_value()) {
         return;
     }
@@ -110,8 +109,7 @@ void StartTestExecutionUseCase::applyScenarioImpact(domain::ElapsedSeconds elaps
 }
 
 void StartTestExecutionUseCase::sendAppliedImpact(const domain::WindImpact &profile, domain::ElapsedSeconds elapsed) {
-    const auto uavSpecification =
-        application::services::UavSpecificationMapper{}.map(state.get().protocol.testProtocol);
+    const auto uavSpecification = application::services::UavSpecificationMapper{}.map(state.protocol().testProtocol);
     const auto yawOffset = domain::YawOscillationPolicy::calculate(domain::StandImpactCalculationContext{
         .impact = profile, .elapsed = elapsed, .uavSpecification = uavSpecification});
     const auto commands = domain::StandCommandMapper::map(profile, yawOffset);

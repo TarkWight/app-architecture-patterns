@@ -212,7 +212,7 @@ Use Case should not calculate those values.
 
 ⸻
 
-Step 7. Centralize State Transition Rules — PARTIAL: bc90094, 95326b5, f321705, f0187d9, 353db98, 4899b92
+Step 7. Centralize State Transition Rules — DONE: bc90094, 95326b5, f321705, f0187d9, 353db98, 4899b92
 
 Current code already contains:
 
@@ -236,7 +236,7 @@ Use Cases should only ask Domain.
 
 ⸻
 
-Step 8. Introduce Value Objects — PARTIAL: existing WindImpact/Time value objects, 3b0ebc8, be37490, f4b7de3, 5fb7338, c0db547, ca7c2cf
+Step 8. Introduce Value Objects — PARTIAL: existing WindImpact/Time value objects, 3b0ebc8, be37490, f4b7de3, 5fb7338, c0db547, ca7c2cf, 4a69f17, d5bba07, 3b878fa, c460e1b
 
 Replace primitive obsession where reasonable.
 
@@ -259,22 +259,25 @@ Already completed:
   * removed independent raw `timeSeconds` / `timeMinutes` fields from `WindControlSample`.
 * `ca7c2cf`
   * replaced raw `WindControlProfile::durationMinutes` with `DurationMinutes`.
+* `4a69f17`
+  * replaced `SessionState` duration setters with `DurationMinutes`.
+* `d5bba07`
+  * replaced `SessionState` elapsed/remaining setters with `ElapsedSeconds` / `RemainingSeconds`.
+* `3b878fa`
+  * replaced telemetry poll interval setter with `TelemetryPollInterval`.
+* `c460e1b`
+  * replaced telemetry window end setter with `TelemetryWindowEnd`.
 
 Next safe value-object cleanup order:
 
-1. `SessionState` duration setters:
-   * `setEstimatedTestDurationMinutes(int)` -> `DurationMinutes`;
-   * `setOperatorTestDurationMinutes(int)` -> `DurationMinutes`;
-   * `setActiveTestDurationMinutes(int)` -> `DurationMinutes`.
-2. `SessionState` elapsed/remaining setters:
-   * `setElapsedSeconds(int)` -> `ElapsedSeconds`;
-   * `setRemainingSeconds(int)` -> `RemainingSeconds`.
+1. `SetOperatorTestDurationUseCase`:
+   * replace `execute(int minutes)` with `execute(DurationMinutes minutes)`;
+   * convert raw UI `int` in presenter/UI boundary before crossing into the use case.
+2. `SessionState` compatibility overload:
+   * remove `setControlChartsTabMinutes(int minutes)` if no production code needs it.
 3. `StartTestExecutionUseCase` scheduler callback:
    * keep raw `int elapsedSeconds` at `ITestExecutionScheduler` port boundary;
    * convert to `ElapsedSeconds` immediately inside use case.
-4. Telemetry value objects as separate later work:
-   * `setTelemetryPollIntervalMs(int)` -> `TelemetryPollInterval`;
-   * `setTelemetryWindowEndSeconds(double)` -> `TelemetryWindowEnd`.
 
 Goal
 
@@ -343,125 +346,49 @@ Already moved to Domain:
 * `src/Domain/StandCommandMapper.hpp`
   * owns wind impact -> axis command mapping;
   * owns Beaufort torque coefficients;
-  * owns direction -> axis1.position mapping.
+  * owns effective wind direction -> axis1.position mapping.
+* `src/Domain/EffectiveWindDirection.hpp`
+  * owns `normalize(windDirection + angleOfAttack + yawOscillationOffset)`;
+  * keeps angle of attack as a relative direction offset, not a sector width.
 * `src/Domain/TestExecutionPlanner.hpp`
   * owns start-time planning for manual/automatic/hybrid modes;
-  * owns initial remaining time and completion check for running tests.
+  * owns initial remaining time and completion check for running tests;
+  * owns stop-time reset through `resetAfterStop(...)`.
 * `src/Domain/ScenarioExecutionEngine.hpp`
   * owns scenario profile -> next impact;
   * owns scenario trace sample construction.
-
-Remaining state transition rules around mode/time-source changes:
-
-1. `src/Application/UseCases/SetStandControlModeUseCase.cpp`
-   * Current leak:
-     * use case directly chooses `TestTimeSource::FreeRun` / `AutoCalculated`;
-     * use case directly chooses `TestTimeDirection::CountUp` / `CountDown`.
-   * Expected cleanup:
-     * create/extend a Domain service, for example `TestModeStatePolicy`;
-     * input: `StandControlMode`;
-     * output: `TestMode`, `StandControlMode`, `TestTimeSource`, `TestTimeDirection`;
-     * use case only applies returned state to `SessionState`.
-
-2. `src/Application/UseCases/UpdateTestProtocolUseCase.cpp`
-   * Current leak:
-     * local helper `applyTestModeState(...)` duplicates the same mode/time-source/time-direction rules as `SetStandControlModeUseCase`.
-   * Expected cleanup:
-     * remove local `applyTestModeState(...)`;
-     * reuse the same Domain policy as `SetStandControlModeUseCase`;
-     * keep `SessionState::setTestModeState(...)` as one atomic application-state update.
-
-3. `src/Application/UseCases/SetTestTimeSourceUseCase.cpp`
-   * Current leak:
-     * use case directly maps `TestTimeSource` to `TestTimeDirection`.
-   * Expected cleanup:
-     * move `TestTimeSource -> TestTimeDirection` rule into Domain;
-     * likely place: `TestExecutionPlanner` or a smaller `TestTimePolicy`;
-     * use case should only set source and derived direction returned by Domain.
-
-4. Tests to add/update:
-   * add Domain tests for the new policy:
-     * manual mode -> manual stand mode, free-run, count-up;
-     * hybrid mode -> hybrid stand mode, auto-calculated, count-down;
-     * automatic mode -> preset scenario stand mode, auto-calculated, count-down;
-     * source auto/operator -> count-down;
-     * source free-run -> count-up.
-   * update application tests only to verify orchestration and atomic state publication, not rule details.
-
-Remaining StopTestExecutionUseCase time calculation:
-
-1. `src/Application/UseCases/StopTestExecutionUseCase.cpp`
-   * Current leak:
-     * after stopping, use case directly checks `session.testTimeDirection`;
-     * use case directly calculates `session.activeTestDuration.value() * 60`.
-   * Expected cleanup:
-     * move "reset time after stop" into Domain;
-     * possible API:
-       * `TestExecutionPlanner::resetAfterStop(activeDuration, direction)`;
-       * or `TestExecutionStopPlan::from(activeDuration, direction)`;
-     * output should contain:
-       * `ElapsedSeconds{0}`;
-       * `RemainingSeconds{duration * 60}` for countdown;
-       * `RemainingSeconds{0}` for count-up.
-   * Use case should only:
-     * ask Domain for reset values;
-     * write them to `SessionState`;
-     * stop scheduler/telemetry through ports.
-
-2. Tests to add/update:
-   * Domain tests:
-     * countdown stop reset restores full remaining duration;
-     * count-up stop reset sets remaining to zero;
-     * elapsed reset is zero in both cases.
-   * Application tests:
-     * keep verifying scheduler/telemetry/status orchestration;
-     * avoid asserting duplicated arithmetic in the use case.
+* `src/Domain/TestModeStatePolicy.hpp`
+  * owns test mode -> stand mode/time source/time direction mapping;
+  * owns operator duration availability and derived time direction rules.
 
 Remaining value object leaks:
 
 1. `src/Application/Session/SessionState.hpp`
-   * Current raw setters:
+   * Remaining raw compatibility setter:
      * `setControlChartsTabMinutes(int minutes)`;
-     * `setEstimatedTestDurationMinutes(int minutes)`;
-     * `setOperatorTestDurationMinutes(int minutes)`;
-     * `setActiveTestDurationMinutes(int minutes)`;
-     * `setElapsedSeconds(int seconds)`;
-     * `setRemainingSeconds(int seconds)`;
-     * `setTelemetryWindowEndSeconds(double endSeconds)`;
-     * `setTelemetryPollIntervalMs(int intervalMs)`.
    * Expected cleanup:
-     * prefer overloads or replacements that accept Domain value objects:
-       * `DurationMinutes`;
-       * `ElapsedSeconds`;
-       * `RemainingSeconds`;
-       * a future `TelemetryWindowEndSeconds`;
-       * a future `TelemetryPollInterval`.
-     * raw `int/double` may remain at UI/Infrastructure boundaries, but should be converted before crossing into application/domain logic.
+     * remove the raw overload if tests and production code no longer need it;
+     * keep raw `int/double` only at UI/Infrastructure boundaries.
 
 2. `src/Application/UseCases/SetControlChartsTabMinutesUseCase.cpp`
-   * Current leak:
-     * accepts raw `int minutes`;
-     * writes same raw value to control chart duration and operator test duration.
-   * Expected cleanup:
-     * convert input once to `DurationMinutes`;
-     * pass value object to `SessionState`.
+   * Already accepts `DurationMinutes`.
+   * Remaining check:
+     * keep this use case as orchestration only; do not move UI raw values into it.
 
 3. `src/Application/UseCases/SetOperatorTestDurationUseCase.cpp`
    * Current leak:
      * accepts raw `int minutes`.
    * Expected cleanup:
-     * convert input once to `DurationMinutes`;
+     * accept `DurationMinutes`;
      * pass value object to `SessionState`.
 
 4. `src/Application/UseCases/StartTestExecutionUseCase.cpp`
-   * Current remaining primitives:
-     * `applyScenarioImpact(int elapsedSeconds)`;
-     * scheduler callback receives raw `int elapsedSeconds`;
-     * use case converts raw int to `ElapsedSeconds` in several places.
-   * Expected cleanup:
-     * keep scheduler port raw if necessary;
-     * convert to `ElapsedSeconds` immediately at callback boundary;
-     * pass `ElapsedSeconds` through private methods.
+   * Scheduler callback still receives raw `int elapsedSeconds` from `ITestExecutionScheduler`.
+   * Current status:
+     * raw port value is converted to `ElapsedSeconds` immediately inside the callback;
+     * private scenario logic already receives `ElapsedSeconds`.
+   * Future cleanup:
+     * consider changing the port itself to emit `ElapsedSeconds` if Qt adapter remains simple.
 
 5. `src/Ui/MainWindow.cpp`
    * Current boundary conversion:
@@ -492,7 +419,29 @@ Remaining value object leaks:
      * `startPolling(int intervalMs)`.
    * This is an infrastructure-facing port boundary.
    * Future cleanup:
-     * introduce `TelemetryPollInterval` value object if interval validation grows beyond current clamp in `SessionState`.
+     * consider `startPolling(TelemetryPollInterval)` if the application port should become stricter.
+
+Remaining MVP behavior gaps:
+
+1. Hybrid scenario return
+   * Current marker:
+     * `src/Ui/MainWindow.cpp` logs `Hybrid scenario return is pending scenario engine implementation`.
+   * Expected cleanup:
+     * implement a scenario-return policy that smoothly returns from manual override to scenario value.
+
+2. Dynamic yaw oscillation
+   * Current status:
+     * `YawOscillationOffset` exists as a domain value object;
+     * `EffectiveWindDirection` and `StandCommandMapper` support it.
+   * Missing:
+     * a domain policy/generator that produces non-zero oscillation offsets over time.
+
+3. Confirm legacy operational limits
+   * Current TODOs:
+     * Beaufort `0..7`;
+     * signed angle of attack `-360..360`.
+   * Expected cleanup:
+     * verify real stand constraints and replace legacy assumptions if needed.
 
 ⸻
 

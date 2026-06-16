@@ -88,6 +88,8 @@ qt_add_executable(develop
 
   src/Application/Services/ControlPlotBuilder.hpp
   src/Application/Services/ControlPlotBuilder.cpp
+  src/Application/Services/ControlProfilePreviewService.hpp
+  src/Application/Services/ControlProfilePreviewService.cpp
 
   src/Infrastructure/Config/TomlConfigRepository.hpp
   src/Infrastructure/Config/TomlConfigRepository.cpp
@@ -258,6 +260,7 @@ if (BUILD_TESTING)
     src/Application/Session/SessionState.cpp
     src/Application/Session/Subscription.cpp
     src/Application/Services/ControlPlotBuilder.cpp
+    src/Application/Services/ControlProfilePreviewService.cpp
     src/Application/UseCases/BuildControlPlotUseCase.cpp
     src/Application/UseCases/ConfigureTelemetryUseCase.cpp
     src/Application/UseCases/ConnectStandUseCase.cpp

@@ -267,15 +267,15 @@ Already completed:
   * replaced telemetry poll interval setter with `TelemetryPollInterval`.
 * `c460e1b`
   * replaced telemetry window end setter with `TelemetryWindowEnd`.
+* `7d58dfd`
+  * replaced `SetOperatorTestDurationUseCase::execute(int)` with `execute(DurationMinutes)`;
+  * moved raw UI `int` conversion to presentation boundary.
 
 Next safe value-object cleanup order:
 
-1. `SetOperatorTestDurationUseCase`:
-   * replace `execute(int minutes)` with `execute(DurationMinutes minutes)`;
-   * convert raw UI `int` in presenter/UI boundary before crossing into the use case.
-2. `SessionState` compatibility overload:
+1. `SessionState` compatibility overload:
    * remove `setControlChartsTabMinutes(int minutes)` if no production code needs it.
-3. `StartTestExecutionUseCase` scheduler callback:
+2. `StartTestExecutionUseCase` scheduler callback:
    * keep raw `int elapsedSeconds` at `ITestExecutionScheduler` port boundary;
    * convert to `ElapsedSeconds` immediately inside use case.
 
@@ -376,11 +376,10 @@ Remaining value object leaks:
      * keep this use case as orchestration only; do not move UI raw values into it.
 
 3. `src/Application/UseCases/SetOperatorTestDurationUseCase.cpp`
-   * Current leak:
-     * accepts raw `int minutes`.
-   * Expected cleanup:
-     * accept `DurationMinutes`;
-     * pass value object to `SessionState`.
+   * Done in `7d58dfd`.
+   * Current status:
+     * accepts `DurationMinutes`;
+     * presentation boundary converts widget `int` to `DurationMinutes`.
 
 4. `src/Application/UseCases/StartTestExecutionUseCase.cpp`
    * Scheduler callback still receives raw `int elapsedSeconds` from `ITestExecutionScheduler`.

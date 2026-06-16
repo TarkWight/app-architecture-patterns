@@ -424,20 +424,14 @@ Remaining value object leaks:
 
 Remaining MVP behavior gaps:
 
-1. Hybrid scenario return
-   * Current marker:
-     * `src/Ui/MainWindow.cpp` logs `Hybrid scenario return is pending scenario engine implementation`.
-   * Expected cleanup:
-     * implement a scenario-return policy that smoothly returns from manual override to scenario value.
-
-2. Dynamic yaw oscillation
+1. Dynamic yaw oscillation
    * Current status:
      * `YawOscillationOffset` exists as a domain value object;
      * `EffectiveWindDirection` and `StandCommandMapper` support it.
    * Missing:
      * a domain policy/generator that produces non-zero oscillation offsets over time.
 
-3. Confirm legacy operational limits
+2. Confirm legacy operational limits
    * Current TODOs:
      * signed angle of attack `-360..360`.
    * Confirmed:
@@ -445,11 +439,17 @@ Remaining MVP behavior gaps:
    * Expected cleanup:
      * verify real stand constraints for signed angle of attack and replace MVP guard if needed.
 
-4. Additional impact smoothing
+3. Additional impact smoothing
    * Current status:
      * real stand/business flow already prevents unsafe hard jumps during tests.
    * Decision:
      * do not add another smoothing layer in MVP.
+
+4. Hybrid manual override return
+   * Current status:
+     * verified during stand testing: the system returns to the correct state without an additional custom return policy.
+   * Decision:
+     * do not add a separate hybrid-return mechanism in MVP.
 
 ⸻
 

@@ -420,10 +420,6 @@ void MainWindow::advanceStandImpactTransition() {
     if (transition.targetReached) {
         standImpactTransitionTimer->stop();
         appendLog("Manual stand impact target reached: " + formatImpact(next));
-
-        if (scenario.manualImpactPolicy() == domain::ManualImpactPolicy::ReturnToScenarioAfterManualImpact) {
-            appendLog("Hybrid scenario return is pending scenario engine implementation");
-        }
     }
 }
 

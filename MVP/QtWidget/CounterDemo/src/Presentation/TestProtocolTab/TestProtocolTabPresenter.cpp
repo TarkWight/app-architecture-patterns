@@ -56,7 +56,7 @@ void TestProtocolTabPresenter::syncViewFromState() {
 }
 
 void TestProtocolTabPresenter::onOperatorTestDurationChanged(int minutes) {
-    setOperatorTestDurationUseCase.execute(minutes);
+    setOperatorTestDurationUseCase.execute(domain::DurationMinutes::required(minutes));
 
     if (view != nullptr) {
         view->appendLog("Operator test duration updated");

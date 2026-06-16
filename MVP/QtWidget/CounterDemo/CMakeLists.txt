@@ -242,6 +242,7 @@ if (BUILD_TESTING)
     tests/Application/ConnectStandUseCaseTest.cpp
     tests/Application/SessionStateTest.cpp
     tests/Application/SetControlChartsTabMinutesUseCaseTest.cpp
+    tests/Application/SetOperatorTestDurationUseCaseTest.cpp
     tests/Application/SetStandControlModeUseCaseTest.cpp
     tests/Application/SetStandImpactUseCaseTest.cpp
     tests/Application/SetTelemetryWindowUseCaseTest.cpp
@@ -257,6 +258,7 @@ if (BUILD_TESTING)
     src/Application/UseCases/ConfigureTelemetryUseCase.cpp
     src/Application/UseCases/ConnectStandUseCase.cpp
     src/Application/UseCases/SetControlChartsTabMinutesUseCase.cpp
+    src/Application/UseCases/SetOperatorTestDurationUseCase.cpp
     src/Application/UseCases/SetStandControlModeUseCase.cpp
     src/Application/UseCases/SetStandImpactUseCase.cpp
     src/Application/UseCases/SetTelemetryWindowUseCase.cpp

@@ -124,6 +124,13 @@
         </widget>
        </item>
        <item row="0" column="10">
+        <widget class="QPushButton" name="buttonSelectTelemetryConfig">
+         <property name="text">
+          <string>Выбрать telemetry.toml</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="11">
         <spacer name="horizontalSpacerTop">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>

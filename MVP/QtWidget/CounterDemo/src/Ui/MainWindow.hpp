@@ -97,6 +97,7 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     QTimer *standImpactTransitionTimer{nullptr};
     bool controlPlotRebuildScheduled{false};
     std::string observedTestProtocolModeKey{};
+    std::string selectedTelemetryConfigPath{};
 
     void setupTabs();
     void setupStandControlPanel();
@@ -117,6 +118,8 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     void updateManualStandControlsEnabled();
     void updateControlFormulaTemplateSelection(const std::string &expression);
     void createTelemetryTemplate();
+    void selectTelemetryConfig();
+    std::string telemetryConfigPathForConnection() const;
     double selectedStandDirectionDegrees() const;
     domain::AxisId selectedTelemetryAxisId() const;
 };

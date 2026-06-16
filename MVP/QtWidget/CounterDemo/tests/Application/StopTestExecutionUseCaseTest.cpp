@@ -103,8 +103,8 @@ TEST(StopTestExecutionUseCaseTest, StopsTelemetryPollingAndKeepsStandConnected) 
 
     EXPECT_EQ(scheduler.stopCalls, 1);
     EXPECT_EQ(telemetryClient.stopPollingCalls, 1);
-    EXPECT_EQ(state.get().connection.standConnectionStatus, domain::StandConnectionStatus::Connected);
-    EXPECT_EQ(state.get().execution.testExecutionStatus, domain::TestExecutionStatus::Ready);
+    EXPECT_EQ(state.connection().standConnectionStatus, domain::StandConnectionStatus::Connected);
+    EXPECT_EQ(state.execution().testExecutionStatus, domain::TestExecutionStatus::Ready);
 }
 
 TEST(StopTestExecutionUseCaseTest, ResetsCountdownTimeUsingDomainStopPlan) {
@@ -121,9 +121,9 @@ TEST(StopTestExecutionUseCaseTest, ResetsCountdownTimeUsingDomainStopPlan) {
 
     useCase.execute();
 
-    EXPECT_EQ(state.get().execution.elapsed.value(), 0);
-    EXPECT_EQ(state.get().execution.remaining.value(), 720);
-    EXPECT_EQ(state.get().execution.testExecutionStatus, domain::TestExecutionStatus::Ready);
+    EXPECT_EQ(state.execution().elapsed.value(), 0);
+    EXPECT_EQ(state.execution().remaining.value(), 720);
+    EXPECT_EQ(state.execution().testExecutionStatus, domain::TestExecutionStatus::Ready);
 }
 
 TEST(StopTestExecutionUseCaseTest, ResetsCountUpTimeUsingDomainStopPlan) {
@@ -140,9 +140,9 @@ TEST(StopTestExecutionUseCaseTest, ResetsCountUpTimeUsingDomainStopPlan) {
 
     useCase.execute();
 
-    EXPECT_EQ(state.get().execution.elapsed.value(), 0);
-    EXPECT_EQ(state.get().execution.remaining.value(), 0);
-    EXPECT_EQ(state.get().execution.testExecutionStatus, domain::TestExecutionStatus::Ready);
+    EXPECT_EQ(state.execution().elapsed.value(), 0);
+    EXPECT_EQ(state.execution().remaining.value(), 0);
+    EXPECT_EQ(state.execution().testExecutionStatus, domain::TestExecutionStatus::Ready);
 }
 
 } // namespace

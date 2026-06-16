@@ -14,7 +14,6 @@
 #include "../Application/UseCases/ApplyAngleOfAttackUseCase.hpp"
 #include "../Application/UseCases/ApplyBeaufortImpactUseCase.hpp"
 #include "../Application/UseCases/ApplyWindDirectionUseCase.hpp"
-#include "../Application/UseCases/SetStandControlModeUseCase.hpp"
 #include "../Application/UseCases/SetStandImpactUseCase.hpp"
 #include "../Domain/AxisId.hpp"
 #include "../Domain/TestTimeSource.hpp"
@@ -48,7 +47,6 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
         presentation::telemetryChartsTab::TelemetryChartsTabPresenter &telemetryChartsTabPresenter;
         presentation::controlChartsTab::ControlChartsTabPresenter &controlChartsTabPresenter;
         presentation::testProtocolTab::TestProtocolTabPresenter &testProtocolTabPresenter;
-        application::useCases::SetStandControlModeUseCase &setStandControlModeUseCase;
         application::useCases::SetStandImpactUseCase &setStandImpactUseCase;
         application::useCases::ApplyBeaufortImpactUseCase &applyBeaufortImpactUseCase;
         application::useCases::ApplyWindDirectionUseCase &applyWindDirectionUseCase;
@@ -82,7 +80,6 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     presentation::telemetryChartsTab::TelemetryChartsTabPresenter &telemetryChartsTabPresenter;
     presentation::controlChartsTab::ControlChartsTabPresenter &controlChartsTabPresenter;
     presentation::testProtocolTab::TestProtocolTabPresenter &testProtocolTabPresenter;
-    application::useCases::SetStandControlModeUseCase &setStandControlModeUseCase;
     application::useCases::SetStandImpactUseCase &setStandImpactUseCase;
     application::useCases::ApplyBeaufortImpactUseCase &applyBeaufortImpactUseCase;
     application::useCases::ApplyWindDirectionUseCase &applyWindDirectionUseCase;

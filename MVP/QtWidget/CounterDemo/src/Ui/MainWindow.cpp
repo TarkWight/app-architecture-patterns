@@ -57,8 +57,7 @@ MainWindow::MainWindow(Dependencies deps, QWidget *parent)
     : QMainWindow(parent), ui(std::make_unique<Ui::MainWindow>()), shellPresenter(deps.shellPresenter),
       telemetryChartsTabPresenter(deps.telemetryChartsTabPresenter),
       controlChartsTabPresenter(deps.controlChartsTabPresenter),
-      testProtocolTabPresenter(deps.testProtocolTabPresenter),
-      setStandControlModeUseCase(deps.setStandControlModeUseCase), setStandImpactUseCase(deps.setStandImpactUseCase),
+      testProtocolTabPresenter(deps.testProtocolTabPresenter), setStandImpactUseCase(deps.setStandImpactUseCase),
       applyBeaufortImpactUseCase(deps.applyBeaufortImpactUseCase),
       applyWindDirectionUseCase(deps.applyWindDirectionUseCase),
       applyAngleOfAttackUseCase(deps.applyAngleOfAttackUseCase), sessionAdapter(deps.sessionAdapter),
@@ -270,7 +269,7 @@ void MainWindow::connectConfigTemplateSignals() {
 void MainWindow::connectStandControlSignals() {
     QObject::connect(ui->comboBoxStandControlMode, &QComboBox::currentIndexChanged, this, [this]() {
         const auto mode = static_cast<domain::StandControlMode>(ui->comboBoxStandControlMode->currentData().toInt());
-        setStandControlModeUseCase.execute(mode);
+        shellPresenter.onStandControlModeChanged(mode);
         updateManualStandControlsEnabled();
         scheduleControlPlotRebuild();
     });

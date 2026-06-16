@@ -134,6 +134,7 @@ struct ApplicationContext {
                                                    .setTestTimeSourceUseCase = setTestTimeSourceUseCase,
                                                    .setFunctionExpressionUseCase = setFunctionExpressionUseCase,
                                                    .setLineColorUseCase = setLineColorUseCase,
+                                                   .setStandControlModeUseCase = setStandControlModeUseCase,
                                                    .buildControlPlotUseCase = buildControlPlotUseCase,
                                                    .configureTelemetryUseCase = configureTelemetryUseCase,
                                                    .connectStandUseCase = connectStandUseCase,

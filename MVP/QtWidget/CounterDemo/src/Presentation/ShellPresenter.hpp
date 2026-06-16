@@ -5,6 +5,7 @@
 #include "../Application/UseCases/BuildControlPlotUseCase.hpp"
 #include "../Application/UseCases/SetFunctionExpressionUseCase.hpp"
 #include "../Application/UseCases/SetLineColorUseCase.hpp"
+#include "../Application/UseCases/SetStandControlModeUseCase.hpp"
 #include "../Application/UseCases/StartTestExecutionUseCase.hpp"
 #include "../Application/UseCases/PauseTestExecutionUseCase.hpp"
 #include "../Application/UseCases/ResumeTestExecutionUseCase.hpp"
@@ -32,6 +33,7 @@ class ShellPresenter final {
         application::useCases::SetTestTimeSourceUseCase &setTestTimeSourceUseCase;
         application::useCases::SetFunctionExpressionUseCase &setFunctionExpressionUseCase;
         application::useCases::SetLineColorUseCase &setLineColorUseCase;
+        application::useCases::SetStandControlModeUseCase &setStandControlModeUseCase;
         application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
         application::useCases::ConfigureTelemetryUseCase &configureTelemetryUseCase;
         application::useCases::ConnectStandUseCase &connectStandUseCase;
@@ -56,6 +58,7 @@ class ShellPresenter final {
     void onFormulaTemplateSelected(std::string key);
     void onLineColorSelected(application::dto::RgbColor color);
     void onTestTimeSourceChanged(domain::TestTimeSource source);
+    void onStandControlModeChanged(domain::StandControlMode mode);
     void onConnectTelemetryPressed(std::string configPath);
     [[nodiscard]] bool telemetryConfigRequiredForConnection() const;
 
@@ -72,6 +75,7 @@ class ShellPresenter final {
     application::useCases::ConfigureTelemetryUseCase &configureTelemetryUseCase;
     application::useCases::ConnectStandUseCase &connectStandUseCase;
     application::useCases::DisconnectStandUseCase &disconnectStandUseCase;
+    application::useCases::SetStandControlModeUseCase &setStandControlModeUseCase;
 
     IShellView *view{nullptr};
     domain::StandConnectionStatus lastStandConnectionStatus{domain::StandConnectionStatus::Disconnected};

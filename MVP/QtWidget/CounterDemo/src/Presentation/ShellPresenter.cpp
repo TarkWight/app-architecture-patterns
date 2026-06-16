@@ -20,7 +20,7 @@ ShellPresenter::ShellPresenter(Dependencies deps)
       setFunctionExpressionUseCase(deps.setFunctionExpressionUseCase), setLineColorUseCase(deps.setLineColorUseCase),
       buildControlPlotUseCase(deps.buildControlPlotUseCase), setTestTimeSourceUseCase(deps.setTestTimeSourceUseCase),
       configureTelemetryUseCase(deps.configureTelemetryUseCase), connectStandUseCase(deps.connectStandUseCase),
-      disconnectStandUseCase(deps.disconnectStandUseCase) {
+      disconnectStandUseCase(deps.disconnectStandUseCase), setStandControlModeUseCase(deps.setStandControlModeUseCase) {
 }
 
 void ShellPresenter::attachView(IShellView &view) {
@@ -179,6 +179,14 @@ void ShellPresenter::onTestTimeSourceChanged(domain::TestTimeSource source) {
 
     if (view != nullptr) {
         view->appendLog("Test time source updated");
+    }
+}
+
+void ShellPresenter::onStandControlModeChanged(domain::StandControlMode mode) {
+    setStandControlModeUseCase.execute(mode);
+
+    if (view != nullptr) {
+        view->appendLog("Stand control mode updated");
     }
 }
 

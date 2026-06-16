@@ -14,7 +14,6 @@ int main(int argc, char *argv[]) {
                                      .telemetryChartsTabPresenter = context.telemetryChartsTabPresenter,
                                      .controlChartsTabPresenter = context.controlChartsTabPresenter,
                                      .testProtocolTabPresenter = context.testProtocolTabPresenter,
-                                     .setStandControlModeUseCase = context.setStandControlModeUseCase,
                                      .setStandImpactUseCase = context.setStandImpactUseCase,
                                      .applyBeaufortImpactUseCase = context.applyBeaufortImpactUseCase,
                                      .applyWindDirectionUseCase = context.applyWindDirectionUseCase,

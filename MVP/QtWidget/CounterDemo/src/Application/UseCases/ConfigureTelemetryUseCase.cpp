@@ -11,8 +11,8 @@ namespace application::useCases {
 
 namespace {
 
-bool testExecutionIsActive(const application::session::SessionStateData &stateData) {
-    return domain::canStop(stateData.execution.testExecutionStatus);
+bool testExecutionIsActive(const application::session::ExecutionStateData &execution) {
+    return domain::canStop(execution.testExecutionStatus);
 }
 
 void applyTelemetryConnectionDecision(application::session::SessionState &state,
@@ -23,7 +23,7 @@ void applyTelemetryConnectionDecision(application::session::SessionState &state,
     }
 
     if (decision.shouldStartPolling) {
-        telemetryClient.startPolling(state.get().connection.telemetryPollInterval.milliseconds());
+        telemetryClient.startPolling(state.connection().telemetryPollInterval.milliseconds());
     }
 
     if (decision.standConnectionStatus.has_value()) {
@@ -50,7 +50,7 @@ void ConfigureTelemetryUseCase::execute(const std::string &configPath) {
     telemetryClient.setStatusCallback(
         [this](domain::AxisId /*axisId*/, domain::TelemetryConnectionStatus status, const std::string & /*message*/) {
             const auto decision = domain::TelemetryConnectionPolicy::handleStatus(
-                state.get().connection.standConnectionStatus, status, testExecutionIsActive(state.get()));
+                state.connection().standConnectionStatus, status, testExecutionIsActive(state.execution()));
             applyTelemetryConnectionDecision(state, telemetryClient, decision);
         });
 

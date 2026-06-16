@@ -11,21 +11,22 @@ namespace application::services {
 
 namespace {
 
-domain::DurationMinutes determinePreviewDuration(const session::SessionStateData &stateData) {
-    if (stateData.protocol.testTimeSource == domain::TestTimeSource::OperatorDefined) {
-        return stateData.protocol.operatorTestDuration;
+domain::DurationMinutes determinePreviewDuration(const session::ProtocolStateData &protocol) {
+    if (protocol.testTimeSource == domain::TestTimeSource::OperatorDefined) {
+        return protocol.operatorTestDuration;
     }
 
-    return stateData.protocol.estimatedTestDuration;
+    return protocol.estimatedTestDuration;
 }
 
-domain::DurationMinutes determineGridDuration(const session::SessionStateData &stateData) {
-    if (!stateData.control.controlTrace.empty()) {
-        const double lastTraceMinute = stateData.control.controlTrace.back().time.minutes();
+domain::DurationMinutes determineGridDuration(const session::ProtocolStateData &protocol,
+                                              const session::ControlStateData &control) {
+    if (!control.controlTrace.empty()) {
+        const double lastTraceMinute = control.controlTrace.back().time.minutes();
         return domain::DurationMinutes::required(std::max(1, static_cast<int>(std::ceil(lastTraceMinute))));
     }
 
-    return determinePreviewDuration(stateData);
+    return determinePreviewDuration(protocol);
 }
 
 double traceAxisStepSeconds(double maxSeconds) {
@@ -108,14 +109,15 @@ void addControlTraceSeries(application::dto::PlotModel &plot, const domain::Cont
 
 } // namespace
 
-application::dto::PlotModel ControlPlotBuilder::build(const session::SessionStateData &stateData,
+application::dto::PlotModel ControlPlotBuilder::build(const session::ProtocolStateData &protocol,
+                                                      const session::ControlStateData &control,
                                                       const domain::WindControlProfile &profile) const {
     application::dto::PlotModel plot{};
     plot.title = "Control chart";
-    plot.color = stateData.control.lineColor;
+    plot.color = control.lineColor;
 
     const int durationMinutes =
-        profile.duration.value() > 0 ? profile.duration.value() : determineGridDuration(stateData).value();
+        profile.duration.value() > 0 ? profile.duration.value() : determineGridDuration(protocol, control).value();
     plot.x = application::dto::AxisSpec{0.0, static_cast<double>(std::max(1, durationMinutes)), 1.0, "minutes"};
     plot.y = application::dto::AxisSpec{0.0, domain::maxOperationalBeaufort, 0.5, "Beaufort"};
 
@@ -124,7 +126,7 @@ application::dto::PlotModel ControlPlotBuilder::build(const session::SessionStat
         plot.series.points.push_back(application::dto::Point{.x = sample.time.minutes(), .y = sample.beaufort.value()});
     }
 
-    addControlTraceSeries(plot, stateData.control.controlTrace);
+    addControlTraceSeries(plot, control.controlTrace);
     return plot;
 }
 

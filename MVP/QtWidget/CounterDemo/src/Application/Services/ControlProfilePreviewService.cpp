@@ -5,18 +5,19 @@
 
 namespace application::services {
 
-domain::WindControlProfile ControlProfilePreviewService::build(const session::SessionStateData &stateData,
+domain::WindControlProfile ControlProfilePreviewService::build(const session::ProtocolStateData &protocol,
+                                                               const session::ControlStateData &control,
                                                                const ports::IFunctionEngine &engine) const {
-    const auto timing = domain::determineControlProfileTiming(
-        stateData.protocol.testProtocol.testMode, stateData.protocol.testTimeSource,
-        stateData.protocol.estimatedTestDuration, stateData.protocol.operatorTestDuration);
+    const auto timing =
+        domain::determineControlProfileTiming(protocol.testProtocol.testMode, protocol.testTimeSource,
+                                              protocol.estimatedTestDuration, protocol.operatorTestDuration);
 
     if (!timing.formulaEnabled) {
         return domain::WindControlProfile{};
     }
 
-    return domain::buildWindControlProfile(timing.duration, [&engine, &stateData](double timeMinutes) {
-        return engine.eval(stateData.control.functionExpression.value, timeMinutes);
+    return domain::buildWindControlProfile(timing.duration, [&engine, &control](double timeMinutes) {
+        return engine.eval(control.functionExpression.value, timeMinutes);
     });
 }
 

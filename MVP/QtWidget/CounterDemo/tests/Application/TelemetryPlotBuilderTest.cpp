@@ -16,10 +16,10 @@ domain::AxisTelemetrySample validSample(domain::AxisId axisId, double timestampS
 }
 
 TEST(TelemetryPlotBuilderTest, BuildsVisibleGridWhenHistoryIsEmpty) {
-    const application::session::SessionStateData stateData{};
+    const application::session::TelemetryStateData telemetry{};
     const application::services::TelemetryPlotBuilder builder{};
 
-    const auto plot = builder.build(stateData);
+    const auto plot = builder.build(telemetry);
 
     EXPECT_EQ(plot.title, "Telemetry");
     EXPECT_DOUBLE_EQ(plot.x.min, 0.0);
@@ -36,15 +36,15 @@ TEST(TelemetryPlotBuilderTest, BuildsVisibleGridWhenHistoryIsEmpty) {
 }
 
 TEST(TelemetryPlotBuilderTest, BuildsAxisSeriesInsideSelectedWindow) {
-    application::session::SessionStateData stateData{};
-    stateData.telemetry.telemetryWindowEndSeconds = domain::TelemetryWindowEnd::fromSeconds(70.0);
-    stateData.telemetry.telemetryHistory.push_back(validSample(domain::axis0, 100.0, 1.0F));
-    stateData.telemetry.telemetryHistory.push_back(validSample(domain::axis1, 120.0, 2.0F));
-    stateData.telemetry.telemetryHistory.push_back(validSample(domain::axis0, 160.0, 3.0F));
-    stateData.telemetry.telemetryHistory.push_back(validSample(domain::axis1, 180.0, 4.0F));
+    application::session::TelemetryStateData telemetry{};
+    telemetry.telemetryWindowEndSeconds = domain::TelemetryWindowEnd::fromSeconds(70.0);
+    telemetry.telemetryHistory.push_back(validSample(domain::axis0, 100.0, 1.0F));
+    telemetry.telemetryHistory.push_back(validSample(domain::axis1, 120.0, 2.0F));
+    telemetry.telemetryHistory.push_back(validSample(domain::axis0, 160.0, 3.0F));
+    telemetry.telemetryHistory.push_back(validSample(domain::axis1, 180.0, 4.0F));
     const application::services::TelemetryPlotBuilder builder{};
 
-    const auto plot = builder.build(stateData);
+    const auto plot = builder.build(telemetry);
 
     EXPECT_DOUBLE_EQ(plot.x.min, 10.0);
     EXPECT_DOUBLE_EQ(plot.x.max, 70.0);
@@ -58,14 +58,14 @@ TEST(TelemetryPlotBuilderTest, BuildsAxisSeriesInsideSelectedWindow) {
 }
 
 TEST(TelemetryPlotBuilderTest, AppliesAxisVisibilityAndColors) {
-    application::session::SessionStateData stateData{};
-    stateData.telemetry.telemetryAxisYVisible = false;
-    stateData.telemetry.telemetryAxisZColor = application::dto::RgbColor{1, 2, 3};
-    stateData.telemetry.telemetryHistory.push_back(validSample(domain::axis0, 10.0, 1.0F));
-    stateData.telemetry.telemetryHistory.push_back(validSample(domain::axis1, 20.0, 2.0F));
+    application::session::TelemetryStateData telemetry{};
+    telemetry.telemetryAxisYVisible = false;
+    telemetry.telemetryAxisZColor = application::dto::RgbColor{1, 2, 3};
+    telemetry.telemetryHistory.push_back(validSample(domain::axis0, 10.0, 1.0F));
+    telemetry.telemetryHistory.push_back(validSample(domain::axis1, 20.0, 2.0F));
     const application::services::TelemetryPlotBuilder builder{};
 
-    const auto plot = builder.build(stateData);
+    const auto plot = builder.build(telemetry);
 
     ASSERT_EQ(plot.seriesList.size(), 1U);
     EXPECT_EQ(plot.seriesList.at(0).label, "Ось Z / направление");

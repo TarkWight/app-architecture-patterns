@@ -10,7 +10,8 @@ namespace application::services {
 
 class ControlProfilePreviewService final {
   public:
-    domain::WindControlProfile build(const application::session::SessionStateData &stateData,
+    domain::WindControlProfile build(const application::session::ProtocolStateData &protocol,
+                                     const application::session::ControlStateData &control,
                                      const application::ports::IFunctionEngine &engine) const;
 };
 

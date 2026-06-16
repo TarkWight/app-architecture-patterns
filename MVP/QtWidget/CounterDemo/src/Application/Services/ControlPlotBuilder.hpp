@@ -10,7 +10,8 @@ namespace application::services {
 
 class ControlPlotBuilder final {
   public:
-    application::dto::PlotModel build(const application::session::SessionStateData &stateData,
+    application::dto::PlotModel build(const application::session::ProtocolStateData &protocol,
+                                      const application::session::ControlStateData &control,
                                       const domain::WindControlProfile &profile) const;
 };
 

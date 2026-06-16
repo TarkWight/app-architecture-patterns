@@ -314,7 +314,7 @@ void application::session::SessionState::notify() {
 }
 
 void application::session::SessionState::rebuildTelemetryPlot() {
-    data.telemetry.telemetryPlot = application::services::TelemetryPlotBuilder{}.build(data);
+    data.telemetry.telemetryPlot = application::services::TelemetryPlotBuilder{}.build(data.telemetry);
 }
 
 } // namespace application::session

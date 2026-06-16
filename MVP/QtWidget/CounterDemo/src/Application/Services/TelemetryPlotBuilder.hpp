@@ -8,7 +8,7 @@ namespace application::services {
 
 class TelemetryPlotBuilder final {
   public:
-    application::dto::PlotModel build(const application::session::SessionStateData &stateData) const;
+    application::dto::PlotModel build(const application::session::TelemetryStateData &telemetry) const;
 };
 
 } // namespace application::services

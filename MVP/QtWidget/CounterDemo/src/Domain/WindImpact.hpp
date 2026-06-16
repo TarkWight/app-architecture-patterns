@@ -9,8 +9,8 @@ namespace domain {
 constexpr double minOperationalBeaufort = 0.0;
 // TODO(post-MVP): verify real stand/wind-model limits; 0..7 is inherited from the legacy application.
 constexpr double maxOperationalBeaufort = 7.0;
-constexpr double minAngleOfAttack = 0.0;
-// TODO(post-MVP): verify real stand limits; 360 is inherited from the legacy application.
+// TODO(post-MVP): verify real stand limits; signed +/-360 is an MVP relative-angle guard.
+constexpr double minAngleOfAttack = -360.0;
 constexpr double maxAngleOfAttack = 360.0;
 
 class Beaufort final {

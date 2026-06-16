@@ -105,10 +105,9 @@ void StartTestExecutionUseCase::applyScenarioImpact(domain::ElapsedSeconds elaps
 }
 
 void StartTestExecutionUseCase::sendAppliedImpact(const domain::WindImpact &profile) {
-    const auto mapping = domain::StandCommandMapper::map(profile, state.get().angleOfAttackOscillation);
-    state.setAngleOfAttackOscillation(mapping.angleOfAttackState);
-    telemetryClient.setAxisCommand(domain::axis0, mapping.commands.axis0);
-    telemetryClient.setAxisCommand(domain::axis1, mapping.commands.axis1);
+    const auto commands = domain::StandCommandMapper::map(profile);
+    telemetryClient.setAxisCommand(domain::axis0, commands.axis0);
+    telemetryClient.setAxisCommand(domain::axis1, commands.axis1);
 }
 
 } // namespace application::useCases

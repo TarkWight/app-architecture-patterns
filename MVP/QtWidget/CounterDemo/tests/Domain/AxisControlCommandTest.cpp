@@ -98,13 +98,29 @@ TEST(StandCommandMapperTest, WhenDirectionIsApplied_ReturnsAxis1Position) {
     EXPECT_FLOAT_EQ(commands.axis1.position, 90.0F);
 }
 
-TEST(StandCommandMapperTest, WhenAngleOfAttackIsApplied_TargetsAxis1SectorInsteadOfOverwritingDirection) {
-    const auto impact = domain::makeWindImpact(0.0, 90.0, 15.0);
+TEST(StandCommandMapperTest, WhenAngleOfAttackIsApplied_AddsAngleToDirection) {
+    const auto impact = domain::makeWindImpact(0.0, 70.0, 30.0);
 
     const auto commands = domain::StandCommandMapper::map(impact);
 
     EXPECT_FLOAT_EQ(commands.axis0.position, 0.0F);
-    EXPECT_FLOAT_EQ(commands.axis1.position, 97.5F);
+    EXPECT_FLOAT_EQ(commands.axis1.position, 100.0F);
+}
+
+TEST(StandCommandMapperTest, WhenAngleOfAttackIsNegative_SubtractsAngleFromDirection) {
+    const auto impact = domain::makeWindImpact(0.0, 90.0, -15.0);
+
+    const auto commands = domain::StandCommandMapper::map(impact);
+
+    EXPECT_FLOAT_EQ(commands.axis1.position, 75.0F);
+}
+
+TEST(StandCommandMapperTest, WhenYawOscillationOffsetIsProvided_AddsOffsetToEffectiveDirection) {
+    const auto impact = domain::makeWindImpact(0.0, 70.0, 30.0);
+
+    const auto commands = domain::StandCommandMapper::map(impact, domain::YawOscillationOffset::from(5.0));
+
+    EXPECT_FLOAT_EQ(commands.axis1.position, 105.0F);
 }
 
 TEST_P(DirectionCommandMappingTest, MapsDirectionToAxis1Position_WhenWindRoseDirectionProvided_ReturnsSamePosition) {

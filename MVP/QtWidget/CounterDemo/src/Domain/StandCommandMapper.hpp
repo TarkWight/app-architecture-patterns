@@ -1,8 +1,8 @@
 #ifndef STANDCOMMANDMAPPER_HPP
 #define STANDCOMMANDMAPPER_HPP
 
-#include "AngleOfAttackOscillationPolicy.hpp"
 #include "AxisControlCommand.hpp"
+#include "EffectiveWindDirection.hpp"
 #include "WindImpact.hpp"
 
 namespace domain {
@@ -12,24 +12,16 @@ struct StandAxisCommands {
     AxisControlCommand axis1{};
 };
 
-struct StandCommandMappingResult {
-    StandAxisCommands commands{};
-    AngleOfAttackOscillationState angleOfAttackState{};
-};
-
 class StandCommandMapper final {
   public:
     [[nodiscard]] static StandAxisCommands map(const WindImpact &impact) {
-        return map(impact, AngleOfAttackOscillationState{}).commands;
+        return map(impact, YawOscillationOffset::from(0.0));
     }
 
-    [[nodiscard]] static StandCommandMappingResult map(const WindImpact &impact,
-                                                       AngleOfAttackOscillationState angleOfAttackState) {
-        const auto angleStep =
-            AngleOfAttackOscillationPolicy::nextTarget(angleOfAttackState, impact.direction, impact.angleOfAttack);
-        return StandCommandMappingResult{
-            .commands = StandAxisCommands{.axis0 = mapAxis0(impact), .axis1 = mapAxis1(impact, angleStep.target)},
-            .angleOfAttackState = angleStep.state};
+    [[nodiscard]] static StandAxisCommands map(const WindImpact &impact, YawOscillationOffset yawOscillationOffset) {
+        const auto effectiveDirection =
+            EffectiveWindDirection::from(impact.direction, impact.angleOfAttack, yawOscillationOffset);
+        return StandAxisCommands{.axis0 = mapAxis0(impact), .axis1 = mapAxis1(impact, effectiveDirection)};
     }
 
   private:

@@ -68,7 +68,6 @@ class SessionState {
                           domain::TestTimeSource timeSource, domain::TestTimeDirection timeDirection);
     void setAppliedStandImpact(domain::WindImpact profile);
     void setTargetStandImpact(domain::WindImpact profile);
-    void setAngleOfAttackOscillation(domain::AngleOfAttackOscillationState state);
 
     void setTestProtocolTitle(std::string title);
     void setTestProtocolLine(int idx, std::string line);

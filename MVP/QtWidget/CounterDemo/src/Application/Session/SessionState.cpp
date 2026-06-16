@@ -199,11 +199,6 @@ void application::session::SessionState::setTargetStandImpact(domain::WindImpact
     notify();
 }
 
-void application::session::SessionState::setAngleOfAttackOscillation(domain::AngleOfAttackOscillationState state) {
-    data.angleOfAttackOscillation = state;
-    notify();
-}
-
 void application::session::SessionState::setControlPlot(domain::PlotModel plot) {
     data.controlPlot = std::move(plot);
     notify();

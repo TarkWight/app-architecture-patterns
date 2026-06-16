@@ -3,7 +3,6 @@
 
 #include "../../Domain/AxisState.hpp"
 #include "../../Domain/AxisTelemetrySample.hpp"
-#include "../../Domain/AngleOfAttackOscillationPolicy.hpp"
 #include "../../Domain/ControlTrace.hpp"
 #include "../../Domain/Plot.hpp"
 #include "../../Domain/StandControlMode.hpp"
@@ -73,8 +72,6 @@ struct SessionStateData {
     domain::StandControlMode standControlMode{domain::StandControlMode::Manual};
     domain::WindImpact appliedStandImpact{};
     domain::WindImpact targetStandImpact{};
-    domain::AngleOfAttackOscillationState angleOfAttackOscillation{};
-
     // ===== Protocol / report =====
     domain::TestProtocol testProtocol{};
 

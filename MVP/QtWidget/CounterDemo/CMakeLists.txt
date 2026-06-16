@@ -86,6 +86,9 @@ qt_add_executable(develop
   src/Application/Session/Subscription.hpp
   src/Application/Session/Subscription.cpp
 
+  src/Application/Services/ControlPlotBuilder.hpp
+  src/Application/Services/ControlPlotBuilder.cpp
+
   src/Infrastructure/Config/TomlConfigRepository.hpp
   src/Infrastructure/Config/TomlConfigRepository.cpp
   src/Infrastructure/ConfigTemplates/IAppFileLocationProvider.hpp
@@ -254,6 +257,7 @@ if (BUILD_TESTING)
     tests/Infrastructure/SimpleFunctionEngineTest.cpp
     src/Application/Session/SessionState.cpp
     src/Application/Session/Subscription.cpp
+    src/Application/Services/ControlPlotBuilder.cpp
     src/Application/UseCases/BuildControlPlotUseCase.cpp
     src/Application/UseCases/ConfigureTelemetryUseCase.cpp
     src/Application/UseCases/ConnectStandUseCase.cpp

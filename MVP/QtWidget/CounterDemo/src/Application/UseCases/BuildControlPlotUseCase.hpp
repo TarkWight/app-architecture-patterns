@@ -1,6 +1,7 @@
 #ifndef BUILDCONTROLPLOTUSECASE_HPP
 #define BUILDCONTROLPLOTUSECASE_HPP
 
+#include "../Services/ControlPlotBuilder.hpp"
 #include "../Ports/IFunctionEngine.hpp"
 #include "../Session/SessionState.hpp"
 #include "../../Application/Dto/PlotModel.hpp"
@@ -18,6 +19,7 @@ class BuildControlPlotUseCase final {
   private:
     application::session::SessionState &state;
     const application::ports::IFunctionEngine &engine;
+    application::services::ControlPlotBuilder plotBuilder{};
 };
 
 } // namespace application::useCases

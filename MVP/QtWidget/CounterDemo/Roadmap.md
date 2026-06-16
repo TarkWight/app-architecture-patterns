@@ -439,9 +439,17 @@ Remaining MVP behavior gaps:
      * `YawOscillationOffset` exists as a domain value object;
      * `EffectiveWindDirection` and `StandCommandMapper` support it.
      * `YawOscillationPolicy` produces deterministic sinusoidal offsets over time;
-     * MVP amplitude depends only on Beaufort.
+     * MVP model is a deterministic Beaufort-dependent sinusoid:
+       `yawOscillationOffset = amplitude(beaufort) * sin(2π * elapsed / 12s)`;
+     * MVP amplitude is `beaufort * 1.5°`;
+     * this is MVP calibration, not a validated physical model;
+     * `UavSpecification` is present in `StandImpactCalculationContext`, but does not affect current yaw calculation.
+   * Legacy note:
+     * recovered legacy `SetRouteSpin` behavior is a protocol observation, not domain truth;
+     * legacy UI actions overwrite the same transport field, so angle/yaw behavior must not be copied as a domain model.
    * Expected cleanup:
-     * later amplitude/frequency may depend on `UavSpecification` fields: mass, DR, payload, motor and battery parameters.
+     * post-MVP amplitude/frequency may depend on `UavSpecification` fields after a physical or empirical model is defined:
+       mass, DR, payload, motor and battery parameters.
 
 3. Confirm legacy operational limits
    * Current TODOs:

@@ -1,7 +1,10 @@
 #include "SetStandImpactUseCase.hpp"
 
 #include "../../Domain/AxisId.hpp"
+#include "../../Domain/StandImpactCalculationContext.hpp"
 #include "../../Domain/StandCommandMapper.hpp"
+#include "../../Domain/YawOscillationPolicy.hpp"
+#include "../Services/UavSpecificationMapper.hpp"
 
 #include <utility>
 
@@ -22,11 +25,15 @@ void SetStandImpactUseCase::setApplied(domain::WindImpact profile) {
 
     state.setAppliedStandImpact(profile);
     state.appendControlTraceSample(domain::ControlTraceSample::manualCommand(elapsed, target, profile));
-    sendAppliedImpact(profile);
+    sendAppliedImpact(profile, elapsed);
 }
 
-void SetStandImpactUseCase::sendAppliedImpact(const domain::WindImpact &profile) {
-    const auto commands = domain::StandCommandMapper::map(profile);
+void SetStandImpactUseCase::sendAppliedImpact(const domain::WindImpact &profile, domain::ElapsedSeconds elapsed) {
+    const auto uavSpecification =
+        application::services::UavSpecificationMapper{}.map(state.get().protocol.testProtocol);
+    const auto yawOffset = domain::YawOscillationPolicy::calculate(domain::StandImpactCalculationContext{
+        .impact = profile, .elapsed = elapsed, .uavSpecification = uavSpecification});
+    const auto commands = domain::StandCommandMapper::map(profile, yawOffset);
     telemetryClient.setAxisCommand(domain::axis0, commands.axis0);
     telemetryClient.setAxisCommand(domain::axis1, commands.axis1);
 }

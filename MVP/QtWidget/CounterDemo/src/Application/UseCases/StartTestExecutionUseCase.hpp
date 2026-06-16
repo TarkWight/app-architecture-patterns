@@ -8,6 +8,7 @@
 #include "../Session/SessionState.hpp"
 
 #include "../../Domain/Time.hpp"
+#include "../../Domain/WindImpact.hpp"
 
 namespace application::useCases {
 
@@ -29,7 +30,7 @@ class StartTestExecutionUseCase final {
     void startTelemetryPollingIfConnected();
     void stopTelemetryPollingIfActive();
     void applyScenarioImpact(domain::ElapsedSeconds elapsed);
-    void sendAppliedImpact(const domain::WindImpact &profile);
+    void sendAppliedImpact(const domain::WindImpact &profile, domain::ElapsedSeconds elapsed);
 };
 
 } // namespace application::useCases

@@ -51,6 +51,9 @@ qt_add_executable(develop
   src/Domain/WindImpact.hpp
   src/Domain/WindControlProfile.hpp
   src/Domain/WindControlProfileImpact.hpp
+  src/Domain/UavSpecification.hpp
+  src/Domain/StandImpactCalculationContext.hpp
+  src/Domain/YawOscillationPolicy.hpp
   src/Domain/AxisState.hpp
   src/Domain/TestExecutionStatus.hpp
   src/Domain/TestExecutionTransitions.hpp
@@ -92,6 +95,8 @@ qt_add_executable(develop
   src/Application/Services/ControlProfilePreviewService.cpp
   src/Application/Services/TelemetryPlotBuilder.hpp
   src/Application/Services/TelemetryPlotBuilder.cpp
+  src/Application/Services/UavSpecificationMapper.hpp
+  src/Application/Services/UavSpecificationMapper.cpp
 
   src/Infrastructure/Config/TomlConfigRepository.hpp
   src/Infrastructure/Config/TomlConfigRepository.cpp
@@ -243,6 +248,7 @@ if (BUILD_TESTING)
     tests/Domain/WindImpactTest.cpp
     tests/Domain/WindControlProfileCalculatorTest.cpp
     tests/Domain/WindControlProfileImpactTest.cpp
+    tests/Domain/YawOscillationPolicyTest.cpp
     tests/Application/ApplyWindImpactUseCasesTest.cpp
     tests/Application/BuildControlPlotUseCaseTest.cpp
     tests/Application/ConfigureTelemetryUseCaseTest.cpp
@@ -257,6 +263,7 @@ if (BUILD_TESTING)
     tests/Application/StopTestExecutionUseCaseTest.cpp
     tests/Application/TelemetryPlotBuilderTest.cpp
     tests/Application/UpdateTestProtocolUseCaseTest.cpp
+    tests/Application/UavSpecificationMapperTest.cpp
     tests/Infrastructure/ConfigTemplateServiceTest.cpp
     tests/Infrastructure/LegacyAxisProtocolCodecTest.cpp
     tests/Infrastructure/SimpleFunctionEngineTest.cpp
@@ -265,6 +272,7 @@ if (BUILD_TESTING)
     src/Application/Services/ControlPlotBuilder.cpp
     src/Application/Services/ControlProfilePreviewService.cpp
     src/Application/Services/TelemetryPlotBuilder.cpp
+    src/Application/Services/UavSpecificationMapper.cpp
     src/Application/UseCases/BuildControlPlotUseCase.cpp
     src/Application/UseCases/ConfigureTelemetryUseCase.cpp
     src/Application/UseCases/ConnectStandUseCase.cpp

@@ -2,6 +2,7 @@
 #define SETSTANDIMPACTUSECASE_HPP
 
 #include "../../Domain/WindImpact.hpp"
+#include "../../Domain/Time.hpp"
 #include "../Ports/ITelemetryClient.hpp"
 #include "../Session/SessionState.hpp"
 
@@ -19,7 +20,7 @@ class SetStandImpactUseCase final {
     application::session::SessionState &state;
     application::ports::ITelemetryClient &telemetryClient;
 
-    void sendAppliedImpact(const domain::WindImpact &profile);
+    void sendAppliedImpact(const domain::WindImpact &profile, domain::ElapsedSeconds elapsed);
 };
 
 } // namespace application::useCases

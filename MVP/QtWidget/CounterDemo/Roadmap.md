@@ -424,14 +424,26 @@ Remaining value object leaks:
 
 Remaining MVP behavior gaps:
 
-1. Dynamic yaw oscillation
+1. Drone passport data for future calculations
+   * Current status:
+     * `pdf_report.drone_parameters` are treated as source/passport data for the BAS/UAV under test, not as PDF-only fields;
+     * application layer maps protocol drone parameters into domain `UavSpecification`;
+     * domain does not know TOML, `pdf_report` section names or raw string values.
+   * Expected cleanup:
+     * future scenario duration and disturbance calculators must use `UavSpecification`;
+     * do not calculate from raw TOML/PDF fields directly;
+     * add confirmed formulas for mass, battery/time, DR and payload effects when the model is known.
+
+2. Dynamic yaw oscillation
    * Current status:
      * `YawOscillationOffset` exists as a domain value object;
      * `EffectiveWindDirection` and `StandCommandMapper` support it.
-   * Missing:
-     * a domain policy/generator that produces non-zero oscillation offsets over time.
+     * `YawOscillationPolicy` produces deterministic sinusoidal offsets over time;
+     * MVP amplitude depends only on Beaufort.
+   * Expected cleanup:
+     * later amplitude/frequency may depend on `UavSpecification` fields: mass, DR, payload, motor and battery parameters.
 
-2. Confirm legacy operational limits
+3. Confirm legacy operational limits
    * Current TODOs:
      * signed angle of attack `-360..360`.
    * Confirmed:
@@ -439,13 +451,13 @@ Remaining MVP behavior gaps:
    * Expected cleanup:
      * verify real stand constraints for signed angle of attack and replace MVP guard if needed.
 
-3. Additional impact smoothing
+4. Additional impact smoothing
    * Current status:
      * real stand/business flow already prevents unsafe hard jumps during tests.
    * Decision:
      * do not add another smoothing layer in MVP.
 
-4. Hybrid manual override return
+5. Hybrid manual override return
    * Current status:
      * verified during stand testing: the system returns to the correct state without an additional custom return policy.
    * Decision:

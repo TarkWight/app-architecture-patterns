@@ -90,6 +90,8 @@ qt_add_executable(develop
   src/Application/Services/ControlPlotBuilder.cpp
   src/Application/Services/ControlProfilePreviewService.hpp
   src/Application/Services/ControlProfilePreviewService.cpp
+  src/Application/Services/TelemetryPlotBuilder.hpp
+  src/Application/Services/TelemetryPlotBuilder.cpp
 
   src/Infrastructure/Config/TomlConfigRepository.hpp
   src/Infrastructure/Config/TomlConfigRepository.cpp
@@ -253,6 +255,7 @@ if (BUILD_TESTING)
     tests/Application/SetTelemetryWindowUseCaseTest.cpp
     tests/Application/StartTestExecutionUseCaseTest.cpp
     tests/Application/StopTestExecutionUseCaseTest.cpp
+    tests/Application/TelemetryPlotBuilderTest.cpp
     tests/Application/UpdateTestProtocolUseCaseTest.cpp
     tests/Infrastructure/ConfigTemplateServiceTest.cpp
     tests/Infrastructure/LegacyAxisProtocolCodecTest.cpp
@@ -261,6 +264,7 @@ if (BUILD_TESTING)
     src/Application/Session/Subscription.cpp
     src/Application/Services/ControlPlotBuilder.cpp
     src/Application/Services/ControlProfilePreviewService.cpp
+    src/Application/Services/TelemetryPlotBuilder.cpp
     src/Application/UseCases/BuildControlPlotUseCase.cpp
     src/Application/UseCases/ConfigureTelemetryUseCase.cpp
     src/Application/UseCases/ConnectStandUseCase.cpp

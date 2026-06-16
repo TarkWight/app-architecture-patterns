@@ -1,5 +1,7 @@
 #include "SessionState.hpp"
 
+#include "../Services/TelemetryPlotBuilder.hpp"
+
 #include "../../Domain/AxisId.hpp"
 #include "../../Domain/ControlTrace.hpp"
 #include "../../Application/Dto/PlotModel.hpp"
@@ -11,8 +13,6 @@
 #include "SessionStateData.hpp"
 #include "Subscription.hpp"
 
-#include <algorithm>
-#include <cmath>
 #include <functional>
 #include <mutex>
 #include <string>
@@ -293,52 +293,7 @@ void application::session::SessionState::notify() {
 }
 
 void application::session::SessionState::rebuildTelemetryPlot() {
-    application::dto::PlotModel plot{};
-    plot.title = "Telemetry";
-    plot.x.label = "seconds";
-    plot.y = application::dto::AxisSpec{.min = -180.0, .max = 360.0, .step = 45.0, .label = "degrees"};
-
-    const double windowSeconds = std::max(1.0, data.telemetryWindowSeconds);
-    const double endSeconds = std::max(windowSeconds, data.telemetryWindowEndSeconds.seconds());
-    const double startSeconds = std::max(0.0, endSeconds - windowSeconds);
-
-    plot.x = application::dto::AxisSpec{
-        .min = startSeconds, .max = startSeconds + windowSeconds, .step = 10.0, .label = "seconds"};
-
-    application::dto::NamedSeries axisY{};
-    axisY.label = "Ось Y / тангаж";
-    axisY.color = data.telemetryAxisYColor;
-
-    application::dto::NamedSeries axisZ{};
-    axisZ.label = "Ось Z / направление";
-    axisZ.color = data.telemetryAxisZColor;
-
-    if (!data.telemetryHistory.empty()) {
-        const double baseTimestamp = data.telemetryHistory.front().timestampSeconds;
-
-        for (const auto &sample : data.telemetryHistory) {
-            const double x = sample.timestampSeconds - baseTimestamp;
-            if (x < startSeconds || x > plot.x.max) {
-                continue;
-            }
-
-            if (sample.axisId == domain::axis0 && data.telemetryAxisYVisible) {
-                axisY.series.points.push_back(application::dto::Point{.x = x, .y = sample.position});
-            } else if (sample.axisId == domain::axis1 && data.telemetryAxisZVisible) {
-                axisZ.series.points.push_back(application::dto::Point{.x = x, .y = sample.position});
-            }
-        }
-    }
-
-    if (data.telemetryAxisYVisible) {
-        plot.seriesList.push_back(std::move(axisY));
-    }
-
-    if (data.telemetryAxisZVisible) {
-        plot.seriesList.push_back(std::move(axisZ));
-    }
-
-    data.telemetryPlot = std::move(plot);
+    data.telemetryPlot = application::services::TelemetryPlotBuilder{}.build(data);
 }
 
 } // namespace application::session

@@ -4,6 +4,7 @@
 #include "../../Domain/WindImpact.hpp"
 #include "../../Domain/Time.hpp"
 #include "../Ports/ITelemetryClient.hpp"
+#include "../Services/AppliedStandImpactSender.hpp"
 #include "../Session/SessionState.hpp"
 
 namespace application::useCases {
@@ -18,9 +19,7 @@ class SetStandImpactUseCase final {
 
   private:
     application::session::SessionState &state;
-    application::ports::ITelemetryClient &telemetryClient;
-
-    void sendAppliedImpact(const domain::WindImpact &profile, domain::ElapsedSeconds elapsed);
+    application::services::AppliedStandImpactSender appliedStandImpactSender;
 };
 
 } // namespace application::useCases

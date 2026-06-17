@@ -81,8 +81,11 @@ TEST(SetStandImpactUseCaseTest, RecordsManualTargetAndSafeCommandTraceWhenApplie
     EXPECT_DOUBLE_EQ(state.control().controlTrace.front().time.seconds(), 7.0);
     EXPECT_DOUBLE_EQ(state.control().controlTrace.front().targetValue.beaufort.value(), 5.0);
     EXPECT_DOUBLE_EQ(state.control().controlTrace.front().safeCommandValue.beaufort.value(), 1.2);
+    ASSERT_TRUE(telemetryClient.axis0Command.has_value());
     ASSERT_TRUE(telemetryClient.axis1Command.has_value());
+    EXPECT_FLOAT_EQ(telemetryClient.axis0Command->torque, 7.8F);
     EXPECT_FLOAT_EQ(telemetryClient.axis1Command->torque, 6.0F);
+    EXPECT_NEAR(telemetryClient.axis1Command->position, 21.1F, 0.0001F);
 }
 
 } // namespace

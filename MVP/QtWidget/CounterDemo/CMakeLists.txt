@@ -93,6 +93,8 @@ qt_add_executable(develop
   src/Application/Services/ControlPlotBuilder.cpp
   src/Application/Services/ControlProfilePreviewService.hpp
   src/Application/Services/ControlProfilePreviewService.cpp
+  src/Application/Services/AppliedStandImpactSender.hpp
+  src/Application/Services/AppliedStandImpactSender.cpp
   src/Application/Services/TelemetryPlotBuilder.hpp
   src/Application/Services/TelemetryPlotBuilder.cpp
   src/Application/Services/UavSpecificationMapper.hpp
@@ -250,6 +252,7 @@ if (BUILD_TESTING)
     tests/Domain/WindControlProfileImpactTest.cpp
     tests/Domain/YawOscillationPolicyTest.cpp
     tests/Application/ApplyWindImpactUseCasesTest.cpp
+    tests/Application/AppliedStandImpactSenderTest.cpp
     tests/Application/BuildControlPlotUseCaseTest.cpp
     tests/Application/ConfigureTelemetryUseCaseTest.cpp
     tests/Application/ConnectStandUseCaseTest.cpp
@@ -271,6 +274,7 @@ if (BUILD_TESTING)
     src/Application/Session/Subscription.cpp
     src/Application/Services/ControlPlotBuilder.cpp
     src/Application/Services/ControlProfilePreviewService.cpp
+    src/Application/Services/AppliedStandImpactSender.cpp
     src/Application/Services/TelemetryPlotBuilder.cpp
     src/Application/Services/UavSpecificationMapper.cpp
     src/Application/UseCases/BuildControlPlotUseCase.cpp

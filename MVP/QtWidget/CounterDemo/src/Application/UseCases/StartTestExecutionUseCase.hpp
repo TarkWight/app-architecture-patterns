@@ -3,6 +3,7 @@
 
 #include "BuildControlPlotUseCase.hpp"
 
+#include "../Services/AppliedStandImpactSender.hpp"
 #include "../Ports/ITelemetryClient.hpp"
 #include "../Ports/ITestExecutionScheduler.hpp"
 #include "../Session/SessionState.hpp"
@@ -26,11 +27,11 @@ class StartTestExecutionUseCase final {
     application::ports::ITestExecutionScheduler &testExecutionScheduler;
     application::ports::ITelemetryClient &telemetryClient;
     BuildControlPlotUseCase &buildControlPlotUseCase;
+    application::services::AppliedStandImpactSender appliedStandImpactSender;
 
     void startTelemetryPollingIfConnected();
     void stopTelemetryPollingIfActive();
     void applyScenarioImpact(domain::ElapsedSeconds elapsed);
-    void sendAppliedImpact(const domain::WindImpact &profile, domain::ElapsedSeconds elapsed);
 };
 
 } // namespace application::useCases

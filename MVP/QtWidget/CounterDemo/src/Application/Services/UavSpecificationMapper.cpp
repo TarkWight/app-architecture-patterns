@@ -71,8 +71,12 @@ std::optional<domain::UavSpecification> UavSpecificationMapper::map(const domain
 
     specification.frame.model = textValue(parameters, "uav_model");
     specification.frame.serialNumber = textValue(parameters, "serial_number");
+    specification.frame.emptyWeightKg = doubleValue(parameters, "uav_empty_weight_kg");
+    specification.frame.totalWeightKg = doubleValue(parameters, "uav_total_weight_kg");
     specification.frame.flightPayload = doubleValue(parameters, "flight_payload");
     specification.frame.dragRatioPercent = doubleValue(parameters, "drag_ratio_percent");
+    specification.frame.frontalAreaM2 = doubleValue(parameters, "frontal_area_m2");
+    specification.frame.dragCoefficient = doubleValue(parameters, "drag_coefficient");
     specification.frame.equipmentCurrent = doubleValue(parameters, "equipment_current");
     specification.frame.operationRange = doubleValue(parameters, "operation_range");
     specification.frame.maxSpeed = doubleValue(parameters, "max_speed");
@@ -95,6 +99,7 @@ std::optional<domain::UavSpecification> UavSpecificationMapper::map(const domain
     specification.battery.dischargeRateC = doubleValue(parameters, "battery_discharge_rate_c");
     specification.battery.weight = doubleValue(parameters, "battery_weight");
     specification.battery.cellVoltage = doubleValue(parameters, "battery_cell_voltage");
+    specification.battery.usableCapacityPercent = doubleValue(parameters, "battery_usable_capacity_percent");
 
     specification.motor.model = textValue(parameters, "motor_model");
     specification.motor.shaftDiameter = doubleValue(parameters, "motor_shaft_diameter");
@@ -103,6 +108,10 @@ std::optional<domain::UavSpecification> UavSpecificationMapper::map(const domain
     specification.motor.kv = intValue(parameters, "motor_kv");
     specification.motor.maxThrustKg = doubleValue(parameters, "motor_max_thrust_kg");
     specification.motor.peakCurrentA = doubleValue(parameters, "motor_peak_current_a");
+    specification.motor.hoverCurrentA = doubleValue(parameters, "motor_hover_current_a");
+    specification.motor.nominalCurrentA = doubleValue(parameters, "motor_nominal_current_a");
+    specification.motor.powerCoefficient = doubleValue(parameters, "motor_power_coefficient");
+    specification.motor.thrustPowerCoefficient = doubleValue(parameters, "thrust_power_coefficient");
     specification.motor.weight = doubleValue(parameters, "motor_weight");
 
     specification.firmwareVersion = textValue(parameters, "firmware_version");

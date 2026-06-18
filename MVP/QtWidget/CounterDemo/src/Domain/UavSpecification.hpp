@@ -8,8 +8,12 @@ namespace domain {
 struct UavFrameSpecification {
     std::string model{};
     std::string serialNumber{};
+    double emptyWeightKg{0.0};
+    double totalWeightKg{0.0};
     double flightPayload{0.0};
     double dragRatioPercent{0.0};
+    double frontalAreaM2{0.0};
+    double dragCoefficient{0.0};
     double equipmentCurrent{0.0};
     double operationRange{0.0};
     double maxSpeed{0.0};
@@ -36,6 +40,7 @@ struct BatterySpecification {
     double dischargeRateC{0.0};
     double weight{0.0};
     double cellVoltage{0.0};
+    double usableCapacityPercent{0.0};
 };
 
 struct MotorSpecification {
@@ -46,6 +51,10 @@ struct MotorSpecification {
     int kv{0};
     double maxThrustKg{0.0};
     double peakCurrentA{0.0};
+    double hoverCurrentA{0.0};
+    double nominalCurrentA{0.0};
+    double powerCoefficient{0.0};
+    double thrustPowerCoefficient{0.0};
     double weight{0.0};
 };
 

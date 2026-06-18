@@ -46,6 +46,7 @@ qt_add_executable(develop
   src/Domain/ControlTrace.hpp
   src/Domain/ControlProfileTiming.hpp
   src/Domain/TestProtocol.hpp
+  src/Domain/TestDurationEstimator.hpp
   src/Domain/Time.hpp
   src/Domain/Expression.hpp
   src/Domain/WindImpact.hpp
@@ -243,6 +244,7 @@ if (BUILD_TESTING)
     tests/Domain/TelemetryWindowTest.cpp
     tests/Domain/TelemetryPollIntervalTest.cpp
     tests/Domain/TestExecutionPlannerTest.cpp
+    tests/Domain/TestDurationEstimatorTest.cpp
     tests/Domain/TestExecutionTransitionsTest.cpp
     tests/Domain/TestModeStatePolicyTest.cpp
     tests/Domain/TestProtocolTest.cpp

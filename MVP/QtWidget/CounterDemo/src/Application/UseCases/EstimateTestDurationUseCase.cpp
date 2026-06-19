@@ -28,24 +28,28 @@ EstimateTestDurationUseCase::EstimateTestDurationUseCase(application::session::S
 domain::EstimatedTestDurationResult EstimateTestDurationUseCase::executeForAutoCalculated() {
     const auto &protocol = state.protocol();
     if (protocol.testTimeSource != domain::TestTimeSource::AutoCalculated) {
+        state.resetReadiness();
         return {};
     }
 
+    const auto impact = impactForEstimation(state.control());
     const auto uavSpecification = application::services::UavSpecificationMapper{}.map(protocol.testProtocol);
     if (!uavSpecification.has_value()) {
-        return {};
+        domain::EstimatedTestDurationResult result{};
+        state.setReadinessFromEstimationResult(result, impact);
+        return result;
     }
 
     const auto result = domain::TestDurationEstimator::estimate(domain::TestDurationEstimationContext{
         .uav = *uavSpecification,
-        .impact = impactForEstimation(state.control()),
+        .impact = impact,
     });
 
     if (result.duration.has_value()) {
         state.setEstimatedTestDurationMinutes(*result.duration);
     }
 
-    // TODO: surface duration estimation diagnostics through application logging or explicit session diagnostics.
+    state.setReadinessFromEstimationResult(result, impact);
     return result;
 }
 

@@ -37,6 +37,7 @@ class SessionState {
     const TelemetryStateData &telemetry() const;
     const ControlStateData &control() const;
     const ProtocolStateData &protocol() const;
+    const ReadinessStateData &readiness() const;
 
     Subscription subscribe(Listener listener);
 
@@ -87,6 +88,9 @@ class SessionState {
     void setTelemetryStatus(domain::TelemetryStatus status);
     void setStandConnectionStatus(domain::StandConnectionStatus status);
     void setTelemetryPollInterval(domain::TelemetryPollInterval interval);
+    void setReadinessFromEstimationResult(const domain::EstimatedTestDurationResult &result,
+                                          domain::WindImpact calculatedForImpact);
+    void resetReadiness();
 
   private:
     SessionStateData data{};
@@ -97,6 +101,7 @@ class SessionState {
 
     void notify();
     void rebuildTelemetryPlot();
+    void resetReadinessWithoutNotify();
 };
 
 } // namespace application::session

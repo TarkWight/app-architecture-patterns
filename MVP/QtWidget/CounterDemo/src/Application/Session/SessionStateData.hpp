@@ -11,6 +11,7 @@
 #include "../../Domain/TelemetryPollInterval.hpp"
 #include "../../Domain/TelemetryWindow.hpp"
 #include "../../Domain/TestExecutionStatus.hpp"
+#include "../../Domain/TestDurationEstimator.hpp"
 #include "../../Domain/TestProtocol.hpp"
 #include "../../Domain/TestTimeDirection.hpp"
 #include "../../Domain/TestTimeSource.hpp"
@@ -22,6 +23,8 @@
 #include <vector>
 
 namespace application::session {
+
+enum class ReadinessStatus { Unknown, Ok, Warning, Dangerous, Failed };
 
 inline application::dto::PlotModel makeInitialTelemetryPlot() {
     application::dto::PlotModel plot{};
@@ -47,6 +50,15 @@ struct ProtocolStateData {
     domain::TestTimeSource testTimeSource{domain::TestTimeSource::FreeRun};
     domain::DurationMinutes estimatedTestDuration{domain::DurationMinutes::required(20)}; // рассчитано программой
     domain::DurationMinutes operatorTestDuration{domain::DurationMinutes::required(20)};  // введено оператором
+};
+
+struct ReadinessStateData {
+    ReadinessStatus status{ReadinessStatus::Unknown};
+    std::vector<domain::TestDurationDiagnostic> warnings{};
+    std::vector<domain::TestDurationDiagnostic> errors{};
+    domain::TestDurationDiagnosticValues values{};
+    domain::WindImpact calculatedForImpact{};
+    bool hasCalculatedForImpact{false};
 };
 
 struct ControlStateData {
@@ -92,6 +104,7 @@ struct SessionStateData {
     TelemetryStateData telemetry{};
     ControlStateData control{};
     ProtocolStateData protocol{};
+    ReadinessStateData readiness{};
 };
 
 } // namespace application::session

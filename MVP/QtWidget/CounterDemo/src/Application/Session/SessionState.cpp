@@ -45,6 +45,10 @@ const ProtocolStateData &SessionState::protocol() const {
     return data.protocol;
 }
 
+const ReadinessStateData &SessionState::readiness() const {
+    return data.readiness;
+}
+
 Subscription application::session::SessionState::subscribe(Listener listener) {
     std::lock_guard lock(mu);
     const auto id = ++lastId;
@@ -65,6 +69,7 @@ void application::session::SessionState::setFunctionExpression(std::string expr)
 
 void application::session::SessionState::setWindImpact(domain::WindImpact profile) {
     data.control.windImpact = std::move(profile);
+    resetReadinessWithoutNotify();
     notify();
 }
 
@@ -85,6 +90,7 @@ void application::session::SessionState::setTestExecutionStatus(domain::TestExec
 
 void application::session::SessionState::setTestTimeSource(domain::TestTimeSource source) {
     data.protocol.testTimeSource = source;
+    resetReadinessWithoutNotify();
     notify();
 }
 
@@ -203,6 +209,7 @@ void application::session::SessionState::setTestModeState(domain::TestMode testM
     data.control.standControlMode = standMode;
     data.protocol.testTimeSource = timeSource;
     data.execution.testTimeDirection = timeDirection;
+    resetReadinessWithoutNotify();
     notify();
 }
 
@@ -214,6 +221,7 @@ void application::session::SessionState::setAppliedStandImpact(domain::WindImpac
 
 void application::session::SessionState::setTargetStandImpact(domain::WindImpact profile) {
     data.control.targetStandImpact = std::move(profile);
+    resetReadinessWithoutNotify();
     notify();
 }
 
@@ -268,6 +276,7 @@ void application::session::SessionState::setTestProtocolLine(int idx, std::strin
 
 void application::session::SessionState::setTestProtocolMode(domain::TestMode mode) {
     data.protocol.testProtocol.testMode = mode;
+    resetReadinessWithoutNotify();
     notify();
 }
 
@@ -279,6 +288,7 @@ void application::session::SessionState::setTestProtocolProgram(domain::TestProg
 void application::session::SessionState::setTestProtocolDroneParameters(
     std::vector<domain::TestProtocolParameter> parameters) {
     data.protocol.testProtocol.droneParameters = std::move(parameters);
+    resetReadinessWithoutNotify();
     notify();
 }
 
@@ -288,6 +298,7 @@ void application::session::SessionState::setTestProtocolDroneParameterValue(int 
     }
 
     data.protocol.testProtocol.droneParameters[static_cast<std::size_t>(idx)].value = std::move(value);
+    resetReadinessWithoutNotify();
     notify();
 }
 
@@ -316,6 +327,32 @@ void application::session::SessionState::setTelemetryPollInterval(domain::Teleme
     notify();
 }
 
+void application::session::SessionState::setReadinessFromEstimationResult(
+    const domain::EstimatedTestDurationResult &result, domain::WindImpact calculatedForImpact) {
+    data.readiness.warnings = result.warnings;
+    data.readiness.errors = result.errors;
+    data.readiness.values = result.values;
+    data.readiness.calculatedForImpact = calculatedForImpact;
+    data.readiness.hasCalculatedForImpact = true;
+
+    if (!result.duration.has_value()) {
+        data.readiness.status = ReadinessStatus::Failed;
+    } else if (!result.errors.empty()) {
+        data.readiness.status = ReadinessStatus::Dangerous;
+    } else if (!result.warnings.empty()) {
+        data.readiness.status = ReadinessStatus::Warning;
+    } else {
+        data.readiness.status = ReadinessStatus::Ok;
+    }
+
+    notify();
+}
+
+void application::session::SessionState::resetReadiness() {
+    resetReadinessWithoutNotify();
+    notify();
+}
+
 void application::session::SessionState::notify() {
     std::unordered_map<long long, Listener> copy;
     {
@@ -330,6 +367,10 @@ void application::session::SessionState::notify() {
 
 void application::session::SessionState::rebuildTelemetryPlot() {
     data.telemetry.telemetryPlot = application::services::TelemetryPlotBuilder{}.build(data.telemetry);
+}
+
+void application::session::SessionState::resetReadinessWithoutNotify() {
+    data.readiness = ReadinessStateData{};
 }
 
 } // namespace application::session

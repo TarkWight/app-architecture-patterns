@@ -4,17 +4,20 @@
 
 namespace infrastructure {
 
-QtTestExecutionScheduler::QtTestExecutionScheduler(QObject *parent) : QObject(parent) {
-    timer.setInterval(1000);
-    QObject::connect(&timer, &QTimer::timeout, this, &QtTestExecutionScheduler::handleTimeout);
+QtTestExecutionScheduler::QtTestExecutionScheduler(QObject *parent) : QtTestExecutionScheduler(1000, parent) {
+}
+
+QtTestExecutionScheduler::QtTestExecutionScheduler(int intervalMs, QObject *parent)
+    : QObject(parent), intervalMs(intervalMs > 0 ? intervalMs : 1000) {
 }
 
 void QtTestExecutionScheduler::start(int initialElapsedSeconds, TickCallback onTick) {
     callback = std::move(onTick);
     elapsedSeconds = initialElapsedSeconds;
     state = State::Running;
+    ++generation;
 
-    timer.start();
+    scheduleNextTick();
 }
 
 void QtTestExecutionScheduler::pause() {
@@ -22,7 +25,7 @@ void QtTestExecutionScheduler::pause() {
         return;
     }
 
-    timer.stop();
+    ++generation;
     state = State::Paused;
 }
 
@@ -32,11 +35,12 @@ void QtTestExecutionScheduler::resume() {
     }
 
     state = State::Running;
-    timer.start();
+    ++generation;
+    scheduleNextTick();
 }
 
 void QtTestExecutionScheduler::stop() {
-    timer.stop();
+    ++generation;
     callback = {};
     elapsedSeconds = 0;
     state = State::Idle;
@@ -50,8 +54,13 @@ bool QtTestExecutionScheduler::isPaused() const {
     return state == State::Paused;
 }
 
-void QtTestExecutionScheduler::handleTimeout() {
-    if (state != State::Running) {
+void QtTestExecutionScheduler::scheduleNextTick() {
+    const auto expectedGeneration = generation;
+    QTimer::singleShot(intervalMs, this, [this, expectedGeneration]() { handleTimeout(expectedGeneration); });
+}
+
+void QtTestExecutionScheduler::handleTimeout(std::uint64_t expectedGeneration) {
+    if (state != State::Running || expectedGeneration != generation) {
         return;
     }
 
@@ -59,6 +68,10 @@ void QtTestExecutionScheduler::handleTimeout() {
 
     if (callback) {
         callback(elapsedSeconds);
+    }
+
+    if (state == State::Running && expectedGeneration == generation) {
+        scheduleNextTick();
     }
 }
 

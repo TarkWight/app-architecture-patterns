@@ -15,7 +15,8 @@ StartTestExecutionUseCase::StartTestExecutionUseCase(
     application::session::SessionState &state, application::ports::ITestExecutionScheduler &testExecutionScheduler,
     application::ports::ITelemetryClient &telemetryClient, BuildControlPlotUseCase &buildControlPlotUseCase)
     : state(state), testExecutionScheduler(testExecutionScheduler), telemetryClient(telemetryClient),
-      buildControlPlotUseCase(buildControlPlotUseCase), appliedStandImpactSender(telemetryClient) {
+      buildControlPlotUseCase(buildControlPlotUseCase), estimateTestDurationUseCase(state),
+      appliedStandImpactSender(telemetryClient) {
 }
 
 void StartTestExecutionUseCase::execute() {
@@ -23,6 +24,8 @@ void StartTestExecutionUseCase::execute() {
     if (!transition.has_value()) {
         return;
     }
+
+    estimateTestDurationUseCase.executeForAutoCalculated();
 
     if (domain::TestModeStatePolicy::usesControlProfile(state.protocol().testProtocol.testMode)) {
         buildControlPlotUseCase.execute();

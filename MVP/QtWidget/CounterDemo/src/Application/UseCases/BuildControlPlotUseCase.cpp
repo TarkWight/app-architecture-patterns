@@ -3,10 +3,12 @@
 namespace application::useCases {
 
 BuildControlPlotUseCase::BuildControlPlotUseCase(session::SessionState &state, const ports::IFunctionEngine &engine)
-    : state(state), engine(engine) {
+    : state(state), engine(engine), estimateTestDurationUseCase(state) {
 }
 
 application::dto::PlotModel BuildControlPlotUseCase::execute() {
+    estimateTestDurationUseCase.executeForAutoCalculated();
+
     const auto &protocol = state.protocol();
     const auto &control = state.control();
     auto profile = profilePreviewService.build(protocol, control, engine);

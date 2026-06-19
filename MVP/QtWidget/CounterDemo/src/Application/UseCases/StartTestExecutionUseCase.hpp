@@ -2,6 +2,7 @@
 #define STARTTESTEXECUTIONUSECASE_HPP
 
 #include "BuildControlPlotUseCase.hpp"
+#include "EstimateTestDurationUseCase.hpp"
 
 #include "../Services/AppliedStandImpactSender.hpp"
 #include "../Ports/ITelemetryClient.hpp"
@@ -27,6 +28,7 @@ class StartTestExecutionUseCase final {
     application::ports::ITestExecutionScheduler &testExecutionScheduler;
     application::ports::ITelemetryClient &telemetryClient;
     BuildControlPlotUseCase &buildControlPlotUseCase;
+    EstimateTestDurationUseCase estimateTestDurationUseCase;
     application::services::AppliedStandImpactSender appliedStandImpactSender;
 
     void startTelemetryPollingIfConnected();

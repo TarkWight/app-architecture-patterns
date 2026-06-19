@@ -3,11 +3,14 @@
 
 #include "../../src/Application/Ports/IFunctionEngine.hpp"
 #include "../../src/Application/Session/SessionState.hpp"
+#include "../../src/Application/Services/UavSpecificationMapper.hpp"
+#include "../../src/Domain/TestDurationEstimator.hpp"
 #include "../../src/Domain/WindControlProfile.hpp"
 
 #include <gtest/gtest.h>
 
 #include <string>
+#include <vector>
 
 namespace {
 
@@ -24,6 +27,33 @@ class OutOfRangeFunctionEngine final : public application::ports::IFunctionEngin
         return x < 1.0 ? -1.0 : 9.0;
     }
 };
+
+std::vector<domain::TestProtocolParameter> validDroneParameters() {
+    return {
+        {"uav_model", "Модель БАС", "BAS-1"},
+        {"uav_total_weight_kg", "Полная масса", "3,5"},
+        {"frontal_area_m2", "Фронтальная площадь", "0,2"},
+        {"drag_coefficient", "Коэффициент сопротивления", "1,0"},
+        {"equipment_current", "Ток оборудования", "1,0"},
+        {"battery_capacity_mah", "Емкость", "18000"},
+        {"battery_cell_count", "Число ячеек", "6"},
+        {"battery_cell_voltage", "Напряжение ячейки", "3,8"},
+        {"battery_discharge_rate_c", "C-rate", "6"},
+        {"motor_count", "Количество двигателей", "4"},
+        {"motor_max_thrust_kg", "Максимальная тяга", "2,0"},
+        {"motor_peak_current_a", "Пиковый ток", "30"},
+        {"motor_hover_current_a", "Ток висения", "6"},
+    };
+}
+
+domain::DurationMinutes expectedDuration(const domain::TestProtocol &protocol, const domain::WindImpact &impact) {
+    const auto uav = application::services::UavSpecificationMapper{}.map(protocol);
+    const auto result = domain::TestDurationEstimator::estimate(domain::TestDurationEstimationContext{
+        .uav = *uav,
+        .impact = impact,
+    });
+    return *result.duration;
+}
 
 TEST(BuildControlPlotUseCaseTest, BuildsOneSecondWindControlProfileForCalculatedAutomaticDuration) {
     application::session::SessionState state{};
@@ -63,6 +93,25 @@ TEST(BuildControlPlotUseCaseTest, ClampsFormulaOutputToOperationalBeaufortRange)
 
     EXPECT_DOUBLE_EQ(profile.samples.at(0).beaufort.value(), domain::minOperationalBeaufort);
     EXPECT_DOUBLE_EQ(profile.samples.at(60).beaufort.value(), domain::maxOperationalBeaufort);
+}
+
+TEST(BuildControlPlotUseCaseTest, WhenAutoCalculated_UsesEstimatorDuration) {
+    application::session::SessionState state{};
+    const auto impact = domain::makeWindImpact(4.0, 0.0, 10.0);
+    state.setTestProtocolMode(domain::TestMode::Automatic);
+    state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
+    state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(48));
+    state.setTestProtocolDroneParameters(validDroneParameters());
+    state.setWindImpact(impact);
+    const LinearFunctionEngine engine{};
+    application::useCases::BuildControlPlotUseCase useCase{state, engine};
+
+    useCase.execute();
+
+    const auto expected = expectedDuration(state.protocol().testProtocol, impact);
+    EXPECT_EQ(state.protocol().estimatedTestDuration.value(), expected.value());
+    EXPECT_EQ(state.control().controlProfile.duration.value(), expected.value());
+    EXPECT_NE(state.control().controlProfile.duration.value(), 48);
 }
 
 TEST(BuildControlPlotUseCaseTest, ManualModeShowsEmptyControlGridUntilCommandsAreSent) {

@@ -124,6 +124,8 @@ qt_add_executable(develop
   src/Application/UseCases/StopTestExecutionUseCase.cpp
   src/Application/UseCases/ExportPdfUseCase.hpp
   src/Application/UseCases/ExportPdfUseCase.cpp
+  src/Application/UseCases/EstimateTestDurationUseCase.hpp
+  src/Application/UseCases/EstimateTestDurationUseCase.cpp
   src/Application/UseCases/SetFunctionExpressionUseCase.hpp
   src/Application/UseCases/SetFunctionExpressionUseCase.cpp
   src/Application/UseCases/SetLineColorUseCase.hpp
@@ -258,6 +260,7 @@ if (BUILD_TESTING)
     tests/Application/BuildControlPlotUseCaseTest.cpp
     tests/Application/ConfigureTelemetryUseCaseTest.cpp
     tests/Application/ConnectStandUseCaseTest.cpp
+    tests/Application/EstimateTestDurationUseCaseTest.cpp
     tests/Application/SessionStateTest.cpp
     tests/Application/SetControlChartsTabMinutesUseCaseTest.cpp
     tests/Application/SetOperatorTestDurationUseCaseTest.cpp
@@ -282,6 +285,7 @@ if (BUILD_TESTING)
     src/Application/UseCases/BuildControlPlotUseCase.cpp
     src/Application/UseCases/ConfigureTelemetryUseCase.cpp
     src/Application/UseCases/ConnectStandUseCase.cpp
+    src/Application/UseCases/EstimateTestDurationUseCase.cpp
     src/Application/UseCases/SetControlChartsTabMinutesUseCase.cpp
     src/Application/UseCases/SetOperatorTestDurationUseCase.cpp
     src/Application/UseCases/SetStandControlModeUseCase.cpp

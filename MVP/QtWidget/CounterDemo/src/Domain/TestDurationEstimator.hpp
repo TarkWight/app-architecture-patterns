@@ -80,6 +80,13 @@ struct TestDurationEstimationContext {
     TestDurationEstimatorCalibration calibration{};
 };
 
+struct TestDurationOperationalLimitContext {
+    const UavSpecification &uav;
+    const TestDurationEstimatorCalibration &calibration;
+    double requiredThrustN{0.0};
+    double totalCurrentA{0.0};
+};
+
 class TestDurationEstimator final {
   public:
     [[nodiscard]] static EstimatedTestDurationResult estimate(const TestDurationEstimationContext &context) {
@@ -128,7 +135,14 @@ class TestDurationEstimator final {
         result.values.estimatedPowerW = estimatedPower;
         result.values.estimatedDurationMinutes = estimatedDuration;
 
-        validateOperationalLimits(uav, calibration, requiredThrust, totalCurrent, result);
+        validateOperationalLimits(
+            TestDurationOperationalLimitContext{
+                .uav = uav,
+                .calibration = calibration,
+                .requiredThrustN = requiredThrust,
+                .totalCurrentA = totalCurrent,
+            },
+            result);
 
         if (!result.hasErrors() && estimatedDuration > 0.0) {
             result.duration = DurationMinutes::required(static_cast<int>(std::ceil(estimatedDuration)));
@@ -228,8 +242,8 @@ class TestDurationEstimator final {
     [[nodiscard]] static double anglePenaltyFor(AngleOfAttack angleOfAttack,
                                                 const TestDurationEstimatorCalibration &calibration,
                                                 EstimatedTestDurationResult &result) {
-        constexpr double pi = 3.14159265358979323846;
-        const auto angleRad = std::abs(angleOfAttack.degrees()) * pi / 180.0;
+        constexpr double piValue = 3.14159265358979323846;
+        const auto angleRad = std::abs(angleOfAttack.degrees()) * piValue / 180.0;
         const auto cosine = std::cos(angleRad);
         if (cosine < calibration.minCos) {
             addWarning(result, TestDurationDiagnosticCode::AngleOfAttackClampedByMinCos);
@@ -260,22 +274,21 @@ class TestDurationEstimator final {
         return weightForceN;
     }
 
-    static void validateOperationalLimits(const UavSpecification &uav,
-                                          const TestDurationEstimatorCalibration &calibration, double requiredThrustN,
-                                          double totalCurrentA, EstimatedTestDurationResult &result) {
-        if (uav.motor.maxThrustKg > 0.0) {
-            const auto availableThrustKg = uav.motor.maxThrustKg * static_cast<double>(uav.motor.count);
+    static void validateOperationalLimits(const TestDurationOperationalLimitContext &context,
+                                          EstimatedTestDurationResult &result) {
+        if (context.uav.motor.maxThrustKg > 0.0) {
+            const auto availableThrustKg = context.uav.motor.maxThrustKg * static_cast<double>(context.uav.motor.count);
             result.values.availableThrustKg = availableThrustKg;
-            if (requiredThrustN > availableThrustKg * calibration.gravity) {
+            if (context.requiredThrustN > availableThrustKg * context.calibration.gravity) {
                 addError(result, TestDurationDiagnosticCode::RequiredThrustExceedsAvailable);
             }
         }
 
-        if (totalCurrentA > result.values.maxMotorCurrentA) {
+        if (context.totalCurrentA > result.values.maxMotorCurrentA) {
             addWarning(result, TestDurationDiagnosticCode::MotorPeakCurrentExceeded);
         }
 
-        if (uav.battery.dischargeRateC > 0.0 && totalCurrentA > result.values.maxBatteryCurrentA) {
+        if (context.uav.battery.dischargeRateC > 0.0 && context.totalCurrentA > result.values.maxBatteryCurrentA) {
             addWarning(result, TestDurationDiagnosticCode::BatteryDischargeCurrentExceeded);
         }
     }

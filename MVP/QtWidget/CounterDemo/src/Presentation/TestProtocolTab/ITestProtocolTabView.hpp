@@ -16,8 +16,6 @@ class ITestProtocolTabView {
 
     virtual void setTestProtocolTitle(const std::string &title) = 0;
     virtual void setTestProtocolLine(int index, const std::string &line) = 0;
-    virtual void setTestProtocolMode(const std::string &mode) = 0;
-    virtual void setTestProtocolProgram(const std::string &program) = 0;
     virtual void setTestProtocolDroneParameters(const std::vector<domain::TestProtocolParameter> &parameters) = 0;
 
     virtual void showExportSuccess(const std::string &filePath) = 0;

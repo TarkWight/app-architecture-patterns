@@ -263,6 +263,7 @@ if (BUILD_TESTING)
     tests/Application/ConfigureTelemetryUseCaseTest.cpp
     tests/Application/ConnectStandUseCaseTest.cpp
     tests/Application/EstimateTestDurationUseCaseTest.cpp
+    tests/Application/ExportPdfUseCaseTest.cpp
     tests/Application/PauseResumeTestExecutionUseCaseTest.cpp
     tests/Application/SessionStateTest.cpp
     tests/Application/SetControlChartsTabMinutesUseCaseTest.cpp
@@ -294,6 +295,7 @@ if (BUILD_TESTING)
     src/Application/UseCases/ConnectStandUseCase.cpp
     src/Application/UseCases/DisconnectStandUseCase.cpp
     src/Application/UseCases/EstimateTestDurationUseCase.cpp
+    src/Application/UseCases/ExportPdfUseCase.cpp
     src/Application/UseCases/SetFunctionExpressionUseCase.cpp
     src/Application/UseCases/SetLineColorUseCase.cpp
     src/Application/UseCases/SetControlChartsTabMinutesUseCase.cpp

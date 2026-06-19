@@ -3,12 +3,15 @@
 #include "../../Domain/TestModeStatePolicy.hpp"
 #include "../../Domain/TestProtocol.hpp"
 
+#include <utility>
+
 namespace presentation::controlChartsTab {
 
 ControlChartsTabPresenter::ControlChartsTabPresenter(Dependencies deps)
     : state(deps.state), setControlChartsTabMinutesUseCase(deps.setControlChartsTabMinutesUseCase),
       setWindImpactUseCase(deps.setWindImpactUseCase), buildControlPlotUseCase(deps.buildControlPlotUseCase),
-      estimateTestDurationUseCase(deps.estimateTestDurationUseCase) {
+      estimateTestDurationUseCase(deps.estimateTestDurationUseCase),
+      updateTestProtocolUseCase(deps.updateTestProtocolUseCase) {
 }
 
 void ControlChartsTabPresenter::attachView(IControlChartsTabView &view) {
@@ -30,6 +33,8 @@ void ControlChartsTabPresenter::onViewReady() {
     view->setBeaufort(stateData.control.windImpact.beaufort.value());
     view->setDirection(stateData.control.windImpact.direction.degrees());
     view->setAngleOfAttack(stateData.control.windImpact.angleOfAttack.degrees());
+    view->setTestProtocolMode(std::string{domain::testModeKey(stateData.protocol.testProtocol.testMode)});
+    view->setTestProtocolProgram(std::string{domain::testProgramKey(stateData.protocol.testProtocol.testProgram)});
 
     refreshMinutesInputEnabled();
     refreshReadinessCalculationEnabled();
@@ -46,6 +51,23 @@ void ControlChartsTabPresenter::onMinutesChanged(int minutes) {
 
     if (view != nullptr) {
         view->appendLog("ControlChartsTab minutes updated");
+    }
+}
+
+void ControlChartsTabPresenter::onTestProtocolModeChanged(std::string mode) {
+    updateTestProtocolUseCase.updateMode(std::move(mode));
+    onTimeSettingsChanged();
+
+    if (view != nullptr) {
+        view->appendLog("Test mode updated");
+    }
+}
+
+void ControlChartsTabPresenter::onTestProtocolProgramChanged(std::string program) {
+    updateTestProtocolUseCase.updateProgram(std::move(program));
+
+    if (view != nullptr) {
+        view->appendLog("Test program updated");
     }
 }
 

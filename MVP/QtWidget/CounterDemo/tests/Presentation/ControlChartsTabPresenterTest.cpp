@@ -6,6 +6,7 @@
 #include "../../src/Application/UseCases/EstimateTestDurationUseCase.hpp"
 #include "../../src/Application/UseCases/SetControlChartsTabMinutesUseCase.hpp"
 #include "../../src/Application/UseCases/SetWindImpactUseCase.hpp"
+#include "../../src/Application/UseCases/UpdateTestProtocolUseCase.hpp"
 
 #include <gtest/gtest.h>
 
@@ -35,6 +36,14 @@ class ControlChartsTabViewSpy final : public presentation::controlChartsTab::ICo
         readinessCalculationEnabled = enabled;
     }
 
+    void setTestProtocolMode(const std::string &mode) override {
+        testProtocolMode = mode;
+    }
+
+    void setTestProtocolProgram(const std::string &program) override {
+        testProtocolProgram = program;
+    }
+
     void setBeaufort(double value) override {
         beaufort = value;
     }
@@ -62,6 +71,8 @@ class ControlChartsTabViewSpy final : public presentation::controlChartsTab::ICo
     int minutes{0};
     bool minutesInputEnabled{false};
     bool readinessCalculationEnabled{false};
+    std::string testProtocolMode{};
+    std::string testProtocolProgram{};
     double beaufort{0.0};
     double direction{0.0};
     double angleOfAttack{0.0};
@@ -112,13 +123,15 @@ struct PresenterFixture {
     FunctionEngineStub functionEngine{};
     application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
     application::useCases::EstimateTestDurationUseCase estimateTestDurationUseCase{state};
+    application::useCases::UpdateTestProtocolUseCase updateTestProtocolUseCase{state};
     presentation::controlChartsTab::ControlChartsTabPresenter presenter{
         presentation::controlChartsTab::ControlChartsTabPresenter::Dependencies{
             .state = state,
             .setControlChartsTabMinutesUseCase = setMinutesUseCase,
             .setWindImpactUseCase = setWindImpactUseCase,
             .buildControlPlotUseCase = buildControlPlotUseCase,
-            .estimateTestDurationUseCase = estimateTestDurationUseCase}};
+            .estimateTestDurationUseCase = estimateTestDurationUseCase,
+            .updateTestProtocolUseCase = updateTestProtocolUseCase}};
     ControlChartsTabViewSpy view{};
 };
 
@@ -139,6 +152,38 @@ TEST(ControlChartsTabPresenterTest, CalculateButtonEnabledOnlyForAutomaticAndHyb
     fixture.state.setTestProtocolMode(domain::TestMode::Automatic);
     fixture.presenter.onTimeSettingsChanged();
     EXPECT_TRUE(fixture.view.readinessCalculationEnabled);
+}
+
+TEST(ControlChartsTabPresenterTest, ViewReadySyncsTestModeAndProgram) {
+    PresenterFixture fixture{};
+    fixture.state.setTestProtocolMode(domain::TestMode::Hybrid);
+    fixture.state.setTestProtocolProgram(domain::TestProgram::MaximumWindLoad);
+    fixture.presenter.attachView(fixture.view);
+
+    fixture.presenter.onViewReady();
+
+    EXPECT_EQ(fixture.view.testProtocolMode, "hybrid");
+    EXPECT_EQ(fixture.view.testProtocolProgram, "test2");
+}
+
+TEST(ControlChartsTabPresenterTest, TestModeChangeUpdatesProtocolState) {
+    PresenterFixture fixture{};
+    fixture.presenter.attachView(fixture.view);
+
+    fixture.presenter.onTestProtocolModeChanged("automatic");
+
+    EXPECT_EQ(fixture.state.protocol().testProtocol.testMode, domain::TestMode::Automatic);
+    EXPECT_EQ(fixture.state.control().standControlMode, domain::StandControlMode::PresetScenario);
+    EXPECT_EQ(fixture.state.protocol().testTimeSource, domain::TestTimeSource::AutoCalculated);
+}
+
+TEST(ControlChartsTabPresenterTest, TestProgramChangeUpdatesProtocolState) {
+    PresenterFixture fixture{};
+    fixture.presenter.attachView(fixture.view);
+
+    fixture.presenter.onTestProtocolProgramChanged("test3");
+
+    EXPECT_EQ(fixture.state.protocol().testProtocol.testProgram, domain::TestProgram::WindLoadTemporalPerspective);
 }
 
 TEST(ControlChartsTabPresenterTest, CalculateReadinessRunsEstimateUseCase) {

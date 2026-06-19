@@ -35,8 +35,6 @@ class TestProtocolTabPresenter final {
 
     void onTestProtocolTitleChanged(std::string title);
     void onTestProtocolLineChanged(int index, std::string line);
-    void onTestProtocolModeChanged(std::string mode);
-    void onTestProtocolProgramChanged(std::string program);
     void onTestProtocolDroneParameterChanged(int index, std::string value);
 
     void onLoadPdfTomlPressed(const std::string &filePath);

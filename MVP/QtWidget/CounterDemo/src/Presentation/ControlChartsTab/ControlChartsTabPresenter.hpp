@@ -5,6 +5,7 @@
 #include "../../Application/UseCases/EstimateTestDurationUseCase.hpp"
 #include "../../Application/UseCases/SetControlChartsTabMinutesUseCase.hpp"
 #include "../../Application/UseCases/SetWindImpactUseCase.hpp"
+#include "../../Application/UseCases/UpdateTestProtocolUseCase.hpp"
 
 #include "IControlChartsTabView.hpp"
 
@@ -18,6 +19,7 @@ class ControlChartsTabPresenter final {
         application::useCases::SetWindImpactUseCase &setWindImpactUseCase;
         application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
         application::useCases::EstimateTestDurationUseCase &estimateTestDurationUseCase;
+        application::useCases::UpdateTestProtocolUseCase &updateTestProtocolUseCase;
     };
 
     explicit ControlChartsTabPresenter(Dependencies deps);
@@ -29,6 +31,8 @@ class ControlChartsTabPresenter final {
     void onTimeSettingsChanged();
 
     void onMinutesChanged(int minutes);
+    void onTestProtocolModeChanged(std::string mode);
+    void onTestProtocolProgramChanged(std::string program);
 
     void onBeaufortChanged(double value);
     void onDirectionChanged(double value);
@@ -45,6 +49,7 @@ class ControlChartsTabPresenter final {
     application::useCases::SetWindImpactUseCase &setWindImpactUseCase;
     application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
     application::useCases::EstimateTestDurationUseCase &estimateTestDurationUseCase;
+    application::useCases::UpdateTestProtocolUseCase &updateTestProtocolUseCase;
 
     IControlChartsTabView *view{nullptr};
 

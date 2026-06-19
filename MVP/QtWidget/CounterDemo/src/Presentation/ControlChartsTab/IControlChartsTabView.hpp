@@ -12,6 +12,8 @@ class IControlChartsTabView {
     virtual void setMinutes(int minutes) = 0;
     virtual void setMinutesInputEnabled(bool enabled) = 0;
     virtual void setReadinessCalculationEnabled(bool enabled) = 0;
+    virtual void setTestProtocolMode(const std::string &mode) = 0;
+    virtual void setTestProtocolProgram(const std::string &program) = 0;
 
     virtual void setBeaufort(double value) = 0;
     virtual void setDirection(double value) = 0;

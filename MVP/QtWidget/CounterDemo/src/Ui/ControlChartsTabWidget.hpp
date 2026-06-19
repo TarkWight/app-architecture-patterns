@@ -27,6 +27,8 @@ class ControlChartsTabWidget final : public QWidget, public presentation::contro
     void setMinutes(int minutes) override;
     void setMinutesInputEnabled(bool enabled) override;
     void setReadinessCalculationEnabled(bool enabled) override;
+    void setTestProtocolMode(const std::string &mode) override;
+    void setTestProtocolProgram(const std::string &program) override;
     void setBeaufort(double value) override;
     void setDirection(double value) override;
     void setAngleOfAttack(double value) override;
@@ -51,6 +53,7 @@ class ControlChartsTabWidget final : public QWidget, public presentation::contro
     void connectSignals();
     void connectSessionSignals();
     void populateFormulaTemplates();
+    void populateTestSelectionControls();
     void updateFormulaTemplateSelection(const std::string &expression);
 };
 

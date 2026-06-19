@@ -14,6 +14,7 @@ ControlChartsTabWidget::ControlChartsTabWidget(presentation::controlChartsTab::C
     : QWidget(parent), ui(new Ui::ControlChartsTabWidget), presenter(presenter), sessionAdapter(sessionAdapter) {
     ui->setupUi(this);
     ui->doubleSpinBoxBeaufort->setRange(domain::minOperationalBeaufort, domain::maxOperationalBeaufort);
+    populateTestSelectionControls();
     populateFormulaTemplates();
 
     ui->labelBeaufortCaption->hide();
@@ -51,6 +52,18 @@ void ControlChartsTabWidget::setMinutesInputEnabled(bool enabled) {
 
 void ControlChartsTabWidget::setReadinessCalculationEnabled(bool enabled) {
     ui->buttonCalculateReadiness->setEnabled(enabled);
+}
+
+void ControlChartsTabWidget::setTestProtocolMode(const std::string &mode) {
+    const QSignalBlocker blocker{ui->comboBoxTestMode};
+    const int index = ui->comboBoxTestMode->findData(QString::fromStdString(mode));
+    ui->comboBoxTestMode->setCurrentIndex(index >= 0 ? index : 0);
+}
+
+void ControlChartsTabWidget::setTestProtocolProgram(const std::string &program) {
+    const QSignalBlocker blocker{ui->comboBoxTestProgram};
+    const int index = ui->comboBoxTestProgram->findData(QString::fromStdString(program));
+    ui->comboBoxTestProgram->setCurrentIndex(index >= 0 ? index : 0);
 }
 
 void ControlChartsTabWidget::setBeaufort(double value) {
@@ -107,6 +120,12 @@ void ControlChartsTabWidget::connectSignals() {
     QObject::connect(ui->buttonCalculateReadiness, &QPushButton::clicked, this,
                      [this]() { presenter.onReadinessCalculationPressed(); });
     QObject::connect(ui->buttonPickLineColor, &QPushButton::clicked, this, [this]() { emit lineColorRequested(); });
+    QObject::connect(ui->comboBoxTestMode, &QComboBox::currentIndexChanged, this, [this]() {
+        presenter.onTestProtocolModeChanged(ui->comboBoxTestMode->currentData().toString().toStdString());
+    });
+    QObject::connect(ui->comboBoxTestProgram, &QComboBox::currentIndexChanged, this, [this]() {
+        presenter.onTestProtocolProgramChanged(ui->comboBoxTestProgram->currentData().toString().toStdString());
+    });
 
     QObject::connect(ui->spinBoxMinutes, qOverload<int>(&QSpinBox::valueChanged), this,
                      [this](int value) { presenter.onMinutesChanged(value); });
@@ -127,7 +146,22 @@ void ControlChartsTabWidget::connectSessionSignals() {
         [this](const presentation::viewModels::TestTimeViewModel & /*model*/) { presenter.onTimeSettingsChanged(); });
 
     QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testProtocolModeChanged, this,
-                     [this](const QString & /*mode*/) { presenter.onTimeSettingsChanged(); });
+                     [this](const QString &mode) {
+                         if (ui->comboBoxTestMode->currentData().toString() != mode) {
+                             setTestProtocolMode(mode.toStdString());
+                         }
+
+                         presenter.onTimeSettingsChanged();
+                     });
+
+    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testProtocolProgramChanged, this,
+                     [this](const QString &program) {
+                         if (ui->comboBoxTestProgram->currentData().toString() == program) {
+                             return;
+                         }
+
+                         setTestProtocolProgram(program.toStdString());
+                     });
 
     QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::controlChartsTabMinutesChanged, this,
                      [this](int minutes) {
@@ -177,6 +211,16 @@ void ControlChartsTabWidget::populateFormulaTemplates() {
             QString::fromUtf8(formulaTemplate.title.data(), static_cast<qsizetype>(formulaTemplate.title.size())),
             QString::fromUtf8(formulaTemplate.key.data(), static_cast<qsizetype>(formulaTemplate.key.size())));
     }
+}
+
+void ControlChartsTabWidget::populateTestSelectionControls() {
+    ui->comboBoxTestMode->addItem(QStringLiteral("Ручное"), QStringLiteral("manual"));
+    ui->comboBoxTestMode->addItem(QStringLiteral("Гибридное"), QStringLiteral("hybrid"));
+    ui->comboBoxTestMode->addItem(QStringLiteral("Автоматическое"), QStringLiteral("automatic"));
+
+    ui->comboBoxTestProgram->addItem(QStringLiteral("Полет в штиль"), QStringLiteral("test1"));
+    ui->comboBoxTestProgram->addItem(QStringLiteral("Определение максимальных параметров"), QStringLiteral("test2"));
+    ui->comboBoxTestProgram->addItem(QStringLiteral("Исследование временной перспективы"), QStringLiteral("test3"));
 }
 
 void ControlChartsTabWidget::updateFormulaTemplateSelection(const std::string &expression) {

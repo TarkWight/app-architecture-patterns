@@ -83,6 +83,8 @@ struct ApplicationContext {
 
     application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{sessionState, functionEngine};
 
+    application::useCases::EstimateTestDurationUseCase estimateTestDurationUseCase{sessionState};
+
     application::useCases::StartTestExecutionUseCase startTestExecutionUseCase{
         application::useCases::StartTestExecutionUseCase::Dependencies{.state = sessionState,
                                                                        .testExecutionScheduler = testExecutionScheduler,
@@ -160,7 +162,8 @@ struct ApplicationContext {
             .state = sessionState,
             .setControlChartsTabMinutesUseCase = setControlChartsTabMinutesUseCase,
             .setWindImpactUseCase = setWindImpactUseCase,
-            .buildControlPlotUseCase = buildControlPlotUseCase}};
+            .buildControlPlotUseCase = buildControlPlotUseCase,
+            .estimateTestDurationUseCase = estimateTestDurationUseCase}};
 
     presentation::testProtocolTab::TestProtocolTabPresenter testProtocolTabPresenter{
         presentation::testProtocolTab::TestProtocolTabPresenter::Dependencies{

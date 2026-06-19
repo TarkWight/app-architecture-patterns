@@ -26,10 +26,12 @@ class ControlChartsTabWidget final : public QWidget, public presentation::contro
 
     void setMinutes(int minutes) override;
     void setMinutesInputEnabled(bool enabled) override;
+    void setReadinessCalculationEnabled(bool enabled) override;
     void setBeaufort(double value) override;
     void setDirection(double value) override;
     void setAngleOfAttack(double value) override;
     void refreshPlot() override;
+    void showReadinessMessage(const std::string &message) override;
     void appendLog(const std::string &text) override;
     void setFunctionExpression(const std::string &expression);
 

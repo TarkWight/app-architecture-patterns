@@ -191,18 +191,25 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="4" rowspan="2">
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+      <item row="0" column="4">
+       <widget class="QPushButton" name="buttonCalculateReadiness">
+        <property name="enabled">
+         <bool>false</bool>
         </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
+        <property name="text">
+         <string>Рассчитать готовность</string>
         </property>
-       </spacer>
+       </widget>
+      </item>
+      <item row="1" column="4">
+       <widget class="QLabel" name="labelReadinessStatus">
+        <property name="text">
+         <string>Расчёт готовности не выполнен</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

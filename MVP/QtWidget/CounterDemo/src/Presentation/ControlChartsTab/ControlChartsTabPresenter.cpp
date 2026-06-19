@@ -1,12 +1,14 @@
 #include "ControlChartsTabPresenter.hpp"
 
 #include "../../Domain/TestModeStatePolicy.hpp"
+#include "../../Domain/TestProtocol.hpp"
 
 namespace presentation::controlChartsTab {
 
 ControlChartsTabPresenter::ControlChartsTabPresenter(Dependencies deps)
     : state(deps.state), setControlChartsTabMinutesUseCase(deps.setControlChartsTabMinutesUseCase),
-      setWindImpactUseCase(deps.setWindImpactUseCase), buildControlPlotUseCase(deps.buildControlPlotUseCase) {
+      setWindImpactUseCase(deps.setWindImpactUseCase), buildControlPlotUseCase(deps.buildControlPlotUseCase),
+      estimateTestDurationUseCase(deps.estimateTestDurationUseCase) {
 }
 
 void ControlChartsTabPresenter::attachView(IControlChartsTabView &view) {
@@ -30,11 +32,13 @@ void ControlChartsTabPresenter::onViewReady() {
     view->setAngleOfAttack(stateData.control.windImpact.angleOfAttack.degrees());
 
     refreshMinutesInputEnabled();
+    refreshReadinessCalculationEnabled();
     onRebuildPlotPressed();
 }
 
 void ControlChartsTabPresenter::onTimeSettingsChanged() {
     refreshMinutesInputEnabled();
+    refreshReadinessCalculationEnabled();
 }
 
 void ControlChartsTabPresenter::onMinutesChanged(int minutes) {
@@ -87,6 +91,18 @@ void ControlChartsTabPresenter::onRebuildPlotPressed() {
     }
 }
 
+void ControlChartsTabPresenter::onReadinessCalculationPressed() {
+    estimateTestDurationUseCase.executeForAutoCalculated();
+
+    if (view == nullptr) {
+        return;
+    }
+
+    const auto message = messageForReadinessStatus(state.readiness().status);
+    view->showReadinessMessage(message);
+    view->appendLog(message);
+}
+
 void ControlChartsTabPresenter::updateWindImpact(double beaufort, double direction, double angleOfAttack) {
     setWindImpactUseCase.execute(domain::makeWindImpact(beaufort, direction, angleOfAttack));
 }
@@ -99,6 +115,32 @@ void ControlChartsTabPresenter::refreshMinutesInputEnabled() {
     const auto &stateData = state.get();
     view->setMinutesInputEnabled(domain::TestModeStatePolicy::operatorDurationInputEnabled(
         stateData.protocol.testProtocol.testMode, stateData.protocol.testTimeSource));
+}
+
+void ControlChartsTabPresenter::refreshReadinessCalculationEnabled() {
+    if (view == nullptr) {
+        return;
+    }
+
+    const auto mode = state.protocol().testProtocol.testMode;
+    view->setReadinessCalculationEnabled(mode == domain::TestMode::Hybrid || mode == domain::TestMode::Automatic);
+}
+
+std::string ControlChartsTabPresenter::messageForReadinessStatus(application::session::ReadinessStatus status) {
+    switch (status) {
+    case application::session::ReadinessStatus::Ok:
+        return "Расчёт готовности выполнен. Испытание допустимо.";
+    case application::session::ReadinessStatus::Warning:
+        return "Расчёт готовности выполнен. Есть предупреждения.";
+    case application::session::ReadinessStatus::Dangerous:
+        return "Испытание потенциально опасно.";
+    case application::session::ReadinessStatus::Failed:
+        return "Расчёт готовности невозможен. Испытание потенциально опасно.";
+    case application::session::ReadinessStatus::Unknown:
+        return "Расчёт готовности не выполнен.";
+    }
+
+    return "Расчёт готовности не выполнен.";
 }
 
 } // namespace presentation::controlChartsTab

@@ -49,6 +49,10 @@ void ControlChartsTabWidget::setMinutesInputEnabled(bool enabled) {
     ui->spinBoxMinutes->setEnabled(enabled);
 }
 
+void ControlChartsTabWidget::setReadinessCalculationEnabled(bool enabled) {
+    ui->buttonCalculateReadiness->setEnabled(enabled);
+}
+
 void ControlChartsTabWidget::setBeaufort(double value) {
     const QSignalBlocker blocker{ui->doubleSpinBoxBeaufort};
     ui->doubleSpinBoxBeaufort->setValue(value);
@@ -66,6 +70,10 @@ void ControlChartsTabWidget::setAngleOfAttack(double value) {
 
 void ControlChartsTabWidget::refreshPlot() {
     plotWidget->setPlot(sessionAdapter.getState().get().control.controlPlot);
+}
+
+void ControlChartsTabWidget::showReadinessMessage(const std::string &message) {
+    ui->labelReadinessStatus->setText(QString::fromStdString(message));
 }
 
 void ControlChartsTabWidget::appendLog(const std::string &text) {
@@ -96,6 +104,8 @@ void ControlChartsTabWidget::connectSignals() {
     });
 
     QObject::connect(ui->buttonCalculatePlot, &QPushButton::clicked, this, [this]() { emit calculateRequested(); });
+    QObject::connect(ui->buttonCalculateReadiness, &QPushButton::clicked, this,
+                     [this]() { presenter.onReadinessCalculationPressed(); });
     QObject::connect(ui->buttonPickLineColor, &QPushButton::clicked, this, [this]() { emit lineColorRequested(); });
 
     QObject::connect(ui->spinBoxMinutes, qOverload<int>(&QSpinBox::valueChanged), this,

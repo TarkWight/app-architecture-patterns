@@ -93,8 +93,10 @@ class TelemetryClientSpy final : public application::ports::ITelemetryClient {
     void setAxisCommand(domain::AxisId axisId, domain::AxisControlCommand command) override {
         if (axisId == domain::axis0) {
             axis0Command = command;
+            ++axis0CommandCalls;
         } else if (axisId == domain::axis1) {
             axis1Command = command;
+            ++axis1CommandCalls;
         }
     }
 
@@ -106,6 +108,8 @@ class TelemetryClientSpy final : public application::ports::ITelemetryClient {
     ErrorCallback errorCallback{};
     std::optional<domain::AxisControlCommand> axis0Command{};
     std::optional<domain::AxisControlCommand> axis1Command{};
+    int axis0CommandCalls{0};
+    int axis1CommandCalls{0};
     int startPollingCalls{0};
     int stopPollingCalls{0};
 };
@@ -142,6 +146,13 @@ domain::DurationMinutes expectedDuration(const domain::TestProtocol &protocol, c
         .impact = impact,
     });
     return *result.duration;
+}
+
+domain::AxisTelemetrySample validSampleAt(double timestampSeconds) {
+    domain::AxisTelemetrySample sample{};
+    sample.timestampSeconds = timestampSeconds;
+    sample.valid = true;
+    return sample;
 }
 
 TEST(StartTestExecutionUseCaseTest, ManualModeStartsAsStopwatchEvenWhenOperatorDurationIsSelected) {
@@ -188,6 +199,67 @@ TEST(StartTestExecutionUseCaseTest, ScenarioStartClearsPreviousControlTrace) {
 
     ASSERT_EQ(state.control().controlTrace.size(), 1U);
     EXPECT_DOUBLE_EQ(state.control().controlTrace.front().time.seconds(), 0.0);
+}
+
+TEST(StartTestExecutionUseCaseTest, StartClearsTelemetryHistoryForNewDisplaySession) {
+    application::session::SessionState state{};
+    state.setTestExecutionStatus(domain::TestExecutionStatus::Ready);
+    state.appendTelemetrySample(validSampleAt(10.0));
+    ASSERT_FALSE(state.telemetry().telemetryHistory.empty());
+
+    TestExecutionSchedulerSpy scheduler{};
+    TelemetryClientSpy telemetryClient{};
+    ScenarioFunctionEngine functionEngine{};
+    application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
+    application::useCases::StartTestExecutionUseCase useCase{state, scheduler, telemetryClient,
+                                                             buildControlPlotUseCase};
+
+    useCase.execute();
+
+    EXPECT_TRUE(state.telemetry().telemetryHistory.empty());
+    EXPECT_TRUE(state.telemetry().telemetryPlot.series.points.empty());
+    ASSERT_EQ(state.telemetry().telemetryPlot.seriesList.size(), 2U);
+    EXPECT_TRUE(state.telemetry().telemetryPlot.seriesList.at(0).series.points.empty());
+    EXPECT_TRUE(state.telemetry().telemetryPlot.seriesList.at(1).series.points.empty());
+}
+
+TEST(StartTestExecutionUseCaseTest, StartBuildsControlPlotForManualMode) {
+    application::session::SessionState state{};
+    state.setTestProtocolMode(domain::TestMode::Manual);
+
+    TestExecutionSchedulerSpy scheduler{};
+    TelemetryClientSpy telemetryClient{};
+    ScenarioFunctionEngine functionEngine{};
+    application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
+    application::useCases::StartTestExecutionUseCase useCase{state, scheduler, telemetryClient,
+                                                             buildControlPlotUseCase};
+
+    useCase.execute();
+
+    EXPECT_EQ(state.control().controlPlot.title, "Control chart");
+    EXPECT_GT(state.control().controlPlot.x.max, state.control().controlPlot.x.min);
+}
+
+TEST(StartTestExecutionUseCaseTest, InitialSchedulerTickDoesNotDuplicateScenarioTraceOrSend) {
+    application::session::SessionState state{};
+    state.setTestProtocolMode(domain::TestMode::Automatic);
+    state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(1));
+
+    TestExecutionSchedulerSpy scheduler{};
+    TelemetryClientSpy telemetryClient{};
+    ScenarioFunctionEngine functionEngine{};
+    application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
+    application::useCases::StartTestExecutionUseCase useCase{state, scheduler, telemetryClient,
+                                                             buildControlPlotUseCase};
+
+    useCase.execute();
+    ASSERT_TRUE(scheduler.tick);
+    scheduler.tick(0);
+
+    ASSERT_EQ(state.control().controlTrace.size(), 1U);
+    EXPECT_DOUBLE_EQ(state.control().controlTrace.front().time.seconds(), 0.0);
+    EXPECT_EQ(telemetryClient.axis0CommandCalls, 1);
+    EXPECT_EQ(telemetryClient.axis1CommandCalls, 1);
 }
 
 TEST(StartTestExecutionUseCaseTest, StartsTelemetryPollingWhenStandIsConnected) {

@@ -60,6 +60,8 @@ class SessionState {
     void setTelemetryPlot(application::dto::PlotModel plot);
     void setControlPlot(application::dto::PlotModel plot);
     void setControlProfile(domain::WindControlProfile profile);
+    void resetTelemetrySession();
+    void resetControlSession();
     void clearControlTrace();
     void appendControlTraceSample(domain::ControlTraceSample sample);
     void appendTelemetrySample(domain::AxisTelemetrySample sample);

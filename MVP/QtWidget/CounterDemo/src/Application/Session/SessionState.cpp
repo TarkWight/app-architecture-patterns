@@ -227,6 +227,21 @@ void application::session::SessionState::setControlProfile(domain::WindControlPr
     notify();
 }
 
+void application::session::SessionState::resetTelemetrySession() {
+    data.telemetry.telemetryHistory.clear();
+    data.telemetry.telemetryFollowTail = true;
+    data.telemetry.telemetryWindowEndSeconds = domain::TelemetryWindowEnd::fromSeconds(0.0);
+    rebuildTelemetryPlot();
+    notify();
+}
+
+void application::session::SessionState::resetControlSession() {
+    data.control.controlTrace.clear();
+    data.control.controlProfile = domain::WindControlProfile{};
+    data.control.controlPlot = application::dto::PlotModel{};
+    notify();
+}
+
 void application::session::SessionState::clearControlTrace() {
     data.control.controlTrace.clear();
     notify();

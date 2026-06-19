@@ -14,10 +14,6 @@ void QtTestExecutionScheduler::start(int initialElapsedSeconds, TickCallback onT
     elapsedSeconds = initialElapsedSeconds;
     state = State::Running;
 
-    if (callback) {
-        callback(elapsedSeconds);
-    }
-
     timer.start();
 }
 

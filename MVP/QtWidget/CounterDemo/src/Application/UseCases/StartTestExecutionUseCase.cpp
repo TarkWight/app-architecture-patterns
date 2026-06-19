@@ -25,12 +25,14 @@ void StartTestExecutionUseCase::execute() {
         return;
     }
 
+    state.resetTelemetrySession();
+    state.resetControlSession();
+
     estimateTestDurationUseCase.executeForAutoCalculated();
+    buildControlPlotUseCase.execute();
 
     if (domain::TestModeStatePolicy::usesControlProfile(state.protocol().testProtocol.testMode)) {
-        buildControlPlotUseCase.execute();
         state.setTargetStandImpact(state.control().windImpact);
-        state.clearControlTrace();
     }
 
     const auto &protocol = state.protocol();
@@ -48,6 +50,10 @@ void StartTestExecutionUseCase::execute() {
 
     testExecutionScheduler.start(0, [this, plan](int elapsedSeconds) {
         const auto elapsed = domain::ElapsedSeconds::from(elapsedSeconds);
+        if (elapsed.value() == 0) {
+            return;
+        }
+
         state.setElapsedSeconds(elapsed);
         applyScenarioImpact(elapsed);
 

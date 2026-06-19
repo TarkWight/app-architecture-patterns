@@ -3,6 +3,7 @@
 #include "../../src/Application/Ports/ITelemetryClient.hpp"
 #include "../../src/Application/Ports/ITestExecutionScheduler.hpp"
 #include "../../src/Application/Session/SessionState.hpp"
+#include "../../src/Application/Dto/PlotModel.hpp"
 #include "../../src/Domain/StandConnectionStatus.hpp"
 #include "../../src/Domain/TestExecutionStatus.hpp"
 #include "../../src/Domain/TestTimeDirection.hpp"
@@ -90,6 +91,13 @@ class TelemetryClientSpy final : public application::ports::ITelemetryClient {
     int stopPollingCalls{0};
 };
 
+domain::AxisTelemetrySample validSampleAt(double timestampSeconds) {
+    domain::AxisTelemetrySample sample{};
+    sample.timestampSeconds = timestampSeconds;
+    sample.valid = true;
+    return sample;
+}
+
 TEST(StopTestExecutionUseCaseTest, StopsTelemetryPollingAndKeepsStandConnected) {
     application::session::SessionState state{};
     state.setTestExecutionStatus(domain::TestExecutionStatus::Running);
@@ -105,6 +113,34 @@ TEST(StopTestExecutionUseCaseTest, StopsTelemetryPollingAndKeepsStandConnected) 
     EXPECT_EQ(telemetryClient.stopPollingCalls, 1);
     EXPECT_EQ(state.connection().standConnectionStatus, domain::StandConnectionStatus::Connected);
     EXPECT_EQ(state.execution().testExecutionStatus, domain::TestExecutionStatus::Ready);
+}
+
+TEST(StopTestExecutionUseCaseTest, KeepsTelemetryAndControlPlotsVisible) {
+    application::session::SessionState state{};
+    state.setTestExecutionStatus(domain::TestExecutionStatus::Running);
+    state.setStandConnectionStatus(domain::StandConnectionStatus::Polling);
+    state.appendTelemetrySample(validSampleAt(10.0));
+    state.appendControlTraceSample(
+        domain::ControlTraceSample{.time = domain::ControlTraceTime::fromSeconds(10.0),
+                                   .targetValue = domain::makeWindImpact(4.0, 90.0, 0.0),
+                                   .safeCommandValue = domain::makeWindImpact(3.0, 90.0, 0.0)});
+
+    application::dto::PlotModel controlPlot{};
+    controlPlot.title = "Control chart";
+    controlPlot.series.points.push_back(application::dto::Point{.x = 0.0, .y = 1.0});
+    state.setControlPlot(controlPlot);
+
+    TestExecutionSchedulerSpy scheduler{};
+    TelemetryClientSpy telemetryClient{};
+    application::useCases::StopTestExecutionUseCase useCase{state, scheduler, telemetryClient};
+
+    useCase.execute();
+
+    EXPECT_FALSE(state.telemetry().telemetryHistory.empty());
+    EXPECT_EQ(state.control().controlTrace.size(), 1U);
+    EXPECT_EQ(state.control().controlPlot.title, "Control chart");
+    ASSERT_EQ(state.control().controlPlot.series.points.size(), 1U);
+    EXPECT_DOUBLE_EQ(state.control().controlPlot.series.points.front().y, 1.0);
 }
 
 TEST(StopTestExecutionUseCaseTest, ResetsCountdownTimeUsingDomainStopPlan) {

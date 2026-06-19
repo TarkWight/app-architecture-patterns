@@ -203,23 +203,13 @@
              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
             </property>
             <item row="0" column="0">
-             <widget class="QLabel" name="labelStandModeCaption">
-              <property name="text">
-               <string>Вид теста</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QComboBox" name="comboBoxStandControlMode"/>
-            </item>
-            <item row="1" column="0">
              <widget class="QLabel" name="labelStandBeaufortCaption">
               <property name="text">
                <string>Бофорт</string>
               </property>
              </widget>
             </item>
-            <item row="1" column="1">
+            <item row="0" column="1">
              <widget class="QDoubleSpinBox" name="doubleSpinBoxStandBeaufort">
               <property name="decimals">
                <number>1</number>
@@ -229,14 +219,14 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="0">
+            <item row="1" column="0">
              <widget class="QLabel" name="labelStandAngleCaption">
               <property name="text">
                <string>Угол атаки</string>
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
+            <item row="1" column="1">
              <widget class="QDoubleSpinBox" name="doubleSpinBoxStandAngleOfAttack">
               <property name="decimals">
                <number>1</number>
@@ -249,34 +239,34 @@
               </property>
              </widget>
             </item>
-            <item row="3" column="0">
+            <item row="2" column="0">
              <widget class="QLabel" name="labelStandDirectionCaption">
               <property name="text">
                <string>Сторона света</string>
               </property>
              </widget>
             </item>
-            <item row="3" column="1">
+            <item row="2" column="1">
              <widget class="QComboBox" name="comboBoxStandDirection"/>
             </item>
-            <item row="4" column="0">
+            <item row="3" column="0">
              <widget class="QLabel" name="labelTelemetrySourceCaption">
               <property name="text">
                <string>Источник</string>
               </property>
              </widget>
             </item>
-            <item row="4" column="1">
+            <item row="3" column="1">
              <widget class="QComboBox" name="comboBoxTelemetrySource"/>
             </item>
-            <item row="5" column="0">
+            <item row="4" column="0">
              <widget class="QLabel" name="labelTelemetryVisibleCaption">
               <property name="text">
                <string>Отображение</string>
               </property>
              </widget>
             </item>
-            <item row="5" column="1">
+            <item row="4" column="1">
              <widget class="QCheckBox" name="checkBoxTelemetryCurveVisible">
               <property name="text">
                <string>Показывать</string>

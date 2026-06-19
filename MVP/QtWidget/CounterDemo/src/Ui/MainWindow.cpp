@@ -150,12 +150,6 @@ void MainWindow::setupTabs() {
 }
 
 void MainWindow::setupStandControlPanel() {
-    ui->comboBoxStandControlMode->addItem(QStringLiteral("Ручной"), static_cast<int>(domain::StandControlMode::Manual));
-    ui->comboBoxStandControlMode->addItem(QStringLiteral("Гибридный"),
-                                          static_cast<int>(domain::StandControlMode::Hybrid));
-    ui->comboBoxStandControlMode->addItem(QStringLiteral("Заготовленный"),
-                                          static_cast<int>(domain::StandControlMode::PresetScenario));
-
     ui->doubleSpinBoxStandBeaufort->setRange(domain::minOperationalBeaufort, domain::maxOperationalBeaufort);
     ui->doubleSpinBoxStandAngleOfAttack->setRange(domain::minAngleOfAttack, domain::maxAngleOfAttack);
 
@@ -276,13 +270,6 @@ void MainWindow::connectConfigTemplateSignals() {
 }
 
 void MainWindow::connectStandControlSignals() {
-    QObject::connect(ui->comboBoxStandControlMode, &QComboBox::currentIndexChanged, this, [this]() {
-        const auto mode = static_cast<domain::StandControlMode>(ui->comboBoxStandControlMode->currentData().toInt());
-        shellPresenter.onStandControlModeChanged(mode);
-        updateManualStandControlsEnabled();
-        scheduleControlPlotRebuild();
-    });
-
     QObject::connect(ui->comboBoxTelemetrySource, &QComboBox::currentIndexChanged, this, [this](int index) {
         const QSignalBlocker visibleBlocker{ui->checkBoxTelemetryCurveVisible};
 
@@ -323,7 +310,6 @@ void MainWindow::connectSessionSignals() {
                          }
 
                          observedTestProtocolModeKey = modeKey;
-                         updateStandControlModeSelection();
                          updateManualStandControlsEnabled();
                          scheduleControlPlotRebuild();
                      });
@@ -496,19 +482,8 @@ void MainWindow::selectTelemetryConfig() {
     appendLog("telemetry.toml selected: " + selectedTelemetryConfigPath);
 }
 
-void MainWindow::updateStandControlModeSelection() {
-    const auto mode = sessionAdapter.getState().get().control.standControlMode;
-    const int index = ui->comboBoxStandControlMode->findData(static_cast<int>(mode));
-    if (index < 0 || ui->comboBoxStandControlMode->currentIndex() == index) {
-        return;
-    }
-
-    const QSignalBlocker blocker{ui->comboBoxStandControlMode};
-    ui->comboBoxStandControlMode->setCurrentIndex(index);
-}
-
 void MainWindow::updateManualStandControlsEnabled() {
-    const auto mode = static_cast<domain::StandControlMode>(ui->comboBoxStandControlMode->currentData().toInt());
+    const auto mode = sessionAdapter.getState().control().standControlMode;
     const bool manualEnabled = !domain::StandScenario{mode}.locksManualControls();
 
     ui->doubleSpinBoxStandBeaufort->setEnabled(manualEnabled);

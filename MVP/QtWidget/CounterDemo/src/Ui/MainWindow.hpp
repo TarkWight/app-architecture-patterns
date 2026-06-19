@@ -113,7 +113,6 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     void advanceStandImpactTransition();
     void selectTelemetryAxisColor();
     void scheduleControlPlotRebuild();
-    void updateStandControlModeSelection();
     void updateManualStandControlsEnabled();
     void updateControlFormulaTemplateSelection(const std::string &expression);
     void createTelemetryTemplate();

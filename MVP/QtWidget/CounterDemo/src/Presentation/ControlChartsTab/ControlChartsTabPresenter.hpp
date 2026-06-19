@@ -41,8 +41,6 @@ class ControlChartsTabPresenter final {
     void onRebuildPlotPressed();
     void onReadinessCalculationPressed();
 
-    [[nodiscard]] static std::string messageForReadinessStatus(application::session::ReadinessStatus status);
-
   private:
     application::session::SessionState &state;
     application::useCases::SetControlChartsTabMinutesUseCase &setControlChartsTabMinutesUseCase;

@@ -116,6 +116,10 @@ std::vector<domain::TestProtocolParameter> invalidDroneParameters() {
     };
 }
 
+bool contains(const std::string &text, const std::string &fragment) {
+    return text.find(fragment) != std::string::npos;
+}
+
 struct PresenterFixture {
     application::session::SessionState state{};
     application::useCases::SetControlChartsTabMinutesUseCase setMinutesUseCase{state};
@@ -209,7 +213,9 @@ TEST(ControlChartsTabPresenterTest, WarningStatusMapsToWarningMessage) {
     fixture.presenter.onReadinessCalculationPressed();
 
     EXPECT_EQ(fixture.state.readiness().status, application::session::ReadinessStatus::Warning);
-    EXPECT_EQ(fixture.view.readinessMessage, "Расчёт готовности выполнен. Есть предупреждения.");
+    EXPECT_TRUE(contains(fixture.view.readinessMessage, "Расчёт готовности выполнен. Есть предупреждения."));
+    EXPECT_TRUE(contains(fixture.view.readinessMessage, "Фронтальная площадь"));
+    EXPECT_TRUE(contains(fixture.view.readinessMessage, "Коэффициент сопротивления"));
 }
 
 TEST(ControlChartsTabPresenterTest, FailedStatusMapsToDangerMessage) {
@@ -222,19 +228,7 @@ TEST(ControlChartsTabPresenterTest, FailedStatusMapsToDangerMessage) {
     fixture.presenter.onReadinessCalculationPressed();
 
     EXPECT_EQ(fixture.state.readiness().status, application::session::ReadinessStatus::Failed);
-    EXPECT_EQ(fixture.view.readinessMessage, "Расчёт готовности невозможен. Испытание потенциально опасно.");
-}
-
-TEST(ControlChartsTabPresenterTest, ReadinessStatusMessagesAreMapped) {
-    using application::session::ReadinessStatus;
-    using presentation::controlChartsTab::ControlChartsTabPresenter;
-
-    EXPECT_EQ(ControlChartsTabPresenter::messageForReadinessStatus(ReadinessStatus::Ok),
-              "Расчёт готовности выполнен. Испытание допустимо.");
-    EXPECT_EQ(ControlChartsTabPresenter::messageForReadinessStatus(ReadinessStatus::Warning),
-              "Расчёт готовности выполнен. Есть предупреждения.");
-    EXPECT_EQ(ControlChartsTabPresenter::messageForReadinessStatus(ReadinessStatus::Dangerous),
-              "Испытание потенциально опасно.");
-    EXPECT_EQ(ControlChartsTabPresenter::messageForReadinessStatus(ReadinessStatus::Failed),
-              "Расчёт готовности невозможен. Испытание потенциально опасно.");
+    EXPECT_TRUE(
+        contains(fixture.view.readinessMessage, "Расчёт готовности невозможен. Испытание потенциально опасно."));
+    EXPECT_TRUE(contains(fixture.view.readinessMessage, "Ёмкость АКБ"));
 }

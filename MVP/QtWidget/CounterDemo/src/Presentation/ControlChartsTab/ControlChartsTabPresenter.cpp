@@ -1,5 +1,6 @@
 #include "ControlChartsTabPresenter.hpp"
 
+#include "../../Application/Services/ReadinessDiagnosticMessageBuilder.hpp"
 #include "../../Domain/TestModeStatePolicy.hpp"
 #include "../../Domain/TestProtocol.hpp"
 
@@ -120,9 +121,10 @@ void ControlChartsTabPresenter::onReadinessCalculationPressed() {
         return;
     }
 
-    const auto message = messageForReadinessStatus(state.readiness().status);
-    view->showReadinessMessage(message);
-    view->appendLog(message);
+    const auto message = application::services::ReadinessDiagnosticMessageBuilder::build(state.readiness());
+    const auto displayText = message.toDisplayText();
+    view->showReadinessMessage(displayText);
+    view->appendLog(displayText);
 }
 
 void ControlChartsTabPresenter::updateWindImpact(double beaufort, double direction, double angleOfAttack) {
@@ -146,23 +148,6 @@ void ControlChartsTabPresenter::refreshReadinessCalculationEnabled() {
 
     const auto mode = state.protocol().testProtocol.testMode;
     view->setReadinessCalculationEnabled(mode == domain::TestMode::Hybrid || mode == domain::TestMode::Automatic);
-}
-
-std::string ControlChartsTabPresenter::messageForReadinessStatus(application::session::ReadinessStatus status) {
-    switch (status) {
-    case application::session::ReadinessStatus::Ok:
-        return "Расчёт готовности выполнен. Испытание допустимо.";
-    case application::session::ReadinessStatus::Warning:
-        return "Расчёт готовности выполнен. Есть предупреждения.";
-    case application::session::ReadinessStatus::Dangerous:
-        return "Испытание потенциально опасно.";
-    case application::session::ReadinessStatus::Failed:
-        return "Расчёт готовности невозможен. Испытание потенциально опасно.";
-    case application::session::ReadinessStatus::Unknown:
-        return "Расчёт готовности не выполнен.";
-    }
-
-    return "Расчёт готовности не выполнен.";
 }
 
 } // namespace presentation::controlChartsTab

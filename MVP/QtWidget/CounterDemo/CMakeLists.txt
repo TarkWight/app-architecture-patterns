@@ -102,6 +102,8 @@ qt_add_executable(develop
   src/Application/Services/TelemetrySessionClock.cpp
   src/Application/Services/UavSpecificationMapper.hpp
   src/Application/Services/UavSpecificationMapper.cpp
+  src/Application/Services/ReadinessDiagnosticMessageBuilder.hpp
+  src/Application/Services/ReadinessDiagnosticMessageBuilder.cpp
 
   src/Infrastructure/Config/TomlConfigRepository.hpp
   src/Infrastructure/Config/TomlConfigRepository.cpp
@@ -265,6 +267,7 @@ if (BUILD_TESTING)
     tests/Application/EstimateTestDurationUseCaseTest.cpp
     tests/Application/ExportPdfUseCaseTest.cpp
     tests/Application/PauseResumeTestExecutionUseCaseTest.cpp
+    tests/Application/ReadinessDiagnosticMessageBuilderTest.cpp
     tests/Application/SessionStateTest.cpp
     tests/Application/SetControlChartsTabMinutesUseCaseTest.cpp
     tests/Application/SetOperatorTestDurationUseCaseTest.cpp
@@ -290,6 +293,7 @@ if (BUILD_TESTING)
     src/Application/Services/TelemetryPlotBuilder.cpp
     src/Application/Services/TelemetrySessionClock.cpp
     src/Application/Services/UavSpecificationMapper.cpp
+    src/Application/Services/ReadinessDiagnosticMessageBuilder.cpp
     src/Application/UseCases/BuildControlPlotUseCase.cpp
     src/Application/UseCases/ConfigureTelemetryUseCase.cpp
     src/Application/UseCases/ConnectStandUseCase.cpp

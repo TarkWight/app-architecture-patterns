@@ -29,6 +29,7 @@
 #include "UseCases/ConfigureTelemetryUseCase.hpp"
 #include "UseCases/ConnectStandUseCase.hpp"
 #include "UseCases/DisconnectStandUseCase.hpp"
+#include "Services/TelemetrySessionClock.hpp"
 
 #include "../Infrastructure/Config/TomlConfigRepository.hpp"
 #include "../Infrastructure/ConfigTemplates/ConfigTemplateService.hpp"
@@ -65,13 +66,14 @@ struct ApplicationContext {
     infrastructure::QtPdfExporter pdfExporter;
     infrastructure::SessionStateQtAdapter sessionAdapter{sessionState};
     infrastructure::config::TomlConfigRepository configRepository;
+    application::services::TelemetrySessionClock telemetrySessionClock;
 
     infrastructure::axisTcp::LegacyAxisProtocolCodec axisProtocolCodec;
 
     infrastructure::axisTcp::QtTcpTelemetryClient telemetryClient{axisProtocolCodec};
 
     application::useCases::ConfigureTelemetryUseCase configureTelemetryUseCase{sessionState, configRepository,
-                                                                               telemetryClient};
+                                                                               telemetryClient, telemetrySessionClock};
 
     application::useCases::ConnectStandUseCase connectStandUseCase{sessionState, telemetryClient};
 
@@ -82,16 +84,21 @@ struct ApplicationContext {
     application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{sessionState, functionEngine};
 
     application::useCases::StartTestExecutionUseCase startTestExecutionUseCase{
-        sessionState, testExecutionScheduler, telemetryClient, buildControlPlotUseCase};
+        application::useCases::StartTestExecutionUseCase::Dependencies{.state = sessionState,
+                                                                       .testExecutionScheduler = testExecutionScheduler,
+                                                                       .telemetryClient = telemetryClient,
+                                                                       .buildControlPlotUseCase =
+                                                                           buildControlPlotUseCase,
+                                                                       .telemetrySessionClock = telemetrySessionClock}};
 
     application::useCases::PauseTestExecutionUseCase pauseTestExecutionUseCase{sessionState, testExecutionScheduler,
-                                                                               telemetryClient};
+                                                                               telemetryClient, telemetrySessionClock};
 
-    application::useCases::ResumeTestExecutionUseCase resumeTestExecutionUseCase{sessionState, testExecutionScheduler,
-                                                                                 telemetryClient};
+    application::useCases::ResumeTestExecutionUseCase resumeTestExecutionUseCase{
+        sessionState, testExecutionScheduler, telemetryClient, telemetrySessionClock};
 
     application::useCases::StopTestExecutionUseCase stopTestExecutionUseCase{sessionState, testExecutionScheduler,
-                                                                             telemetryClient};
+                                                                             telemetryClient, telemetrySessionClock};
 
     application::useCases::SetTestTimeSourceUseCase setTestTimeSourceUseCase{sessionState};
 

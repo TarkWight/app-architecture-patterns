@@ -2,6 +2,7 @@
 
 #include "../../src/Application/Ports/IConfigRepository.hpp"
 #include "../../src/Application/Ports/ITelemetryClient.hpp"
+#include "../../src/Application/Services/TelemetrySessionClock.hpp"
 #include "../../src/Application/Session/SessionState.hpp"
 #include "../../src/Domain/StandConnectionStatus.hpp"
 #include "../../src/Domain/TelemetryStatus.hpp"
@@ -83,6 +84,15 @@ class TelemetryClientSpy final : public application::ports::ITelemetryClient {
     int lastPollingIntervalMs{0};
 };
 
+domain::AxisTelemetrySample validSampleAt(double timestampSeconds, float position = 0.0F) {
+    domain::AxisTelemetrySample sample{};
+    sample.axisId = domain::axis0;
+    sample.timestampSeconds = timestampSeconds;
+    sample.position = position;
+    sample.valid = true;
+    return sample;
+}
+
 TEST(ConfigureTelemetryUseCaseTest, StartsPollingWhenAxisConnectsDuringActiveTest) {
     application::session::SessionState state{};
     ConfigRepositoryStub configRepository{};
@@ -156,6 +166,83 @@ TEST(ConfigureTelemetryUseCaseTest, ConnectedStatusDoesNotStartPollingWhileTestI
     EXPECT_EQ(telemetryClient.startPollingCalls, 0);
     EXPECT_EQ(state.connection().standConnectionStatus, domain::StandConnectionStatus::Connected);
     EXPECT_EQ(state.telemetry().telemetryStatus, domain::TelemetryStatus::Valid);
+}
+
+TEST(ConfigureTelemetryUseCaseTest, TelemetryCallbackNormalizesFirstSampleToLogicalZero) {
+    application::session::SessionState state{};
+    ConfigRepositoryStub configRepository{};
+    TelemetryClientSpy telemetryClient{};
+    application::services::TelemetrySessionClock telemetrySessionClock{};
+    application::useCases::ConfigureTelemetryUseCase useCase{state, configRepository, telemetryClient,
+                                                             telemetrySessionClock};
+
+    useCase.execute("telemetry.toml");
+    telemetryClient.telemetryCallback(validSampleAt(100.0));
+
+    ASSERT_EQ(state.telemetry().telemetryHistory.size(), 1U);
+    EXPECT_DOUBLE_EQ(state.telemetry().telemetryHistory.front().timestampSeconds, 0.0);
+}
+
+TEST(ConfigureTelemetryUseCaseTest, TelemetryCallbackWhilePausedDoesNotAppendSample) {
+    application::session::SessionState state{};
+    ConfigRepositoryStub configRepository{};
+    TelemetryClientSpy telemetryClient{};
+    application::services::TelemetrySessionClock telemetrySessionClock{};
+    application::useCases::ConfigureTelemetryUseCase useCase{state, configRepository, telemetryClient,
+                                                             telemetrySessionClock};
+
+    useCase.execute("telemetry.toml");
+    telemetrySessionClock.pause();
+    telemetryClient.telemetryCallback(validSampleAt(100.0));
+
+    EXPECT_TRUE(state.telemetry().telemetryHistory.empty());
+}
+
+TEST(ConfigureTelemetryUseCaseTest, TelemetryPlotAfterPauseResumeHasNoXAxisGap) {
+    application::session::SessionState state{};
+    ConfigRepositoryStub configRepository{};
+    TelemetryClientSpy telemetryClient{};
+    application::services::TelemetrySessionClock telemetrySessionClock{};
+    application::useCases::ConfigureTelemetryUseCase useCase{state, configRepository, telemetryClient,
+                                                             telemetrySessionClock};
+
+    useCase.execute("telemetry.toml");
+    telemetryClient.telemetryCallback(validSampleAt(100.0, 1.0F));
+    telemetryClient.telemetryCallback(validSampleAt(110.0, 2.0F));
+
+    telemetrySessionClock.pause();
+    telemetryClient.telemetryCallback(validSampleAt(160.0, 3.0F));
+    telemetrySessionClock.resume();
+    telemetryClient.telemetryCallback(validSampleAt(161.0, 4.0F));
+
+    ASSERT_EQ(state.telemetry().telemetryHistory.size(), 3U);
+    EXPECT_DOUBLE_EQ(state.telemetry().telemetryHistory.at(0).timestampSeconds, 0.0);
+    EXPECT_DOUBLE_EQ(state.telemetry().telemetryHistory.at(1).timestampSeconds, 10.0);
+    EXPECT_DOUBLE_EQ(state.telemetry().telemetryHistory.at(2).timestampSeconds, 11.0);
+
+    ASSERT_FALSE(state.telemetry().telemetryPlot.seriesList.empty());
+    ASSERT_EQ(state.telemetry().telemetryPlot.seriesList.front().series.points.size(), 3U);
+    EXPECT_DOUBLE_EQ(state.telemetry().telemetryPlot.seriesList.front().series.points.at(2).x, 11.0);
+}
+
+TEST(ConfigureTelemetryUseCaseTest, TelemetryClockCanResetForNewStart) {
+    application::session::SessionState state{};
+    ConfigRepositoryStub configRepository{};
+    TelemetryClientSpy telemetryClient{};
+    application::services::TelemetrySessionClock telemetrySessionClock{};
+    application::useCases::ConfigureTelemetryUseCase useCase{state, configRepository, telemetryClient,
+                                                             telemetrySessionClock};
+
+    useCase.execute("telemetry.toml");
+    telemetryClient.telemetryCallback(validSampleAt(100.0));
+    telemetryClient.telemetryCallback(validSampleAt(101.0));
+    state.resetTelemetrySession();
+    telemetrySessionClock.reset();
+
+    telemetryClient.telemetryCallback(validSampleAt(200.0));
+
+    ASSERT_EQ(state.telemetry().telemetryHistory.size(), 1U);
+    EXPECT_DOUBLE_EQ(state.telemetry().telemetryHistory.front().timestampSeconds, 0.0);
 }
 
 } // namespace

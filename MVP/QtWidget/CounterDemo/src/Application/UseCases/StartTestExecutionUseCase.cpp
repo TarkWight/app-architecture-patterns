@@ -19,6 +19,12 @@ StartTestExecutionUseCase::StartTestExecutionUseCase(
       appliedStandImpactSender(telemetryClient) {
 }
 
+StartTestExecutionUseCase::StartTestExecutionUseCase(Dependencies deps)
+    : state(deps.state), testExecutionScheduler(deps.testExecutionScheduler), telemetryClient(deps.telemetryClient),
+      buildControlPlotUseCase(deps.buildControlPlotUseCase), estimateTestDurationUseCase(deps.state),
+      appliedStandImpactSender(deps.telemetryClient), telemetrySessionClock(&deps.telemetrySessionClock) {
+}
+
 void StartTestExecutionUseCase::execute() {
     const auto transition = domain::transitionAfterStartRequested(state.execution().testExecutionStatus);
     if (!transition.has_value()) {
@@ -27,6 +33,9 @@ void StartTestExecutionUseCase::execute() {
 
     state.resetTelemetrySession();
     state.resetControlSession();
+    if (telemetrySessionClock != nullptr) {
+        telemetrySessionClock->reset();
+    }
 
     estimateTestDurationUseCase.executeForAutoCalculated();
     buildControlPlotUseCase.execute();

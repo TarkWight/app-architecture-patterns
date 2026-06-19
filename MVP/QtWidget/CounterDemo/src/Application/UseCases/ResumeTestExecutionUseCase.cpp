@@ -12,6 +12,14 @@ ResumeTestExecutionUseCase::ResumeTestExecutionUseCase(
     : state(state), testExecutionScheduler(testExecutionScheduler), telemetryClient(telemetryClient) {
 }
 
+ResumeTestExecutionUseCase::ResumeTestExecutionUseCase(
+    application::session::SessionState &state, application::ports::ITestExecutionScheduler &testExecutionScheduler,
+    application::ports::ITelemetryClient &telemetryClient,
+    application::services::TelemetrySessionClock &telemetrySessionClock)
+    : state(state), testExecutionScheduler(testExecutionScheduler), telemetryClient(telemetryClient),
+      telemetrySessionClock(&telemetrySessionClock) {
+}
+
 void ResumeTestExecutionUseCase::execute() {
     const auto transition = domain::transitionAfterResumeRequested(state.get().execution.testExecutionStatus);
     if (!transition.has_value()) {
@@ -23,6 +31,9 @@ void ResumeTestExecutionUseCase::execute() {
     }
 
     testExecutionScheduler.resume();
+    if (telemetrySessionClock != nullptr) {
+        telemetrySessionClock->resume();
+    }
 
     const auto pollingTransition = domain::transitionAfterPollingStarted(state.connection().standConnectionStatus);
     if (pollingTransition.has_value()) {

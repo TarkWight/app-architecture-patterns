@@ -98,6 +98,8 @@ qt_add_executable(develop
   src/Application/Services/AppliedStandImpactSender.cpp
   src/Application/Services/TelemetryPlotBuilder.hpp
   src/Application/Services/TelemetryPlotBuilder.cpp
+  src/Application/Services/TelemetrySessionClock.hpp
+  src/Application/Services/TelemetrySessionClock.cpp
   src/Application/Services/UavSpecificationMapper.hpp
   src/Application/Services/UavSpecificationMapper.cpp
 
@@ -283,6 +285,7 @@ if (BUILD_TESTING)
     src/Application/Services/ControlProfilePreviewService.cpp
     src/Application/Services/AppliedStandImpactSender.cpp
     src/Application/Services/TelemetryPlotBuilder.cpp
+    src/Application/Services/TelemetrySessionClock.cpp
     src/Application/Services/UavSpecificationMapper.cpp
     src/Application/UseCases/BuildControlPlotUseCase.cpp
     src/Application/UseCases/ConfigureTelemetryUseCase.cpp

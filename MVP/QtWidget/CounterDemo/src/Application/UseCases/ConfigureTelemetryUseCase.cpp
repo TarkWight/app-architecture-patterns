@@ -39,11 +39,29 @@ ConfigureTelemetryUseCase::ConfigureTelemetryUseCase(application::session::Sessi
     : state(state), configRepository(configRepository), telemetryClient(telemetryClient) {
 }
 
+ConfigureTelemetryUseCase::ConfigureTelemetryUseCase(
+    application::session::SessionState &state, application::ports::IConfigRepository &configRepository,
+    application::ports::ITelemetryClient &telemetryClient,
+    application::services::TelemetrySessionClock &telemetrySessionClock)
+    : state(state), configRepository(configRepository), telemetryClient(telemetryClient),
+      telemetrySessionClock(&telemetrySessionClock) {
+}
+
 void ConfigureTelemetryUseCase::execute(const std::string &configPath) {
     const auto config = configRepository.loadTelemetryConfig(configPath);
 
     telemetryClient.setTelemetryCallback([this](const domain::AxisTelemetrySample &sample) {
-        state.appendTelemetrySample(sample);
+        if (telemetrySessionClock != nullptr) {
+            const auto logicalSample = telemetrySessionClock->map(sample);
+            if (!logicalSample.has_value()) {
+                return;
+            }
+
+            state.appendTelemetrySample(*logicalSample);
+        } else {
+            state.appendTelemetrySample(sample);
+        }
+
         state.setTelemetryStatus(domain::TelemetryStatus::Valid);
     });
 

@@ -3,6 +3,7 @@
 
 #include "../Ports/ITelemetryClient.hpp"
 #include "../Ports/ITestExecutionScheduler.hpp"
+#include "../Services/TelemetrySessionClock.hpp"
 #include "../Session/SessionState.hpp"
 
 namespace application::useCases {
@@ -12,6 +13,10 @@ class ResumeTestExecutionUseCase final {
     ResumeTestExecutionUseCase(application::session::SessionState &state,
                                application::ports::ITestExecutionScheduler &testExecutionScheduler,
                                application::ports::ITelemetryClient &telemetryClient);
+    ResumeTestExecutionUseCase(application::session::SessionState &state,
+                               application::ports::ITestExecutionScheduler &testExecutionScheduler,
+                               application::ports::ITelemetryClient &telemetryClient,
+                               application::services::TelemetrySessionClock &telemetrySessionClock);
 
     void execute();
 
@@ -19,6 +24,7 @@ class ResumeTestExecutionUseCase final {
     application::session::SessionState &state;
     application::ports::ITestExecutionScheduler &testExecutionScheduler;
     application::ports::ITelemetryClient &telemetryClient;
+    application::services::TelemetrySessionClock *telemetrySessionClock{nullptr};
 };
 
 } // namespace application::useCases

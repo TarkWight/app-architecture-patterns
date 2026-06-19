@@ -4,6 +4,7 @@
 #include "../../src/Application/Dto/PlotModel.hpp"
 #include "../../src/Application/Ports/ITelemetryClient.hpp"
 #include "../../src/Application/Ports/ITestExecutionScheduler.hpp"
+#include "../../src/Application/Services/TelemetrySessionClock.hpp"
 #include "../../src/Application/Session/SessionState.hpp"
 #include "../../src/Domain/StandConnectionStatus.hpp"
 #include "../../src/Domain/TestExecutionStatus.hpp"
@@ -140,6 +141,32 @@ TEST(PauseTestExecutionUseCaseTest, StopsTelemetryPollingAndKeepsPlots) {
     EXPECT_FALSE(state.telemetry().telemetryHistory.empty());
     EXPECT_EQ(state.control().controlPlot.title, "Control chart");
     ASSERT_EQ(state.control().controlPlot.series.points.size(), 1U);
+}
+
+TEST(PauseResumeTestExecutionUseCaseTest, FreezesTelemetryLogicalClockBetweenPauseAndResume) {
+    application::session::SessionState state{};
+    state.setTestExecutionStatus(domain::TestExecutionStatus::Running);
+    state.setStandConnectionStatus(domain::StandConnectionStatus::Polling);
+    application::services::TelemetrySessionClock telemetrySessionClock{};
+    ASSERT_TRUE(telemetrySessionClock.map(validSampleAt(100.0)).has_value());
+    ASSERT_TRUE(telemetrySessionClock.map(validSampleAt(110.0)).has_value());
+
+    TestExecutionSchedulerSpy scheduler{};
+    scheduler.running = true;
+    TelemetryClientSpy telemetryClient{};
+    application::useCases::PauseTestExecutionUseCase pauseUseCase{state, scheduler, telemetryClient,
+                                                                  telemetrySessionClock};
+
+    pauseUseCase.execute();
+    EXPECT_FALSE(telemetrySessionClock.map(validSampleAt(160.0)).has_value());
+
+    application::useCases::ResumeTestExecutionUseCase resumeUseCase{state, scheduler, telemetryClient,
+                                                                    telemetrySessionClock};
+    resumeUseCase.execute();
+    const auto sample = telemetrySessionClock.map(validSampleAt(161.0));
+
+    ASSERT_TRUE(sample.has_value());
+    EXPECT_DOUBLE_EQ(sample->timestampSeconds, 11.0);
 }
 
 TEST(ResumeTestExecutionUseCaseTest, RestartsPollingWhenStandIsConnected) {

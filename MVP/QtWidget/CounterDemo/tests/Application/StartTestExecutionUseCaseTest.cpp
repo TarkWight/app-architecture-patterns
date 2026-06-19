@@ -3,6 +3,7 @@
 #include "../../src/Application/Ports/IFunctionEngine.hpp"
 #include "../../src/Application/Ports/ITelemetryClient.hpp"
 #include "../../src/Application/Ports/ITestExecutionScheduler.hpp"
+#include "../../src/Application/Services/TelemetrySessionClock.hpp"
 #include "../../src/Application/Session/SessionState.hpp"
 #include "../../src/Application/Services/UavSpecificationMapper.hpp"
 #include "../../src/Domain/AxisId.hpp"
@@ -221,6 +222,32 @@ TEST(StartTestExecutionUseCaseTest, StartClearsTelemetryHistoryForNewDisplaySess
     ASSERT_EQ(state.telemetry().telemetryPlot.seriesList.size(), 2U);
     EXPECT_TRUE(state.telemetry().telemetryPlot.seriesList.at(0).series.points.empty());
     EXPECT_TRUE(state.telemetry().telemetryPlot.seriesList.at(1).series.points.empty());
+}
+
+TEST(StartTestExecutionUseCaseTest, StartResetsTelemetryLogicalClockForNewDisplaySession) {
+    application::session::SessionState state{};
+    state.setTestExecutionStatus(domain::TestExecutionStatus::Ready);
+    application::services::TelemetrySessionClock telemetrySessionClock{};
+    ASSERT_TRUE(telemetrySessionClock.map(validSampleAt(100.0)).has_value());
+    ASSERT_TRUE(telemetrySessionClock.map(validSampleAt(101.0)).has_value());
+
+    TestExecutionSchedulerSpy scheduler{};
+    TelemetryClientSpy telemetryClient{};
+    ScenarioFunctionEngine functionEngine{};
+    application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
+    application::useCases::StartTestExecutionUseCase useCase{
+        application::useCases::StartTestExecutionUseCase::Dependencies{.state = state,
+                                                                       .testExecutionScheduler = scheduler,
+                                                                       .telemetryClient = telemetryClient,
+                                                                       .buildControlPlotUseCase =
+                                                                           buildControlPlotUseCase,
+                                                                       .telemetrySessionClock = telemetrySessionClock}};
+
+    useCase.execute();
+    const auto sample = telemetrySessionClock.map(validSampleAt(200.0));
+
+    ASSERT_TRUE(sample.has_value());
+    EXPECT_DOUBLE_EQ(sample->timestampSeconds, 0.0);
 }
 
 TEST(StartTestExecutionUseCaseTest, StartBuildsControlPlotForManualMode) {

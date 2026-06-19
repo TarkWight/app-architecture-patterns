@@ -52,6 +52,7 @@ qt_add_executable(develop
   src/Domain/WindImpact.hpp
   src/Domain/WindControlProfile.hpp
   src/Domain/WindControlProfileImpact.hpp
+  src/Domain/WindControlProfileWorstCase.hpp
   src/Domain/UavSpecification.hpp
   src/Domain/StandImpactCalculationContext.hpp
   src/Domain/YawOscillationPolicy.hpp
@@ -258,6 +259,7 @@ if (BUILD_TESTING)
     tests/Domain/WindImpactTest.cpp
     tests/Domain/WindControlProfileCalculatorTest.cpp
     tests/Domain/WindControlProfileImpactTest.cpp
+    tests/Domain/WindControlProfileWorstCaseTest.cpp
     tests/Domain/YawOscillationPolicyTest.cpp
     tests/Application/ApplyWindImpactUseCasesTest.cpp
     tests/Application/AppliedStandImpactSenderTest.cpp

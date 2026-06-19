@@ -46,6 +46,12 @@ std::string ReadinessDiagnosticMessage::toDisplayText() const {
 ReadinessDiagnosticMessage ReadinessDiagnosticMessageBuilder::build(const session::ReadinessStateData &readiness) {
     ReadinessDiagnosticMessage message{.summary = summaryFor(readiness.status)};
 
+    if (readiness.calculatedForWorstCaseScenario && readiness.hasCalculatedForImpact) {
+        message.details.push_back("Расчёт выполнен по худшему участку сценария: Beaufort " +
+                                  number(readiness.calculatedForImpact.beaufort.value(), 1) + ", угол атаки " +
+                                  number(readiness.calculatedForImpact.angleOfAttack.degrees(), 1) + "°.");
+    }
+
     for (const auto &error : readiness.errors) {
         message.details.push_back(messageForDiagnostic(error.code, readiness.values));
     }

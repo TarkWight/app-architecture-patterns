@@ -328,12 +328,14 @@ void application::session::SessionState::setTelemetryPollInterval(domain::Teleme
 }
 
 void application::session::SessionState::setReadinessFromEstimationResult(
-    const domain::EstimatedTestDurationResult &result, domain::WindImpact calculatedForImpact) {
+    const domain::EstimatedTestDurationResult &result, domain::WindImpact calculatedForImpact,
+    bool calculatedForWorstCaseScenario) {
     data.readiness.warnings = result.warnings;
     data.readiness.errors = result.errors;
     data.readiness.values = result.values;
     data.readiness.calculatedForImpact = calculatedForImpact;
     data.readiness.hasCalculatedForImpact = true;
+    data.readiness.calculatedForWorstCaseScenario = calculatedForWorstCaseScenario;
 
     if (!result.duration.has_value()) {
         data.readiness.status = ReadinessStatus::Failed;

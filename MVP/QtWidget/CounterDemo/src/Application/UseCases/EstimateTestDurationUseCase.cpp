@@ -1,8 +1,11 @@
 #include "EstimateTestDurationUseCase.hpp"
 
+#include "../Services/ControlProfilePreviewService.hpp"
 #include "../Services/UavSpecificationMapper.hpp"
 
 #include "../../Domain/TestTimeSource.hpp"
+#include "../../Domain/TestModeStatePolicy.hpp"
+#include "../../Domain/WindControlProfileWorstCase.hpp"
 
 namespace application::useCases {
 
@@ -20,9 +23,24 @@ domain::WindImpact impactForEstimation(const application::session::ControlStateD
     return control.windImpact;
 }
 
+domain::WindControlProfile profileForEstimation(const application::session::ProtocolStateData &protocol,
+                                                const application::session::ControlStateData &control,
+                                                const application::ports::IFunctionEngine *engine) {
+    if (engine == nullptr) {
+        return control.controlProfile;
+    }
+
+    return application::services::ControlProfilePreviewService{}.build(protocol, control, *engine);
+}
+
 } // namespace
 
 EstimateTestDurationUseCase::EstimateTestDurationUseCase(application::session::SessionState &state) : state(state) {
+}
+
+EstimateTestDurationUseCase::EstimateTestDurationUseCase(application::session::SessionState &state,
+                                                         const application::ports::IFunctionEngine &engine)
+    : state(state), engine(&engine) {
 }
 
 domain::EstimatedTestDurationResult EstimateTestDurationUseCase::executeForAutoCalculated() {
@@ -32,11 +50,22 @@ domain::EstimatedTestDurationResult EstimateTestDurationUseCase::executeForAutoC
         return {};
     }
 
-    const auto impact = impactForEstimation(state.control());
+    const auto &control = state.control();
+    const auto baseImpact = impactForEstimation(control);
+    auto impact = baseImpact;
+    bool calculatedForWorstCaseScenario = false;
+
+    if (domain::TestModeStatePolicy::usesControlProfile(protocol.testProtocol.testMode)) {
+        const auto profile = profileForEstimation(protocol, control, engine);
+        const auto worstCase = domain::WindControlProfileWorstCase::from(profile, baseImpact);
+        impact = worstCase.impact;
+        calculatedForWorstCaseScenario = worstCase.usedProfile;
+    }
+
     const auto uavSpecification = application::services::UavSpecificationMapper{}.map(protocol.testProtocol);
     if (!uavSpecification.has_value()) {
         domain::EstimatedTestDurationResult result{};
-        state.setReadinessFromEstimationResult(result, impact);
+        state.setReadinessFromEstimationResult(result, impact, calculatedForWorstCaseScenario);
         return result;
     }
 
@@ -49,7 +78,7 @@ domain::EstimatedTestDurationResult EstimateTestDurationUseCase::executeForAutoC
         state.setEstimatedTestDurationMinutes(*result.duration);
     }
 
-    state.setReadinessFromEstimationResult(result, impact);
+    state.setReadinessFromEstimationResult(result, impact, calculatedForWorstCaseScenario);
     return result;
 }
 

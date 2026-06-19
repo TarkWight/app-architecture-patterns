@@ -108,7 +108,9 @@ TEST(BuildControlPlotUseCaseTest, WhenAutoCalculated_UsesEstimatorDuration) {
 
     useCase.execute();
 
-    const auto expected = expectedDuration(state.protocol().testProtocol, impact);
+    const auto expected = expectedDuration(state.protocol().testProtocol, state.readiness().calculatedForImpact);
+    EXPECT_TRUE(state.readiness().calculatedForWorstCaseScenario);
+    EXPECT_GT(state.readiness().calculatedForImpact.beaufort.value(), impact.beaufort.value());
     EXPECT_EQ(state.protocol().estimatedTestDuration.value(), expected.value());
     EXPECT_EQ(state.control().controlProfile.duration.value(), expected.value());
     EXPECT_NE(state.control().controlProfile.duration.value(), 48);

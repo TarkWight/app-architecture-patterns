@@ -120,3 +120,17 @@ TEST(ReadinessDiagnosticMessageBuilderTest, MessagesIncludeDiagnosticNumericValu
     EXPECT_TRUE(contains(currentMessage, "108.00"));
     EXPECT_TRUE(contains(fallbackMessage, "1.10"));
 }
+
+TEST(ReadinessDiagnosticMessageBuilderTest, WorstCaseReadinessShowsScenarioImpact) {
+    auto readiness = readinessWith(application::session::ReadinessStatus::Warning);
+    readiness.hasCalculatedForImpact = true;
+    readiness.calculatedForWorstCaseScenario = true;
+    readiness.calculatedForImpact = domain::makeWindImpact(6.0, 90.0, -15.0);
+
+    const auto message = application::services::ReadinessDiagnosticMessageBuilder::build(readiness);
+
+    ASSERT_FALSE(message.details.empty());
+    EXPECT_TRUE(contains(message.details.front(), "худшему участку сценария"));
+    EXPECT_TRUE(contains(message.details.front(), "Beaufort 6.0"));
+    EXPECT_TRUE(contains(message.details.front(), "угол атаки -15.0°"));
+}

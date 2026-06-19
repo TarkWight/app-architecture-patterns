@@ -3,7 +3,7 @@
 namespace application::useCases {
 
 BuildControlPlotUseCase::BuildControlPlotUseCase(session::SessionState &state, const ports::IFunctionEngine &engine)
-    : state(state), engine(engine), estimateTestDurationUseCase(state) {
+    : state(state), engine(engine), estimateTestDurationUseCase(state, engine) {
 }
 
 application::dto::PlotModel BuildControlPlotUseCase::execute() {

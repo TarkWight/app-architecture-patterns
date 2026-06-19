@@ -59,6 +59,7 @@ struct ReadinessStateData {
     domain::TestDurationDiagnosticValues values{};
     domain::WindImpact calculatedForImpact{};
     bool hasCalculatedForImpact{false};
+    bool calculatedForWorstCaseScenario{false};
 };
 
 struct ControlStateData {

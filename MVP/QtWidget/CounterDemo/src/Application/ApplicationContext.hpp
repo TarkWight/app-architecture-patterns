@@ -83,7 +83,7 @@ struct ApplicationContext {
 
     application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{sessionState, functionEngine};
 
-    application::useCases::EstimateTestDurationUseCase estimateTestDurationUseCase{sessionState};
+    application::useCases::EstimateTestDurationUseCase estimateTestDurationUseCase{sessionState, functionEngine};
 
     application::useCases::StartTestExecutionUseCase startTestExecutionUseCase{
         application::useCases::StartTestExecutionUseCase::Dependencies{.state = sessionState,

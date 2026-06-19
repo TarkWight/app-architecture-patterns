@@ -89,7 +89,8 @@ class SessionState {
     void setStandConnectionStatus(domain::StandConnectionStatus status);
     void setTelemetryPollInterval(domain::TelemetryPollInterval interval);
     void setReadinessFromEstimationResult(const domain::EstimatedTestDurationResult &result,
-                                          domain::WindImpact calculatedForImpact);
+                                          domain::WindImpact calculatedForImpact,
+                                          bool calculatedForWorstCaseScenario = false);
     void resetReadiness();
 
   private:

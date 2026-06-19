@@ -1,5 +1,6 @@
 #include "../../src/Application/UseCases/EstimateTestDurationUseCase.hpp"
 
+#include "../../src/Application/Ports/IFunctionEngine.hpp"
 #include "../../src/Application/Session/SessionState.hpp"
 #include "../../src/Application/Services/UavSpecificationMapper.hpp"
 #include "../../src/Domain/TestDurationEstimator.hpp"
@@ -10,6 +11,19 @@
 #include <vector>
 
 namespace {
+
+class PeakFunctionEngine final : public application::ports::IFunctionEngine {
+  public:
+    explicit PeakFunctionEngine(double peak) : peak(peak) {
+    }
+
+    double eval(const std::string & /*expr*/, double /*x*/) const override {
+        return peak;
+    }
+
+  private:
+    double peak{0.0};
+};
 
 std::vector<domain::TestProtocolParameter> validDroneParameters() {
     return {
@@ -58,6 +72,19 @@ domain::DurationMinutes expectedDuration(const domain::TestProtocol &protocol, c
 bool hasDiagnostic(const std::vector<domain::TestDurationDiagnostic> &diagnostics,
                    domain::TestDurationDiagnosticCode code) {
     return std::ranges::any_of(diagnostics, [code](const auto &diagnostic) { return diagnostic.code == code; });
+}
+
+domain::WindControlProfile profileWithBeaufort(std::initializer_list<double> beaufortValues) {
+    domain::WindControlProfile profile{};
+    double seconds = 0.0;
+    for (const auto beaufort : beaufortValues) {
+        profile.samples.push_back(domain::WindControlSample{
+            .time = domain::WindControlSampleTime::fromSeconds(seconds),
+            .beaufort = domain::Beaufort::from(beaufort),
+        });
+        seconds += profile.sampleIntervalSeconds;
+    }
+    return profile;
 }
 
 TEST(EstimateTestDurationUseCaseTest, WhenEstimatorReturnsDuration_UpdatesEstimatedDuration) {
@@ -144,6 +171,110 @@ TEST(EstimateTestDurationUseCaseTest, FailedEstimateDoesNotOverwritePreviousEsti
     EXPECT_FALSE(result.duration.has_value());
     EXPECT_EQ(state.protocol().estimatedTestDuration.value(), 42);
     EXPECT_EQ(state.readiness().status, application::session::ReadinessStatus::Failed);
+}
+
+TEST(EstimateTestDurationUseCaseTest, ManualUsesCurrentImpact) {
+    application::session::SessionState state{};
+    state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
+    state.setTestProtocolMode(domain::TestMode::Manual);
+    state.setTestProtocolDroneParameters(validDroneParameters());
+    const auto currentImpact = domain::makeWindImpact(2.0, 0.0, -15.0);
+    state.setWindImpact(currentImpact);
+    state.setControlProfile(profileWithBeaufort({7.0}));
+
+    application::useCases::EstimateTestDurationUseCase useCase{state};
+
+    ASSERT_TRUE(useCase.executeForAutoCalculated().duration.has_value());
+
+    EXPECT_FALSE(state.readiness().calculatedForWorstCaseScenario);
+    EXPECT_DOUBLE_EQ(state.readiness().calculatedForImpact.beaufort.value(), currentImpact.beaufort.value());
+    EXPECT_DOUBLE_EQ(state.readiness().calculatedForImpact.angleOfAttack.degrees(),
+                     currentImpact.angleOfAttack.degrees());
+}
+
+TEST(EstimateTestDurationUseCaseTest, HybridUsesProfilePeakBeaufort) {
+    application::session::SessionState state{};
+    state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
+    state.setTestProtocolMode(domain::TestMode::Hybrid);
+    state.setTestProtocolDroneParameters(validDroneParameters());
+    state.setWindImpact(domain::makeWindImpact(1.0, 0.0, 0.0));
+    state.setControlProfile(profileWithBeaufort({1.0, 6.0, 3.0}));
+
+    application::useCases::EstimateTestDurationUseCase useCase{state};
+
+    ASSERT_TRUE(useCase.executeForAutoCalculated().duration.has_value());
+
+    EXPECT_TRUE(state.readiness().calculatedForWorstCaseScenario);
+    EXPECT_DOUBLE_EQ(state.readiness().calculatedForImpact.beaufort.value(), 6.0);
+}
+
+TEST(EstimateTestDurationUseCaseTest, AutomaticUsesPreviewProfilePeakBeaufortWhenProfileIsNotBuilt) {
+    application::session::SessionState state{};
+    state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
+    state.setTestProtocolMode(domain::TestMode::Automatic);
+    state.setTestProtocolDroneParameters(validDroneParameters());
+    state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(1));
+    state.setWindImpact(domain::makeWindImpact(1.0, 0.0, 0.0));
+    state.setFunctionExpression("peak");
+    PeakFunctionEngine engine{5.0};
+
+    application::useCases::EstimateTestDurationUseCase useCase{state, engine};
+
+    ASSERT_TRUE(useCase.executeForAutoCalculated().duration.has_value());
+
+    EXPECT_TRUE(state.readiness().calculatedForWorstCaseScenario);
+    EXPECT_DOUBLE_EQ(state.readiness().calculatedForImpact.beaufort.value(), 5.0);
+}
+
+TEST(EstimateTestDurationUseCaseTest, CurrentImpactBelowProfilePeakDoesNotLowerRisk) {
+    application::session::SessionState state{};
+    state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
+    state.setTestProtocolMode(domain::TestMode::Automatic);
+    state.setTestProtocolDroneParameters(validDroneParameters());
+    state.setWindImpact(domain::makeWindImpact(1.0, 0.0, 0.0));
+    state.setControlProfile(profileWithBeaufort({7.0}));
+
+    application::useCases::EstimateTestDurationUseCase useCase{state};
+
+    const auto result = useCase.executeForAutoCalculated();
+
+    ASSERT_TRUE(result.duration.has_value());
+    EXPECT_DOUBLE_EQ(state.readiness().calculatedForImpact.beaufort.value(), 7.0);
+    EXPECT_LT(result.duration->value(),
+              expectedDuration(state.protocol().testProtocol, domain::makeWindImpact(1.0, 0.0, 0.0)).value());
+}
+
+TEST(EstimateTestDurationUseCaseTest, EmptyProfileFallsBackToCurrentImpact) {
+    application::session::SessionState state{};
+    state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
+    state.setTestProtocolMode(domain::TestMode::Automatic);
+    state.setTestProtocolDroneParameters(validDroneParameters());
+    const auto currentImpact = domain::makeWindImpact(3.0, 0.0, 0.0);
+    state.setWindImpact(currentImpact);
+
+    application::useCases::EstimateTestDurationUseCase useCase{state};
+
+    ASSERT_TRUE(useCase.executeForAutoCalculated().duration.has_value());
+
+    EXPECT_FALSE(state.readiness().calculatedForWorstCaseScenario);
+    EXPECT_DOUBLE_EQ(state.readiness().calculatedForImpact.beaufort.value(), currentImpact.beaufort.value());
+}
+
+TEST(EstimateTestDurationUseCaseTest, WorstCaseAngleUsesCurrentAbsoluteAngle) {
+    application::session::SessionState state{};
+    state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
+    state.setTestProtocolMode(domain::TestMode::Hybrid);
+    state.setTestProtocolDroneParameters(validDroneParameters());
+    state.setWindImpact(domain::makeWindImpact(1.0, 0.0, -45.0));
+    state.setControlProfile(profileWithBeaufort({4.0}));
+
+    application::useCases::EstimateTestDurationUseCase useCase{state};
+
+    ASSERT_TRUE(useCase.executeForAutoCalculated().duration.has_value());
+
+    EXPECT_TRUE(state.readiness().calculatedForWorstCaseScenario);
+    EXPECT_DOUBLE_EQ(state.readiness().calculatedForImpact.angleOfAttack.degrees(), -45.0);
+    EXPECT_GT(state.readiness().values.anglePenalty, 1.0);
 }
 
 } // namespace

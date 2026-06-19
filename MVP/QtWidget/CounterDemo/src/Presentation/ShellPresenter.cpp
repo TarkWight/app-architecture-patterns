@@ -53,6 +53,7 @@ void ShellPresenter::onPausePressed() {
     refreshFromState();
 
     if (view != nullptr) {
+        view->freezeStandImpactTransition();
         view->appendLog("Test execution paused");
     }
 }
@@ -83,6 +84,7 @@ void ShellPresenter::onStopPressed() {
     refreshFromState();
 
     if (view != nullptr) {
+        view->freezeStandImpactTransition();
         view->appendLog("Test execution stopped");
     }
 }

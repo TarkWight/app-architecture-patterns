@@ -12,7 +12,7 @@ namespace application::useCases {
 namespace {
 
 bool testExecutionIsActive(const application::session::ExecutionStateData &execution) {
-    return domain::canStop(execution.testExecutionStatus);
+    return execution.testExecutionStatus == domain::TestExecutionStatus::Running;
 }
 
 void applyTelemetryConnectionDecision(application::session::SessionState &state,

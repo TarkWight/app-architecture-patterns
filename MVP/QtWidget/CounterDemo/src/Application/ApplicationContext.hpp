@@ -84,9 +84,11 @@ struct ApplicationContext {
     application::useCases::StartTestExecutionUseCase startTestExecutionUseCase{
         sessionState, testExecutionScheduler, telemetryClient, buildControlPlotUseCase};
 
-    application::useCases::PauseTestExecutionUseCase pauseTestExecutionUseCase{sessionState, testExecutionScheduler};
+    application::useCases::PauseTestExecutionUseCase pauseTestExecutionUseCase{sessionState, testExecutionScheduler,
+                                                                               telemetryClient};
 
-    application::useCases::ResumeTestExecutionUseCase resumeTestExecutionUseCase{sessionState, testExecutionScheduler};
+    application::useCases::ResumeTestExecutionUseCase resumeTestExecutionUseCase{sessionState, testExecutionScheduler,
+                                                                                 telemetryClient};
 
     application::useCases::StopTestExecutionUseCase stopTestExecutionUseCase{sessionState, testExecutionScheduler,
                                                                              telemetryClient};

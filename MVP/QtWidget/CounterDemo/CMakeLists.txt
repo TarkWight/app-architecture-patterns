@@ -261,6 +261,7 @@ if (BUILD_TESTING)
     tests/Application/ConfigureTelemetryUseCaseTest.cpp
     tests/Application/ConnectStandUseCaseTest.cpp
     tests/Application/EstimateTestDurationUseCaseTest.cpp
+    tests/Application/PauseResumeTestExecutionUseCaseTest.cpp
     tests/Application/SessionStateTest.cpp
     tests/Application/SetControlChartsTabMinutesUseCaseTest.cpp
     tests/Application/SetOperatorTestDurationUseCaseTest.cpp
@@ -294,6 +295,8 @@ if (BUILD_TESTING)
     src/Application/UseCases/ApplyBeaufortImpactUseCase.cpp
     src/Application/UseCases/ApplyWindDirectionUseCase.cpp
     src/Application/UseCases/ApplyAngleOfAttackUseCase.cpp
+    src/Application/UseCases/PauseTestExecutionUseCase.cpp
+    src/Application/UseCases/ResumeTestExecutionUseCase.cpp
     src/Application/UseCases/StartTestExecutionUseCase.cpp
     src/Application/UseCases/StopTestExecutionUseCase.cpp
     src/Application/UseCases/UpdateTestProtocolUseCase.cpp

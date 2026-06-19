@@ -139,4 +139,23 @@ TEST(ConfigureTelemetryUseCaseTest, ConnectedStatusMarksStandConnectedWhenNoTest
     EXPECT_EQ(state.telemetry().telemetryStatus, domain::TelemetryStatus::Valid);
 }
 
+TEST(ConfigureTelemetryUseCaseTest, ConnectedStatusDoesNotStartPollingWhileTestIsPaused) {
+    application::session::SessionState state{};
+    ConfigRepositoryStub configRepository{};
+    configRepository.telemetryConfig.pollIntervalMs = 250;
+    configRepository.telemetryConfig.axis0.enabled = true;
+    TelemetryClientSpy telemetryClient{};
+    application::useCases::ConfigureTelemetryUseCase useCase{state, configRepository, telemetryClient};
+
+    useCase.execute("telemetry.toml");
+    state.setStandConnectionStatus(domain::StandConnectionStatus::Connecting);
+    state.setTestExecutionStatus(domain::TestExecutionStatus::Paused);
+
+    telemetryClient.statusCallback(domain::axis0, domain::TelemetryConnectionStatus::Connected, "Connected");
+
+    EXPECT_EQ(telemetryClient.startPollingCalls, 0);
+    EXPECT_EQ(state.connection().standConnectionStatus, domain::StandConnectionStatus::Connected);
+    EXPECT_EQ(state.telemetry().telemetryStatus, domain::TelemetryStatus::Valid);
+}
+
 } // namespace

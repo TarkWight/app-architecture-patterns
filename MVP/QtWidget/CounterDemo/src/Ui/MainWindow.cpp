@@ -129,6 +129,10 @@ void MainWindow::showOperatorWarning(const std::string &title, const std::string
     QMessageBox::warning(this, QString::fromStdString(title), QString::fromStdString(message));
 }
 
+void MainWindow::freezeStandImpactTransition() {
+    standImpactTransitionTimer->stop();
+}
+
 void MainWindow::setupTabs() {
     telemetryChartsTabWidget = new TelemetryChartsTabWidget(telemetryChartsTabPresenter, sessionAdapter, this);
     controlChartsTabWidget = new ControlChartsTabWidget(controlChartsTabPresenter, sessionAdapter, this);

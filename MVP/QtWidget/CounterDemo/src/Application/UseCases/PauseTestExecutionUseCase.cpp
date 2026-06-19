@@ -1,13 +1,15 @@
 #include "PauseTestExecutionUseCase.hpp"
 
+#include "../../Domain/StandConnectionTransitions.hpp"
 #include "../../Domain/TestExecutionStatus.hpp"
 #include "../../Domain/TestExecutionTransitions.hpp"
 
 namespace application::useCases {
 
 PauseTestExecutionUseCase::PauseTestExecutionUseCase(
-    application::session::SessionState &state, application::ports::ITestExecutionScheduler &testExecutionScheduler)
-    : state(state), testExecutionScheduler(testExecutionScheduler) {
+    application::session::SessionState &state, application::ports::ITestExecutionScheduler &testExecutionScheduler,
+    application::ports::ITelemetryClient &telemetryClient)
+    : state(state), testExecutionScheduler(testExecutionScheduler), telemetryClient(telemetryClient) {
 }
 
 void PauseTestExecutionUseCase::execute() {
@@ -21,6 +23,13 @@ void PauseTestExecutionUseCase::execute() {
     }
 
     testExecutionScheduler.pause();
+
+    const auto pollingTransition = domain::transitionAfterPollingStopped(state.connection().standConnectionStatus);
+    if (pollingTransition.has_value()) {
+        telemetryClient.stopPolling();
+        state.setStandConnectionStatus(*pollingTransition);
+    }
+
     state.setTestExecutionStatus(*transition);
 }
 

@@ -72,6 +72,7 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
 
     void appendLog(const std::string &text) override;
     void showOperatorWarning(const std::string &title, const std::string &message) override;
+    bool confirmDangerousReadinessStart(const std::string &title, const std::string &message) override;
     void freezeStandImpactTransition() override;
 
   private:

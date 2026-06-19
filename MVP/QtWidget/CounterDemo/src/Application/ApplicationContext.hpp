@@ -147,6 +147,7 @@ struct ApplicationContext {
                                                    .setLineColorUseCase = setLineColorUseCase,
                                                    .setStandControlModeUseCase = setStandControlModeUseCase,
                                                    .buildControlPlotUseCase = buildControlPlotUseCase,
+                                                   .estimateTestDurationUseCase = estimateTestDurationUseCase,
                                                    .configureTelemetryUseCase = configureTelemetryUseCase,
                                                    .connectStandUseCase = connectStandUseCase,
                                                    .disconnectStandUseCase = disconnectStandUseCase}};

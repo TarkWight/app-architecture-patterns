@@ -129,6 +129,11 @@ void MainWindow::showOperatorWarning(const std::string &title, const std::string
     QMessageBox::warning(this, QString::fromStdString(title), QString::fromStdString(message));
 }
 
+bool MainWindow::confirmDangerousReadinessStart(const std::string &title, const std::string &message) {
+    return QMessageBox::warning(this, QString::fromStdString(title), QString::fromStdString(message),
+                                QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes;
+}
+
 void MainWindow::freezeStandImpactTransition() {
     standImpactTransitionTimer->stop();
 }

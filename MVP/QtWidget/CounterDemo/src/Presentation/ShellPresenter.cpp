@@ -18,7 +18,9 @@ ShellPresenter::ShellPresenter(Dependencies deps)
       resumeTestExecutionUseCase(deps.resumeTestExecutionUseCase),
       stopTestExecutionUseCase(deps.stopTestExecutionUseCase),
       setFunctionExpressionUseCase(deps.setFunctionExpressionUseCase), setLineColorUseCase(deps.setLineColorUseCase),
-      buildControlPlotUseCase(deps.buildControlPlotUseCase), setTestTimeSourceUseCase(deps.setTestTimeSourceUseCase),
+      buildControlPlotUseCase(deps.buildControlPlotUseCase),
+      estimateTestDurationUseCase(deps.estimateTestDurationUseCase),
+      setTestTimeSourceUseCase(deps.setTestTimeSourceUseCase),
       configureTelemetryUseCase(deps.configureTelemetryUseCase), connectStandUseCase(deps.connectStandUseCase),
       disconnectStandUseCase(deps.disconnectStandUseCase), setStandControlModeUseCase(deps.setStandControlModeUseCase) {
 }
@@ -40,12 +42,48 @@ void ShellPresenter::onStateChanged() {
 }
 
 void ShellPresenter::onStartPressed() {
+    if (!readinessAllowsStart()) {
+        refreshFromState();
+        return;
+    }
+
     startTestExecutionUseCase.execute();
     refreshFromState();
 
     if (view != nullptr) {
         view->appendLog("Test execution started");
     }
+}
+
+bool ShellPresenter::readinessAllowsStart() {
+    const auto mode = state.protocol().testProtocol.testMode;
+    if (!readinessGateRequired(mode)) {
+        return true;
+    }
+
+    if (state.readiness().status == application::session::ReadinessStatus::Unknown) {
+        estimateTestDurationUseCase.executeForAutoCalculated();
+    }
+
+    const auto status = state.readiness().status;
+    if (!readinessConfirmationRequired(status)) {
+        return true;
+    }
+
+    return confirmDangerousReadinessStart(status);
+}
+
+bool ShellPresenter::confirmDangerousReadinessStart(application::session::ReadinessStatus status) {
+    if (view == nullptr) {
+        return false;
+    }
+
+    const std::string details =
+        status == application::session::ReadinessStatus::Failed
+            ? "Расчёт готовности невозможен. Проведение испытания может быть опасным."
+            : "Расчёт готовности содержит опасные диагностические сообщения. Проведение испытания может быть опасным.";
+
+    return view->confirmDangerousReadinessStart("Подтверждение запуска испытания", details + " Продолжить запуск?");
 }
 
 void ShellPresenter::onPausePressed() {
@@ -149,6 +187,15 @@ bool testTimeSourceCanBeChanged(domain::TestMode mode) {
 
 bool ShellPresenter::canStop(domain::TestExecutionStatus status) {
     return domain::canStop(status);
+}
+
+bool ShellPresenter::readinessGateRequired(domain::TestMode mode) {
+    return mode == domain::TestMode::Hybrid || mode == domain::TestMode::Automatic;
+}
+
+bool ShellPresenter::readinessConfirmationRequired(application::session::ReadinessStatus status) {
+    return status == application::session::ReadinessStatus::Dangerous ||
+           status == application::session::ReadinessStatus::Failed;
 }
 
 void ShellPresenter::refreshFromState() {

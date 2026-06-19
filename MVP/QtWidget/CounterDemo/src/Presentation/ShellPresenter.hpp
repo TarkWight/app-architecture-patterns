@@ -16,6 +16,7 @@
 #include "../Application/UseCases/ConfigureTelemetryUseCase.hpp"
 #include "../Application/UseCases/ConnectStandUseCase.hpp"
 #include "../Application/UseCases/DisconnectStandUseCase.hpp"
+#include "../Application/UseCases/EstimateTestDurationUseCase.hpp"
 #include "../Domain/StandConnectionStatus.hpp"
 
 #include "IShellView.hpp"
@@ -35,6 +36,7 @@ class ShellPresenter final {
         application::useCases::SetLineColorUseCase &setLineColorUseCase;
         application::useCases::SetStandControlModeUseCase &setStandControlModeUseCase;
         application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
+        application::useCases::EstimateTestDurationUseCase &estimateTestDurationUseCase;
         application::useCases::ConfigureTelemetryUseCase &configureTelemetryUseCase;
         application::useCases::ConnectStandUseCase &connectStandUseCase;
         application::useCases::DisconnectStandUseCase &disconnectStandUseCase;
@@ -71,6 +73,7 @@ class ShellPresenter final {
     application::useCases::SetFunctionExpressionUseCase &setFunctionExpressionUseCase;
     application::useCases::SetLineColorUseCase &setLineColorUseCase;
     application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
+    application::useCases::EstimateTestDurationUseCase &estimateTestDurationUseCase;
     application::useCases::SetTestTimeSourceUseCase &setTestTimeSourceUseCase;
     application::useCases::ConfigureTelemetryUseCase &configureTelemetryUseCase;
     application::useCases::ConnectStandUseCase &connectStandUseCase;
@@ -91,6 +94,10 @@ class ShellPresenter final {
     void refreshStandConnectionButton();
     void refreshStandConnectionStatusText();
     void notifyStandConnectionStatusChanged(domain::StandConnectionStatus status);
+    [[nodiscard]] bool readinessAllowsStart();
+    [[nodiscard]] bool confirmDangerousReadinessStart(application::session::ReadinessStatus status);
+    [[nodiscard]] static bool readinessGateRequired(domain::TestMode mode);
+    [[nodiscard]] static bool readinessConfirmationRequired(application::session::ReadinessStatus status);
 };
 
 } // namespace presentation

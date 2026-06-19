@@ -276,6 +276,7 @@ if (BUILD_TESTING)
     tests/Application/UpdateTestProtocolUseCaseTest.cpp
     tests/Application/UavSpecificationMapperTest.cpp
     tests/Presentation/ControlChartsTabPresenterTest.cpp
+    tests/Presentation/ShellPresenterTest.cpp
     tests/Infrastructure/ConfigTemplateServiceTest.cpp
     tests/Infrastructure/LegacyAxisProtocolCodecTest.cpp
     tests/Infrastructure/QtTestExecutionSchedulerTest.cpp
@@ -291,10 +292,14 @@ if (BUILD_TESTING)
     src/Application/UseCases/BuildControlPlotUseCase.cpp
     src/Application/UseCases/ConfigureTelemetryUseCase.cpp
     src/Application/UseCases/ConnectStandUseCase.cpp
+    src/Application/UseCases/DisconnectStandUseCase.cpp
     src/Application/UseCases/EstimateTestDurationUseCase.cpp
+    src/Application/UseCases/SetFunctionExpressionUseCase.cpp
+    src/Application/UseCases/SetLineColorUseCase.cpp
     src/Application/UseCases/SetControlChartsTabMinutesUseCase.cpp
     src/Application/UseCases/SetWindImpactUseCase.cpp
     src/Application/UseCases/SetOperatorTestDurationUseCase.cpp
+    src/Application/UseCases/SetTestTimeSourceUseCase.cpp
     src/Application/UseCases/SetStandControlModeUseCase.cpp
     src/Application/UseCases/SetStandImpactUseCase.cpp
     src/Application/UseCases/SetTelemetryWindowUseCase.cpp
@@ -306,6 +311,7 @@ if (BUILD_TESTING)
     src/Application/UseCases/StartTestExecutionUseCase.cpp
     src/Application/UseCases/StopTestExecutionUseCase.cpp
     src/Application/UseCases/UpdateTestProtocolUseCase.cpp
+    src/Presentation/ShellPresenter.cpp
     src/Presentation/ControlChartsTab/ControlChartsTabPresenter.cpp
     src/Infrastructure/QtTestExecutionScheduler.cpp
     src/Infrastructure/ConfigTemplates/ConfigTemplateService.cpp

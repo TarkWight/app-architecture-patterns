@@ -50,6 +50,7 @@ qt_add_executable(develop
   src/Domain/Time.hpp
   src/Domain/Expression.hpp
   src/Domain/WindImpact.hpp
+  src/Domain/HybridBeaufortOverride.hpp
   src/Domain/WindControlProfile.hpp
   src/Domain/WindControlProfileImpact.hpp
   src/Domain/WindControlProfileWorstCase.hpp
@@ -257,6 +258,7 @@ if (BUILD_TESTING)
     tests/Domain/TestProtocolTest.cpp
     tests/Domain/TimeTest.cpp
     tests/Domain/WindImpactTest.cpp
+    tests/Domain/HybridBeaufortOverrideTest.cpp
     tests/Domain/WindControlProfileCalculatorTest.cpp
     tests/Domain/WindControlProfileImpactTest.cpp
     tests/Domain/WindControlProfileWorstCaseTest.cpp

@@ -200,7 +200,9 @@ TEST(ControlChartsTabPresenterTest, CalculateReadinessRunsEstimateUseCase) {
     fixture.presenter.onReadinessCalculationPressed();
 
     EXPECT_EQ(fixture.state.readiness().status, application::session::ReadinessStatus::Ok);
-    EXPECT_EQ(fixture.view.readinessMessage, "Расчёт готовности выполнен. Испытание допустимо.");
+    EXPECT_TRUE(contains(fixture.view.readinessMessage, "Расчёт готовности выполнен. Испытание допустимо."));
+    EXPECT_TRUE(contains(fixture.view.readinessMessage, "Безопасный предел по Бофорту"));
+    EXPECT_TRUE(contains(fixture.view.readinessMessage, "Безопасный предел угла атаки"));
 }
 
 TEST(ControlChartsTabPresenterTest, WarningStatusMapsToWarningMessage) {

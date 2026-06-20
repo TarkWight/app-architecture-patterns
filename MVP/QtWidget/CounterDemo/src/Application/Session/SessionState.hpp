@@ -97,7 +97,8 @@ class SessionState {
     void setTelemetryPollInterval(domain::TelemetryPollInterval interval);
     void setReadinessFromEstimationResult(const domain::EstimatedTestDurationResult &result,
                                           domain::WindImpact calculatedForImpact,
-                                          bool calculatedForWorstCaseScenario = false);
+                                          bool calculatedForWorstCaseScenario = false,
+                                          domain::SafeWindImpactLimitResult safeLimits = {});
     void resetReadiness();
 
   private:

@@ -5,6 +5,7 @@
 
 #include "../../Domain/TestTimeSource.hpp"
 #include "../../Domain/HybridBeaufortOverride.hpp"
+#include "../../Domain/SafeWindImpactLimitEstimator.hpp"
 #include "../../Domain/TestModeStatePolicy.hpp"
 #include "../../Domain/WindControlProfileWorstCase.hpp"
 
@@ -96,12 +97,13 @@ domain::EstimatedTestDurationResult EstimateTestDurationUseCase::executeForAutoC
         .uav = *uavSpecification,
         .impact = impact,
     });
+    const auto safeLimits = domain::SafeWindImpactLimitEstimator::estimate(*uavSpecification, impact);
 
     if (result.duration.has_value()) {
         state.setEstimatedTestDurationMinutes(*result.duration);
     }
 
-    state.setReadinessFromEstimationResult(result, impact, calculatedForWorstCaseScenario);
+    state.setReadinessFromEstimationResult(result, impact, calculatedForWorstCaseScenario, safeLimits);
     return result;
 }
 

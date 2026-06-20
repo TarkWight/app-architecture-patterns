@@ -60,6 +60,16 @@ ReadinessDiagnosticMessage ReadinessDiagnosticMessageBuilder::build(const sessio
         message.details.push_back(messageForDiagnostic(warning.code, readiness.values));
     }
 
+    if (readiness.safeLimits.status == domain::SafeWindImpactLimitStatus::Available) {
+        message.details.push_back("Безопасный предел по Бофорту: " + number(readiness.safeLimits.maxSafeBeaufort, 1) +
+                                  ".");
+        message.details.push_back("Безопасный предел угла атаки: ±" +
+                                  number(readiness.safeLimits.maxSafeAbsAngleOfAttack, 0) + "°.");
+    } else if (!readiness.safeLimits.diagnostics.empty()) {
+        message.details.push_back(
+            "Безопасные пределы воздействия недоступны: не хватает критичных паспортных данных БАС.");
+    }
+
     return message;
 }
 

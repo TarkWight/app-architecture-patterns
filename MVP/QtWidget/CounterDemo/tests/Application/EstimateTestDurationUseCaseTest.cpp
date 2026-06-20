@@ -108,6 +108,21 @@ TEST(EstimateTestDurationUseCaseTest, WhenEstimatorReturnsDuration_UpdatesEstima
     EXPECT_DOUBLE_EQ(state.readiness().calculatedForImpact.beaufort.value(), impact.beaufort.value());
 }
 
+TEST(EstimateTestDurationUseCaseTest, StoresSafeWindImpactLimits) {
+    application::session::SessionState state{};
+    state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
+    state.setTestProtocolDroneParameters(validDroneParameters());
+    state.setWindImpact(domain::makeWindImpact(4.0, 0.0, 10.0));
+
+    application::useCases::EstimateTestDurationUseCase useCase{state};
+
+    ASSERT_TRUE(useCase.executeForAutoCalculated().duration.has_value());
+
+    EXPECT_EQ(state.readiness().safeLimits.status, domain::SafeWindImpactLimitStatus::Available);
+    EXPECT_GT(state.readiness().safeLimits.maxSafeBeaufort, 0.0);
+    EXPECT_GT(state.readiness().safeLimits.maxSafeAbsAngleOfAttack, 0.0);
+}
+
 TEST(EstimateTestDurationUseCaseTest, WhenEstimatorFails_DoesNotOverwriteEstimatedDuration) {
     application::session::SessionState state{};
     state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);

@@ -134,3 +134,28 @@ TEST(ReadinessDiagnosticMessageBuilderTest, WorstCaseReadinessShowsScenarioImpac
     EXPECT_TRUE(contains(message.details.front(), "Beaufort 6.0"));
     EXPECT_TRUE(contains(message.details.front(), "угол атаки -15.0°"));
 }
+
+TEST(ReadinessDiagnosticMessageBuilderTest, IncludesSafeLimitsWhenAvailable) {
+    auto readiness = readinessWith(application::session::ReadinessStatus::Ok);
+    readiness.safeLimits.status = domain::SafeWindImpactLimitStatus::Available;
+    readiness.safeLimits.maxSafeBeaufort = 6.5;
+    readiness.safeLimits.maxSafeAbsAngleOfAttack = 45.0;
+
+    const auto message = application::services::ReadinessDiagnosticMessageBuilder::build(readiness);
+    const auto text = message.toDisplayText();
+
+    EXPECT_TRUE(contains(text, "Безопасный предел по Бофорту: 6.5"));
+    EXPECT_TRUE(contains(text, "Безопасный предел угла атаки: ±45°"));
+}
+
+TEST(ReadinessDiagnosticMessageBuilderTest, ShowsReasonWhenSafeLimitsUnavailable) {
+    auto readiness = readinessWith(application::session::ReadinessStatus::Failed);
+    readiness.safeLimits.status = domain::SafeWindImpactLimitStatus::Unavailable;
+    readiness.safeLimits.diagnostics.push_back(
+        domain::TestDurationDiagnostic{.code = domain::TestDurationDiagnosticCode::BatteryCapacityMissing});
+
+    const auto message = application::services::ReadinessDiagnosticMessageBuilder::build(readiness);
+    const auto text = message.toDisplayText();
+
+    EXPECT_TRUE(contains(text, "Безопасные пределы воздействия недоступны"));
+}

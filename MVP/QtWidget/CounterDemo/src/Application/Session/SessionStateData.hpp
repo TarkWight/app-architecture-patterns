@@ -13,6 +13,7 @@
 #include "../../Domain/TestExecutionStatus.hpp"
 #include "../../Domain/TestDurationEstimator.hpp"
 #include "../../Domain/HybridBeaufortOverride.hpp"
+#include "../../Domain/SafeWindImpactLimitEstimator.hpp"
 #include "../../Domain/TestProtocol.hpp"
 #include "../../Domain/TestTimeDirection.hpp"
 #include "../../Domain/TestTimeSource.hpp"
@@ -62,6 +63,7 @@ struct ReadinessStateData {
     domain::WindImpact calculatedForImpact{};
     bool hasCalculatedForImpact{false};
     bool calculatedForWorstCaseScenario{false};
+    domain::SafeWindImpactLimitResult safeLimits{};
 };
 
 struct ControlStateData {

@@ -50,6 +50,20 @@ void ControlChartsTabWidget::setMinutesInputEnabled(bool enabled) {
     ui->spinBoxMinutes->setEnabled(enabled);
 }
 
+void ControlChartsTabWidget::setOperatorDurationVisible(bool visible) {
+    ui->labelMinutesCaption->setVisible(visible);
+    ui->spinBoxMinutes->setVisible(visible);
+}
+
+void ControlChartsTabWidget::setEstimatedDurationVisible(bool visible) {
+    ui->labelEstimatedDurationCaption->setVisible(visible);
+    ui->labelEstimatedDurationValue->setVisible(visible);
+}
+
+void ControlChartsTabWidget::setEstimatedDurationText(const std::string &text) {
+    ui->labelEstimatedDurationValue->setText(QString::fromStdString(text));
+}
+
 void ControlChartsTabWidget::setReadinessCalculationEnabled(bool enabled) {
     ui->buttonCalculateReadiness->setEnabled(enabled);
 }
@@ -141,9 +155,11 @@ void ControlChartsTabWidget::connectSignals() {
 }
 
 void ControlChartsTabWidget::connectSessionSignals() {
-    QObject::connect(
-        &sessionAdapter, &infrastructure::SessionStateQtAdapter::testTimeModelChanged, this,
-        [this](const presentation::viewModels::TestTimeViewModel & /*model*/) { presenter.onTimeSettingsChanged(); });
+    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testTimeModelChanged, this,
+                     [this](const presentation::viewModels::TestTimeViewModel & /*model*/) {
+                         presenter.onTimeSettingsChanged();
+                         presenter.onDurationStateChanged();
+                     });
 
     QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testProtocolModeChanged, this,
                      [this](const QString &mode) {

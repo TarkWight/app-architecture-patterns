@@ -40,6 +40,7 @@ class ControlChartsTabPresenter final {
 
     void onRebuildPlotPressed();
     void onReadinessCalculationPressed();
+    void onDurationStateChanged();
 
   private:
     application::session::SessionState &state;
@@ -53,6 +54,7 @@ class ControlChartsTabPresenter final {
 
     void updateWindImpact(double beaufort, double direction, double angleOfAttack);
     void refreshMinutesInputEnabled();
+    void refreshDurationDisplay();
     void refreshReadinessCalculationEnabled();
 };
 

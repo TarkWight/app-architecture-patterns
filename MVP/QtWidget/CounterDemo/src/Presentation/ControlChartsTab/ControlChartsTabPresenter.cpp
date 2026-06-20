@@ -4,6 +4,7 @@
 #include "../../Domain/TestModeStatePolicy.hpp"
 #include "../../Domain/TestProtocol.hpp"
 
+#include <string>
 #include <utility>
 
 namespace presentation::controlChartsTab {
@@ -38,12 +39,14 @@ void ControlChartsTabPresenter::onViewReady() {
     view->setTestProtocolProgram(std::string{domain::testProgramKey(stateData.protocol.testProtocol.testProgram)});
 
     refreshMinutesInputEnabled();
+    refreshDurationDisplay();
     refreshReadinessCalculationEnabled();
     onRebuildPlotPressed();
 }
 
 void ControlChartsTabPresenter::onTimeSettingsChanged() {
     refreshMinutesInputEnabled();
+    refreshDurationDisplay();
     refreshReadinessCalculationEnabled();
 }
 
@@ -123,8 +126,13 @@ void ControlChartsTabPresenter::onReadinessCalculationPressed() {
 
     const auto message = application::services::ReadinessDiagnosticMessageBuilder::build(state.readiness());
     const auto displayText = message.toDisplayText();
+    refreshDurationDisplay();
     view->showReadinessMessage(displayText);
     view->appendLog(displayText);
+}
+
+void ControlChartsTabPresenter::onDurationStateChanged() {
+    refreshDurationDisplay();
 }
 
 void ControlChartsTabPresenter::updateWindImpact(double beaufort, double direction, double angleOfAttack) {
@@ -139,6 +147,35 @@ void ControlChartsTabPresenter::refreshMinutesInputEnabled() {
     const auto &stateData = state.get();
     view->setMinutesInputEnabled(domain::TestModeStatePolicy::operatorDurationInputEnabled(
         stateData.protocol.testProtocol.testMode, stateData.protocol.testTimeSource));
+}
+
+void ControlChartsTabPresenter::refreshDurationDisplay() {
+    if (view == nullptr) {
+        return;
+    }
+
+    const auto &protocol = state.protocol();
+    const bool autoCalculated = protocol.testTimeSource == domain::TestTimeSource::AutoCalculated;
+    view->setOperatorDurationVisible(!autoCalculated);
+    view->setEstimatedDurationVisible(autoCalculated);
+
+    if (!autoCalculated) {
+        return;
+    }
+
+    switch (state.readiness().status) {
+    case application::session::ReadinessStatus::Failed:
+        view->setEstimatedDurationText("Расчёт не выполнен");
+        return;
+    case application::session::ReadinessStatus::Unknown:
+        view->setEstimatedDurationText("Не рассчитано");
+        return;
+    case application::session::ReadinessStatus::Ok:
+    case application::session::ReadinessStatus::Warning:
+    case application::session::ReadinessStatus::Dangerous:
+        view->setEstimatedDurationText(std::to_string(protocol.estimatedTestDuration.value()) + " мин");
+        return;
+    }
 }
 
 void ControlChartsTabPresenter::refreshReadinessCalculationEnabled() {

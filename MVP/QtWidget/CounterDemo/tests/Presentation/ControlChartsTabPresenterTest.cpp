@@ -32,6 +32,18 @@ class ControlChartsTabViewSpy final : public presentation::controlChartsTab::ICo
         minutesInputEnabled = enabled;
     }
 
+    void setOperatorDurationVisible(bool visible) override {
+        operatorDurationVisible = visible;
+    }
+
+    void setEstimatedDurationVisible(bool visible) override {
+        estimatedDurationVisible = visible;
+    }
+
+    void setEstimatedDurationText(const std::string &text) override {
+        estimatedDurationText = text;
+    }
+
     void setReadinessCalculationEnabled(bool enabled) override {
         readinessCalculationEnabled = enabled;
     }
@@ -70,6 +82,9 @@ class ControlChartsTabViewSpy final : public presentation::controlChartsTab::ICo
 
     int minutes{0};
     bool minutesInputEnabled{false};
+    bool operatorDurationVisible{true};
+    bool estimatedDurationVisible{false};
+    std::string estimatedDurationText{};
     bool readinessCalculationEnabled{false};
     std::string testProtocolMode{};
     std::string testProtocolProgram{};
@@ -233,4 +248,67 @@ TEST(ControlChartsTabPresenterTest, FailedStatusMapsToDangerMessage) {
     EXPECT_TRUE(
         contains(fixture.view.readinessMessage, "Расчёт готовности невозможен. Испытание потенциально опасно."));
     EXPECT_TRUE(contains(fixture.view.readinessMessage, "Ёмкость АКБ"));
+}
+
+TEST(ControlChartsTabPresenterTest, AutoCalculatedShowsEstimatedDurationNotControlChartsMinutes) {
+    PresenterFixture fixture{};
+    fixture.state.setTestProtocolMode(domain::TestMode::Automatic);
+    fixture.state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
+    fixture.state.setControlChartsTabMinutes(domain::DurationMinutes::required(20));
+    fixture.state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(37));
+    domain::EstimatedTestDurationResult result{};
+    result.duration = domain::DurationMinutes::required(37);
+    fixture.state.setReadinessFromEstimationResult(result, domain::makeWindImpact(1.0, 0.0, 0.0));
+    fixture.presenter.attachView(fixture.view);
+
+    fixture.presenter.onViewReady();
+
+    EXPECT_FALSE(fixture.view.operatorDurationVisible);
+    EXPECT_TRUE(fixture.view.estimatedDurationVisible);
+    EXPECT_EQ(fixture.view.estimatedDurationText, "37 мин");
+}
+
+TEST(ControlChartsTabPresenterTest, OperatorDefinedShowsControlChartsMinutes) {
+    PresenterFixture fixture{};
+    fixture.state.setTestProtocolMode(domain::TestMode::Hybrid);
+    fixture.state.setTestTimeSource(domain::TestTimeSource::OperatorDefined);
+    fixture.state.setControlChartsTabMinutes(domain::DurationMinutes::required(42));
+    fixture.state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(7));
+    fixture.presenter.attachView(fixture.view);
+
+    fixture.presenter.onViewReady();
+
+    EXPECT_TRUE(fixture.view.operatorDurationVisible);
+    EXPECT_FALSE(fixture.view.estimatedDurationVisible);
+    EXPECT_EQ(fixture.view.minutes, 42);
+}
+
+TEST(ControlChartsTabPresenterTest, SuccessfulReadinessCalculationUpdatesEstimatedDurationDisplay) {
+    PresenterFixture fixture{};
+    fixture.state.setTestProtocolMode(domain::TestMode::Automatic);
+    fixture.state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
+    fixture.state.setControlChartsTabMinutes(domain::DurationMinutes::required(20));
+    fixture.state.setTestProtocolDroneParameters(validDroneParameters());
+    fixture.presenter.attachView(fixture.view);
+
+    fixture.presenter.onReadinessCalculationPressed();
+
+    EXPECT_TRUE(fixture.view.estimatedDurationVisible);
+    EXPECT_EQ(fixture.view.estimatedDurationText,
+              std::to_string(fixture.state.protocol().estimatedTestDuration.value()) + " мин");
+}
+
+TEST(ControlChartsTabPresenterTest, FailedReadinessDoesNotPresentFallbackDurationAsSuccessful) {
+    PresenterFixture fixture{};
+    fixture.state.setTestProtocolMode(domain::TestMode::Automatic);
+    fixture.state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
+    fixture.state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(20));
+    fixture.state.setTestProtocolDroneParameters(invalidDroneParameters());
+    fixture.presenter.attachView(fixture.view);
+
+    fixture.presenter.onReadinessCalculationPressed();
+
+    EXPECT_EQ(fixture.state.readiness().status, application::session::ReadinessStatus::Failed);
+    EXPECT_TRUE(fixture.view.estimatedDurationVisible);
+    EXPECT_EQ(fixture.view.estimatedDurationText, "Расчёт не выполнен");
 }

@@ -231,6 +231,20 @@
       <item row="2" column="3" colspan="2">
        <widget class="QComboBox" name="comboBoxTestProgram"/>
       </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="labelEstimatedDurationCaption">
+        <property name="text">
+         <string>Расчётное время:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1" colspan="4">
+       <widget class="QLabel" name="labelEstimatedDurationValue">
+        <property name="text">
+         <string>Не рассчитано</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>

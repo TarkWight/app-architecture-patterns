@@ -91,6 +91,14 @@ int PlotRenderer::tickCount(double minValue, double maxValue, double stepValue) 
     return static_cast<int>(std::floor(span / stepValue)) + 1;
 }
 
+QString PlotRenderer::formatTickValue(double value, const application::dto::AxisSpec &axis) {
+    if (axis.labelPrecision >= 0) {
+        return QString::number(value, 'f', axis.labelPrecision);
+    }
+
+    return QString::number(value);
+}
+
 void PlotRenderer::drawFrame(QPainter &painter, const QRect &plotRect) {
     painter.fillRect(plotRect, QColor(255, 255, 255));
     painter.setPen(QPen(QColor(30, 41, 59), 1));
@@ -136,7 +144,7 @@ void PlotRenderer::drawXGrid(QPainter &painter, const QRect &plotRect, const app
         painter.drawLine(px, plotRect.top(), px, plotRect.bottom());
 
         painter.setPen(QPen(QColor(30, 41, 59), 1));
-        painter.drawText(px - 15, plotRect.bottom() + 18, 30, 16, Qt::AlignCenter, QString::number(xValue));
+        painter.drawText(px - 15, plotRect.bottom() + 18, 30, 16, Qt::AlignCenter, formatTickValue(xValue, plot.x));
         painter.setPen(QPen(QColor(203, 213, 225), 1, Qt::DashLine));
     }
 }
@@ -158,7 +166,7 @@ void PlotRenderer::drawYGrid(QPainter &painter, const QRect &plotRect, const app
 
         painter.setPen(QPen(QColor(30, 41, 59), 1));
         painter.drawText(plotRect.left() - leftMargin, py - 8, leftMargin - 5, 16, Qt::AlignRight | Qt::AlignVCenter,
-                         QString::number(yValue));
+                         formatTickValue(yValue, plot.y));
         painter.setPen(QPen(QColor(203, 213, 225), 1, Qt::DashLine));
     }
 }

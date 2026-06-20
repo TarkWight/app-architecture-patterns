@@ -11,14 +11,17 @@ application::dto::PlotModel TelemetryPlotBuilder::build(const session::Telemetry
     application::dto::PlotModel plot{};
     plot.title = "Telemetry";
     plot.x.label = "seconds";
-    plot.y = application::dto::AxisSpec{.min = -180.0, .max = 360.0, .step = 45.0, .label = "degrees"};
+    plot.y = application::dto::AxisSpec{.min = 0.0, .max = 360.0, .step = 45.0, .label = "degrees"};
 
     const double windowSeconds = std::max(1.0, telemetry.telemetryWindowSeconds);
     const double endSeconds = std::max(windowSeconds, telemetry.telemetryWindowEndSeconds.seconds());
     const double startSeconds = std::max(0.0, endSeconds - windowSeconds);
 
-    plot.x = application::dto::AxisSpec{
-        .min = startSeconds, .max = startSeconds + windowSeconds, .step = 10.0, .label = "seconds"};
+    plot.x = application::dto::AxisSpec{.min = startSeconds,
+                                        .max = startSeconds + windowSeconds,
+                                        .step = 10.0,
+                                        .label = "seconds",
+                                        .labelPrecision = 0};
 
     application::dto::NamedSeries axisY{};
     axisY.label = "Ось Y / тангаж";

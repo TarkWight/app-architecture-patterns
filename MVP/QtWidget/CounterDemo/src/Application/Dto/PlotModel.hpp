@@ -33,6 +33,7 @@ struct AxisSpec {
     double max{1.0};
     double step{1.0};
     std::string label{};
+    int labelPrecision{-1};
 };
 
 struct PlotMarker {

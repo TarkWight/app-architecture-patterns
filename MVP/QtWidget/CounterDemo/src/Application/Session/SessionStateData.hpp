@@ -32,8 +32,8 @@ enum class ReadinessStatus { Unknown, Ok, Warning, Dangerous, Failed };
 inline application::dto::PlotModel makeInitialTelemetryPlot() {
     application::dto::PlotModel plot{};
     plot.title = "Telemetry";
-    plot.x = application::dto::AxisSpec{.min = 0.0, .max = 60.0, .step = 10.0, .label = "seconds"};
-    plot.y = application::dto::AxisSpec{.min = -180.0, .max = 360.0, .step = 45.0, .label = "degrees"};
+    plot.x = application::dto::AxisSpec{.min = 0.0, .max = 60.0, .step = 10.0, .label = "seconds", .labelPrecision = 0};
+    plot.y = application::dto::AxisSpec{.min = 0.0, .max = 360.0, .step = 45.0, .label = "degrees"};
     return plot;
 }
 

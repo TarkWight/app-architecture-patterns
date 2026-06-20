@@ -26,7 +26,8 @@ TEST(TelemetryPlotBuilderTest, BuildsVisibleGridWhenHistoryIsEmpty) {
     EXPECT_DOUBLE_EQ(plot.x.max, 60.0);
     EXPECT_DOUBLE_EQ(plot.x.step, 10.0);
     EXPECT_EQ(plot.x.label, "seconds");
-    EXPECT_DOUBLE_EQ(plot.y.min, -180.0);
+    EXPECT_EQ(plot.x.labelPrecision, 0);
+    EXPECT_DOUBLE_EQ(plot.y.min, 0.0);
     EXPECT_DOUBLE_EQ(plot.y.max, 360.0);
     EXPECT_DOUBLE_EQ(plot.y.step, 45.0);
     EXPECT_EQ(plot.y.label, "degrees");
@@ -48,6 +49,7 @@ TEST(TelemetryPlotBuilderTest, BuildsAxisSeriesInsideSelectedWindow) {
 
     EXPECT_DOUBLE_EQ(plot.x.min, 10.0);
     EXPECT_DOUBLE_EQ(plot.x.max, 70.0);
+    EXPECT_EQ(plot.x.labelPrecision, 0);
     ASSERT_EQ(plot.seriesList.size(), 2U);
     ASSERT_EQ(plot.seriesList.at(0).series.points.size(), 1U);
     ASSERT_EQ(plot.seriesList.at(1).series.points.size(), 1U);

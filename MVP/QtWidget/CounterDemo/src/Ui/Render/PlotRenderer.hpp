@@ -24,6 +24,8 @@ class PlotRenderer final {
 
     static int tickCount(double minValue, double maxValue, double stepValue);
 
+    static QString formatTickValue(double value, const application::dto::AxisSpec &axis);
+
     static void drawFrame(QPainter &painter, const QRect &plotRect);
 
     static void drawTitle(QPainter &painter, const QRect &outerRect, const application::dto::PlotModel &plot);

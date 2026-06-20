@@ -225,9 +225,15 @@ void application::session::SessionState::setTargetStandImpact(domain::WindImpact
     notify();
 }
 
+void application::session::SessionState::setRuntimeTargetStandImpact(domain::WindImpact profile) {
+    data.control.targetStandImpact = std::move(profile);
+    notify();
+}
+
 void application::session::SessionState::setHybridBeaufortOverride(
     std::optional<domain::HybridBeaufortOverride> overrideState) {
     data.control.hybridBeaufortOverride = std::move(overrideState);
+    resetReadinessWithoutNotify();
     notify();
 }
 
@@ -237,6 +243,7 @@ void application::session::SessionState::clearHybridBeaufortOverride() {
     }
 
     data.control.hybridBeaufortOverride.reset();
+    resetReadinessWithoutNotify();
     notify();
 }
 

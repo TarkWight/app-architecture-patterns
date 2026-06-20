@@ -4,6 +4,7 @@
 #include "../Services/UavSpecificationMapper.hpp"
 
 #include "../../Domain/TestTimeSource.hpp"
+#include "../../Domain/HybridBeaufortOverride.hpp"
 #include "../../Domain/TestModeStatePolicy.hpp"
 #include "../../Domain/WindControlProfileWorstCase.hpp"
 
@@ -21,6 +22,25 @@ domain::WindImpact impactForEstimation(const application::session::ControlStateD
     }
 
     return control.windImpact;
+}
+
+domain::WindImpact hybridImpactForEstimation(const domain::WindControlProfile &profile,
+                                             const application::session::ControlStateData &control,
+                                             bool &calculatedForWorstCaseScenario) {
+    const auto baseImpact = impactForEstimation(control);
+    auto worstCase = domain::WindControlProfileWorstCase::from(profile, baseImpact);
+    auto beaufort = worstCase.impact.beaufort;
+    calculatedForWorstCaseScenario = worstCase.usedProfile;
+
+    if (control.hybridBeaufortOverride.has_value() &&
+        control.hybridBeaufortOverride->operatorBeaufort.value() > beaufort.value()) {
+        beaufort = control.hybridBeaufortOverride->operatorBeaufort;
+        calculatedForWorstCaseScenario = true;
+    }
+
+    return domain::WindImpact{.beaufort = beaufort,
+                              .direction = control.hybridOperatorDirection,
+                              .angleOfAttack = control.hybridOperatorAngleOfAttack};
 }
 
 domain::WindControlProfile profileForEstimation(const application::session::ProtocolStateData &protocol,
@@ -55,7 +75,10 @@ domain::EstimatedTestDurationResult EstimateTestDurationUseCase::executeForAutoC
     auto impact = baseImpact;
     bool calculatedForWorstCaseScenario = false;
 
-    if (domain::TestModeStatePolicy::usesControlProfile(protocol.testProtocol.testMode)) {
+    if (protocol.testProtocol.testMode == domain::TestMode::Hybrid) {
+        const auto profile = profileForEstimation(protocol, control, engine);
+        impact = hybridImpactForEstimation(profile, control, calculatedForWorstCaseScenario);
+    } else if (domain::TestModeStatePolicy::usesControlProfile(protocol.testProtocol.testMode)) {
         const auto profile = profileForEstimation(protocol, control, engine);
         const auto worstCase = domain::WindControlProfileWorstCase::from(profile, baseImpact);
         impact = worstCase.impact;

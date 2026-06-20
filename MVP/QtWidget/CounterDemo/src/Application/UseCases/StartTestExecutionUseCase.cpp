@@ -43,7 +43,7 @@ void StartTestExecutionUseCase::execute() {
     buildControlPlotUseCase.execute();
 
     if (domain::TestModeStatePolicy::usesControlProfile(state.protocol().testProtocol.testMode)) {
-        state.setTargetStandImpact(state.control().windImpact);
+        state.setRuntimeTargetStandImpact(state.control().windImpact);
     }
 
     const auto &protocol = state.protocol();
@@ -131,7 +131,7 @@ void StartTestExecutionUseCase::applyScenarioImpact(domain::ElapsedSeconds elaps
         state.clearHybridBeaufortOverride();
     }
 
-    state.setTargetStandImpact(effectiveImpact);
+    state.setRuntimeTargetStandImpact(effectiveImpact);
     state.setAppliedStandImpact(effectiveImpact);
     state.appendControlTraceSample(
         domain::ControlTraceSample::manualCommand(elapsed, effectiveImpact, effectiveImpact));

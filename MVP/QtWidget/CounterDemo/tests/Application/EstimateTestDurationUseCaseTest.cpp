@@ -208,6 +208,77 @@ TEST(EstimateTestDurationUseCaseTest, HybridUsesProfilePeakBeaufort) {
     EXPECT_DOUBLE_EQ(state.readiness().calculatedForImpact.beaufort.value(), 6.0);
 }
 
+TEST(EstimateTestDurationUseCaseTest, HybridReadinessUsesHybridOperatorDirectionInCalculatedImpact) {
+    application::session::SessionState state{};
+    state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
+    state.setTestProtocolMode(domain::TestMode::Hybrid);
+    state.setTestProtocolDroneParameters(validDroneParameters());
+    state.setWindImpact(domain::makeWindImpact(1.0, 0.0, 0.0));
+    state.setControlProfile(profileWithBeaufort({4.0}));
+    state.setHybridOperatorDirection(domain::WindDirection::from(270.0));
+
+    application::useCases::EstimateTestDurationUseCase useCase{state};
+
+    ASSERT_TRUE(useCase.executeForAutoCalculated().duration.has_value());
+
+    EXPECT_DOUBLE_EQ(state.readiness().calculatedForImpact.direction.degrees(), 270.0);
+}
+
+TEST(EstimateTestDurationUseCaseTest, HybridReadinessUsesHybridOperatorAngleOfAttack) {
+    application::session::SessionState state{};
+    state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
+    state.setTestProtocolMode(domain::TestMode::Hybrid);
+    state.setTestProtocolDroneParameters(validDroneParameters());
+    state.setWindImpact(domain::makeWindImpact(1.0, 0.0, 0.0));
+    state.setControlProfile(profileWithBeaufort({4.0}));
+    state.setHybridOperatorAngleOfAttack(domain::AngleOfAttack::from(-45.0));
+
+    application::useCases::EstimateTestDurationUseCase useCase{state};
+
+    ASSERT_TRUE(useCase.executeForAutoCalculated().duration.has_value());
+
+    EXPECT_DOUBLE_EQ(state.readiness().calculatedForImpact.angleOfAttack.degrees(), -45.0);
+    EXPECT_GT(state.readiness().values.anglePenalty, 1.0);
+}
+
+TEST(EstimateTestDurationUseCaseTest, HybridReadinessConsidersActiveOverrideOperatorBeaufort) {
+    application::session::SessionState state{};
+    state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
+    state.setTestProtocolMode(domain::TestMode::Hybrid);
+    state.setTestProtocolDroneParameters(validDroneParameters());
+    state.setWindImpact(domain::makeWindImpact(1.0, 0.0, 0.0));
+    state.setControlProfile(profileWithBeaufort({1.0, 3.0}));
+    state.setHybridBeaufortOverride(domain::HybridBeaufortOverridePolicy::startOverride(
+        domain::Beaufort::from(3.0), domain::Beaufort::from(6.0), domain::ElapsedSeconds::from(0)));
+
+    application::useCases::EstimateTestDurationUseCase useCase{state};
+
+    ASSERT_TRUE(useCase.executeForAutoCalculated().duration.has_value());
+
+    EXPECT_TRUE(state.readiness().calculatedForWorstCaseScenario);
+    EXPECT_DOUBLE_EQ(state.readiness().calculatedForImpact.beaufort.value(), 6.0);
+}
+
+TEST(EstimateTestDurationUseCaseTest, OverrideBeaufortAboveProfilePeakIncreasesReadinessRisk) {
+    application::session::SessionState state{};
+    state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
+    state.setTestProtocolMode(domain::TestMode::Hybrid);
+    state.setTestProtocolDroneParameters(validDroneParameters());
+    state.setWindImpact(domain::makeWindImpact(1.0, 0.0, 0.0));
+    state.setControlProfile(profileWithBeaufort({3.0}));
+    state.setHybridBeaufortOverride(domain::HybridBeaufortOverridePolicy::startOverride(
+        domain::Beaufort::from(3.0), domain::Beaufort::from(7.0), domain::ElapsedSeconds::from(0)));
+
+    application::useCases::EstimateTestDurationUseCase useCase{state};
+
+    const auto result = useCase.executeForAutoCalculated();
+
+    ASSERT_TRUE(result.duration.has_value());
+    EXPECT_DOUBLE_EQ(state.readiness().calculatedForImpact.beaufort.value(), 7.0);
+    EXPECT_LT(result.duration->value(),
+              expectedDuration(state.protocol().testProtocol, domain::makeWindImpact(3.0, 0.0, 0.0)).value());
+}
+
 TEST(EstimateTestDurationUseCaseTest, AutomaticUsesPreviewProfilePeakBeaufortWhenProfileIsNotBuilt) {
     application::session::SessionState state{};
     state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
@@ -267,6 +338,7 @@ TEST(EstimateTestDurationUseCaseTest, WorstCaseAngleUsesCurrentAbsoluteAngle) {
     state.setTestProtocolDroneParameters(validDroneParameters());
     state.setWindImpact(domain::makeWindImpact(1.0, 0.0, -45.0));
     state.setControlProfile(profileWithBeaufort({4.0}));
+    state.setHybridOperatorAngleOfAttack(domain::AngleOfAttack::from(-45.0));
 
     application::useCases::EstimateTestDurationUseCase useCase{state};
 

@@ -68,4 +68,46 @@ TEST(SessionStateTest, ResetsReadinessWhenEstimationInputsChange) {
     EXPECT_FALSE(state.readiness().hasCalculatedForImpact);
 }
 
+TEST(SessionStateTest, ResetsReadinessWhenHybridOverrideChanges) {
+    application::session::SessionState state{};
+    domain::EstimatedTestDurationResult result{};
+    result.duration = domain::DurationMinutes::required(12);
+    state.setReadinessFromEstimationResult(result, domain::makeWindImpact(1.0, 0.0, 0.0));
+    ASSERT_EQ(state.readiness().status, application::session::ReadinessStatus::Ok);
+
+    state.setHybridBeaufortOverride(domain::HybridBeaufortOverridePolicy::startOverride(
+        domain::Beaufort::from(1.0), domain::Beaufort::from(6.0), domain::ElapsedSeconds::from(0)));
+
+    EXPECT_EQ(state.readiness().status, application::session::ReadinessStatus::Unknown);
+    EXPECT_FALSE(state.readiness().hasCalculatedForImpact);
+}
+
+TEST(SessionStateTest, ResetsReadinessWhenHybridOverrideIsCleared) {
+    application::session::SessionState state{};
+    state.setHybridBeaufortOverride(domain::HybridBeaufortOverridePolicy::startOverride(
+        domain::Beaufort::from(1.0), domain::Beaufort::from(6.0), domain::ElapsedSeconds::from(0)));
+    domain::EstimatedTestDurationResult result{};
+    result.duration = domain::DurationMinutes::required(12);
+    state.setReadinessFromEstimationResult(result, domain::makeWindImpact(1.0, 0.0, 0.0));
+    ASSERT_EQ(state.readiness().status, application::session::ReadinessStatus::Ok);
+
+    state.clearHybridBeaufortOverride();
+
+    EXPECT_EQ(state.readiness().status, application::session::ReadinessStatus::Unknown);
+    EXPECT_FALSE(state.readiness().hasCalculatedForImpact);
+}
+
+TEST(SessionStateTest, RuntimeTargetStandImpactDoesNotResetReadiness) {
+    application::session::SessionState state{};
+    domain::EstimatedTestDurationResult result{};
+    result.duration = domain::DurationMinutes::required(12);
+    state.setReadinessFromEstimationResult(result, domain::makeWindImpact(1.0, 0.0, 0.0));
+    ASSERT_EQ(state.readiness().status, application::session::ReadinessStatus::Ok);
+
+    state.setRuntimeTargetStandImpact(domain::makeWindImpact(2.0, 90.0, 0.0));
+
+    EXPECT_EQ(state.readiness().status, application::session::ReadinessStatus::Ok);
+    EXPECT_TRUE(state.readiness().hasCalculatedForImpact);
+}
+
 } // namespace

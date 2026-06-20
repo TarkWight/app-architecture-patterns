@@ -77,6 +77,7 @@ class SessionState {
                           domain::TestTimeSource timeSource, domain::TestTimeDirection timeDirection);
     void setAppliedStandImpact(domain::WindImpact profile);
     void setTargetStandImpact(domain::WindImpact profile);
+    void setRuntimeTargetStandImpact(domain::WindImpact profile);
     void setHybridBeaufortOverride(std::optional<domain::HybridBeaufortOverride> overrideState);
     void clearHybridBeaufortOverride();
     void setHybridOperatorDirection(domain::WindDirection direction);

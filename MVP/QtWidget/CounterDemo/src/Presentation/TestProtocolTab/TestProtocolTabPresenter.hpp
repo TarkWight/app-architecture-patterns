@@ -3,7 +3,6 @@
 
 #include "../../Application/UseCases/ExportPdfUseCase.hpp"
 #include "../../Application/UseCases/LoadPdfReportDefaultsUseCase.hpp"
-#include "../../Application/UseCases/SetOperatorTestDurationUseCase.hpp"
 #include "../../Application/UseCases/UpdateTestProtocolUseCase.hpp"
 #include "../../Application/Session/SessionState.hpp"
 
@@ -17,7 +16,6 @@ class TestProtocolTabPresenter final {
   public:
     struct Dependencies {
         application::session::SessionState &state;
-        application::useCases::SetOperatorTestDurationUseCase &setOperatorTestDurationUseCase;
         application::useCases::UpdateTestProtocolUseCase &updateTestProtocolUseCase;
         application::useCases::LoadPdfReportDefaultsUseCase &loadPdfReportDefaultsUseCase;
         application::useCases::ExportPdfUseCase &exportPdfUseCase;
@@ -31,8 +29,6 @@ class TestProtocolTabPresenter final {
 
     void onViewReady();
 
-    void onOperatorTestDurationChanged(int minutes);
-
     void onTestProtocolTitleChanged(std::string title);
     void onTestProtocolLineChanged(int index, std::string line);
     void onTestProtocolDroneParameterChanged(int index, std::string value);
@@ -43,7 +39,6 @@ class TestProtocolTabPresenter final {
 
   private:
     application::session::SessionState &state;
-    application::useCases::SetOperatorTestDurationUseCase &setOperatorTestDurationUseCase;
     application::useCases::UpdateTestProtocolUseCase &updateTestProtocolUseCase;
     application::useCases::LoadPdfReportDefaultsUseCase &loadPdfReportDefaultsUseCase;
     application::useCases::ExportPdfUseCase &exportPdfUseCase;

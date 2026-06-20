@@ -6,8 +6,7 @@
 namespace presentation::testProtocolTab {
 
 TestProtocolTabPresenter::TestProtocolTabPresenter(Dependencies deps)
-    : state(deps.state), setOperatorTestDurationUseCase(deps.setOperatorTestDurationUseCase),
-      updateTestProtocolUseCase(deps.updateTestProtocolUseCase),
+    : state(deps.state), updateTestProtocolUseCase(deps.updateTestProtocolUseCase),
       loadPdfReportDefaultsUseCase(deps.loadPdfReportDefaultsUseCase), exportPdfUseCase(deps.exportPdfUseCase),
       pdfReportConfigPath(std::move(deps.pdfReportConfigPath)) {
 }
@@ -43,7 +42,6 @@ void TestProtocolTabPresenter::syncViewFromState() {
 
     const auto &session = state.get();
 
-    view->setOperatorTestDurationMinutes(session.protocol.operatorTestDuration.value());
     view->setTestProtocolTitle(session.protocol.testProtocol.title);
 
     for (int i = 0; i < 8; ++i) {
@@ -51,14 +49,6 @@ void TestProtocolTabPresenter::syncViewFromState() {
     }
 
     view->setTestProtocolDroneParameters(session.protocol.testProtocol.droneParameters);
-}
-
-void TestProtocolTabPresenter::onOperatorTestDurationChanged(int minutes) {
-    setOperatorTestDurationUseCase.execute(domain::DurationMinutes::required(minutes));
-
-    if (view != nullptr) {
-        view->appendLog("Operator test duration updated");
-    }
 }
 
 void TestProtocolTabPresenter::onTestProtocolTitleChanged(std::string title) {

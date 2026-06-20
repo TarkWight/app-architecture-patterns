@@ -12,7 +12,6 @@
 #include "UseCases/SetFunctionExpressionUseCase.hpp"
 #include "UseCases/SetLineColorUseCase.hpp"
 #include "UseCases/SetControlChartsTabMinutesUseCase.hpp"
-#include "UseCases/SetOperatorTestDurationUseCase.hpp"
 #include "UseCases/SetTestTimeSourceUseCase.hpp"
 #include "UseCases/SetTelemetryAxisColorUseCase.hpp"
 #include "UseCases/SetTelemetryAxisVisibleUseCase.hpp"
@@ -128,8 +127,6 @@ struct ApplicationContext {
 
     application::useCases::SetWindImpactUseCase setWindImpactUseCase{sessionState};
 
-    application::useCases::SetOperatorTestDurationUseCase setOperatorTestDurationUseCase{sessionState};
-
     application::useCases::UpdateTestProtocolUseCase updateTestProtocolUseCase{sessionState};
 
     application::useCases::LoadPdfReportDefaultsUseCase loadPdfReportDefaultsUseCase{sessionState, configRepository};
@@ -170,7 +167,6 @@ struct ApplicationContext {
     presentation::testProtocolTab::TestProtocolTabPresenter testProtocolTabPresenter{
         presentation::testProtocolTab::TestProtocolTabPresenter::Dependencies{
             .state = sessionState,
-            .setOperatorTestDurationUseCase = setOperatorTestDurationUseCase,
             .updateTestProtocolUseCase = updateTestProtocolUseCase,
             .loadPdfReportDefaultsUseCase = loadPdfReportDefaultsUseCase,
             .exportPdfUseCase = exportPdfUseCase,

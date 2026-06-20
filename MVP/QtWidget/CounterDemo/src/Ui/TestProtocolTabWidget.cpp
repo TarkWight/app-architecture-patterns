@@ -65,11 +65,6 @@ TestProtocolTabWidget::~TestProtocolTabWidget() {
     delete ui;
 }
 
-void TestProtocolTabWidget::setOperatorTestDurationMinutes(int minutes) {
-    const QSignalBlocker blocker{ui->spinBoxTimerMinutes};
-    ui->spinBoxTimerMinutes->setValue(minutes);
-}
-
 void TestProtocolTabWidget::setTestProtocolTitle(const std::string &title) {
     const QSignalBlocker blocker{ui->lineEditTitle};
     ui->lineEditTitle->setText(QString::fromStdString(title));
@@ -200,9 +195,6 @@ void TestProtocolTabWidget::setupDroneParametersEditor() {
 }
 
 void TestProtocolTabWidget::connectSignals() {
-    QObject::connect(ui->spinBoxTimerMinutes, qOverload<int>(&QSpinBox::valueChanged), this,
-                     [this](int value) { presenter.onOperatorTestDurationChanged(value); });
-
     QObject::connect(ui->lineEditTitle, &QLineEdit::textChanged, this,
                      [this](const QString &text) { presenter.onTestProtocolTitleChanged(text.toStdString()); });
 
@@ -255,15 +247,6 @@ void TestProtocolTabWidget::connectSignals() {
 }
 
 void TestProtocolTabWidget::connectSessionSignals() {
-    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testTimeModelChanged, this,
-                     [this](const presentation::viewModels::TestTimeViewModel &model) {
-                         if (ui->spinBoxTimerMinutes->value() == model.operatorDurationMinutes) {
-                             return;
-                         }
-
-                         setOperatorTestDurationMinutes(model.operatorDurationMinutes);
-                     });
-
     QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testProtocolTitleChanged, this,
                      [this](const QString &title) {
                          if (ui->lineEditTitle->text() == title) {

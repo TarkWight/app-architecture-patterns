@@ -100,7 +100,7 @@ void ControlChartsTabWidget::refreshPlot() {
 }
 
 void ControlChartsTabWidget::showReadinessMessage(const std::string &message) {
-    ui->labelReadinessStatus->setText(QString::fromStdString(message));
+    ui->plainTextEditReadinessStatus->setPlainText(QString::fromStdString(message));
 }
 
 void ControlChartsTabWidget::appendLog(const std::string &text) {

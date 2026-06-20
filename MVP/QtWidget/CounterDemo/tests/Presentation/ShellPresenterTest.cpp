@@ -297,6 +297,10 @@ void prepareAuto(ShellPresenterFixture &fixture, std::vector<domain::TestProtoco
     fixture.state.setTestProtocolDroneParameters(std::move(parameters));
 }
 
+void connectStand(ShellPresenterFixture &fixture) {
+    fixture.state.setStandConnectionStatus(domain::StandConnectionStatus::Connected);
+}
+
 void setReadiness(ShellPresenterFixture &fixture, application::session::ReadinessStatus status) {
     domain::EstimatedTestDurationResult result{};
     if (status != application::session::ReadinessStatus::Failed) {
@@ -318,6 +322,7 @@ void setReadiness(ShellPresenterFixture &fixture, application::session::Readines
 TEST(ShellPresenterTest, ManualStartDoesNotAskReadinessConfirmation) {
     ShellPresenterFixture fixture{};
     fixture.presenter.attachView(fixture.view);
+    connectStand(fixture);
     fixture.state.setTestProtocolMode(domain::TestMode::Manual);
     setReadiness(fixture, application::session::ReadinessStatus::Failed);
 
@@ -330,6 +335,7 @@ TEST(ShellPresenterTest, ManualStartDoesNotAskReadinessConfirmation) {
 TEST(ShellPresenterTest, AutoWithOkStartsWithoutConfirmation) {
     ShellPresenterFixture fixture{};
     fixture.presenter.attachView(fixture.view);
+    connectStand(fixture);
     prepareAuto(fixture, validDroneParameters());
     setReadiness(fixture, application::session::ReadinessStatus::Ok);
 
@@ -342,6 +348,7 @@ TEST(ShellPresenterTest, AutoWithOkStartsWithoutConfirmation) {
 TEST(ShellPresenterTest, HybridWithWarningStartsWithoutConfirmation) {
     ShellPresenterFixture fixture{};
     fixture.presenter.attachView(fixture.view);
+    connectStand(fixture);
     fixture.state.setTestProtocolMode(domain::TestMode::Hybrid);
     fixture.state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
     fixture.state.setTestProtocolDroneParameters(warningDroneParameters());
@@ -356,6 +363,7 @@ TEST(ShellPresenterTest, HybridWithWarningStartsWithoutConfirmation) {
 TEST(ShellPresenterTest, DangerousReadinessAsksConfirmationAndStartsWhenConfirmed) {
     ShellPresenterFixture fixture{};
     fixture.presenter.attachView(fixture.view);
+    connectStand(fixture);
     prepareAuto(fixture, validDroneParameters());
     setReadiness(fixture, application::session::ReadinessStatus::Dangerous);
     fixture.view.confirmationResponse = true;
@@ -369,6 +377,7 @@ TEST(ShellPresenterTest, DangerousReadinessAsksConfirmationAndStartsWhenConfirme
 TEST(ShellPresenterTest, FailedReadinessAsksConfirmationAndCancelsStart) {
     ShellPresenterFixture fixture{};
     fixture.presenter.attachView(fixture.view);
+    connectStand(fixture);
     prepareAuto(fixture, invalidDroneParameters());
     setReadiness(fixture, application::session::ReadinessStatus::Failed);
     fixture.view.confirmationResponse = false;
@@ -383,6 +392,7 @@ TEST(ShellPresenterTest, FailedReadinessAsksConfirmationAndCancelsStart) {
 TEST(ShellPresenterTest, UnknownReadinessRunsEstimatorBeforeStart) {
     ShellPresenterFixture fixture{};
     fixture.presenter.attachView(fixture.view);
+    connectStand(fixture);
     prepareAuto(fixture, validDroneParameters());
     ASSERT_EQ(fixture.state.readiness().status, application::session::ReadinessStatus::Unknown);
 
@@ -395,6 +405,7 @@ TEST(ShellPresenterTest, UnknownReadinessRunsEstimatorBeforeStart) {
 TEST(ShellPresenterTest, UnknownFailedReadinessRunsEstimatorAndAsksConfirmation) {
     ShellPresenterFixture fixture{};
     fixture.presenter.attachView(fixture.view);
+    connectStand(fixture);
     prepareAuto(fixture, invalidDroneParameters());
     fixture.view.confirmationResponse = false;
     ASSERT_EQ(fixture.state.readiness().status, application::session::ReadinessStatus::Unknown);
@@ -409,6 +420,7 @@ TEST(ShellPresenterTest, UnknownFailedReadinessRunsEstimatorAndAsksConfirmation)
 TEST(ShellPresenterTest, DangerousConfirmationIsRequestedAgainOnNextStart) {
     ShellPresenterFixture fixture{};
     fixture.presenter.attachView(fixture.view);
+    connectStand(fixture);
     prepareAuto(fixture, validDroneParameters());
     setReadiness(fixture, application::session::ReadinessStatus::Dangerous);
     fixture.view.confirmationResponse = false;
@@ -418,4 +430,49 @@ TEST(ShellPresenterTest, DangerousConfirmationIsRequestedAgainOnNextStart) {
 
     EXPECT_EQ(fixture.view.confirmationCount, 2);
     EXPECT_EQ(fixture.state.execution().testExecutionStatus, domain::TestExecutionStatus::Idle);
+}
+
+TEST(ShellPresenterTest, Start_WhenStandDisconnected_DoesNotStart) {
+    ShellPresenterFixture fixture{};
+    fixture.presenter.attachView(fixture.view);
+    fixture.state.setTestProtocolMode(domain::TestMode::Manual);
+
+    fixture.presenter.onStartPressed();
+
+    EXPECT_EQ(fixture.scheduler.startCount, 0);
+    EXPECT_EQ(fixture.state.execution().testExecutionStatus, domain::TestExecutionStatus::Idle);
+    EXPECT_EQ(fixture.view.lastWarningTitle, "Стенд не подключён");
+    ASSERT_FALSE(fixture.view.logs.empty());
+    EXPECT_EQ(fixture.view.logs.back(), "Test execution start blocked: stand is not connected");
+}
+
+TEST(ShellPresenterTest, Start_WhenConnectionFailed_DoesNotStart) {
+    ShellPresenterFixture fixture{};
+    fixture.presenter.attachView(fixture.view);
+    fixture.state.setStandConnectionStatus(domain::StandConnectionStatus::Error);
+    fixture.state.setTestProtocolMode(domain::TestMode::Manual);
+
+    fixture.presenter.onStartPressed();
+
+    EXPECT_EQ(fixture.scheduler.startCount, 0);
+    EXPECT_EQ(fixture.state.execution().testExecutionStatus, domain::TestExecutionStatus::Idle);
+    ASSERT_FALSE(fixture.view.logs.empty());
+    EXPECT_EQ(fixture.view.logs.back(), "Test execution start blocked: stand is not connected");
+}
+
+TEST(ShellPresenterTest, Start_WhenConnected_AllowsStartForManualHybridAndAutomatic) {
+    for (const auto mode : {domain::TestMode::Manual, domain::TestMode::Hybrid, domain::TestMode::Automatic}) {
+        ShellPresenterFixture fixture{};
+        fixture.presenter.attachView(fixture.view);
+        connectStand(fixture);
+        fixture.state.setTestProtocolMode(mode);
+        fixture.state.setTestProtocolDroneParameters(validDroneParameters());
+        fixture.state.setTestTimeSource(mode == domain::TestMode::Manual ? domain::TestTimeSource::FreeRun
+                                                                         : domain::TestTimeSource::AutoCalculated);
+        setReadiness(fixture, application::session::ReadinessStatus::Ok);
+
+        fixture.presenter.onStartPressed();
+
+        EXPECT_EQ(fixture.state.execution().testExecutionStatus, domain::TestExecutionStatus::Running);
+    }
 }

@@ -42,6 +42,10 @@ void ShellPresenter::onStateChanged() {
 }
 
 void ShellPresenter::onStartPressed() {
+    if (!connectionAllowsStart()) {
+        return;
+    }
+
     if (!readinessAllowsStart()) {
         refreshFromState();
         return;
@@ -71,6 +75,19 @@ bool ShellPresenter::readinessAllowsStart() {
     }
 
     return confirmDangerousReadinessStart(status);
+}
+
+bool ShellPresenter::connectionAllowsStart() {
+    if (state.connection().standConnectionStatus == domain::StandConnectionStatus::Connected) {
+        return true;
+    }
+
+    if (view != nullptr) {
+        view->showOperatorWarning("Стенд не подключён", "Перед запуском испытания необходимо подключить стенд.");
+        view->appendLog("Test execution start blocked: stand is not connected");
+    }
+
+    return false;
 }
 
 bool ShellPresenter::confirmDangerousReadinessStart(application::session::ReadinessStatus status) {

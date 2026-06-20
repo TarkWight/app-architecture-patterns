@@ -95,6 +95,7 @@ class ShellPresenter final {
     void refreshStandConnectionStatusText();
     void notifyStandConnectionStatusChanged(domain::StandConnectionStatus status);
     [[nodiscard]] bool readinessAllowsStart();
+    [[nodiscard]] bool connectionAllowsStart();
     [[nodiscard]] bool confirmDangerousReadinessStart(application::session::ReadinessStatus status);
     [[nodiscard]] static bool readinessGateRequired(domain::TestMode mode);
     [[nodiscard]] static bool readinessConfirmationRequired(application::session::ReadinessStatus status);

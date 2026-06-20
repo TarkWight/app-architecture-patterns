@@ -1,5 +1,7 @@
 #include "StartTestExecutionUseCase.hpp"
 
+#include "../../Domain/ControlTrace.hpp"
+#include "../../Domain/HybridBeaufortOverride.hpp"
 #include "../../Domain/ScenarioExecutionEngine.hpp"
 #include "../../Domain/StandConnectionStatus.hpp"
 #include "../../Domain/StandConnectionTransitions.hpp"
@@ -114,11 +116,27 @@ void StartTestExecutionUseCase::applyScenarioImpact(domain::ElapsedSeconds elaps
         return;
     }
 
-    state.setTargetStandImpact(step->impact);
-    state.setAppliedStandImpact(step->impact);
-    state.appendControlTraceSample(step->traceSample);
+    const auto overrideState = control.hybridBeaufortOverride;
+    const auto effectiveImpact = control.standControlMode == domain::StandControlMode::Hybrid
+                                     ? domain::HybridImpactResolver::resolve(domain::HybridImpactResolutionInput{
+                                           .scenarioBeaufort = step->impact.beaufort,
+                                           .operatorDirection = control.hybridOperatorDirection,
+                                           .operatorAngleOfAttack = control.hybridOperatorAngleOfAttack,
+                                           .overrideState = overrideState,
+                                           .elapsed = elapsed,
+                                       })
+                                     : step->impact;
+
+    if (overrideState.has_value() && domain::HybridBeaufortOverridePolicy::isCompleted(*overrideState, elapsed)) {
+        state.clearHybridBeaufortOverride();
+    }
+
+    state.setTargetStandImpact(effectiveImpact);
+    state.setAppliedStandImpact(effectiveImpact);
+    state.appendControlTraceSample(
+        domain::ControlTraceSample::manualCommand(elapsed, effectiveImpact, effectiveImpact));
     buildControlPlotUseCase.refreshFromState();
-    appliedStandImpactSender.send(step->impact, elapsed, protocol.testProtocol);
+    appliedStandImpactSender.send(effectiveImpact, elapsed, protocol.testProtocol);
 }
 
 } // namespace application::useCases

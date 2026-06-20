@@ -12,6 +12,7 @@
 #include "../../Domain/TelemetryWindow.hpp"
 #include "../../Domain/TestExecutionStatus.hpp"
 #include "../../Domain/TestDurationEstimator.hpp"
+#include "../../Domain/HybridBeaufortOverride.hpp"
 #include "../../Domain/TestProtocol.hpp"
 #include "../../Domain/TestTimeDirection.hpp"
 #include "../../Domain/TestTimeSource.hpp"
@@ -21,6 +22,7 @@
 #include "../../Domain/Expression.hpp"
 
 #include <vector>
+#include <optional>
 
 namespace application::session {
 
@@ -75,6 +77,9 @@ struct ControlStateData {
     domain::StandControlMode standControlMode{domain::StandControlMode::Manual};
     domain::WindImpact appliedStandImpact{};
     domain::WindImpact targetStandImpact{};
+    std::optional<domain::HybridBeaufortOverride> hybridBeaufortOverride{};
+    domain::WindDirection hybridOperatorDirection{domain::WindDirection::from(0.0)};
+    domain::AngleOfAttack hybridOperatorAngleOfAttack{domain::AngleOfAttack::from(0.0)};
 };
 
 struct TelemetryStateData {

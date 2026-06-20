@@ -9,12 +9,18 @@ ApplyWindDirectionUseCase::ApplyWindDirectionUseCase(application::session::Sessi
 }
 
 bool ApplyWindDirectionUseCase::execute(domain::WindDirection direction) {
-    const auto &session = state.get();
-    if (!domain::StandScenario{session.control.standControlMode}.allowsManualImpact()) {
+    const auto &control = state.control();
+    const auto scenario = domain::StandScenario{control.standControlMode};
+    if (!scenario.allowsManualImpact()) {
         return false;
     }
 
-    state.setTargetStandImpact(session.control.targetStandImpact.withDirection(direction));
+    if (control.standControlMode == domain::StandControlMode::Hybrid) {
+        state.setHybridOperatorDirection(direction);
+        return true;
+    }
+
+    state.setTargetStandImpact(control.targetStandImpact.withDirection(direction));
     return true;
 }
 

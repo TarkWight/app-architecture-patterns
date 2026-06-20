@@ -289,6 +289,77 @@ TEST(StartTestExecutionUseCaseTest, InitialSchedulerTickDoesNotDuplicateScenario
     EXPECT_EQ(telemetryClient.axis1CommandCalls, 1);
 }
 
+TEST(StartTestExecutionUseCaseTest, HybridScenarioTickUsesOverrideResolver) {
+    application::session::SessionState state{};
+    state.setTestModeState(domain::TestMode::Hybrid, domain::StandControlMode::Hybrid,
+                           domain::TestTimeSource::AutoCalculated, domain::TestTimeDirection::CountDown);
+    state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(1));
+    state.setHybridBeaufortOverride(domain::HybridBeaufortOverridePolicy::startOverride(
+        domain::Beaufort::from(1.0), domain::Beaufort::from(5.0), domain::ElapsedSeconds::from(0)));
+
+    TestExecutionSchedulerSpy scheduler{};
+    TelemetryClientSpy telemetryClient{};
+    ScenarioFunctionEngine functionEngine{};
+    application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
+    application::useCases::StartTestExecutionUseCase useCase{state, scheduler, telemetryClient,
+                                                             buildControlPlotUseCase};
+
+    useCase.execute();
+    ASSERT_TRUE(scheduler.tick);
+    scheduler.tick(1);
+
+    ASSERT_FALSE(state.control().controlTrace.samples().empty());
+    const auto &lastSample = state.control().controlTrace.back();
+    EXPECT_DOUBLE_EQ(lastSample.targetValue.beaufort.value(), 3.0);
+    EXPECT_DOUBLE_EQ(lastSample.safeCommandValue.beaufort.value(), 3.0);
+}
+
+TEST(StartTestExecutionUseCaseTest, HybridScenarioDoesNotOverwriteOperatorDirectionOrAngle) {
+    application::session::SessionState state{};
+    state.setTestModeState(domain::TestMode::Hybrid, domain::StandControlMode::Hybrid,
+                           domain::TestTimeSource::AutoCalculated, domain::TestTimeDirection::CountDown);
+    state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(1));
+    state.setHybridOperatorDirection(domain::WindDirection::from(270.0));
+    state.setHybridOperatorAngleOfAttack(domain::AngleOfAttack::from(15.0));
+
+    TestExecutionSchedulerSpy scheduler{};
+    TelemetryClientSpy telemetryClient{};
+    ScenarioFunctionEngine functionEngine{};
+    application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
+    application::useCases::StartTestExecutionUseCase useCase{state, scheduler, telemetryClient,
+                                                             buildControlPlotUseCase};
+
+    useCase.execute();
+
+    ASSERT_EQ(state.control().controlTrace.size(), 1U);
+    EXPECT_DOUBLE_EQ(state.control().controlTrace.front().targetValue.direction.degrees(), 270.0);
+    EXPECT_DOUBLE_EQ(state.control().controlTrace.front().targetValue.angleOfAttack.degrees(), 15.0);
+}
+
+TEST(StartTestExecutionUseCaseTest, HybridCompletedOverrideIsClearedAfterScenarioTick) {
+    application::session::SessionState state{};
+    state.setTestModeState(domain::TestMode::Hybrid, domain::StandControlMode::Hybrid,
+                           domain::TestTimeSource::AutoCalculated, domain::TestTimeDirection::CountDown);
+    state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(1));
+    state.setHybridBeaufortOverride(domain::HybridBeaufortOverridePolicy::startOverride(
+        domain::Beaufort::from(1.0), domain::Beaufort::from(5.0), domain::ElapsedSeconds::from(0)));
+
+    TestExecutionSchedulerSpy scheduler{};
+    TelemetryClientSpy telemetryClient{};
+    ScenarioFunctionEngine functionEngine{};
+    application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
+    application::useCases::StartTestExecutionUseCase useCase{state, scheduler, telemetryClient,
+                                                             buildControlPlotUseCase};
+
+    useCase.execute();
+    ASSERT_TRUE(state.control().hybridBeaufortOverride.has_value());
+    ASSERT_TRUE(scheduler.tick);
+    scheduler.tick(10);
+
+    EXPECT_FALSE(state.control().hybridBeaufortOverride.has_value());
+    EXPECT_DOUBLE_EQ(state.control().controlTrace.back().targetValue.beaufort.value(), 2.0);
+}
+
 TEST(StartTestExecutionUseCaseTest, StartsTelemetryPollingWhenStandIsConnected) {
     application::session::SessionState state{};
     state.setTestProtocolMode(domain::TestMode::Manual);

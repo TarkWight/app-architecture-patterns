@@ -106,18 +106,24 @@ class HybridBeaufortOverridePolicy final {
     }
 };
 
+struct HybridImpactResolutionInput {
+    Beaufort scenarioBeaufort{Beaufort::from(0.0)};
+    WindDirection operatorDirection{WindDirection::from(0.0)};
+    AngleOfAttack operatorAngleOfAttack{AngleOfAttack::from(0.0)};
+    std::optional<HybridBeaufortOverride> overrideState{};
+    ElapsedSeconds elapsed{ElapsedSeconds::from(0)};
+};
+
 class HybridImpactResolver final {
   public:
-    [[nodiscard]] static WindImpact resolve(Beaufort scenarioBeaufort, WindDirection operatorDirection,
-                                            AngleOfAttack operatorAngleOfAttack,
-                                            const std::optional<HybridBeaufortOverride> &overrideState,
-                                            ElapsedSeconds elapsed) {
-        const auto beaufort =
-            overrideState.has_value()
-                ? HybridBeaufortOverridePolicy::resolveBeaufort(*overrideState, scenarioBeaufort, elapsed)
-                : scenarioBeaufort;
+    [[nodiscard]] static WindImpact resolve(const HybridImpactResolutionInput &input) {
+        const auto beaufort = input.overrideState.has_value()
+                                  ? HybridBeaufortOverridePolicy::resolveBeaufort(*input.overrideState,
+                                                                                  input.scenarioBeaufort, input.elapsed)
+                                  : input.scenarioBeaufort;
 
-        return WindImpact{.beaufort = beaufort, .direction = operatorDirection, .angleOfAttack = operatorAngleOfAttack};
+        return WindImpact{
+            .beaufort = beaufort, .direction = input.operatorDirection, .angleOfAttack = input.operatorAngleOfAttack};
     }
 };
 

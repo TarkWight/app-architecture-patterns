@@ -225,6 +225,33 @@ void application::session::SessionState::setTargetStandImpact(domain::WindImpact
     notify();
 }
 
+void application::session::SessionState::setHybridBeaufortOverride(
+    std::optional<domain::HybridBeaufortOverride> overrideState) {
+    data.control.hybridBeaufortOverride = std::move(overrideState);
+    notify();
+}
+
+void application::session::SessionState::clearHybridBeaufortOverride() {
+    if (!data.control.hybridBeaufortOverride.has_value()) {
+        return;
+    }
+
+    data.control.hybridBeaufortOverride.reset();
+    notify();
+}
+
+void application::session::SessionState::setHybridOperatorDirection(domain::WindDirection direction) {
+    data.control.hybridOperatorDirection = direction;
+    resetReadinessWithoutNotify();
+    notify();
+}
+
+void application::session::SessionState::setHybridOperatorAngleOfAttack(domain::AngleOfAttack angleOfAttack) {
+    data.control.hybridOperatorAngleOfAttack = angleOfAttack;
+    resetReadinessWithoutNotify();
+    notify();
+}
+
 void application::session::SessionState::setControlPlot(application::dto::PlotModel plot) {
     data.control.controlPlot = std::move(plot);
     notify();

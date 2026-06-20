@@ -73,9 +73,13 @@ TEST(HybridBeaufortOverrideTest, CompletedOverrideReturnsScenarioBeaufort) {
 }
 
 TEST(HybridImpactResolverTest, WithoutOverrideUsesScenarioBeaufort) {
-    const auto impact = domain::HybridImpactResolver::resolve(
-        domain::Beaufort::from(3.0), domain::WindDirection::from(90.0), domain::AngleOfAttack::from(15.0), std::nullopt,
-        domain::ElapsedSeconds::from(0));
+    const auto impact = domain::HybridImpactResolver::resolve(domain::HybridImpactResolutionInput{
+        .scenarioBeaufort = domain::Beaufort::from(3.0),
+        .operatorDirection = domain::WindDirection::from(90.0),
+        .operatorAngleOfAttack = domain::AngleOfAttack::from(15.0),
+        .overrideState = std::nullopt,
+        .elapsed = domain::ElapsedSeconds::from(0),
+    });
 
     EXPECT_DOUBLE_EQ(impact.beaufort.value(), 3.0);
 }
@@ -83,9 +87,13 @@ TEST(HybridImpactResolverTest, WithoutOverrideUsesScenarioBeaufort) {
 TEST(HybridImpactResolverTest, WithOverrideUsesOverriddenBeaufort) {
     const auto overrideState = defaultOverride(2.0, 6.0, 10);
 
-    const auto impact = domain::HybridImpactResolver::resolve(
-        domain::Beaufort::from(2.0), domain::WindDirection::from(90.0), domain::AngleOfAttack::from(15.0),
-        overrideState, domain::ElapsedSeconds::from(11));
+    const auto impact = domain::HybridImpactResolver::resolve(domain::HybridImpactResolutionInput{
+        .scenarioBeaufort = domain::Beaufort::from(2.0),
+        .operatorDirection = domain::WindDirection::from(90.0),
+        .operatorAngleOfAttack = domain::AngleOfAttack::from(15.0),
+        .overrideState = overrideState,
+        .elapsed = domain::ElapsedSeconds::from(11),
+    });
 
     EXPECT_NEAR(impact.beaufort.value(), 4.0, defaultTolerance);
 }
@@ -93,9 +101,13 @@ TEST(HybridImpactResolverTest, WithOverrideUsesOverriddenBeaufort) {
 TEST(HybridImpactResolverTest, AlwaysUsesOperatorDirection) {
     const auto overrideState = defaultOverride();
 
-    const auto impact = domain::HybridImpactResolver::resolve(
-        domain::Beaufort::from(2.0), domain::WindDirection::from(270.0), domain::AngleOfAttack::from(15.0),
-        overrideState, domain::ElapsedSeconds::from(11));
+    const auto impact = domain::HybridImpactResolver::resolve(domain::HybridImpactResolutionInput{
+        .scenarioBeaufort = domain::Beaufort::from(2.0),
+        .operatorDirection = domain::WindDirection::from(270.0),
+        .operatorAngleOfAttack = domain::AngleOfAttack::from(15.0),
+        .overrideState = overrideState,
+        .elapsed = domain::ElapsedSeconds::from(11),
+    });
 
     EXPECT_DOUBLE_EQ(impact.direction.degrees(), 270.0);
 }
@@ -103,9 +115,13 @@ TEST(HybridImpactResolverTest, AlwaysUsesOperatorDirection) {
 TEST(HybridImpactResolverTest, AlwaysUsesOperatorAngleOfAttack) {
     const auto overrideState = defaultOverride();
 
-    const auto impact = domain::HybridImpactResolver::resolve(
-        domain::Beaufort::from(2.0), domain::WindDirection::from(270.0), domain::AngleOfAttack::from(-20.0),
-        overrideState, domain::ElapsedSeconds::from(11));
+    const auto impact = domain::HybridImpactResolver::resolve(domain::HybridImpactResolutionInput{
+        .scenarioBeaufort = domain::Beaufort::from(2.0),
+        .operatorDirection = domain::WindDirection::from(270.0),
+        .operatorAngleOfAttack = domain::AngleOfAttack::from(-20.0),
+        .overrideState = overrideState,
+        .elapsed = domain::ElapsedSeconds::from(11),
+    });
 
     EXPECT_DOUBLE_EQ(impact.angleOfAttack.degrees(), -20.0);
 }

@@ -12,12 +12,14 @@
 #include "../../Domain/TelemetryWindow.hpp"
 #include "../../Domain/WindControlProfile.hpp"
 #include "../../Domain/AxisTelemetrySample.hpp"
+#include "../../Domain/HybridBeaufortOverride.hpp"
 
 #include "SessionStateData.hpp"
 #include "Subscription.hpp"
 
 #include <functional>
 #include <mutex>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -75,6 +77,10 @@ class SessionState {
                           domain::TestTimeSource timeSource, domain::TestTimeDirection timeDirection);
     void setAppliedStandImpact(domain::WindImpact profile);
     void setTargetStandImpact(domain::WindImpact profile);
+    void setHybridBeaufortOverride(std::optional<domain::HybridBeaufortOverride> overrideState);
+    void clearHybridBeaufortOverride();
+    void setHybridOperatorDirection(domain::WindDirection direction);
+    void setHybridOperatorAngleOfAttack(domain::AngleOfAttack angleOfAttack);
 
     void setTestProtocolTitle(std::string title);
     void setTestProtocolLine(int idx, std::string line);

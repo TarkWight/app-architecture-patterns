@@ -5,6 +5,8 @@
 #include <QString>
 
 #include <algorithm>
+#include <cmath>
+#include <utility>
 
 namespace ui::render {
 namespace {
@@ -58,6 +60,34 @@ bool PlotRenderer::hasRenderablePlot(const application::dto::PlotModel &plot) {
 
     return std::any_of(plot.seriesList.begin(), plot.seriesList.end(),
                        [](const application::dto::NamedSeries &series) { return !series.series.points.empty(); });
+}
+
+std::vector<application::dto::Series> PlotRenderer::splitDrawableSegments(const application::dto::Series &series) {
+    if (!series.breakOnLargeDelta || series.points.size() < 2) {
+        return {series};
+    }
+
+    std::vector<application::dto::Series> segments{};
+    application::dto::Series current{};
+    current.breakOnLargeDelta = series.breakOnLargeDelta;
+    current.wrapThreshold = series.wrapThreshold;
+
+    for (const auto &point : series.points) {
+        if (!current.points.empty() && std::abs(point.y - current.points.back().y) > series.wrapThreshold) {
+            segments.push_back(std::move(current));
+            current = application::dto::Series{};
+            current.breakOnLargeDelta = series.breakOnLargeDelta;
+            current.wrapThreshold = series.wrapThreshold;
+        }
+
+        current.points.push_back(point);
+    }
+
+    if (!current.points.empty()) {
+        segments.push_back(std::move(current));
+    }
+
+    return segments;
 }
 
 double PlotRenderer::normalize(double value, double min, double max) {
@@ -217,8 +247,14 @@ void PlotRenderer::drawSeries(QPainter &painter, const QRect &plotRect, const ap
             if (series.series.points.size() == 1) {
                 drawPoint(painter, plotRect, plot, series.series.points.front());
             } else {
-                const QPolygon polyline = buildPolyline(plotRect, plot, series.series);
-                painter.drawPolyline(polyline);
+                for (const auto &segment : splitDrawableSegments(series.series)) {
+                    if (segment.points.size() == 1) {
+                        drawPoint(painter, plotRect, plot, segment.points.front());
+                    } else {
+                        const QPolygon polyline = buildPolyline(plotRect, plot, segment);
+                        painter.drawPolyline(polyline);
+                    }
+                }
             }
         }
 
@@ -230,8 +266,14 @@ void PlotRenderer::drawSeries(QPainter &painter, const QRect &plotRect, const ap
     if (plot.series.points.size() == 1) {
         drawPoint(painter, plotRect, plot, plot.series.points.front());
     } else {
-        const QPolygon polyline = buildPolyline(plotRect, plot, plot.series);
-        painter.drawPolyline(polyline);
+        for (const auto &segment : splitDrawableSegments(plot.series)) {
+            if (segment.points.size() == 1) {
+                drawPoint(painter, plotRect, plot, segment.points.front());
+            } else {
+                const QPolygon polyline = buildPolyline(plotRect, plot, segment);
+                painter.drawPolyline(polyline);
+            }
+        }
     }
 }
 

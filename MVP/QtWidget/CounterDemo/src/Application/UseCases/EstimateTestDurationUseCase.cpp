@@ -63,14 +63,6 @@ domain::WindControlProfile profileForEstimation(const application::session::Prot
     return application::services::ControlProfilePreviewService{}.build(protocol, control, *engine);
 }
 
-domain::DurationMinutes analysisDurationFor(const application::session::ProtocolStateData &protocol) {
-    if (protocol.testTimeSource == domain::TestTimeSource::OperatorDefined) {
-        return protocol.operatorTestDuration;
-    }
-
-    return domain::DurationMinutes::required(application::services::defaultControlFunctionAnalysisWindowMinutes);
-}
-
 } // namespace
 
 EstimateTestDurationUseCase::EstimateTestDurationUseCase(application::session::SessionState &state) : state(state) {

@@ -98,7 +98,8 @@ application::dto::Series PlotWidget::interpolateSeries(const application::dto::S
         return target;
     }
 
-    application::dto::Series result{};
+    application::dto::Series result = target;
+    result.points.clear();
     result.points.reserve(target.points.size());
 
     for (std::size_t index = 0; index < target.points.size(); ++index) {

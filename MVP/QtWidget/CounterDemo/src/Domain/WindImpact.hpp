@@ -9,6 +9,7 @@ namespace domain {
 constexpr double minOperationalBeaufort = 0.0;
 // Operational test scope is limited to Beaufort 0..7; drones are not tested above this range.
 constexpr double maxOperationalBeaufort = 7.0;
+constexpr double directionNormalizationEpsilon = 1.0e-6;
 // TODO(post-MVP): verify real stand limits; signed +/-360 is an MVP relative-angle guard.
 constexpr double minAngleOfAttack = -360.0;
 constexpr double maxAngleOfAttack = 360.0;
@@ -33,9 +34,17 @@ class Beaufort final {
 class WindDirection final {
   public:
     static WindDirection from(double rawValue) {
+        if (std::abs(rawValue) < directionNormalizationEpsilon) {
+            return WindDirection{0.0};
+        }
+
         auto normalized = std::fmod(rawValue, 360.0);
         if (normalized < 0.0) {
             normalized += 360.0;
+        }
+        if (std::abs(normalized) < directionNormalizationEpsilon ||
+            std::abs(normalized - 360.0) < directionNormalizationEpsilon) {
+            normalized = 0.0;
         }
 
         return WindDirection{normalized};

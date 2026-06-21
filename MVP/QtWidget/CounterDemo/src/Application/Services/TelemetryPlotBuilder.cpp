@@ -30,6 +30,8 @@ application::dto::PlotModel TelemetryPlotBuilder::build(const session::Telemetry
     application::dto::NamedSeries axisZ{};
     axisZ.label = "Ось Z / направление";
     axisZ.color = telemetry.telemetryAxisZColor;
+    axisZ.series.breakOnLargeDelta = true;
+    axisZ.series.wrapThreshold = 180.0;
 
     if (!telemetry.telemetryHistory.empty()) {
         const double baseTimestamp = telemetry.telemetryHistory.front().timestampSeconds;

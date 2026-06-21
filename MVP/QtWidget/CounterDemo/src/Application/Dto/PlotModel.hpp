@@ -20,6 +20,8 @@ struct Point {
 
 struct Series {
     std::vector<Point> points{};
+    bool breakOnLargeDelta{false};
+    double wrapThreshold{180.0};
 };
 
 struct NamedSeries {

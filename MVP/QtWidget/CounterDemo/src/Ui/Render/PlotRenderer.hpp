@@ -4,6 +4,8 @@
 #include <QPainter>
 #include <QRect>
 
+#include <vector>
+
 #include "../../Application/Dto/PlotModel.hpp"
 
 namespace ui::render {
@@ -11,6 +13,7 @@ namespace ui::render {
 class PlotRenderer final {
   public:
     static void drawPlot(QPainter &painter, const QRect &rect, const application::dto::PlotModel &plot);
+    static std::vector<application::dto::Series> splitDrawableSegments(const application::dto::Series &series);
 
   private:
     static bool hasRenderablePlot(const application::dto::PlotModel &plot);

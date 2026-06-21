@@ -293,6 +293,7 @@ if (BUILD_TESTING)
     tests/Application/UavSpecificationMapperTest.cpp
     tests/Presentation/ControlChartsTabPresenterTest.cpp
     tests/Presentation/ShellPresenterTest.cpp
+    tests/Ui/PlotRendererTest.cpp
     tests/Infrastructure/ConfigTemplateServiceTest.cpp
     tests/Infrastructure/LegacyAxisProtocolCodecTest.cpp
     tests/Infrastructure/QtTestExecutionSchedulerTest.cpp
@@ -333,6 +334,7 @@ if (BUILD_TESTING)
     src/Application/UseCases/UpdateTestProtocolUseCase.cpp
     src/Presentation/ShellPresenter.cpp
     src/Presentation/ControlChartsTab/ControlChartsTabPresenter.cpp
+    src/Ui/Render/PlotRenderer.cpp
     src/Infrastructure/QtTestExecutionScheduler.cpp
     src/Infrastructure/ConfigTemplates/ConfigTemplateService.cpp
     src/Infrastructure/AxisTcp/LegacyAxisProtocolCodec.cpp
@@ -346,6 +348,7 @@ if (BUILD_TESTING)
   target_link_libraries(domain_tests
     PRIVATE
       Qt::Core
+      Qt::Gui
       GTest::gtest_main
   )
 

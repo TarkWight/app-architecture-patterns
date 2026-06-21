@@ -14,6 +14,14 @@ TEST(WindImpactTest, NormalizesDirectionToCompassCircle) {
     EXPECT_DOUBLE_EQ(domain::WindDirection::from(382.5).degrees(), 22.5);
 }
 
+TEST(WindImpactTest, NormalizesDirectionNearZeroWithoutReturningThreeSixty) {
+    EXPECT_DOUBLE_EQ(domain::WindDirection::from(-0.0000001).degrees(), 0.0);
+    EXPECT_DOUBLE_EQ(domain::WindDirection::from(360.0).degrees(), 0.0);
+    EXPECT_DOUBLE_EQ(domain::WindDirection::from(720.0).degrees(), 0.0);
+    EXPECT_DOUBLE_EQ(domain::WindDirection::from(-5.0).degrees(), 355.0);
+    EXPECT_DOUBLE_EQ(domain::WindDirection::from(359.999999999).degrees(), 0.0);
+}
+
 TEST(WindImpactTest, ClampsAngleOfAttackToSignedStandRange) {
     EXPECT_DOUBLE_EQ(domain::AngleOfAttack::from(-720.0).degrees(), domain::minAngleOfAttack);
     EXPECT_DOUBLE_EQ(domain::AngleOfAttack::from(400.0).degrees(), domain::maxAngleOfAttack);

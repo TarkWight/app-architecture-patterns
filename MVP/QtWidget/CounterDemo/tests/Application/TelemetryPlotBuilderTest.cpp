@@ -34,6 +34,9 @@ TEST(TelemetryPlotBuilderTest, BuildsVisibleGridWhenHistoryIsEmpty) {
     ASSERT_EQ(plot.seriesList.size(), 2U);
     EXPECT_EQ(plot.seriesList.at(0).label, "Ось Y / тангаж");
     EXPECT_EQ(plot.seriesList.at(1).label, "Ось Z / направление");
+    EXPECT_FALSE(plot.seriesList.at(0).series.breakOnLargeDelta);
+    EXPECT_TRUE(plot.seriesList.at(1).series.breakOnLargeDelta);
+    EXPECT_DOUBLE_EQ(plot.seriesList.at(1).series.wrapThreshold, 180.0);
 }
 
 TEST(TelemetryPlotBuilderTest, BuildsAxisSeriesInsideSelectedWindow) {
@@ -71,6 +74,7 @@ TEST(TelemetryPlotBuilderTest, AppliesAxisVisibilityAndColors) {
 
     ASSERT_EQ(plot.seriesList.size(), 1U);
     EXPECT_EQ(plot.seriesList.at(0).label, "Ось Z / направление");
+    EXPECT_TRUE(plot.seriesList.at(0).series.breakOnLargeDelta);
     EXPECT_EQ(plot.seriesList.at(0).color.r, 1);
     EXPECT_EQ(plot.seriesList.at(0).color.g, 2);
     EXPECT_EQ(plot.seriesList.at(0).color.b, 3);

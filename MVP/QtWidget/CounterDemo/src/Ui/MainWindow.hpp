@@ -94,7 +94,6 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     TestProtocolTabWidget *testProtocolTabWidget{nullptr};
 
     QTimer *standImpactTransitionTimer{nullptr};
-    bool controlPlotRebuildScheduled{false};
     std::string observedTestProtocolModeKey{};
     std::string selectedTelemetryConfigPath{};
 
@@ -112,7 +111,6 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     void handleManualImpactRejected();
     void advanceStandImpactTransition();
     void selectTelemetryAxisColor();
-    void scheduleControlPlotRebuild();
     void updateManualStandControlsEnabled();
     void updateControlFormulaTemplateSelection(const std::string &expression);
     void createTelemetryTemplate();

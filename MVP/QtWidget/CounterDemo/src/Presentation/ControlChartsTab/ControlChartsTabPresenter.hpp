@@ -2,7 +2,6 @@
 #define CONTROLCHARTSPRESENTER_HPP
 
 #include "../../Application/UseCases/BuildControlPlotUseCase.hpp"
-#include "../../Application/UseCases/EstimateTestDurationUseCase.hpp"
 #include "../../Application/UseCases/SetControlChartsTabMinutesUseCase.hpp"
 #include "../../Application/UseCases/SetWindImpactUseCase.hpp"
 #include "../../Application/UseCases/UpdateTestProtocolUseCase.hpp"
@@ -18,7 +17,6 @@ class ControlChartsTabPresenter final {
         application::useCases::SetControlChartsTabMinutesUseCase &setControlChartsTabMinutesUseCase;
         application::useCases::SetWindImpactUseCase &setWindImpactUseCase;
         application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
-        application::useCases::EstimateTestDurationUseCase &estimateTestDurationUseCase;
         application::useCases::UpdateTestProtocolUseCase &updateTestProtocolUseCase;
     };
 
@@ -39,7 +37,7 @@ class ControlChartsTabPresenter final {
     void onAngleOfAttackChanged(double value);
 
     void onRebuildPlotPressed();
-    void onReadinessCalculationPressed();
+    void onCalculationResultChanged();
     void onDurationStateChanged();
 
   private:
@@ -47,7 +45,6 @@ class ControlChartsTabPresenter final {
     application::useCases::SetControlChartsTabMinutesUseCase &setControlChartsTabMinutesUseCase;
     application::useCases::SetWindImpactUseCase &setWindImpactUseCase;
     application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
-    application::useCases::EstimateTestDurationUseCase &estimateTestDurationUseCase;
     application::useCases::UpdateTestProtocolUseCase &updateTestProtocolUseCase;
 
     IControlChartsTabView *view{nullptr};
@@ -55,7 +52,6 @@ class ControlChartsTabPresenter final {
     void updateWindImpact(double beaufort, double direction, double angleOfAttack);
     void refreshMinutesInputEnabled();
     void refreshDurationDisplay();
-    void refreshReadinessCalculationEnabled();
 };
 
 } // namespace presentation::controlChartsTab

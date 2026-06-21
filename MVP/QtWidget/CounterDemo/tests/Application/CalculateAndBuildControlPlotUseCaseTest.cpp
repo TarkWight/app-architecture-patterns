@@ -97,7 +97,7 @@ TEST(CalculateAndBuildControlPlotUseCaseTest, WhenEstimatorSucceedsBuildsPlotUsi
     const auto expected = expectedDuration(state.protocol().testProtocol, state.readiness().calculatedForImpact);
     EXPECT_EQ(state.protocol().estimatedTestDuration.value(), expected.value());
     EXPECT_EQ(state.control().controlProfile.duration.value(), expected.value());
-    EXPECT_EQ(state.control().controlPlot.x.max, static_cast<double>(expected.value()));
+    EXPECT_DOUBLE_EQ(state.control().controlPlot.x.max, static_cast<double>(expected.value()));
 }
 
 TEST(CalculateAndBuildControlPlotUseCaseTest, WhenEstimatorFailsDoesNotOverwriteFinalPlotAsSuccessful) {

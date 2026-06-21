@@ -29,7 +29,6 @@ class ControlChartsTabWidget final : public QWidget, public presentation::contro
     void setOperatorDurationVisible(bool visible) override;
     void setEstimatedDurationVisible(bool visible) override;
     void setEstimatedDurationText(const std::string &text) override;
-    void setReadinessCalculationEnabled(bool enabled) override;
     void setTestProtocolMode(const std::string &mode) override;
     void setTestProtocolProgram(const std::string &program) override;
     void setBeaufort(double value) override;

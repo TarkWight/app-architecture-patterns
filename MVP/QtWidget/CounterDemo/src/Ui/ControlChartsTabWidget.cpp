@@ -64,10 +64,6 @@ void ControlChartsTabWidget::setEstimatedDurationText(const std::string &text) {
     ui->labelEstimatedDurationValue->setText(QString::fromStdString(text));
 }
 
-void ControlChartsTabWidget::setReadinessCalculationEnabled(bool enabled) {
-    ui->buttonCalculateReadiness->setEnabled(enabled);
-}
-
 void ControlChartsTabWidget::setTestProtocolMode(const std::string &mode) {
     const QSignalBlocker blocker{ui->comboBoxTestMode};
     const int index = ui->comboBoxTestMode->findData(QString::fromStdString(mode));
@@ -131,8 +127,6 @@ void ControlChartsTabWidget::connectSignals() {
     });
 
     QObject::connect(ui->buttonCalculatePlot, &QPushButton::clicked, this, [this]() { emit calculateRequested(); });
-    QObject::connect(ui->buttonCalculateReadiness, &QPushButton::clicked, this,
-                     [this]() { presenter.onReadinessCalculationPressed(); });
     QObject::connect(ui->buttonPickLineColor, &QPushButton::clicked, this, [this]() { emit lineColorRequested(); });
     QObject::connect(ui->comboBoxTestMode, &QComboBox::currentIndexChanged, this, [this]() {
         presenter.onTestProtocolModeChanged(ui->comboBoxTestMode->currentData().toString().toStdString());

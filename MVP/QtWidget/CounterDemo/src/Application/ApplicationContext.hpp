@@ -165,7 +165,6 @@ struct ApplicationContext {
             .setControlChartsTabMinutesUseCase = setControlChartsTabMinutesUseCase,
             .setWindImpactUseCase = setWindImpactUseCase,
             .buildControlPlotUseCase = buildControlPlotUseCase,
-            .estimateTestDurationUseCase = estimateTestDurationUseCase,
             .updateTestProtocolUseCase = updateTestProtocolUseCase}};
 
     presentation::testProtocolTab::TestProtocolTabPresenter testProtocolTabPresenter{

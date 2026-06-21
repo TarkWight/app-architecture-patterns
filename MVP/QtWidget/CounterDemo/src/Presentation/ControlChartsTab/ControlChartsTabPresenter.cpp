@@ -12,7 +12,6 @@ namespace presentation::controlChartsTab {
 ControlChartsTabPresenter::ControlChartsTabPresenter(Dependencies deps)
     : state(deps.state), setControlChartsTabMinutesUseCase(deps.setControlChartsTabMinutesUseCase),
       setWindImpactUseCase(deps.setWindImpactUseCase), buildControlPlotUseCase(deps.buildControlPlotUseCase),
-      estimateTestDurationUseCase(deps.estimateTestDurationUseCase),
       updateTestProtocolUseCase(deps.updateTestProtocolUseCase) {
 }
 
@@ -40,14 +39,11 @@ void ControlChartsTabPresenter::onViewReady() {
 
     refreshMinutesInputEnabled();
     refreshDurationDisplay();
-    refreshReadinessCalculationEnabled();
-    onRebuildPlotPressed();
 }
 
 void ControlChartsTabPresenter::onTimeSettingsChanged() {
     refreshMinutesInputEnabled();
     refreshDurationDisplay();
-    refreshReadinessCalculationEnabled();
 }
 
 void ControlChartsTabPresenter::onMinutesChanged(int minutes) {
@@ -117,9 +113,7 @@ void ControlChartsTabPresenter::onRebuildPlotPressed() {
     }
 }
 
-void ControlChartsTabPresenter::onReadinessCalculationPressed() {
-    estimateTestDurationUseCase.executeForAutoCalculated();
-
+void ControlChartsTabPresenter::onCalculationResultChanged() {
     if (view == nullptr) {
         return;
     }
@@ -127,6 +121,7 @@ void ControlChartsTabPresenter::onReadinessCalculationPressed() {
     const auto message = application::services::ReadinessDiagnosticMessageBuilder::build(state.readiness());
     const auto displayText = message.toDisplayText();
     refreshDurationDisplay();
+    view->refreshPlot();
     view->showReadinessMessage(displayText);
     view->appendLog(displayText);
 }
@@ -176,15 +171,6 @@ void ControlChartsTabPresenter::refreshDurationDisplay() {
         view->setEstimatedDurationText(std::to_string(protocol.estimatedTestDuration.value()) + " мин");
         return;
     }
-}
-
-void ControlChartsTabPresenter::refreshReadinessCalculationEnabled() {
-    if (view == nullptr) {
-        return;
-    }
-
-    const auto mode = state.protocol().testProtocol.testMode;
-    view->setReadinessCalculationEnabled(mode == domain::TestMode::Hybrid || mode == domain::TestMode::Automatic);
 }
 
 } // namespace presentation::controlChartsTab

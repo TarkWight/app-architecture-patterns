@@ -2,6 +2,7 @@
 #define SHELLPRESENTER_HPP
 
 #include "../Application/Session/SessionState.hpp"
+#include "../Application/UseCases/BuildControlPlotUseCase.hpp"
 #include "../Application/UseCases/CalculateAndBuildControlPlotUseCase.hpp"
 #include "../Application/UseCases/SetFunctionExpressionUseCase.hpp"
 #include "../Application/UseCases/SetLineColorUseCase.hpp"

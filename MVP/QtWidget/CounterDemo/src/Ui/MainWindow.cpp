@@ -198,8 +198,10 @@ void MainWindow::connectTestControlSignals() {
                      [this](const QString &expression) { shellPresenter.onFunctionEdited(expression.toStdString()); });
     QObject::connect(controlChartsTabWidget, &ControlChartsTabWidget::formulaTemplateSelected, this,
                      [this](const QString &key) { shellPresenter.onFormulaTemplateSelected(key.toStdString()); });
-    QObject::connect(controlChartsTabWidget, &ControlChartsTabWidget::calculateRequested, this,
-                     [this]() { shellPresenter.onCalculatePressed(); });
+    QObject::connect(controlChartsTabWidget, &ControlChartsTabWidget::calculateRequested, this, [this]() {
+        shellPresenter.onCalculatePressed();
+        controlChartsTabPresenter.onCalculationResultChanged();
+    });
     QObject::connect(controlChartsTabWidget, &ControlChartsTabWidget::lineColorRequested, this, [this]() {
         const QColor color = QColorDialog::getColor(Qt::red, this);
         if (!color.isValid()) {
@@ -311,7 +313,6 @@ void MainWindow::connectSessionSignals() {
 
                          observedTestProtocolModeKey = modeKey;
                          updateManualStandControlsEnabled();
-                         scheduleControlPlotRebuild();
                      });
 }
 
@@ -426,18 +427,6 @@ void MainWindow::selectTelemetryAxisColor() {
 
     telemetryChartsTabPresenter.onTelemetryAxisColorSelected(selectedTelemetryAxisId(),
                                                              MainWindowUiAdapter::toDomainColor(color));
-}
-
-void MainWindow::scheduleControlPlotRebuild() {
-    if (controlPlotRebuildScheduled) {
-        return;
-    }
-
-    controlPlotRebuildScheduled = true;
-    QTimer::singleShot(0, this, [this]() {
-        controlPlotRebuildScheduled = false;
-        controlChartsTabPresenter.onRebuildPlotPressed();
-    });
 }
 
 double MainWindow::selectedStandDirectionDegrees() const {

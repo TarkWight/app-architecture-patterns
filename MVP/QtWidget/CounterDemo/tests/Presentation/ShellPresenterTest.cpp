@@ -335,6 +335,22 @@ TEST(ShellPresenterTest, ManualStartDoesNotAskReadinessConfirmation) {
     EXPECT_EQ(fixture.state.execution().testExecutionStatus, domain::TestExecutionStatus::Running);
 }
 
+TEST(ShellPresenterTest, CalculatePressedUpdatesReadinessAndBuildsControlPlot) {
+    ShellPresenterFixture fixture{};
+    fixture.presenter.attachView(fixture.view);
+    fixture.state.setTestProtocolMode(domain::TestMode::Automatic);
+    fixture.state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
+    fixture.state.setTestProtocolDroneParameters(validDroneParameters());
+    fixture.state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(1));
+
+    fixture.presenter.onCalculatePressed();
+
+    EXPECT_EQ(fixture.state.readiness().status, application::session::ReadinessStatus::Ok);
+    EXPECT_FALSE(fixture.state.control().controlProfile.samples.empty());
+    EXPECT_FALSE(fixture.state.control().controlPlot.series.points.empty());
+    EXPECT_NE(fixture.state.control().controlProfile.duration.value(), 1);
+}
+
 TEST(ShellPresenterTest, AutoWithOkStartsWithoutConfirmation) {
     ShellPresenterFixture fixture{};
     fixture.presenter.attachView(fixture.view);

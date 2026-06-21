@@ -14,6 +14,14 @@ namespace application::useCases {
 
 namespace {
 
+domain::DurationMinutes analysisDurationFor(const application::session::ProtocolStateData &protocol) {
+    if (protocol.testTimeSource == domain::TestTimeSource::OperatorDefined) {
+        return protocol.operatorTestDuration;
+    }
+
+    return domain::DurationMinutes::required(application::services::defaultControlFunctionAnalysisWindowMinutes);
+}
+
 bool hasExplicitImpact(const domain::WindImpact &impact) {
     return impact.beaufort.value() > 0.0 || impact.direction.degrees() > 0.0 || impact.angleOfAttack.degrees() != 0.0;
 }

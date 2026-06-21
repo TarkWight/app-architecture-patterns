@@ -3,7 +3,6 @@
 #include "../../src/Application/Ports/IFunctionEngine.hpp"
 #include "../../src/Application/Session/SessionState.hpp"
 #include "../../src/Application/UseCases/BuildControlPlotUseCase.hpp"
-#include "../../src/Application/UseCases/EstimateTestDurationUseCase.hpp"
 #include "../../src/Application/UseCases/SetControlChartsTabMinutesUseCase.hpp"
 #include "../../src/Application/UseCases/SetWindImpactUseCase.hpp"
 #include "../../src/Application/UseCases/UpdateTestProtocolUseCase.hpp"
@@ -44,10 +43,6 @@ class ControlChartsTabViewSpy final : public presentation::controlChartsTab::ICo
         estimatedDurationText = text;
     }
 
-    void setReadinessCalculationEnabled(bool enabled) override {
-        readinessCalculationEnabled = enabled;
-    }
-
     void setTestProtocolMode(const std::string &mode) override {
         testProtocolMode = mode;
     }
@@ -85,7 +80,6 @@ class ControlChartsTabViewSpy final : public presentation::controlChartsTab::ICo
     bool operatorDurationVisible{true};
     bool estimatedDurationVisible{false};
     std::string estimatedDurationText{};
-    bool readinessCalculationEnabled{false};
     std::string testProtocolMode{};
     std::string testProtocolProgram{};
     double beaufort{0.0};
@@ -114,16 +108,6 @@ std::vector<domain::TestProtocolParameter> validDroneParameters() {
     };
 }
 
-std::vector<domain::TestProtocolParameter> warningDroneParameters() {
-    auto parameters = validDroneParameters();
-    for (auto &parameter : parameters) {
-        if (parameter.key == "frontal_area_m2" || parameter.key == "drag_coefficient") {
-            parameter.value = "";
-        }
-    }
-    return parameters;
-}
-
 std::vector<domain::TestProtocolParameter> invalidDroneParameters() {
     return {
         {"uav_model", "Модель БАС", "BAS-1"},
@@ -141,7 +125,6 @@ struct PresenterFixture {
     application::useCases::SetWindImpactUseCase setWindImpactUseCase{state};
     FunctionEngineStub functionEngine{};
     application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
-    application::useCases::EstimateTestDurationUseCase estimateTestDurationUseCase{state};
     application::useCases::UpdateTestProtocolUseCase updateTestProtocolUseCase{state};
     presentation::controlChartsTab::ControlChartsTabPresenter presenter{
         presentation::controlChartsTab::ControlChartsTabPresenter::Dependencies{
@@ -149,29 +132,11 @@ struct PresenterFixture {
             .setControlChartsTabMinutesUseCase = setMinutesUseCase,
             .setWindImpactUseCase = setWindImpactUseCase,
             .buildControlPlotUseCase = buildControlPlotUseCase,
-            .estimateTestDurationUseCase = estimateTestDurationUseCase,
             .updateTestProtocolUseCase = updateTestProtocolUseCase}};
     ControlChartsTabViewSpy view{};
 };
 
 } // namespace
-
-TEST(ControlChartsTabPresenterTest, CalculateButtonEnabledOnlyForAutomaticAndHybridModes) {
-    PresenterFixture fixture{};
-    fixture.presenter.attachView(fixture.view);
-
-    fixture.state.setTestProtocolMode(domain::TestMode::Manual);
-    fixture.presenter.onViewReady();
-    EXPECT_FALSE(fixture.view.readinessCalculationEnabled);
-
-    fixture.state.setTestProtocolMode(domain::TestMode::Hybrid);
-    fixture.presenter.onTimeSettingsChanged();
-    EXPECT_TRUE(fixture.view.readinessCalculationEnabled);
-
-    fixture.state.setTestProtocolMode(domain::TestMode::Automatic);
-    fixture.presenter.onTimeSettingsChanged();
-    EXPECT_TRUE(fixture.view.readinessCalculationEnabled);
-}
 
 TEST(ControlChartsTabPresenterTest, ViewReadySyncsTestModeAndProgram) {
     PresenterFixture fixture{};
@@ -183,9 +148,10 @@ TEST(ControlChartsTabPresenterTest, ViewReadySyncsTestModeAndProgram) {
 
     EXPECT_EQ(fixture.view.testProtocolMode, "hybrid");
     EXPECT_EQ(fixture.view.testProtocolProgram, "test2");
+    EXPECT_EQ(fixture.view.plotRefreshCount, 0);
 }
 
-TEST(ControlChartsTabPresenterTest, TestModeChangeUpdatesProtocolState) {
+TEST(ControlChartsTabPresenterTest, TestModeChangeUpdatesProtocolStateWithoutRebuildingPlot) {
     PresenterFixture fixture{};
     fixture.presenter.attachView(fixture.view);
 
@@ -194,6 +160,7 @@ TEST(ControlChartsTabPresenterTest, TestModeChangeUpdatesProtocolState) {
     EXPECT_EQ(fixture.state.protocol().testProtocol.testMode, domain::TestMode::Automatic);
     EXPECT_EQ(fixture.state.control().standControlMode, domain::StandControlMode::PresetScenario);
     EXPECT_EQ(fixture.state.protocol().testTimeSource, domain::TestTimeSource::AutoCalculated);
+    EXPECT_EQ(fixture.view.plotRefreshCount, 0);
 }
 
 TEST(ControlChartsTabPresenterTest, TestProgramChangeUpdatesProtocolState) {
@@ -205,29 +172,34 @@ TEST(ControlChartsTabPresenterTest, TestProgramChangeUpdatesProtocolState) {
     EXPECT_EQ(fixture.state.protocol().testProtocol.testProgram, domain::TestProgram::WindLoadTemporalPerspective);
 }
 
-TEST(ControlChartsTabPresenterTest, CalculateReadinessRunsEstimateUseCase) {
+TEST(ControlChartsTabPresenterTest, CalculationResultDisplaysOkReadinessMessage) {
     PresenterFixture fixture{};
-    fixture.state.setTestProtocolMode(domain::TestMode::Automatic);
-    fixture.state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
-    fixture.state.setTestProtocolDroneParameters(validDroneParameters());
+    domain::EstimatedTestDurationResult result{};
+    result.duration = domain::DurationMinutes::required(37);
+    fixture.state.setReadinessFromEstimationResult(result, domain::makeWindImpact(1.0, 0.0, 0.0));
     fixture.presenter.attachView(fixture.view);
 
-    fixture.presenter.onReadinessCalculationPressed();
+    fixture.presenter.onCalculationResultChanged();
 
     EXPECT_EQ(fixture.state.readiness().status, application::session::ReadinessStatus::Ok);
     EXPECT_TRUE(contains(fixture.view.readinessMessage, "Расчёт готовности выполнен. Испытание допустимо."));
-    EXPECT_TRUE(contains(fixture.view.readinessMessage, "Безопасный предел по Бофорту"));
-    EXPECT_TRUE(contains(fixture.view.readinessMessage, "Безопасный предел угла атаки"));
+    EXPECT_EQ(fixture.view.plotRefreshCount, 1);
 }
 
 TEST(ControlChartsTabPresenterTest, WarningStatusMapsToWarningMessage) {
     PresenterFixture fixture{};
     fixture.state.setTestProtocolMode(domain::TestMode::Automatic);
     fixture.state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
-    fixture.state.setTestProtocolDroneParameters(warningDroneParameters());
+    domain::EstimatedTestDurationResult result{};
+    result.duration = domain::DurationMinutes::required(37);
+    result.warnings.push_back(
+        domain::TestDurationDiagnostic{.code = domain::TestDurationDiagnosticCode::FrontalAreaFallbackUsed});
+    result.warnings.push_back(
+        domain::TestDurationDiagnostic{.code = domain::TestDurationDiagnosticCode::DragCoefficientFallbackUsed});
+    fixture.state.setReadinessFromEstimationResult(result, domain::makeWindImpact(1.0, 0.0, 0.0));
     fixture.presenter.attachView(fixture.view);
 
-    fixture.presenter.onReadinessCalculationPressed();
+    fixture.presenter.onCalculationResultChanged();
 
     EXPECT_EQ(fixture.state.readiness().status, application::session::ReadinessStatus::Warning);
     EXPECT_TRUE(contains(fixture.view.readinessMessage, "Расчёт готовности выполнен. Есть предупреждения."));
@@ -239,10 +211,13 @@ TEST(ControlChartsTabPresenterTest, FailedStatusMapsToDangerMessage) {
     PresenterFixture fixture{};
     fixture.state.setTestProtocolMode(domain::TestMode::Automatic);
     fixture.state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
-    fixture.state.setTestProtocolDroneParameters(invalidDroneParameters());
+    domain::EstimatedTestDurationResult result{};
+    result.errors.push_back(
+        domain::TestDurationDiagnostic{.code = domain::TestDurationDiagnosticCode::BatteryCapacityMissing});
+    fixture.state.setReadinessFromEstimationResult(result, domain::makeWindImpact(1.0, 0.0, 0.0));
     fixture.presenter.attachView(fixture.view);
 
-    fixture.presenter.onReadinessCalculationPressed();
+    fixture.presenter.onCalculationResultChanged();
 
     EXPECT_EQ(fixture.state.readiness().status, application::session::ReadinessStatus::Failed);
     EXPECT_TRUE(
@@ -291,7 +266,11 @@ TEST(ControlChartsTabPresenterTest, SuccessfulReadinessCalculationUpdatesEstimat
     fixture.state.setTestProtocolDroneParameters(validDroneParameters());
     fixture.presenter.attachView(fixture.view);
 
-    fixture.presenter.onReadinessCalculationPressed();
+    domain::EstimatedTestDurationResult result{};
+    result.duration = domain::DurationMinutes::required(37);
+    fixture.state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(37));
+    fixture.state.setReadinessFromEstimationResult(result, domain::makeWindImpact(1.0, 0.0, 0.0));
+    fixture.presenter.onCalculationResultChanged();
 
     EXPECT_TRUE(fixture.view.estimatedDurationVisible);
     EXPECT_EQ(fixture.view.estimatedDurationText,
@@ -306,7 +285,11 @@ TEST(ControlChartsTabPresenterTest, FailedReadinessDoesNotPresentFallbackDuratio
     fixture.state.setTestProtocolDroneParameters(invalidDroneParameters());
     fixture.presenter.attachView(fixture.view);
 
-    fixture.presenter.onReadinessCalculationPressed();
+    domain::EstimatedTestDurationResult result{};
+    result.errors.push_back(
+        domain::TestDurationDiagnostic{.code = domain::TestDurationDiagnosticCode::BatteryCapacityMissing});
+    fixture.state.setReadinessFromEstimationResult(result, domain::makeWindImpact(1.0, 0.0, 0.0));
+    fixture.presenter.onCalculationResultChanged();
 
     EXPECT_EQ(fixture.state.readiness().status, application::session::ReadinessStatus::Failed);
     EXPECT_TRUE(fixture.view.estimatedDurationVisible);

@@ -4,6 +4,7 @@
 #include "Session/SessionState.hpp"
 
 #include "UseCases/BuildControlPlotUseCase.hpp"
+#include "UseCases/CalculateAndBuildControlPlotUseCase.hpp"
 #include "UseCases/ExportPdfUseCase.hpp"
 #include "UseCases/GenerateStairPlotUseCase.hpp"
 #include "UseCases/LoadPdfReportDefaultsUseCase.hpp"
@@ -82,6 +83,9 @@ struct ApplicationContext {
 
     application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{sessionState, functionEngine};
 
+    application::useCases::CalculateAndBuildControlPlotUseCase calculateAndBuildControlPlotUseCase{
+        sessionState, functionEngine, buildControlPlotUseCase};
+
     application::useCases::EstimateTestDurationUseCase estimateTestDurationUseCase{sessionState, functionEngine};
 
     application::useCases::StartTestExecutionUseCase startTestExecutionUseCase{
@@ -133,21 +137,21 @@ struct ApplicationContext {
 
     application::useCases::ExportPdfUseCase exportPdfUseCase{sessionState, pdfExporter};
 
-    presentation::ShellPresenter shellPresenter{
-        presentation::ShellPresenter::Dependencies{.state = sessionState,
-                                                   .startTestExecutionUseCase = startTestExecutionUseCase,
-                                                   .pauseTestExecutionUseCase = pauseTestExecutionUseCase,
-                                                   .resumeTestExecutionUseCase = resumeTestExecutionUseCase,
-                                                   .stopTestExecutionUseCase = stopTestExecutionUseCase,
-                                                   .setTestTimeSourceUseCase = setTestTimeSourceUseCase,
-                                                   .setFunctionExpressionUseCase = setFunctionExpressionUseCase,
-                                                   .setLineColorUseCase = setLineColorUseCase,
-                                                   .setStandControlModeUseCase = setStandControlModeUseCase,
-                                                   .buildControlPlotUseCase = buildControlPlotUseCase,
-                                                   .estimateTestDurationUseCase = estimateTestDurationUseCase,
-                                                   .configureTelemetryUseCase = configureTelemetryUseCase,
-                                                   .connectStandUseCase = connectStandUseCase,
-                                                   .disconnectStandUseCase = disconnectStandUseCase}};
+    presentation::ShellPresenter shellPresenter{presentation::ShellPresenter::Dependencies{
+        .state = sessionState,
+        .startTestExecutionUseCase = startTestExecutionUseCase,
+        .pauseTestExecutionUseCase = pauseTestExecutionUseCase,
+        .resumeTestExecutionUseCase = resumeTestExecutionUseCase,
+        .stopTestExecutionUseCase = stopTestExecutionUseCase,
+        .setTestTimeSourceUseCase = setTestTimeSourceUseCase,
+        .setFunctionExpressionUseCase = setFunctionExpressionUseCase,
+        .setLineColorUseCase = setLineColorUseCase,
+        .setStandControlModeUseCase = setStandControlModeUseCase,
+        .calculateAndBuildControlPlotUseCase = calculateAndBuildControlPlotUseCase,
+        .estimateTestDurationUseCase = estimateTestDurationUseCase,
+        .configureTelemetryUseCase = configureTelemetryUseCase,
+        .connectStandUseCase = connectStandUseCase,
+        .disconnectStandUseCase = disconnectStandUseCase}};
 
     presentation::telemetryChartsTab::TelemetryChartsTabPresenter telemetryChartsTabPresenter{
         presentation::telemetryChartsTab::TelemetryChartsTabPresenter::Dependencies{

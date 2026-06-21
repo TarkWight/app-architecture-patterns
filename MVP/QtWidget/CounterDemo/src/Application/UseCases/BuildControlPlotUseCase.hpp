@@ -1,8 +1,6 @@
 #ifndef BUILDCONTROLPLOTUSECASE_HPP
 #define BUILDCONTROLPLOTUSECASE_HPP
 
-#include "EstimateTestDurationUseCase.hpp"
-
 #include "../Services/ControlProfilePreviewService.hpp"
 #include "../Services/ControlPlotBuilder.hpp"
 #include "../Ports/IFunctionEngine.hpp"
@@ -22,7 +20,6 @@ class BuildControlPlotUseCase final {
   private:
     application::session::SessionState &state;
     const application::ports::IFunctionEngine &engine;
-    EstimateTestDurationUseCase estimateTestDurationUseCase;
     application::services::ControlProfilePreviewService profilePreviewService{};
     application::services::ControlPlotBuilder plotBuilder{};
 };

@@ -18,7 +18,7 @@ ShellPresenter::ShellPresenter(Dependencies deps)
       resumeTestExecutionUseCase(deps.resumeTestExecutionUseCase),
       stopTestExecutionUseCase(deps.stopTestExecutionUseCase),
       setFunctionExpressionUseCase(deps.setFunctionExpressionUseCase), setLineColorUseCase(deps.setLineColorUseCase),
-      buildControlPlotUseCase(deps.buildControlPlotUseCase),
+      calculateAndBuildControlPlotUseCase(deps.calculateAndBuildControlPlotUseCase),
       estimateTestDurationUseCase(deps.estimateTestDurationUseCase),
       setTestTimeSourceUseCase(deps.setTestTimeSourceUseCase),
       configureTelemetryUseCase(deps.configureTelemetryUseCase), connectStandUseCase(deps.connectStandUseCase),
@@ -145,10 +145,10 @@ void ShellPresenter::onStopPressed() {
 }
 
 void ShellPresenter::onCalculatePressed() {
-    buildControlPlotUseCase.execute();
+    calculateAndBuildControlPlotUseCase.execute();
 
     if (view != nullptr) {
-        view->appendLog("Formula plot rebuilt");
+        view->appendLog("Readiness calculated and formula plot rebuilt");
     }
 }
 

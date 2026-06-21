@@ -95,6 +95,8 @@ qt_add_executable(develop
 
   src/Application/Services/ControlPlotBuilder.hpp
   src/Application/Services/ControlPlotBuilder.cpp
+  src/Application/Services/ControlFunctionWorstCaseAnalyzer.hpp
+  src/Application/Services/ControlFunctionWorstCaseAnalyzer.cpp
   src/Application/Services/ControlProfilePreviewService.hpp
   src/Application/Services/ControlProfilePreviewService.cpp
   src/Application/Services/AppliedStandImpactSender.hpp
@@ -121,6 +123,8 @@ qt_add_executable(develop
 
   src/Application/UseCases/BuildControlPlotUseCase.hpp
   src/Application/UseCases/BuildControlPlotUseCase.cpp
+  src/Application/UseCases/CalculateAndBuildControlPlotUseCase.hpp
+  src/Application/UseCases/CalculateAndBuildControlPlotUseCase.cpp
   src/Application/UseCases/GenerateStairPlotUseCase.hpp
   src/Application/UseCases/GenerateStairPlotUseCase.cpp
   src/Application/UseCases/LoadPdfReportDefaultsUseCase.hpp
@@ -268,7 +272,9 @@ if (BUILD_TESTING)
     tests/Application/ApplyWindImpactUseCasesTest.cpp
     tests/Application/AppliedStandImpactSenderTest.cpp
     tests/Application/BuildControlPlotUseCaseTest.cpp
+    tests/Application/CalculateAndBuildControlPlotUseCaseTest.cpp
     tests/Application/ConfigureTelemetryUseCaseTest.cpp
+    tests/Application/ControlFunctionWorstCaseAnalyzerTest.cpp
     tests/Application/ConnectStandUseCaseTest.cpp
     tests/Application/EstimateTestDurationUseCaseTest.cpp
     tests/Application/ExportPdfUseCaseTest.cpp
@@ -294,6 +300,7 @@ if (BUILD_TESTING)
     src/Application/Session/SessionState.cpp
     src/Application/Session/Subscription.cpp
     src/Application/Services/ControlPlotBuilder.cpp
+    src/Application/Services/ControlFunctionWorstCaseAnalyzer.cpp
     src/Application/Services/ControlProfilePreviewService.cpp
     src/Application/Services/AppliedStandImpactSender.cpp
     src/Application/Services/TelemetryPlotBuilder.cpp
@@ -301,6 +308,7 @@ if (BUILD_TESTING)
     src/Application/Services/UavSpecificationMapper.cpp
     src/Application/Services/ReadinessDiagnosticMessageBuilder.cpp
     src/Application/UseCases/BuildControlPlotUseCase.cpp
+    src/Application/UseCases/CalculateAndBuildControlPlotUseCase.cpp
     src/Application/UseCases/ConfigureTelemetryUseCase.cpp
     src/Application/UseCases/ConnectStandUseCase.cpp
     src/Application/UseCases/DisconnectStandUseCase.cpp

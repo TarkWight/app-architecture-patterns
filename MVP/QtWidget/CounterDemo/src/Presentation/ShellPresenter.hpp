@@ -2,7 +2,7 @@
 #define SHELLPRESENTER_HPP
 
 #include "../Application/Session/SessionState.hpp"
-#include "../Application/UseCases/BuildControlPlotUseCase.hpp"
+#include "../Application/UseCases/CalculateAndBuildControlPlotUseCase.hpp"
 #include "../Application/UseCases/SetFunctionExpressionUseCase.hpp"
 #include "../Application/UseCases/SetLineColorUseCase.hpp"
 #include "../Application/UseCases/SetStandControlModeUseCase.hpp"
@@ -35,7 +35,7 @@ class ShellPresenter final {
         application::useCases::SetFunctionExpressionUseCase &setFunctionExpressionUseCase;
         application::useCases::SetLineColorUseCase &setLineColorUseCase;
         application::useCases::SetStandControlModeUseCase &setStandControlModeUseCase;
-        application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
+        application::useCases::CalculateAndBuildControlPlotUseCase &calculateAndBuildControlPlotUseCase;
         application::useCases::EstimateTestDurationUseCase &estimateTestDurationUseCase;
         application::useCases::ConfigureTelemetryUseCase &configureTelemetryUseCase;
         application::useCases::ConnectStandUseCase &connectStandUseCase;
@@ -72,7 +72,7 @@ class ShellPresenter final {
     application::useCases::StopTestExecutionUseCase &stopTestExecutionUseCase;
     application::useCases::SetFunctionExpressionUseCase &setFunctionExpressionUseCase;
     application::useCases::SetLineColorUseCase &setLineColorUseCase;
-    application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
+    application::useCases::CalculateAndBuildControlPlotUseCase &calculateAndBuildControlPlotUseCase;
     application::useCases::EstimateTestDurationUseCase &estimateTestDurationUseCase;
     application::useCases::SetTestTimeSourceUseCase &setTestTimeSourceUseCase;
     application::useCases::ConfigureTelemetryUseCase &configureTelemetryUseCase;

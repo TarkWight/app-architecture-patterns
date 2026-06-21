@@ -7,6 +7,7 @@
 #include "../../src/Application/Session/SessionState.hpp"
 #include "../../src/Application/Services/TelemetrySessionClock.hpp"
 #include "../../src/Application/UseCases/BuildControlPlotUseCase.hpp"
+#include "../../src/Application/UseCases/CalculateAndBuildControlPlotUseCase.hpp"
 #include "../../src/Application/UseCases/ConfigureTelemetryUseCase.hpp"
 #include "../../src/Application/UseCases/ConnectStandUseCase.hpp"
 #include "../../src/Application/UseCases/DisconnectStandUseCase.hpp"
@@ -259,6 +260,8 @@ struct ShellPresenterFixture {
     ConfigRepositoryStub configRepository{};
     application::services::TelemetrySessionClock telemetrySessionClock{};
     application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
+    application::useCases::CalculateAndBuildControlPlotUseCase calculateAndBuildControlPlotUseCase{
+        state, functionEngine, buildControlPlotUseCase};
     application::useCases::StartTestExecutionUseCase startUseCase{state, scheduler, telemetryClient,
                                                                   buildControlPlotUseCase};
     application::useCases::PauseTestExecutionUseCase pauseUseCase{state, scheduler, telemetryClient};
@@ -273,21 +276,21 @@ struct ShellPresenterFixture {
                                                                                telemetrySessionClock};
     application::useCases::ConnectStandUseCase connectStandUseCase{state, telemetryClient};
     application::useCases::DisconnectStandUseCase disconnectStandUseCase{state, telemetryClient};
-    presentation::ShellPresenter presenter{
-        presentation::ShellPresenter::Dependencies{.state = state,
-                                                   .startTestExecutionUseCase = startUseCase,
-                                                   .pauseTestExecutionUseCase = pauseUseCase,
-                                                   .resumeTestExecutionUseCase = resumeUseCase,
-                                                   .stopTestExecutionUseCase = stopUseCase,
-                                                   .setTestTimeSourceUseCase = setTestTimeSourceUseCase,
-                                                   .setFunctionExpressionUseCase = setFunctionExpressionUseCase,
-                                                   .setLineColorUseCase = setLineColorUseCase,
-                                                   .setStandControlModeUseCase = setStandControlModeUseCase,
-                                                   .buildControlPlotUseCase = buildControlPlotUseCase,
-                                                   .estimateTestDurationUseCase = estimateTestDurationUseCase,
-                                                   .configureTelemetryUseCase = configureTelemetryUseCase,
-                                                   .connectStandUseCase = connectStandUseCase,
-                                                   .disconnectStandUseCase = disconnectStandUseCase}};
+    presentation::ShellPresenter presenter{presentation::ShellPresenter::Dependencies{
+        .state = state,
+        .startTestExecutionUseCase = startUseCase,
+        .pauseTestExecutionUseCase = pauseUseCase,
+        .resumeTestExecutionUseCase = resumeUseCase,
+        .stopTestExecutionUseCase = stopUseCase,
+        .setTestTimeSourceUseCase = setTestTimeSourceUseCase,
+        .setFunctionExpressionUseCase = setFunctionExpressionUseCase,
+        .setLineColorUseCase = setLineColorUseCase,
+        .setStandControlModeUseCase = setStandControlModeUseCase,
+        .calculateAndBuildControlPlotUseCase = calculateAndBuildControlPlotUseCase,
+        .estimateTestDurationUseCase = estimateTestDurationUseCase,
+        .configureTelemetryUseCase = configureTelemetryUseCase,
+        .connectStandUseCase = connectStandUseCase,
+        .disconnectStandUseCase = disconnectStandUseCase}};
     ShellViewSpy view{};
 };
 

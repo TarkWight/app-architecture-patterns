@@ -3,8 +3,6 @@
 
 #include "../../src/Application/Ports/IFunctionEngine.hpp"
 #include "../../src/Application/Session/SessionState.hpp"
-#include "../../src/Application/Services/UavSpecificationMapper.hpp"
-#include "../../src/Domain/TestDurationEstimator.hpp"
 #include "../../src/Domain/WindControlProfile.hpp"
 
 #include <gtest/gtest.h>
@@ -44,15 +42,6 @@ std::vector<domain::TestProtocolParameter> validDroneParameters() {
         {"motor_peak_current_a", "Пиковый ток", "30"},
         {"motor_hover_current_a", "Ток висения", "6"},
     };
-}
-
-domain::DurationMinutes expectedDuration(const domain::TestProtocol &protocol, const domain::WindImpact &impact) {
-    const auto uav = application::services::UavSpecificationMapper{}.map(protocol);
-    const auto result = domain::TestDurationEstimator::estimate(domain::TestDurationEstimationContext{
-        .uav = *uav,
-        .impact = impact,
-    });
-    return *result.duration;
 }
 
 TEST(BuildControlPlotUseCaseTest, BuildsOneSecondWindControlProfileForCalculatedAutomaticDuration) {
@@ -95,7 +84,7 @@ TEST(BuildControlPlotUseCaseTest, ClampsFormulaOutputToOperationalBeaufortRange)
     EXPECT_DOUBLE_EQ(profile.samples.at(60).beaufort.value(), domain::maxOperationalBeaufort);
 }
 
-TEST(BuildControlPlotUseCaseTest, WhenAutoCalculated_UsesEstimatorDuration) {
+TEST(BuildControlPlotUseCaseTest, WhenAutoCalculatedUsesCurrentEstimatedDurationWithoutReadinessEstimation) {
     application::session::SessionState state{};
     const auto impact = domain::makeWindImpact(4.0, 0.0, 10.0);
     state.setTestProtocolMode(domain::TestMode::Automatic);
@@ -108,12 +97,9 @@ TEST(BuildControlPlotUseCaseTest, WhenAutoCalculated_UsesEstimatorDuration) {
 
     useCase.execute();
 
-    const auto expected = expectedDuration(state.protocol().testProtocol, state.readiness().calculatedForImpact);
-    EXPECT_TRUE(state.readiness().calculatedForWorstCaseScenario);
-    EXPECT_GT(state.readiness().calculatedForImpact.beaufort.value(), impact.beaufort.value());
-    EXPECT_EQ(state.protocol().estimatedTestDuration.value(), expected.value());
-    EXPECT_EQ(state.control().controlProfile.duration.value(), expected.value());
-    EXPECT_NE(state.control().controlProfile.duration.value(), 48);
+    EXPECT_EQ(state.readiness().status, application::session::ReadinessStatus::Unknown);
+    EXPECT_EQ(state.protocol().estimatedTestDuration.value(), 48);
+    EXPECT_EQ(state.control().controlProfile.duration.value(), 48);
 }
 
 TEST(BuildControlPlotUseCaseTest, ManualModeShowsEmptyControlGridUntilCommandsAreSent) {

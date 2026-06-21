@@ -16,6 +16,8 @@ class EstimateTestDurationUseCase final {
                                 const application::ports::IFunctionEngine &engine);
 
     domain::EstimatedTestDurationResult executeForAutoCalculated();
+    domain::EstimatedTestDurationResult executeForImpact(domain::WindImpact impact,
+                                                         bool calculatedForWorstCaseScenario = false);
 
   private:
     application::session::SessionState &state;

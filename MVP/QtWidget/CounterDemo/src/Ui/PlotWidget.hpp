@@ -4,7 +4,7 @@
 #include <QTimer>
 #include <QWidget>
 
-#include "../Domain/Plot.hpp"
+#include "../Application/Dto/PlotModel.hpp"
 
 namespace ui {
 
@@ -14,28 +14,32 @@ class PlotWidget final : public QWidget {
   public:
     explicit PlotWidget(QWidget *parent = nullptr);
 
-    void setPlot(domain::PlotModel plot);
-    const domain::PlotModel &getPlot() const;
+    void setPlot(application::dto::PlotModel plot);
+    const application::dto::PlotModel &getPlot() const;
 
   protected:
     void paintEvent(QPaintEvent *event) override;
 
   private:
-    domain::PlotModel plot{};
-    domain::PlotModel targetPlot{};
+    application::dto::PlotModel plot{};
+    application::dto::PlotModel targetPlot{};
     QTimer animationTimer{};
 
     void advanceAnimationFrame();
 
-    static domain::PlotModel interpolatePlot(const domain::PlotModel &current, const domain::PlotModel &target);
-    static domain::AxisSpec interpolateAxis(domain::AxisSpec current, domain::AxisSpec target);
-    static domain::Series interpolateSeries(const domain::Series &current, const domain::Series &target);
-    static domain::RgbColor interpolateColor(domain::RgbColor current, domain::RgbColor target);
+    static application::dto::PlotModel interpolatePlot(const application::dto::PlotModel &current,
+                                                       const application::dto::PlotModel &target);
+    static application::dto::AxisSpec interpolateAxis(application::dto::AxisSpec current,
+                                                      application::dto::AxisSpec target);
+    static application::dto::Series interpolateSeries(const application::dto::Series &current,
+                                                      const application::dto::Series &target);
+    static application::dto::RgbColor interpolateColor(application::dto::RgbColor current,
+                                                       application::dto::RgbColor target);
     static double interpolateValue(double current, double target);
-    static bool isClose(const domain::PlotModel &current, const domain::PlotModel &target);
-    static bool isClose(const domain::AxisSpec &current, const domain::AxisSpec &target);
-    static bool isClose(const domain::Series &current, const domain::Series &target);
-    static bool isClose(const domain::NamedSeries &current, const domain::NamedSeries &target);
+    static bool isClose(const application::dto::PlotModel &current, const application::dto::PlotModel &target);
+    static bool isClose(const application::dto::AxisSpec &current, const application::dto::AxisSpec &target);
+    static bool isClose(const application::dto::Series &current, const application::dto::Series &target);
+    static bool isClose(const application::dto::NamedSeries &current, const application::dto::NamedSeries &target);
 };
 
 } // namespace ui

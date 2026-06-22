@@ -4,13 +4,13 @@
 #include <QColor>
 #include <string>
 
-#include "../Domain/Plot.hpp"
+#include "../Application/Dto/PlotModel.hpp"
 
 namespace ui {
 
 class MainWindowUiAdapter final {
   public:
-    static domain::RgbColor toDomainColor(const QColor &color);
+    static application::dto::RgbColor toDomainColor(const QColor &color);
     static std::string formatElapsed(int elapsedSeconds);
 };
 

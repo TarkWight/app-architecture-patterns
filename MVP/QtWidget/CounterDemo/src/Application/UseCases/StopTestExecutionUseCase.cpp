@@ -1,9 +1,10 @@
 #include "StopTestExecutionUseCase.hpp"
 
 #include "../../Domain/StandConnectionStatus.hpp"
+#include "../../Domain/StandConnectionTransitions.hpp"
+#include "../../Domain/TestExecutionPlanner.hpp"
 #include "../../Domain/TestExecutionStatus.hpp"
 #include "../../Domain/TestExecutionTransitions.hpp"
-#include "../../Domain/TestTimeDirection.hpp"
 
 namespace application::useCases {
 
@@ -13,29 +14,39 @@ StopTestExecutionUseCase::StopTestExecutionUseCase(application::session::Session
     : state(state), testExecutionScheduler(testExecutionScheduler), telemetryClient(telemetryClient) {
 }
 
+StopTestExecutionUseCase::StopTestExecutionUseCase(application::session::SessionState &state,
+                                                   application::ports::ITestExecutionScheduler &testExecutionScheduler,
+                                                   application::ports::ITelemetryClient &telemetryClient,
+                                                   application::services::TelemetrySessionClock &telemetrySessionClock)
+    : state(state), testExecutionScheduler(testExecutionScheduler), telemetryClient(telemetryClient),
+      telemetrySessionClock(&telemetrySessionClock) {
+}
+
 void StopTestExecutionUseCase::execute() {
-    if (!domain::canStop(state.get().testExecutionStatus)) {
+    const auto transition = domain::transitionAfterStopRequested(state.execution().testExecutionStatus);
+    if (!transition.has_value()) {
         return;
     }
 
     testExecutionScheduler.stop();
+    if (telemetrySessionClock != nullptr) {
+        telemetrySessionClock->pause();
+    }
 
-    if (state.get().standConnectionStatus == domain::StandConnectionStatus::Polling) {
+    const auto pollingTransition = domain::transitionAfterPollingStopped(state.connection().standConnectionStatus);
+    if (pollingTransition.has_value()) {
         telemetryClient.stopPolling();
-        state.setStandConnectionStatus(domain::StandConnectionStatus::Connected);
+        state.setStandConnectionStatus(*pollingTransition);
     }
 
-    const auto &session = state.get();
+    const auto &execution = state.execution();
+    const auto stopPlan =
+        domain::TestExecutionPlanner::resetAfterStop(execution.activeTestDuration, execution.testTimeDirection);
 
-    state.setElapsedSeconds(0);
+    state.setElapsedSeconds(stopPlan.elapsed);
+    state.setRemainingSeconds(stopPlan.remaining);
 
-    if (session.testTimeDirection == domain::TestTimeDirection::CountDown) {
-        state.setRemainingSeconds(session.activeTestDuration.value() * 60);
-    } else {
-        state.setRemainingSeconds(0);
-    }
-
-    state.setTestExecutionStatus(domain::TestExecutionStatus::Ready);
+    state.setTestExecutionStatus(*transition);
 }
 
 } // namespace application::useCases

@@ -1,7 +1,9 @@
 #include "ConfigureTelemetryUseCase.hpp"
 
-#include "../../Domain/StandConnectionStatus.hpp"
+#include "../../Domain/StandConnectionTransitions.hpp"
+#include "../../Domain/TelemetryConnectionPolicy.hpp"
 #include "../../Domain/TelemetryConnectionStatus.hpp"
+#include "../../Domain/TelemetryPollInterval.hpp"
 #include "../../Domain/TelemetryStatus.hpp"
 #include "../../Domain/TestExecutionTransitions.hpp"
 
@@ -9,8 +11,24 @@ namespace application::useCases {
 
 namespace {
 
-bool testExecutionIsActive(const application::session::SessionStateData &stateData) {
-    return domain::canStop(stateData.testExecutionStatus);
+bool testExecutionIsActive(const application::session::ExecutionStateData &execution) {
+    return execution.testExecutionStatus == domain::TestExecutionStatus::Running;
+}
+
+void applyTelemetryConnectionDecision(application::session::SessionState &state,
+                                      application::ports::ITelemetryClient &telemetryClient,
+                                      const domain::TelemetryConnectionDecision &decision) {
+    if (decision.telemetryStatus.has_value()) {
+        state.setTelemetryStatus(*decision.telemetryStatus);
+    }
+
+    if (decision.shouldStartPolling) {
+        telemetryClient.startPolling(state.connection().telemetryPollInterval.milliseconds());
+    }
+
+    if (decision.standConnectionStatus.has_value()) {
+        state.setStandConnectionStatus(*decision.standConnectionStatus);
+    }
 }
 
 } // namespace
@@ -21,67 +39,41 @@ ConfigureTelemetryUseCase::ConfigureTelemetryUseCase(application::session::Sessi
     : state(state), configRepository(configRepository), telemetryClient(telemetryClient) {
 }
 
+ConfigureTelemetryUseCase::ConfigureTelemetryUseCase(
+    application::session::SessionState &state, application::ports::IConfigRepository &configRepository,
+    application::ports::ITelemetryClient &telemetryClient,
+    application::services::TelemetrySessionClock &telemetrySessionClock)
+    : state(state), configRepository(configRepository), telemetryClient(telemetryClient),
+      telemetrySessionClock(&telemetrySessionClock) {
+}
+
 void ConfigureTelemetryUseCase::execute(const std::string &configPath) {
     const auto config = configRepository.loadTelemetryConfig(configPath);
 
     telemetryClient.setTelemetryCallback([this](const domain::AxisTelemetrySample &sample) {
-        state.appendTelemetrySample(sample);
+        if (telemetrySessionClock != nullptr) {
+            const auto logicalSample = telemetrySessionClock->map(sample);
+            if (!logicalSample.has_value()) {
+                return;
+            }
+
+            state.appendTelemetrySample(*logicalSample);
+        } else {
+            state.appendTelemetrySample(sample);
+        }
+
         state.setTelemetryStatus(domain::TelemetryStatus::Valid);
     });
 
     telemetryClient.setStatusCallback(
         [this](domain::AxisId /*axisId*/, domain::TelemetryConnectionStatus status, const std::string & /*message*/) {
-            const auto currentStatus = state.get().standConnectionStatus;
-
-            switch (status) {
-            case domain::TelemetryConnectionStatus::Connecting:
-                if (currentStatus != domain::StandConnectionStatus::Disconnecting) {
-                    state.setStandConnectionStatus(domain::StandConnectionStatus::Connecting);
-                }
-                break;
-            case domain::TelemetryConnectionStatus::Connected:
-                if (currentStatus == domain::StandConnectionStatus::Disconnecting) {
-                    break;
-                }
-
-                state.setTelemetryStatus(domain::TelemetryStatus::Valid);
-
-                if (currentStatus == domain::StandConnectionStatus::Polling) {
-                    break;
-                }
-
-                if (testExecutionIsActive(state.get())) {
-                    telemetryClient.startPolling(state.get().telemetryPollIntervalMs);
-                    state.setStandConnectionStatus(domain::StandConnectionStatus::Polling);
-                    break;
-                }
-
-                state.setStandConnectionStatus(domain::StandConnectionStatus::Connected);
-                break;
-            case domain::TelemetryConnectionStatus::Polling:
-                if (currentStatus != domain::StandConnectionStatus::Disconnecting) {
-                    state.setStandConnectionStatus(domain::StandConnectionStatus::Polling);
-                    state.setTelemetryStatus(domain::TelemetryStatus::Valid);
-                }
-                break;
-            case domain::TelemetryConnectionStatus::Disconnected:
-                if (currentStatus == domain::StandConnectionStatus::Connecting ||
-                    currentStatus == domain::StandConnectionStatus::Connected ||
-                    currentStatus == domain::StandConnectionStatus::Polling) {
-                    state.setStandConnectionStatus(domain::StandConnectionStatus::Error);
-                    state.setTelemetryStatus(domain::TelemetryStatus::Unavailable);
-                }
-                break;
-            case domain::TelemetryConnectionStatus::Error:
-                state.setStandConnectionStatus(domain::StandConnectionStatus::Error);
-                state.setTelemetryStatus(domain::TelemetryStatus::Unavailable);
-                break;
-            }
+            const auto decision = domain::TelemetryConnectionPolicy::handleStatus(
+                state.connection().standConnectionStatus, status, testExecutionIsActive(state.execution()));
+            applyTelemetryConnectionDecision(state, telemetryClient, decision);
         });
 
     telemetryClient.setErrorCallback([this](domain::AxisId /*axisId*/, const std::string & /*message*/) {
-        state.setStandConnectionStatus(domain::StandConnectionStatus::Error);
-        state.setTelemetryStatus(domain::TelemetryStatus::Unavailable);
+        applyTelemetryConnectionDecision(state, telemetryClient, domain::TelemetryConnectionPolicy::failure());
     });
 
     if (config.axis0.enabled) {
@@ -92,8 +84,8 @@ void ConfigureTelemetryUseCase::execute(const std::string &configPath) {
         telemetryClient.configureAxis(domain::axis1, config.axis1.host, config.axis1.port);
     }
 
-    state.setTelemetryPollIntervalMs(config.pollIntervalMs);
-    state.setStandConnectionStatus(domain::StandConnectionStatus::Configured);
+    state.setTelemetryPollInterval(domain::TelemetryPollInterval::fromMilliseconds(config.pollIntervalMs));
+    state.setStandConnectionStatus(domain::transitionAfterTelemetryConfigured());
 }
 
 } // namespace application::useCases

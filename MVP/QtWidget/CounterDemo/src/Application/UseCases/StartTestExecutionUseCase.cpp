@@ -1,15 +1,15 @@
 #include "StartTestExecutionUseCase.hpp"
 
-#include "../../Domain/AxisControlCommand.hpp"
-#include "../../Domain/AxisId.hpp"
+#include "../../Domain/ControlTrace.hpp"
+#include "../../Domain/HybridBeaufortOverride.hpp"
+#include "../../Domain/ScenarioExecutionEngine.hpp"
 #include "../../Domain/StandConnectionStatus.hpp"
+#include "../../Domain/StandConnectionTransitions.hpp"
+#include "../../Domain/TestExecutionPlanner.hpp"
 #include "../../Domain/TestExecutionStatus.hpp"
 #include "../../Domain/TestExecutionTransitions.hpp"
+#include "../../Domain/TestModeStatePolicy.hpp"
 #include "../../Domain/TestProtocol.hpp"
-#include "../../Domain/TestTimeDirection.hpp"
-#include "../../Domain/TestTimeSource.hpp"
-#include "../../Domain/StandImpactTransition.hpp"
-#include "../../Domain/WindControlProfileImpact.hpp"
 
 namespace application::useCases {
 
@@ -17,125 +17,126 @@ StartTestExecutionUseCase::StartTestExecutionUseCase(
     application::session::SessionState &state, application::ports::ITestExecutionScheduler &testExecutionScheduler,
     application::ports::ITelemetryClient &telemetryClient, BuildControlPlotUseCase &buildControlPlotUseCase)
     : state(state), testExecutionScheduler(testExecutionScheduler), telemetryClient(telemetryClient),
-      buildControlPlotUseCase(buildControlPlotUseCase) {
+      buildControlPlotUseCase(buildControlPlotUseCase), estimateTestDurationUseCase(state),
+      appliedStandImpactSender(telemetryClient) {
+}
+
+StartTestExecutionUseCase::StartTestExecutionUseCase(Dependencies deps)
+    : state(deps.state), testExecutionScheduler(deps.testExecutionScheduler), telemetryClient(deps.telemetryClient),
+      buildControlPlotUseCase(deps.buildControlPlotUseCase), estimateTestDurationUseCase(deps.state),
+      appliedStandImpactSender(deps.telemetryClient), telemetrySessionClock(&deps.telemetrySessionClock) {
 }
 
 void StartTestExecutionUseCase::execute() {
-    const auto &session = state.get();
-    if (!domain::canStart(session.testExecutionStatus)) {
+    const auto transition = domain::transitionAfterStartRequested(state.execution().testExecutionStatus);
+    if (!transition.has_value()) {
         return;
     }
 
-    if (session.testProtocol.testMode != domain::TestMode::Manual) {
-        buildControlPlotUseCase.execute();
-        state.setTargetStandImpact(state.get().windImpact);
-        state.clearControlTrace();
+    state.resetTelemetrySession();
+    state.resetControlSession();
+    if (telemetrySessionClock != nullptr) {
+        telemetrySessionClock->reset();
     }
 
-    int activeDurationMinutes = 0;
-    domain::TestTimeDirection direction = domain::TestTimeDirection::CountUp;
+    estimateTestDurationUseCase.executeForAutoCalculated();
+    buildControlPlotUseCase.execute();
 
-    if (session.testProtocol.testMode == domain::TestMode::Manual) {
-        activeDurationMinutes = 0;
-        direction = domain::TestTimeDirection::CountUp;
-    } else {
-        switch (session.testTimeSource) {
-        case domain::TestTimeSource::AutoCalculated:
-            activeDurationMinutes = session.estimatedTestDuration.value();
-            direction = domain::TestTimeDirection::CountDown;
-            break;
-
-        case domain::TestTimeSource::OperatorDefined:
-            activeDurationMinutes = session.operatorTestDuration.value();
-            direction = domain::TestTimeDirection::CountDown;
-            break;
-
-        case domain::TestTimeSource::FreeRun:
-            activeDurationMinutes = 0;
-            direction = domain::TestTimeDirection::CountUp;
-            break;
-        }
+    if (domain::TestModeStatePolicy::usesControlProfile(state.protocol().testProtocol.testMode)) {
+        state.setRuntimeTargetStandImpact(state.control().windImpact);
     }
 
-    state.setActiveTestDurationMinutes(activeDurationMinutes);
-    state.setTestTimeDirection(direction);
-    state.setElapsedSeconds(0);
+    const auto &protocol = state.protocol();
+    const auto plan = domain::TestExecutionPlanner::plan(protocol.testProtocol, protocol.testTimeSource,
+                                                         protocol.estimatedTestDuration, protocol.operatorTestDuration);
 
-    if (direction == domain::TestTimeDirection::CountDown) {
-        state.setRemainingSeconds(activeDurationMinutes * 60);
-    } else {
-        state.setRemainingSeconds(0);
-    }
+    state.setActiveTestDurationMinutes(plan.activeDuration);
+    state.setTestTimeDirection(plan.direction);
+    state.setElapsedSeconds(domain::ElapsedSeconds::from(0));
+    state.setRemainingSeconds(plan.initialRemaining());
 
-    state.setTestExecutionStatus(domain::TestExecutionStatus::Running);
+    state.setTestExecutionStatus(*transition);
     startTelemetryPollingIfConnected();
-    applyScenarioImpact(0);
+    applyScenarioImpact(domain::ElapsedSeconds::from(0));
 
-    testExecutionScheduler.start(0, [this](int elapsedSeconds) {
-        state.setElapsedSeconds(elapsedSeconds);
-        applyScenarioImpact(elapsedSeconds);
+    testExecutionScheduler.start(0, [this, plan](int elapsedSeconds) {
+        const auto elapsed = domain::ElapsedSeconds::from(elapsedSeconds);
+        if (elapsed.value() == 0) {
+            return;
+        }
 
-        const auto &current = state.get();
+        state.setElapsedSeconds(elapsed);
+        applyScenarioImpact(elapsed);
 
-        if (current.testTimeDirection == domain::TestTimeDirection::CountDown) {
-            const int totalSeconds = current.activeTestDuration.value() * 60;
-            const int remainingSeconds = (elapsedSeconds < totalSeconds) ? (totalSeconds - elapsedSeconds) : 0;
+        const auto remaining = plan.remainingAt(elapsed);
 
-            state.setRemainingSeconds(remainingSeconds);
+        state.setRemainingSeconds(remaining);
 
-            if (remainingSeconds == 0) {
-                testExecutionScheduler.stop();
-                stopTelemetryPollingIfActive();
-                state.setTestExecutionStatus(domain::TestExecutionStatus::Completed);
+        if (plan.isCompletedAt(elapsed)) {
+            testExecutionScheduler.stop();
+            stopTelemetryPollingIfActive();
+            const auto completion = domain::transitionAfterExecutionCompleted(state.execution().testExecutionStatus);
+            if (completion.has_value()) {
+                state.setTestExecutionStatus(*completion);
             }
         }
     });
 }
 
 void StartTestExecutionUseCase::startTelemetryPollingIfConnected() {
-    if (state.get().standConnectionStatus != domain::StandConnectionStatus::Connected) {
+    const auto transition = domain::transitionAfterPollingStarted(state.connection().standConnectionStatus);
+    if (!transition.has_value()) {
         return;
     }
 
-    telemetryClient.startPolling(state.get().telemetryPollIntervalMs);
-    state.setStandConnectionStatus(domain::StandConnectionStatus::Polling);
+    telemetryClient.startPolling(state.connection().telemetryPollInterval.milliseconds());
+    state.setStandConnectionStatus(*transition);
 }
 
 void StartTestExecutionUseCase::stopTelemetryPollingIfActive() {
-    if (state.get().standConnectionStatus != domain::StandConnectionStatus::Polling) {
+    const auto transition = domain::transitionAfterPollingStopped(state.connection().standConnectionStatus);
+    if (!transition.has_value()) {
         return;
     }
 
     telemetryClient.stopPolling();
-    state.setStandConnectionStatus(domain::StandConnectionStatus::Connected);
+    state.setStandConnectionStatus(*transition);
 }
 
-void StartTestExecutionUseCase::applyScenarioImpact(int elapsedSeconds) {
-    const auto &session = state.get();
-    if (session.testProtocol.testMode == domain::TestMode::Manual) {
+void StartTestExecutionUseCase::applyScenarioImpact(domain::ElapsedSeconds elapsed) {
+    const auto &protocol = state.protocol();
+    if (!domain::TestModeStatePolicy::usesControlProfile(protocol.testProtocol.testMode)) {
         return;
     }
 
-    const auto impact = domain::windImpactAt(session.controlProfile, domain::ElapsedSeconds::from(elapsedSeconds),
-                                             session.targetStandImpact);
-    if (!impact.has_value()) {
+    const auto &control = state.control();
+    const auto step =
+        domain::ScenarioExecutionEngine::advance(control.controlProfile, elapsed, control.targetStandImpact);
+    if (!step.has_value()) {
         return;
     }
 
-    const auto transition = domain::StandImpactTransition{}.advance(session.appliedStandImpact, *impact);
+    const auto overrideState = control.hybridBeaufortOverride;
+    const auto effectiveImpact = control.standControlMode == domain::StandControlMode::Hybrid
+                                     ? domain::HybridImpactResolver::resolve(domain::HybridImpactResolutionInput{
+                                           .scenarioBeaufort = step->impact.beaufort,
+                                           .operatorDirection = control.hybridOperatorDirection,
+                                           .operatorAngleOfAttack = control.hybridOperatorAngleOfAttack,
+                                           .overrideState = overrideState,
+                                           .elapsed = elapsed,
+                                       })
+                                     : step->impact;
 
-    state.setTargetStandImpact(*impact);
-    state.setAppliedStandImpact(transition.impact);
-    state.appendControlTraceSample(domain::ControlTraceSample{.timeSeconds = static_cast<double>(elapsedSeconds),
-                                                              .targetValue = *impact,
-                                                              .safeCommandValue = transition.impact});
+    if (overrideState.has_value() && domain::HybridBeaufortOverridePolicy::isCompleted(*overrideState, elapsed)) {
+        state.clearHybridBeaufortOverride();
+    }
+
+    state.setRuntimeTargetStandImpact(effectiveImpact);
+    state.setAppliedStandImpact(effectiveImpact);
+    state.appendControlTraceSample(
+        domain::ControlTraceSample::manualCommand(elapsed, effectiveImpact, effectiveImpact));
     buildControlPlotUseCase.refreshFromState();
-    sendAppliedImpact(transition.impact);
-}
-
-void StartTestExecutionUseCase::sendAppliedImpact(const domain::WindImpact &profile) {
-    telemetryClient.setAxisCommand(domain::axis0, domain::axis0WindCommand(profile));
-    telemetryClient.setAxisCommand(domain::axis1, domain::axis1WindCommand(profile));
+    appliedStandImpactSender.send(effectiveImpact, elapsed, protocol.testProtocol);
 }
 
 } // namespace application::useCases

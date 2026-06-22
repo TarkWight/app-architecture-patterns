@@ -1,6 +1,6 @@
 #include "DisconnectStandUseCase.hpp"
 
-#include "../../Domain/StandConnectionStatus.hpp"
+#include "../../Domain/StandConnectionTransitions.hpp"
 
 namespace application::useCases {
 
@@ -10,17 +10,20 @@ DisconnectStandUseCase::DisconnectStandUseCase(application::session::SessionStat
 }
 
 void DisconnectStandUseCase::execute() {
-    const auto currentStatus = state.get().standConnectionStatus;
-    if (currentStatus == domain::StandConnectionStatus::Disconnected) {
+    const auto transition = domain::transitionToDisconnecting(state.get().connection.standConnectionStatus);
+    if (!transition.has_value()) {
         return;
     }
 
-    state.setStandConnectionStatus(domain::StandConnectionStatus::Disconnecting);
+    state.setStandConnectionStatus(*transition);
 
     telemetryClient.stopPolling();
     telemetryClient.disconnectAll();
 
-    state.setStandConnectionStatus(domain::StandConnectionStatus::Disconnected);
+    const auto completion = domain::transitionAfterDisconnectCompleted(state.get().connection.standConnectionStatus);
+    if (completion.has_value()) {
+        state.setStandConnectionStatus(*completion);
+    }
 }
 
 } // namespace application::useCases

@@ -23,3 +23,6 @@
 
 # ==== Configurations ====
 **/CMakeUserPresets.json
+
+# ==== MetaData ====
+**/MetaData/

@@ -7,10 +7,11 @@
 namespace domain {
 
 constexpr double minOperationalBeaufort = 0.0;
-// TODO(post-MVP): verify real stand/wind-model limits; 0..7 is inherited from the legacy application.
+// Operational test scope is limited to Beaufort 0..7; drones are not tested above this range.
 constexpr double maxOperationalBeaufort = 7.0;
-constexpr double minAngleOfAttack = 0.0;
-// TODO(post-MVP): verify real stand limits; 360 is inherited from the legacy application.
+constexpr double directionNormalizationEpsilon = 1.0e-6;
+// TODO(post-MVP): verify real stand limits; signed +/-360 is an MVP relative-angle guard.
+constexpr double minAngleOfAttack = -360.0;
 constexpr double maxAngleOfAttack = 360.0;
 
 class Beaufort final {
@@ -33,9 +34,17 @@ class Beaufort final {
 class WindDirection final {
   public:
     static WindDirection from(double rawValue) {
+        if (std::abs(rawValue) < directionNormalizationEpsilon) {
+            return WindDirection{0.0};
+        }
+
         auto normalized = std::fmod(rawValue, 360.0);
         if (normalized < 0.0) {
             normalized += 360.0;
+        }
+        if (std::abs(normalized) < directionNormalizationEpsilon ||
+            std::abs(normalized - 360.0) < directionNormalizationEpsilon) {
+            normalized = 0.0;
         }
 
         return WindDirection{normalized};
@@ -73,6 +82,18 @@ struct WindImpact {
     Beaufort beaufort{Beaufort::from(0.0)};
     WindDirection direction{WindDirection::from(0.0)};
     AngleOfAttack angleOfAttack{AngleOfAttack::from(0.0)};
+
+    [[nodiscard]] WindImpact withBeaufort(Beaufort value) const {
+        return WindImpact{.beaufort = value, .direction = direction, .angleOfAttack = angleOfAttack};
+    }
+
+    [[nodiscard]] WindImpact withDirection(WindDirection value) const {
+        return WindImpact{.beaufort = beaufort, .direction = value, .angleOfAttack = angleOfAttack};
+    }
+
+    [[nodiscard]] WindImpact withAngleOfAttack(AngleOfAttack value) const {
+        return WindImpact{.beaufort = beaufort, .direction = direction, .angleOfAttack = value};
+    }
 };
 
 inline WindImpact makeWindImpact(double beaufort, double direction, double angleOfAttack) {

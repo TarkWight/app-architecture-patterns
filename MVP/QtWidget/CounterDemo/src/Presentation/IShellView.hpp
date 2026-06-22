@@ -24,6 +24,8 @@ class IShellView {
 
     virtual void appendLog(const std::string &text) = 0;
     virtual void showOperatorWarning(const std::string &title, const std::string &message) = 0;
+    [[nodiscard]] virtual bool confirmDangerousReadinessStart(const std::string &title, const std::string &message) = 0;
+    virtual void freezeStandImpactTransition() = 0;
 };
 
 } // namespace presentation

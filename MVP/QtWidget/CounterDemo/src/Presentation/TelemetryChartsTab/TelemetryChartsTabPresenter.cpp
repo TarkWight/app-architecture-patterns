@@ -32,14 +32,15 @@ void TelemetryChartsTabPresenter::onRebuildPlotPressed() {
 }
 
 void TelemetryChartsTabPresenter::onTelemetryWindowChanged(int windowEndSeconds) {
-    setTelemetryWindowUseCase.execute(static_cast<double>(windowEndSeconds));
+    setTelemetryWindowUseCase.execute(domain::TelemetryWindowEnd::fromSeconds(static_cast<double>(windowEndSeconds)));
 
     if (view != nullptr) {
         view->refreshPlot();
     }
 }
 
-void TelemetryChartsTabPresenter::onTelemetryAxisColorSelected(domain::AxisId axisId, domain::RgbColor color) {
+void TelemetryChartsTabPresenter::onTelemetryAxisColorSelected(domain::AxisId axisId,
+                                                               application::dto::RgbColor color) {
     setTelemetryAxisColorUseCase.execute(axisId, color);
 
     if (view != nullptr) {

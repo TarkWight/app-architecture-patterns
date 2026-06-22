@@ -2,7 +2,7 @@
 #define GENERATESTAIRPLOTUSECASE_H
 
 #include "../Session/SessionState.hpp"
-#include "../../Domain/Plot.hpp"
+#include "../../Application/Dto/PlotModel.hpp"
 
 namespace application::useCases {
 
@@ -10,7 +10,7 @@ class GenerateStairPlotUseCase final {
   public:
     explicit GenerateStairPlotUseCase(application::session::SessionState &state);
 
-    domain::PlotModel execute();
+    application::dto::PlotModel execute();
 
   private:
     application::session::SessionState &state;

@@ -2,9 +2,9 @@
 
 namespace ui {
 
-domain::RgbColor MainWindowUiAdapter::toDomainColor(const QColor &color) {
-    return domain::RgbColor{static_cast<std::uint8_t>(color.red()), static_cast<std::uint8_t>(color.green()),
-                            static_cast<std::uint8_t>(color.blue())};
+application::dto::RgbColor MainWindowUiAdapter::toDomainColor(const QColor &color) {
+    return application::dto::RgbColor{static_cast<std::uint8_t>(color.red()), static_cast<std::uint8_t>(color.green()),
+                                      static_cast<std::uint8_t>(color.blue())};
 }
 
 std::string MainWindowUiAdapter::formatElapsed(int elapsedSeconds) {

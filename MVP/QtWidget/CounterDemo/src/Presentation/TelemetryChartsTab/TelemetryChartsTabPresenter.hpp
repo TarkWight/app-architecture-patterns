@@ -5,7 +5,7 @@
 #include "../../Application/UseCases/SetTelemetryAxisVisibleUseCase.hpp"
 #include "../../Application/UseCases/SetTelemetryWindowUseCase.hpp"
 #include "../../Domain/AxisId.hpp"
-#include "../../Domain/Plot.hpp"
+#include "../../Application/Dto/PlotModel.hpp"
 #include "ITelemetryChartsTabView.hpp"
 
 namespace presentation::telemetryChartsTab {
@@ -27,7 +27,7 @@ class TelemetryChartsTabPresenter final {
 
     void onRebuildPlotPressed();
     void onTelemetryWindowChanged(int windowEndSeconds);
-    void onTelemetryAxisColorSelected(domain::AxisId axisId, domain::RgbColor color);
+    void onTelemetryAxisColorSelected(domain::AxisId axisId, application::dto::RgbColor color);
     void onTelemetryAxisVisibilityChanged(domain::AxisId axisId, bool visible);
 
   private:

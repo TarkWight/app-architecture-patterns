@@ -2,7 +2,9 @@
 
 #include "../Domain/FormulaTemplate.hpp"
 #include "../Domain/StandConnectionStatus.hpp"
+#include "../Domain/StandConnectionTransitions.hpp"
 #include "../Domain/TestExecutionTransitions.hpp"
+#include "../Domain/TestModeStatePolicy.hpp"
 #include "../Domain/TestProtocol.hpp"
 #include "../Domain/TestTimeSource.hpp"
 #include "../Domain/TestTimeDirection.hpp"
@@ -16,16 +18,25 @@ ShellPresenter::ShellPresenter(Dependencies deps)
       resumeTestExecutionUseCase(deps.resumeTestExecutionUseCase),
       stopTestExecutionUseCase(deps.stopTestExecutionUseCase),
       setFunctionExpressionUseCase(deps.setFunctionExpressionUseCase), setLineColorUseCase(deps.setLineColorUseCase),
-      buildControlPlotUseCase(deps.buildControlPlotUseCase), setTestTimeSourceUseCase(deps.setTestTimeSourceUseCase),
+      calculateAndBuildControlPlotUseCase(deps.calculateAndBuildControlPlotUseCase),
+      estimateTestDurationUseCase(deps.estimateTestDurationUseCase),
+      setTestTimeSourceUseCase(deps.setTestTimeSourceUseCase),
       configureTelemetryUseCase(deps.configureTelemetryUseCase), connectStandUseCase(deps.connectStandUseCase),
-      disconnectStandUseCase(deps.disconnectStandUseCase) {
+      disconnectStandUseCase(deps.disconnectStandUseCase), setStandControlModeUseCase(deps.setStandControlModeUseCase),
+      telemetryClient(deps.telemetryClient) {
 }
 
 void ShellPresenter::attachView(IShellView &view) {
     this->view = &view;
+    telemetryClient.setTraceCallback([this](const std::string &message) {
+        if (this->view != nullptr) {
+            this->view->appendLog(message);
+        }
+    });
 }
 
 void ShellPresenter::detachView() {
+    telemetryClient.setTraceCallback({});
     view = nullptr;
 }
 
@@ -38,6 +49,15 @@ void ShellPresenter::onStateChanged() {
 }
 
 void ShellPresenter::onStartPressed() {
+    if (!connectionAllowsStart()) {
+        return;
+    }
+
+    if (!readinessAllowsStart()) {
+        refreshFromState();
+        return;
+    }
+
     startTestExecutionUseCase.execute();
     refreshFromState();
 
@@ -46,11 +66,56 @@ void ShellPresenter::onStartPressed() {
     }
 }
 
+bool ShellPresenter::readinessAllowsStart() {
+    const auto mode = state.protocol().testProtocol.testMode;
+    if (!readinessGateRequired(mode)) {
+        return true;
+    }
+
+    if (state.readiness().status == application::session::ReadinessStatus::Unknown) {
+        estimateTestDurationUseCase.executeForAutoCalculated();
+    }
+
+    const auto status = state.readiness().status;
+    if (!readinessConfirmationRequired(status)) {
+        return true;
+    }
+
+    return confirmDangerousReadinessStart(status);
+}
+
+bool ShellPresenter::connectionAllowsStart() {
+    if (state.connection().standConnectionStatus == domain::StandConnectionStatus::Connected) {
+        return true;
+    }
+
+    if (view != nullptr) {
+        view->showOperatorWarning("Стенд не подключён", "Перед запуском испытания необходимо подключить стенд.");
+        view->appendLog("Test execution start blocked: stand is not connected");
+    }
+
+    return false;
+}
+
+bool ShellPresenter::confirmDangerousReadinessStart(application::session::ReadinessStatus status) {
+    if (view == nullptr) {
+        return false;
+    }
+
+    const std::string details =
+        status == application::session::ReadinessStatus::Failed
+            ? "Расчёт готовности невозможен. Проведение испытания может быть опасным."
+            : "Расчёт готовности содержит опасные диагностические сообщения. Проведение испытания может быть опасным.";
+
+    return view->confirmDangerousReadinessStart("Подтверждение запуска испытания", details + " Продолжить запуск?");
+}
+
 void ShellPresenter::onPausePressed() {
     pauseTestExecutionUseCase.execute();
     refreshFromState();
 
     if (view != nullptr) {
+        view->freezeStandImpactTransition();
         view->appendLog("Test execution paused");
     }
 }
@@ -65,7 +130,7 @@ void ShellPresenter::onResumePressed() {
 }
 
 void ShellPresenter::onPauseResumePressed() {
-    const auto status = state.get().testExecutionStatus;
+    const auto status = state.get().execution.testExecutionStatus;
     if (canPause(status)) {
         onPausePressed();
         return;
@@ -81,15 +146,16 @@ void ShellPresenter::onStopPressed() {
     refreshFromState();
 
     if (view != nullptr) {
+        view->freezeStandImpactTransition();
         view->appendLog("Test execution stopped");
     }
 }
 
 void ShellPresenter::onCalculatePressed() {
-    buildControlPlotUseCase.execute();
+    calculateAndBuildControlPlotUseCase.execute();
 
     if (view != nullptr) {
-        view->appendLog("Formula plot rebuilt");
+        view->appendLog("Readiness calculated and formula plot rebuilt");
     }
 }
 
@@ -110,7 +176,7 @@ void ShellPresenter::onFormulaTemplateSelected(std::string key) {
     }
 }
 
-void ShellPresenter::onLineColorSelected(domain::RgbColor color) {
+void ShellPresenter::onLineColorSelected(application::dto::RgbColor color) {
     setLineColorUseCase.execute(color);
 
     if (view != nullptr) {
@@ -140,11 +206,20 @@ bool ShellPresenter::canResume(domain::TestExecutionStatus status) {
 }
 
 bool testTimeSourceCanBeChanged(domain::TestMode mode) {
-    return mode == domain::TestMode::Hybrid;
+    return domain::TestModeStatePolicy::allowsOperatorDuration(mode);
 }
 
 bool ShellPresenter::canStop(domain::TestExecutionStatus status) {
     return domain::canStop(status);
+}
+
+bool ShellPresenter::readinessGateRequired(domain::TestMode mode) {
+    return mode == domain::TestMode::Hybrid || mode == domain::TestMode::Automatic;
+}
+
+bool ShellPresenter::readinessConfirmationRequired(application::session::ReadinessStatus status) {
+    return status == application::session::ReadinessStatus::Dangerous ||
+           status == application::session::ReadinessStatus::Failed;
 }
 
 void ShellPresenter::refreshFromState() {
@@ -154,21 +229,22 @@ void ShellPresenter::refreshFromState() {
 
     const auto &session = state.get();
 
-    const int displayedSeconds = (session.testTimeDirection == domain::TestTimeDirection::CountDown)
-                                     ? session.remaining.value()
-                                     : session.elapsed.value();
+    const int displayedSeconds = (session.execution.testTimeDirection == domain::TestTimeDirection::CountDown)
+                                     ? session.execution.remaining.value()
+                                     : session.execution.elapsed.value();
 
     view->setTimerText(formatTimerText(displayedSeconds));
-    view->setStartEnabled(canStart(session.testExecutionStatus));
-    view->setPauseResumeEnabled(canPause(session.testExecutionStatus) || canResume(session.testExecutionStatus));
-    view->setPauseResumeText(canResume(session.testExecutionStatus) ? "Продолжить" : "Пауза");
-    view->setStopEnabled(canStop(session.testExecutionStatus));
-    view->setFunctionExpression(session.functionExpression.value);
-    view->setTestTimeSource(session.testTimeSource);
-    view->setTestTimeSourceEnabled(testTimeSourceCanBeChanged(session.testProtocol.testMode));
+    view->setStartEnabled(canStart(session.execution.testExecutionStatus));
+    view->setPauseResumeEnabled(canPause(session.execution.testExecutionStatus) ||
+                                canResume(session.execution.testExecutionStatus));
+    view->setPauseResumeText(canResume(session.execution.testExecutionStatus) ? "Продолжить" : "Пауза");
+    view->setStopEnabled(canStop(session.execution.testExecutionStatus));
+    view->setFunctionExpression(session.control.functionExpression.value);
+    view->setTestTimeSource(session.protocol.testTimeSource);
+    view->setTestTimeSourceEnabled(testTimeSourceCanBeChanged(session.protocol.testProtocol.testMode));
     refreshStandConnectionButton();
     refreshStandConnectionStatusText();
-    notifyStandConnectionStatusChanged(session.standConnectionStatus);
+    notifyStandConnectionStatusChanged(session.connection.standConnectionStatus);
 }
 
 void ShellPresenter::onTestTimeSourceChanged(domain::TestTimeSource source) {
@@ -180,13 +256,18 @@ void ShellPresenter::onTestTimeSourceChanged(domain::TestTimeSource source) {
     }
 }
 
+void ShellPresenter::onStandControlModeChanged(domain::StandControlMode mode) {
+    setStandControlModeUseCase.execute(mode);
+
+    if (view != nullptr) {
+        view->appendLog("Stand control mode updated");
+    }
+}
+
 void ShellPresenter::onConnectTelemetryPressed(std::string configPath) {
     try {
-        const auto status = state.get().standConnectionStatus;
-
-        if (status == domain::StandConnectionStatus::Connected || status == domain::StandConnectionStatus::Polling ||
-            status == domain::StandConnectionStatus::Connecting ||
-            status == domain::StandConnectionStatus::Disconnecting || status == domain::StandConnectionStatus::Error) {
+        switch (domain::connectionButtonAction(state.get().connection.standConnectionStatus)) {
+        case domain::StandConnectionButtonAction::Disconnect:
             disconnectStandUseCase.execute();
 
             if (view != nullptr) {
@@ -195,13 +276,14 @@ void ShellPresenter::onConnectTelemetryPressed(std::string configPath) {
 
             refreshFromState();
             return;
-        }
 
-        if (status == domain::StandConnectionStatus::Disconnected || status == domain::StandConnectionStatus::Error) {
+        case domain::StandConnectionButtonAction::ConfigureAndConnect:
             configureTelemetryUseCase.execute(configPath);
+            [[fallthrough]];
+        case domain::StandConnectionButtonAction::Connect:
+            connectStandUseCase.execute();
+            break;
         }
-
-        connectStandUseCase.execute();
 
         if (view != nullptr) {
             view->appendLog("Stand connection started");
@@ -218,21 +300,22 @@ void ShellPresenter::onConnectTelemetryPressed(std::string configPath) {
     }
 }
 
+bool ShellPresenter::telemetryConfigRequiredForConnection() const {
+    return domain::connectionButtonAction(state.get().connection.standConnectionStatus) ==
+           domain::StandConnectionButtonAction::ConfigureAndConnect;
+}
+
 void ShellPresenter::refreshStandConnectionButton() {
     if (view == nullptr) {
         return;
     }
 
-    switch (state.get().standConnectionStatus) {
-    case domain::StandConnectionStatus::Disconnected:
-    case domain::StandConnectionStatus::Configured:
+    switch (domain::connectionButtonAction(state.get().connection.standConnectionStatus)) {
+    case domain::StandConnectionButtonAction::ConfigureAndConnect:
+    case domain::StandConnectionButtonAction::Connect:
         view->setStandConnectionButtonText("Подключить стенд");
         break;
-    case domain::StandConnectionStatus::Connected:
-    case domain::StandConnectionStatus::Connecting:
-    case domain::StandConnectionStatus::Polling:
-    case domain::StandConnectionStatus::Disconnecting:
-    case domain::StandConnectionStatus::Error:
+    case domain::StandConnectionButtonAction::Disconnect:
         view->setStandConnectionButtonText("Отключить стенд");
         break;
     }
@@ -243,7 +326,7 @@ void ShellPresenter::refreshStandConnectionStatusText() {
         return;
     }
 
-    switch (state.get().standConnectionStatus) {
+    switch (state.get().connection.standConnectionStatus) {
     case domain::StandConnectionStatus::Disconnected:
         view->setStandConnectionStatusText("Стенд: отключен");
         break;

@@ -1,8 +1,10 @@
 #include "SessionState.hpp"
 
+#include "../Services/TelemetryPlotBuilder.hpp"
+
 #include "../../Domain/AxisId.hpp"
 #include "../../Domain/ControlTrace.hpp"
-#include "../../Domain/Plot.hpp"
+#include "../../Application/Dto/PlotModel.hpp"
 #include "../../Domain/TestProtocol.hpp"
 #include "../../Domain/Time.hpp"
 #include "../../Domain/WindControlProfile.hpp"
@@ -11,8 +13,6 @@
 #include "SessionStateData.hpp"
 #include "Subscription.hpp"
 
-#include <algorithm>
-#include <cmath>
 #include <functional>
 #include <mutex>
 #include <string>
@@ -23,6 +23,30 @@
 namespace application::session {
 const application::session::SessionStateData &application::session::SessionState::get() const {
     return data;
+}
+
+const ExecutionStateData &SessionState::execution() const {
+    return data.execution;
+}
+
+const ConnectionStateData &SessionState::connection() const {
+    return data.connection;
+}
+
+const TelemetryStateData &SessionState::telemetry() const {
+    return data.telemetry;
+}
+
+const ControlStateData &SessionState::control() const {
+    return data.control;
+}
+
+const ProtocolStateData &SessionState::protocol() const {
+    return data.protocol;
+}
+
+const ReadinessStateData &SessionState::readiness() const {
+    return data.readiness;
 }
 
 Subscription application::session::SessionState::subscribe(Listener listener) {
@@ -39,67 +63,69 @@ Subscription application::session::SessionState::subscribe(Listener listener) {
 }
 
 void application::session::SessionState::setFunctionExpression(std::string expr) {
-    data.functionExpression.value = std::move(expr);
+    data.control.functionExpression.value = std::move(expr);
     notify();
 }
 
 void application::session::SessionState::setWindImpact(domain::WindImpact profile) {
-    data.windImpact = std::move(profile);
+    data.control.windImpact = std::move(profile);
+    resetReadinessWithoutNotify();
     notify();
 }
 
-void application::session::SessionState::setLineColor(domain::RgbColor color) {
-    data.lineColor = color;
+void application::session::SessionState::setLineColor(application::dto::RgbColor color) {
+    data.control.lineColor = color;
     notify();
 }
 
-void application::session::SessionState::setControlChartsTabMinutes(int minutes) {
-    data.controlChartsTabMinutes = domain::DurationMinutes::required(minutes);
+void application::session::SessionState::setControlChartsTabMinutes(domain::DurationMinutes minutes) {
+    data.control.controlChartsTabMinutes = minutes;
     notify();
 }
 
 void application::session::SessionState::setTestExecutionStatus(domain::TestExecutionStatus status) {
-    data.testExecutionStatus = status;
+    data.execution.testExecutionStatus = status;
     notify();
 }
 
 void application::session::SessionState::setTestTimeSource(domain::TestTimeSource source) {
-    data.testTimeSource = source;
+    data.protocol.testTimeSource = source;
+    resetReadinessWithoutNotify();
     notify();
 }
 
 void application::session::SessionState::setTestTimeDirection(domain::TestTimeDirection direction) {
-    data.testTimeDirection = direction;
+    data.execution.testTimeDirection = direction;
     notify();
 }
 
-void application::session::SessionState::setEstimatedTestDurationMinutes(int minutes) {
-    data.estimatedTestDuration = domain::DurationMinutes::required(minutes);
+void application::session::SessionState::setEstimatedTestDurationMinutes(domain::DurationMinutes minutes) {
+    data.protocol.estimatedTestDuration = minutes;
     notify();
 }
 
-void application::session::SessionState::setOperatorTestDurationMinutes(int minutes) {
-    data.operatorTestDuration = domain::DurationMinutes::required(minutes);
+void application::session::SessionState::setOperatorTestDurationMinutes(domain::DurationMinutes minutes) {
+    data.protocol.operatorTestDuration = minutes;
     notify();
 }
 
-void application::session::SessionState::setActiveTestDurationMinutes(int minutes) {
-    data.activeTestDuration = domain::DurationMinutes::optional(minutes);
+void application::session::SessionState::setActiveTestDurationMinutes(domain::DurationMinutes minutes) {
+    data.execution.activeTestDuration = minutes;
     notify();
 }
 
-void application::session::SessionState::setElapsedSeconds(int seconds) {
-    data.elapsed = domain::ElapsedSeconds::from(seconds);
+void application::session::SessionState::setElapsedSeconds(domain::ElapsedSeconds seconds) {
+    data.execution.elapsed = seconds;
     notify();
 }
 
-void application::session::SessionState::setRemainingSeconds(int seconds) {
-    data.remaining = domain::RemainingSeconds::from(seconds);
+void application::session::SessionState::setRemainingSeconds(domain::RemainingSeconds seconds) {
+    data.execution.remaining = seconds;
     notify();
 }
 
-void application::session::SessionState::setTelemetryPlot(domain::PlotModel plot) {
-    data.telemetryPlot = std::move(plot);
+void application::session::SessionState::setTelemetryPlot(application::dto::PlotModel plot) {
+    data.telemetry.telemetryPlot = std::move(plot);
     notify();
 }
 
@@ -108,51 +134,52 @@ void application::session::SessionState::appendTelemetrySample(domain::AxisTelem
         return;
     }
 
-    data.telemetryHistory.push_back(sample);
+    data.telemetry.telemetryHistory.push_back(sample);
 
     constexpr std::size_t maxTelemetryHistorySamples = 50'000;
-    if (data.telemetryHistory.size() > maxTelemetryHistorySamples) {
-        const auto eraseCount = data.telemetryHistory.size() - maxTelemetryHistorySamples;
-        data.telemetryHistory.erase(
-            data.telemetryHistory.begin(),
-            data.telemetryHistory.begin() +
+    if (data.telemetry.telemetryHistory.size() > maxTelemetryHistorySamples) {
+        const auto eraseCount = data.telemetry.telemetryHistory.size() - maxTelemetryHistorySamples;
+        data.telemetry.telemetryHistory.erase(
+            data.telemetry.telemetryHistory.begin(),
+            data.telemetry.telemetryHistory.begin() +
                 static_cast<std::vector<domain::AxisTelemetrySample>::difference_type>(eraseCount));
     }
 
-    if (data.telemetryFollowTail && !data.telemetryHistory.empty()) {
-        const double baseTimestamp = data.telemetryHistory.front().timestampSeconds;
-        data.telemetryWindowEndSeconds = std::max(0.0, sample.timestampSeconds - baseTimestamp);
+    if (data.telemetry.telemetryFollowTail && !data.telemetry.telemetryHistory.empty()) {
+        data.telemetry.telemetryWindowEndSeconds =
+            domain::TelemetryWindowEnd::fromTail(data.telemetry.telemetryHistory.front(), sample);
     }
 
     rebuildTelemetryPlot();
     notify();
 }
 
-void application::session::SessionState::setTelemetryWindowEndSeconds(double endSeconds) {
-    data.telemetryFollowTail = false;
-    data.telemetryWindowEndSeconds = std::max(0.0, endSeconds);
+void application::session::SessionState::setTelemetryWindowEnd(domain::TelemetryWindowEnd end) {
+    data.telemetry.telemetryFollowTail = false;
+    data.telemetry.telemetryWindowEndSeconds = end;
 
     rebuildTelemetryPlot();
     notify();
 }
 
 void application::session::SessionState::followTelemetryTail() {
-    data.telemetryFollowTail = true;
+    data.telemetry.telemetryFollowTail = true;
 
-    if (!data.telemetryHistory.empty()) {
-        const double baseTimestamp = data.telemetryHistory.front().timestampSeconds;
-        data.telemetryWindowEndSeconds = std::max(0.0, data.telemetryHistory.back().timestampSeconds - baseTimestamp);
+    if (!data.telemetry.telemetryHistory.empty()) {
+        data.telemetry.telemetryWindowEndSeconds = domain::TelemetryWindowEnd::fromTail(
+            data.telemetry.telemetryHistory.front(), data.telemetry.telemetryHistory.back());
     }
 
     rebuildTelemetryPlot();
     notify();
 }
 
-void application::session::SessionState::setTelemetryAxisColor(domain::AxisId axisId, domain::RgbColor color) {
+void application::session::SessionState::setTelemetryAxisColor(domain::AxisId axisId,
+                                                               application::dto::RgbColor color) {
     if (axisId == domain::axis0) {
-        data.telemetryAxisYColor = color;
+        data.telemetry.telemetryAxisYColor = color;
     } else if (axisId == domain::axis1) {
-        data.telemetryAxisZColor = color;
+        data.telemetry.telemetryAxisZColor = color;
     }
 
     rebuildTelemetryPlot();
@@ -161,9 +188,9 @@ void application::session::SessionState::setTelemetryAxisColor(domain::AxisId ax
 
 void application::session::SessionState::setTelemetryAxisVisible(domain::AxisId axisId, bool visible) {
     if (axisId == domain::axis0) {
-        data.telemetryAxisYVisible = visible;
+        data.telemetry.telemetryAxisYVisible = visible;
     } else if (axisId == domain::axis1) {
-        data.telemetryAxisZVisible = visible;
+        data.telemetry.telemetryAxisZVisible = visible;
     }
 
     rebuildTelemetryPlot();
@@ -171,53 +198,104 @@ void application::session::SessionState::setTelemetryAxisVisible(domain::AxisId 
 }
 
 void application::session::SessionState::setStandControlMode(domain::StandControlMode mode) {
-    data.standControlMode = mode;
+    data.control.standControlMode = mode;
     notify();
 }
 
 void application::session::SessionState::setTestModeState(domain::TestMode testMode, domain::StandControlMode standMode,
                                                           domain::TestTimeSource timeSource,
                                                           domain::TestTimeDirection timeDirection) {
-    data.testProtocol.testMode = testMode;
-    data.standControlMode = standMode;
-    data.testTimeSource = timeSource;
-    data.testTimeDirection = timeDirection;
+    data.protocol.testProtocol.testMode = testMode;
+    data.control.standControlMode = standMode;
+    data.protocol.testTimeSource = timeSource;
+    data.execution.testTimeDirection = timeDirection;
+    resetReadinessWithoutNotify();
     notify();
 }
 
 void application::session::SessionState::setAppliedStandImpact(domain::WindImpact profile) {
-    data.appliedStandImpact = std::move(profile);
-    data.windImpact = data.appliedStandImpact;
+    data.control.appliedStandImpact = std::move(profile);
+    data.control.windImpact = data.control.appliedStandImpact;
     notify();
 }
 
 void application::session::SessionState::setTargetStandImpact(domain::WindImpact profile) {
-    data.targetStandImpact = std::move(profile);
+    data.control.targetStandImpact = std::move(profile);
+    resetReadinessWithoutNotify();
     notify();
 }
 
-void application::session::SessionState::setControlPlot(domain::PlotModel plot) {
-    data.controlPlot = std::move(plot);
+void application::session::SessionState::setRuntimeTargetStandImpact(domain::WindImpact profile) {
+    data.control.targetStandImpact = std::move(profile);
+    notify();
+}
+
+void application::session::SessionState::setHybridBeaufortOverride(
+    std::optional<domain::HybridBeaufortOverride> overrideState) {
+    data.control.hybridBeaufortOverride = std::move(overrideState);
+    resetReadinessWithoutNotify();
+    notify();
+}
+
+void application::session::SessionState::clearHybridBeaufortOverride() {
+    if (!data.control.hybridBeaufortOverride.has_value()) {
+        return;
+    }
+
+    data.control.hybridBeaufortOverride.reset();
+    resetReadinessWithoutNotify();
+    notify();
+}
+
+void application::session::SessionState::setHybridOperatorDirection(domain::WindDirection direction) {
+    data.control.hybridOperatorDirection = direction;
+    resetReadinessWithoutNotify();
+    notify();
+}
+
+void application::session::SessionState::setHybridOperatorAngleOfAttack(domain::AngleOfAttack angleOfAttack) {
+    data.control.hybridOperatorAngleOfAttack = angleOfAttack;
+    resetReadinessWithoutNotify();
+    notify();
+}
+
+void application::session::SessionState::setControlPlot(application::dto::PlotModel plot) {
+    data.control.controlPlot = std::move(plot);
     notify();
 }
 
 void application::session::SessionState::setControlProfile(domain::WindControlProfile profile) {
-    data.controlProfile = std::move(profile);
+    data.control.controlProfile = std::move(profile);
+    notify();
+}
+
+void application::session::SessionState::resetTelemetrySession() {
+    data.telemetry.telemetryHistory.clear();
+    data.telemetry.telemetryFollowTail = true;
+    data.telemetry.telemetryWindowEndSeconds = domain::TelemetryWindowEnd::fromSeconds(0.0);
+    rebuildTelemetryPlot();
+    notify();
+}
+
+void application::session::SessionState::resetControlSession() {
+    data.control.controlTrace.clear();
+    data.control.controlProfile = domain::WindControlProfile{};
+    data.control.controlPlot = application::dto::PlotModel{};
     notify();
 }
 
 void application::session::SessionState::clearControlTrace() {
-    data.controlTrace.clear();
+    data.control.controlTrace.clear();
     notify();
 }
 
 void application::session::SessionState::appendControlTraceSample(domain::ControlTraceSample sample) {
-    data.controlTrace.append(std::move(sample));
+    data.control.controlTrace.append(std::move(sample));
     notify();
 }
 
 void application::session::SessionState::setTestProtocolTitle(std::string title) {
-    data.testProtocol.title = std::move(title);
+    data.protocol.testProtocol.title = std::move(title);
     notify();
 }
 
@@ -226,57 +304,89 @@ void application::session::SessionState::setTestProtocolLine(int idx, std::strin
         return;
     }
 
-    data.testProtocol.lines[static_cast<std::size_t>(idx)] = std::move(line);
+    data.protocol.testProtocol.lines[static_cast<std::size_t>(idx)] = std::move(line);
     notify();
 }
 
 void application::session::SessionState::setTestProtocolMode(domain::TestMode mode) {
-    data.testProtocol.testMode = mode;
+    data.protocol.testProtocol.testMode = mode;
+    resetReadinessWithoutNotify();
     notify();
 }
 
 void application::session::SessionState::setTestProtocolProgram(domain::TestProgram program) {
-    data.testProtocol.testProgram = program;
+    data.protocol.testProtocol.testProgram = program;
     notify();
 }
 
 void application::session::SessionState::setTestProtocolDroneParameters(
     std::vector<domain::TestProtocolParameter> parameters) {
-    data.testProtocol.droneParameters = std::move(parameters);
+    data.protocol.testProtocol.droneParameters = std::move(parameters);
+    resetReadinessWithoutNotify();
     notify();
 }
 
 void application::session::SessionState::setTestProtocolDroneParameterValue(int idx, std::string value) {
-    if (idx < 0 || idx >= static_cast<int>(data.testProtocol.droneParameters.size())) {
+    if (idx < 0 || idx >= static_cast<int>(data.protocol.testProtocol.droneParameters.size())) {
         return;
     }
 
-    data.testProtocol.droneParameters[static_cast<std::size_t>(idx)].value = std::move(value);
+    data.protocol.testProtocol.droneParameters[static_cast<std::size_t>(idx)].value = std::move(value);
+    resetReadinessWithoutNotify();
     notify();
 }
 
 void application::session::SessionState::setAxis1State(domain::AxisState stateValue) {
-    data.axis1State = stateValue;
+    data.connection.axis1State = stateValue;
     notify();
 }
 
 void application::session::SessionState::setAxis2State(domain::AxisState stateValue) {
-    data.axis2State = stateValue;
+    data.connection.axis2State = stateValue;
     notify();
 }
 
 void application::session::SessionState::setTelemetryStatus(domain::TelemetryStatus status) {
-    data.telemetryStatus = status;
+    data.telemetry.telemetryStatus = status;
     notify();
 }
 
 void application::session::SessionState::setStandConnectionStatus(domain::StandConnectionStatus status) {
-    data.standConnectionStatus = status;
+    data.connection.standConnectionStatus = status;
     notify();
 }
 
-void application::session::SessionState::setTelemetryPollIntervalMs(int intervalMs) {
-    data.telemetryPollIntervalMs = std::clamp(intervalMs, 20, 60'000);
+void application::session::SessionState::setTelemetryPollInterval(domain::TelemetryPollInterval interval) {
+    data.connection.telemetryPollInterval = interval;
+    notify();
+}
+
+void application::session::SessionState::setReadinessFromEstimationResult(
+    const domain::EstimatedTestDurationResult &result, domain::WindImpact calculatedForImpact,
+    bool calculatedForWorstCaseScenario, domain::SafeWindImpactLimitResult safeLimits) {
+    data.readiness.warnings = result.warnings;
+    data.readiness.errors = result.errors;
+    data.readiness.values = result.values;
+    data.readiness.calculatedForImpact = calculatedForImpact;
+    data.readiness.hasCalculatedForImpact = true;
+    data.readiness.calculatedForWorstCaseScenario = calculatedForWorstCaseScenario;
+    data.readiness.safeLimits = std::move(safeLimits);
+
+    if (!result.duration.has_value()) {
+        data.readiness.status = ReadinessStatus::Failed;
+    } else if (!result.errors.empty()) {
+        data.readiness.status = ReadinessStatus::Dangerous;
+    } else if (!result.warnings.empty()) {
+        data.readiness.status = ReadinessStatus::Warning;
+    } else {
+        data.readiness.status = ReadinessStatus::Ok;
+    }
+
+    notify();
+}
+
+void application::session::SessionState::resetReadiness() {
+    resetReadinessWithoutNotify();
     notify();
 }
 
@@ -293,52 +403,11 @@ void application::session::SessionState::notify() {
 }
 
 void application::session::SessionState::rebuildTelemetryPlot() {
-    domain::PlotModel plot{};
-    plot.title = "Telemetry";
-    plot.x.label = "seconds";
-    plot.y = domain::AxisSpec{.min = -180.0, .max = 360.0, .step = 45.0, .label = "degrees"};
+    data.telemetry.telemetryPlot = application::services::TelemetryPlotBuilder{}.build(data.telemetry);
+}
 
-    const double windowSeconds = std::max(1.0, data.telemetryWindowSeconds);
-    const double endSeconds = std::max(windowSeconds, data.telemetryWindowEndSeconds);
-    const double startSeconds = std::max(0.0, endSeconds - windowSeconds);
-
-    plot.x =
-        domain::AxisSpec{.min = startSeconds, .max = startSeconds + windowSeconds, .step = 10.0, .label = "seconds"};
-
-    domain::NamedSeries axisY{};
-    axisY.label = "Ось Y / тангаж";
-    axisY.color = data.telemetryAxisYColor;
-
-    domain::NamedSeries axisZ{};
-    axisZ.label = "Ось Z / направление";
-    axisZ.color = data.telemetryAxisZColor;
-
-    if (!data.telemetryHistory.empty()) {
-        const double baseTimestamp = data.telemetryHistory.front().timestampSeconds;
-
-        for (const auto &sample : data.telemetryHistory) {
-            const double x = sample.timestampSeconds - baseTimestamp;
-            if (x < startSeconds || x > plot.x.max) {
-                continue;
-            }
-
-            if (sample.axisId == domain::axis0 && data.telemetryAxisYVisible) {
-                axisY.series.points.push_back(domain::Point{.x = x, .y = sample.position});
-            } else if (sample.axisId == domain::axis1 && data.telemetryAxisZVisible) {
-                axisZ.series.points.push_back(domain::Point{.x = x, .y = sample.position});
-            }
-        }
-    }
-
-    if (data.telemetryAxisYVisible) {
-        plot.seriesList.push_back(std::move(axisY));
-    }
-
-    if (data.telemetryAxisZVisible) {
-        plot.seriesList.push_back(std::move(axisZ));
-    }
-
-    data.telemetryPlot = std::move(plot);
+void application::session::SessionState::resetReadinessWithoutNotify() {
+    data.readiness = ReadinessStateData{};
 }
 
 } // namespace application::session

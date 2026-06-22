@@ -11,10 +11,13 @@
 #include "../Presentation/TelemetryChartsTab/TelemetryChartsTabPresenter.hpp"
 #include "../Presentation/ControlChartsTab/ControlChartsTabPresenter.hpp"
 #include "../Presentation/TestProtocolTab/TestProtocolTabPresenter.hpp"
-#include "../Application/UseCases/SetStandControlModeUseCase.hpp"
+#include "../Application/UseCases/ApplyAngleOfAttackUseCase.hpp"
+#include "../Application/UseCases/ApplyBeaufortImpactUseCase.hpp"
+#include "../Application/UseCases/ApplyWindDirectionUseCase.hpp"
 #include "../Application/UseCases/SetStandImpactUseCase.hpp"
 #include "../Domain/AxisId.hpp"
 #include "../Domain/TestTimeSource.hpp"
+#include "../Infrastructure/ConfigTemplates/IConfigTemplateService.hpp"
 
 class QComboBox;
 class QCheckBox;
@@ -44,9 +47,12 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
         presentation::telemetryChartsTab::TelemetryChartsTabPresenter &telemetryChartsTabPresenter;
         presentation::controlChartsTab::ControlChartsTabPresenter &controlChartsTabPresenter;
         presentation::testProtocolTab::TestProtocolTabPresenter &testProtocolTabPresenter;
-        application::useCases::SetStandControlModeUseCase &setStandControlModeUseCase;
         application::useCases::SetStandImpactUseCase &setStandImpactUseCase;
+        application::useCases::ApplyBeaufortImpactUseCase &applyBeaufortImpactUseCase;
+        application::useCases::ApplyWindDirectionUseCase &applyWindDirectionUseCase;
+        application::useCases::ApplyAngleOfAttackUseCase &applyAngleOfAttackUseCase;
         infrastructure::SessionStateQtAdapter &sessionAdapter;
+        infrastructure::configTemplates::IConfigTemplateService &configTemplateService;
     };
 
     explicit MainWindow(Dependencies deps, QWidget *parent = nullptr);
@@ -66,6 +72,8 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
 
     void appendLog(const std::string &text) override;
     void showOperatorWarning(const std::string &title, const std::string &message) override;
+    bool confirmDangerousReadinessStart(const std::string &title, const std::string &message) override;
+    void freezeStandImpactTransition() override;
 
   private:
     std::unique_ptr<Ui::MainWindow> ui;
@@ -74,29 +82,39 @@ class MainWindow final : public QMainWindow, public presentation::IShellView {
     presentation::telemetryChartsTab::TelemetryChartsTabPresenter &telemetryChartsTabPresenter;
     presentation::controlChartsTab::ControlChartsTabPresenter &controlChartsTabPresenter;
     presentation::testProtocolTab::TestProtocolTabPresenter &testProtocolTabPresenter;
-    application::useCases::SetStandControlModeUseCase &setStandControlModeUseCase;
     application::useCases::SetStandImpactUseCase &setStandImpactUseCase;
+    application::useCases::ApplyBeaufortImpactUseCase &applyBeaufortImpactUseCase;
+    application::useCases::ApplyWindDirectionUseCase &applyWindDirectionUseCase;
+    application::useCases::ApplyAngleOfAttackUseCase &applyAngleOfAttackUseCase;
     infrastructure::SessionStateQtAdapter &sessionAdapter;
+    infrastructure::configTemplates::IConfigTemplateService &configTemplateService;
 
     TelemetryChartsTabWidget *telemetryChartsTabWidget{nullptr};
     ControlChartsTabWidget *controlChartsTabWidget{nullptr};
     TestProtocolTabWidget *testProtocolTabWidget{nullptr};
 
     QTimer *standImpactTransitionTimer{nullptr};
-    bool controlPlotRebuildScheduled{false};
     std::string observedTestProtocolModeKey{};
+    std::string selectedTelemetryConfigPath{};
 
     void setupTabs();
     void setupStandControlPanel();
     void connectShellSignals();
+    void connectTestControlSignals();
+    void connectConfigTemplateSignals();
+    void connectStandControlSignals();
     void connectSessionSignals();
-    void applyStandInputs();
+    void applyBeaufortImpact();
+    void applyWindDirectionImpact();
+    void applyAngleOfAttackImpact();
+    void handleManualImpactAccepted(const domain::WindImpact &previousTarget, const std::string &changedParameter);
+    void handleManualImpactRejected();
     void advanceStandImpactTransition();
     void selectTelemetryAxisColor();
-    void scheduleControlPlotRebuild();
-    void updateStandControlModeSelection();
     void updateManualStandControlsEnabled();
     void updateControlFormulaTemplateSelection(const std::string &expression);
+    void createTelemetryTemplate();
+    void selectTelemetryConfig();
     double selectedStandDirectionDegrees() const;
     domain::AxisId selectedTelemetryAxisId() const;
 };

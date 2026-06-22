@@ -9,7 +9,7 @@ class SetOperatorTestDurationUseCase final {
   public:
     explicit SetOperatorTestDurationUseCase(application::session::SessionState &state);
 
-    void execute(int minutes);
+    void execute(domain::DurationMinutes minutes);
 
   private:
     application::session::SessionState &state;

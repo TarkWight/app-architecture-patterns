@@ -5,6 +5,8 @@
 #include <QString>
 
 #include <algorithm>
+#include <cmath>
+#include <utility>
 
 namespace ui::render {
 namespace {
@@ -21,13 +23,13 @@ QRect makeInnerPlotRect(const QRect &outerRect) {
 
 } // namespace
 
-void PlotRenderer::drawPlot(QPainter &painter, const QRect &rect, const domain::PlotModel &plot) {
-    domain::PlotModel drawablePlot = plot;
+void PlotRenderer::drawPlot(QPainter &painter, const QRect &rect, const application::dto::PlotModel &plot) {
+    application::dto::PlotModel drawablePlot = plot;
     if (drawablePlot.x.max <= drawablePlot.x.min) {
-        drawablePlot.x = domain::AxisSpec{.min = 0.0, .max = 1.0, .step = 0.25, .label = plot.x.label};
+        drawablePlot.x = application::dto::AxisSpec{.min = 0.0, .max = 1.0, .step = 0.25, .label = plot.x.label};
     }
     if (drawablePlot.y.max <= drawablePlot.y.min) {
-        drawablePlot.y = domain::AxisSpec{.min = 0.0, .max = 1.0, .step = 0.25, .label = plot.y.label};
+        drawablePlot.y = application::dto::AxisSpec{.min = 0.0, .max = 1.0, .step = 0.25, .label = plot.y.label};
     }
 
     const QRect plotRect = makeInnerPlotRect(rect);
@@ -47,7 +49,7 @@ void PlotRenderer::drawPlot(QPainter &painter, const QRect &rect, const domain::
     drawMarker(painter, plotRect, drawablePlot);
 }
 
-bool PlotRenderer::hasRenderablePlot(const domain::PlotModel &plot) {
+bool PlotRenderer::hasRenderablePlot(const application::dto::PlotModel &plot) {
     if (plot.x.max <= plot.x.min || plot.y.max <= plot.y.min) {
         return false;
     }
@@ -57,7 +59,35 @@ bool PlotRenderer::hasRenderablePlot(const domain::PlotModel &plot) {
     }
 
     return std::any_of(plot.seriesList.begin(), plot.seriesList.end(),
-                       [](const domain::NamedSeries &series) { return !series.series.points.empty(); });
+                       [](const application::dto::NamedSeries &series) { return !series.series.points.empty(); });
+}
+
+std::vector<application::dto::Series> PlotRenderer::splitDrawableSegments(const application::dto::Series &series) {
+    if (!series.breakOnLargeDelta || series.points.size() < 2) {
+        return {series};
+    }
+
+    std::vector<application::dto::Series> segments{};
+    application::dto::Series current{};
+    current.breakOnLargeDelta = series.breakOnLargeDelta;
+    current.wrapThreshold = series.wrapThreshold;
+
+    for (const auto &point : series.points) {
+        if (!current.points.empty() && std::abs(point.y - current.points.back().y) > series.wrapThreshold) {
+            segments.push_back(std::move(current));
+            current = application::dto::Series{};
+            current.breakOnLargeDelta = series.breakOnLargeDelta;
+            current.wrapThreshold = series.wrapThreshold;
+        }
+
+        current.points.push_back(point);
+    }
+
+    if (!current.points.empty()) {
+        segments.push_back(std::move(current));
+    }
+
+    return segments;
 }
 
 double PlotRenderer::normalize(double value, double min, double max) {
@@ -68,16 +98,16 @@ double PlotRenderer::normalize(double value, double min, double max) {
     return (value - min) / (max - min);
 }
 
-QColor PlotRenderer::toQColor(domain::RgbColor color) {
+QColor PlotRenderer::toQColor(application::dto::RgbColor color) {
     return QColor(static_cast<int>(color.r), static_cast<int>(color.g), static_cast<int>(color.b));
 }
 
-int PlotRenderer::projectX(const QRect &plotRect, const domain::PlotModel &plot, double xValue) {
+int PlotRenderer::projectX(const QRect &plotRect, const application::dto::PlotModel &plot, double xValue) {
     const double ratio = normalize(xValue, plot.x.min, plot.x.max);
     return plotRect.left() + static_cast<int>(std::lround(ratio * static_cast<double>(plotRect.width())));
 }
 
-int PlotRenderer::projectY(const QRect &plotRect, const domain::PlotModel &plot, double yValue) {
+int PlotRenderer::projectY(const QRect &plotRect, const application::dto::PlotModel &plot, double yValue) {
     const double ratio = normalize(yValue, plot.y.min, plot.y.max);
     return plotRect.bottom() - static_cast<int>(std::lround(ratio * static_cast<double>(plotRect.height())));
 }
@@ -91,13 +121,21 @@ int PlotRenderer::tickCount(double minValue, double maxValue, double stepValue) 
     return static_cast<int>(std::floor(span / stepValue)) + 1;
 }
 
+QString PlotRenderer::formatTickValue(double value, const application::dto::AxisSpec &axis) {
+    if (axis.labelPrecision >= 0) {
+        return QString::number(value, 'f', axis.labelPrecision);
+    }
+
+    return QString::number(value);
+}
+
 void PlotRenderer::drawFrame(QPainter &painter, const QRect &plotRect) {
     painter.fillRect(plotRect, QColor(255, 255, 255));
     painter.setPen(QPen(QColor(30, 41, 59), 1));
     painter.drawRect(plotRect);
 }
 
-void PlotRenderer::drawTitle(QPainter &painter, const QRect &outerRect, const domain::PlotModel &plot) {
+void PlotRenderer::drawTitle(QPainter &painter, const QRect &outerRect, const application::dto::PlotModel &plot) {
     if (plot.title.empty()) {
         return;
     }
@@ -106,7 +144,7 @@ void PlotRenderer::drawTitle(QPainter &painter, const QRect &outerRect, const do
                      QString::fromStdString(plot.title));
 }
 
-void PlotRenderer::drawAxisLabels(QPainter &painter, const QRect &plotRect, const domain::PlotModel &plot) {
+void PlotRenderer::drawAxisLabels(QPainter &painter, const QRect &plotRect, const application::dto::PlotModel &plot) {
     painter.drawText(QRect(plotRect.left(), plotRect.bottom() + 8, plotRect.width(), 20), Qt::AlignCenter,
                      QString::fromStdString(plot.x.label));
 
@@ -119,7 +157,8 @@ void PlotRenderer::drawAxisLabels(QPainter &painter, const QRect &plotRect, cons
     painter.restore();
 }
 
-void PlotRenderer::drawXGrid(QPainter &painter, const QRect &plotRect, const domain::PlotModel &plot, int /*leftMargin*/
+void PlotRenderer::drawXGrid(QPainter &painter, const QRect &plotRect, const application::dto::PlotModel &plot,
+                             int /*leftMargin*/
 ) {
     const int count = tickCount(plot.x.min, plot.x.max, plot.x.step);
     if (count <= 0) {
@@ -135,12 +174,13 @@ void PlotRenderer::drawXGrid(QPainter &painter, const QRect &plotRect, const dom
         painter.drawLine(px, plotRect.top(), px, plotRect.bottom());
 
         painter.setPen(QPen(QColor(30, 41, 59), 1));
-        painter.drawText(px - 15, plotRect.bottom() + 18, 30, 16, Qt::AlignCenter, QString::number(xValue));
+        painter.drawText(px - 15, plotRect.bottom() + 18, 30, 16, Qt::AlignCenter, formatTickValue(xValue, plot.x));
         painter.setPen(QPen(QColor(203, 213, 225), 1, Qt::DashLine));
     }
 }
 
-void PlotRenderer::drawYGrid(QPainter &painter, const QRect &plotRect, const domain::PlotModel &plot, int leftMargin) {
+void PlotRenderer::drawYGrid(QPainter &painter, const QRect &plotRect, const application::dto::PlotModel &plot,
+                             int leftMargin) {
     const int count = tickCount(plot.y.min, plot.y.max, plot.y.step);
     if (count <= 0) {
         return;
@@ -156,12 +196,12 @@ void PlotRenderer::drawYGrid(QPainter &painter, const QRect &plotRect, const dom
 
         painter.setPen(QPen(QColor(30, 41, 59), 1));
         painter.drawText(plotRect.left() - leftMargin, py - 8, leftMargin - 5, 16, Qt::AlignRight | Qt::AlignVCenter,
-                         QString::number(yValue));
+                         formatTickValue(yValue, plot.y));
         painter.setPen(QPen(QColor(203, 213, 225), 1, Qt::DashLine));
     }
 }
 
-void PlotRenderer::drawMarker(QPainter &painter, const QRect &plotRect, const domain::PlotModel &plot) {
+void PlotRenderer::drawMarker(QPainter &painter, const QRect &plotRect, const application::dto::PlotModel &plot) {
     if (!plot.marker.visible || plot.marker.x < plot.x.min || plot.marker.x > plot.x.max) {
         return;
     }
@@ -177,8 +217,8 @@ void PlotRenderer::drawMarker(QPainter &painter, const QRect &plotRect, const do
     }
 }
 
-QPolygon PlotRenderer::buildPolyline(const QRect &plotRect, const domain::PlotModel &plot,
-                                     const domain::Series &series) {
+QPolygon PlotRenderer::buildPolyline(const QRect &plotRect, const application::dto::PlotModel &plot,
+                                     const application::dto::Series &series) {
     QPolygon polyline;
     polyline.reserve(static_cast<int>(series.points.size()));
 
@@ -189,14 +229,14 @@ QPolygon PlotRenderer::buildPolyline(const QRect &plotRect, const domain::PlotMo
     return polyline;
 }
 
-void PlotRenderer::drawPoint(QPainter &painter, const QRect &plotRect, const domain::PlotModel &plot,
-                             const domain::Point &point) {
+void PlotRenderer::drawPoint(QPainter &painter, const QRect &plotRect, const application::dto::PlotModel &plot,
+                             const application::dto::Point &point) {
     constexpr int radius = 4;
     const QPoint center{projectX(plotRect, plot, point.x), projectY(plotRect, plot, point.y)};
     painter.drawEllipse(center, radius, radius);
 }
 
-void PlotRenderer::drawSeries(QPainter &painter, const QRect &plotRect, const domain::PlotModel &plot) {
+void PlotRenderer::drawSeries(QPainter &painter, const QRect &plotRect, const application::dto::PlotModel &plot) {
     if (!plot.seriesList.empty()) {
         for (const auto &series : plot.seriesList) {
             if (series.series.points.empty()) {
@@ -207,8 +247,14 @@ void PlotRenderer::drawSeries(QPainter &painter, const QRect &plotRect, const do
             if (series.series.points.size() == 1) {
                 drawPoint(painter, plotRect, plot, series.series.points.front());
             } else {
-                const QPolygon polyline = buildPolyline(plotRect, plot, series.series);
-                painter.drawPolyline(polyline);
+                for (const auto &segment : splitDrawableSegments(series.series)) {
+                    if (segment.points.size() == 1) {
+                        drawPoint(painter, plotRect, plot, segment.points.front());
+                    } else {
+                        const QPolygon polyline = buildPolyline(plotRect, plot, segment);
+                        painter.drawPolyline(polyline);
+                    }
+                }
             }
         }
 
@@ -220,18 +266,24 @@ void PlotRenderer::drawSeries(QPainter &painter, const QRect &plotRect, const do
     if (plot.series.points.size() == 1) {
         drawPoint(painter, plotRect, plot, plot.series.points.front());
     } else {
-        const QPolygon polyline = buildPolyline(plotRect, plot, plot.series);
-        painter.drawPolyline(polyline);
+        for (const auto &segment : splitDrawableSegments(plot.series)) {
+            if (segment.points.size() == 1) {
+                drawPoint(painter, plotRect, plot, segment.points.front());
+            } else {
+                const QPolygon polyline = buildPolyline(plotRect, plot, segment);
+                painter.drawPolyline(polyline);
+            }
+        }
     }
 }
 
-void PlotRenderer::drawLegend(QPainter &painter, const QRect &plotRect, const domain::PlotModel &plot) {
+void PlotRenderer::drawLegend(QPainter &painter, const QRect &plotRect, const application::dto::PlotModel &plot) {
     int y = plotRect.top() + 8;
     const int x = plotRect.right() - 170;
 
-    const int visibleLabels =
-        static_cast<int>(std::count_if(plot.seriesList.begin(), plot.seriesList.end(),
-                                       [](const domain::NamedSeries &series) { return !series.label.empty(); }));
+    const int visibleLabels = static_cast<int>(
+        std::count_if(plot.seriesList.begin(), plot.seriesList.end(),
+                      [](const application::dto::NamedSeries &series) { return !series.label.empty(); }));
     if (visibleLabels > 0) {
         painter.fillRect(QRect(x - 8, y - 5, 170, (visibleLabels * 20) + 10), QColor(255, 255, 255, 230));
         painter.setPen(QPen(QColor(226, 232, 240), 1));

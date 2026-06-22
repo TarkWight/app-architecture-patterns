@@ -41,16 +41,23 @@ endif()
 qt_add_executable(develop
   src/main.cpp
 
-  src/Domain/Plot.hpp
+  src/Application/Dto/PlotModel.hpp
   src/Domain/FormulaTemplate.hpp
   src/Domain/ControlTrace.hpp
   src/Domain/ControlProfileTiming.hpp
   src/Domain/TestProtocol.hpp
+  src/Domain/TestDurationEstimator.hpp
+  src/Domain/SafeWindImpactLimitEstimator.hpp
   src/Domain/Time.hpp
   src/Domain/Expression.hpp
   src/Domain/WindImpact.hpp
+  src/Domain/HybridBeaufortOverride.hpp
   src/Domain/WindControlProfile.hpp
   src/Domain/WindControlProfileImpact.hpp
+  src/Domain/WindControlProfileWorstCase.hpp
+  src/Domain/UavSpecification.hpp
+  src/Domain/StandImpactCalculationContext.hpp
+  src/Domain/YawOscillationPolicy.hpp
   src/Domain/AxisState.hpp
   src/Domain/TestExecutionStatus.hpp
   src/Domain/TestExecutionTransitions.hpp
@@ -86,13 +93,38 @@ qt_add_executable(develop
   src/Application/Session/Subscription.hpp
   src/Application/Session/Subscription.cpp
 
+  src/Application/Services/ControlPlotBuilder.hpp
+  src/Application/Services/ControlPlotBuilder.cpp
+  src/Application/Services/ControlFunctionWorstCaseAnalyzer.hpp
+  src/Application/Services/ControlFunctionWorstCaseAnalyzer.cpp
+  src/Application/Services/ControlProfilePreviewService.hpp
+  src/Application/Services/ControlProfilePreviewService.cpp
+  src/Application/Services/AppliedStandImpactSender.hpp
+  src/Application/Services/AppliedStandImpactSender.cpp
+  src/Application/Services/TelemetryPlotBuilder.hpp
+  src/Application/Services/TelemetryPlotBuilder.cpp
+  src/Application/Services/TelemetrySessionClock.hpp
+  src/Application/Services/TelemetrySessionClock.cpp
+  src/Application/Services/UavSpecificationMapper.hpp
+  src/Application/Services/UavSpecificationMapper.cpp
+  src/Application/Services/ReadinessDiagnosticMessageBuilder.hpp
+  src/Application/Services/ReadinessDiagnosticMessageBuilder.cpp
+
   src/Infrastructure/Config/TomlConfigRepository.hpp
   src/Infrastructure/Config/TomlConfigRepository.cpp
+  src/Infrastructure/ConfigTemplates/IAppFileLocationProvider.hpp
+  src/Infrastructure/ConfigTemplates/IConfigTemplateService.hpp
+  src/Infrastructure/ConfigTemplates/QtAppFileLocationProvider.hpp
+  src/Infrastructure/ConfigTemplates/QtAppFileLocationProvider.cpp
+  src/Infrastructure/ConfigTemplates/ConfigTemplateService.hpp
+  src/Infrastructure/ConfigTemplates/ConfigTemplateService.cpp
 
   src/Application/ApplicationContext.hpp
 
   src/Application/UseCases/BuildControlPlotUseCase.hpp
   src/Application/UseCases/BuildControlPlotUseCase.cpp
+  src/Application/UseCases/CalculateAndBuildControlPlotUseCase.hpp
+  src/Application/UseCases/CalculateAndBuildControlPlotUseCase.cpp
   src/Application/UseCases/GenerateStairPlotUseCase.hpp
   src/Application/UseCases/GenerateStairPlotUseCase.cpp
   src/Application/UseCases/LoadPdfReportDefaultsUseCase.hpp
@@ -103,6 +135,8 @@ qt_add_executable(develop
   src/Application/UseCases/StopTestExecutionUseCase.cpp
   src/Application/UseCases/ExportPdfUseCase.hpp
   src/Application/UseCases/ExportPdfUseCase.cpp
+  src/Application/UseCases/EstimateTestDurationUseCase.hpp
+  src/Application/UseCases/EstimateTestDurationUseCase.cpp
   src/Application/UseCases/SetFunctionExpressionUseCase.hpp
   src/Application/UseCases/SetFunctionExpressionUseCase.cpp
   src/Application/UseCases/SetLineColorUseCase.hpp
@@ -131,6 +165,12 @@ qt_add_executable(develop
   src/Application/UseCases/SetStandControlModeUseCase.cpp
   src/Application/UseCases/SetStandImpactUseCase.hpp
   src/Application/UseCases/SetStandImpactUseCase.cpp
+  src/Application/UseCases/ApplyBeaufortImpactUseCase.hpp
+  src/Application/UseCases/ApplyBeaufortImpactUseCase.cpp
+  src/Application/UseCases/ApplyWindDirectionUseCase.hpp
+  src/Application/UseCases/ApplyWindDirectionUseCase.cpp
+  src/Application/UseCases/ApplyAngleOfAttackUseCase.hpp
+  src/Application/UseCases/ApplyAngleOfAttackUseCase.cpp
   src/Application/UseCases/ConfigureTelemetryUseCase.hpp
   src/Application/UseCases/ConfigureTelemetryUseCase.cpp
   src/Application/UseCases/ConnectStandUseCase.hpp
@@ -150,6 +190,8 @@ qt_add_executable(develop
 
   src/Infrastructure/AxisTcp/LegacyAxisProtocolCodec.hpp
   src/Infrastructure/AxisTcp/LegacyAxisProtocolCodec.cpp
+  src/Infrastructure/AxisTcp/StandTraceFormatter.hpp
+  src/Infrastructure/AxisTcp/StandTraceFormatter.cpp
   src/Infrastructure/AxisTcp/QtTcpTelemetryClient.hpp
   src/Infrastructure/AxisTcp/QtTcpTelemetryClient.cpp
 
@@ -206,37 +248,100 @@ endif()
 if (BUILD_TESTING)
   add_executable(domain_tests
     tests/Domain/AxisControlCommandTest.cpp
+    tests/Domain/EffectiveWindDirectionTest.cpp
     tests/Domain/ControlTraceTest.cpp
     tests/Domain/ControlProfileTimingTest.cpp
+    tests/Domain/ScenarioExecutionEngineTest.cpp
     tests/Domain/StandScenarioTest.cpp
+    tests/Domain/StandConnectionTransitionsTest.cpp
     tests/Domain/StandImpactTransitionTest.cpp
+    tests/Domain/TelemetryConnectionPolicyTest.cpp
+    tests/Domain/TelemetryWindowTest.cpp
+    tests/Domain/TelemetryPollIntervalTest.cpp
+    tests/Domain/TestExecutionPlannerTest.cpp
+    tests/Domain/TestDurationEstimatorTest.cpp
+    tests/Domain/SafeWindImpactLimitEstimatorTest.cpp
     tests/Domain/TestExecutionTransitionsTest.cpp
+    tests/Domain/TestModeStatePolicyTest.cpp
     tests/Domain/TestProtocolTest.cpp
     tests/Domain/TimeTest.cpp
     tests/Domain/WindImpactTest.cpp
+    tests/Domain/HybridBeaufortOverrideTest.cpp
+    tests/Domain/WindControlProfileCalculatorTest.cpp
     tests/Domain/WindControlProfileImpactTest.cpp
+    tests/Domain/WindControlProfileWorstCaseTest.cpp
+    tests/Domain/YawOscillationPolicyTest.cpp
+    tests/Application/ApplyWindImpactUseCasesTest.cpp
+    tests/Application/AppliedStandImpactSenderTest.cpp
     tests/Application/BuildControlPlotUseCaseTest.cpp
+    tests/Application/CalculateAndBuildControlPlotUseCaseTest.cpp
     tests/Application/ConfigureTelemetryUseCaseTest.cpp
+    tests/Application/ControlFunctionWorstCaseAnalyzerTest.cpp
     tests/Application/ConnectStandUseCaseTest.cpp
+    tests/Application/EstimateTestDurationUseCaseTest.cpp
+    tests/Application/ExportPdfUseCaseTest.cpp
+    tests/Application/PauseResumeTestExecutionUseCaseTest.cpp
+    tests/Application/ReadinessDiagnosticMessageBuilderTest.cpp
     tests/Application/SessionStateTest.cpp
     tests/Application/SetControlChartsTabMinutesUseCaseTest.cpp
+    tests/Application/SetOperatorTestDurationUseCaseTest.cpp
     tests/Application/SetStandControlModeUseCaseTest.cpp
     tests/Application/SetStandImpactUseCaseTest.cpp
+    tests/Application/SetTelemetryWindowUseCaseTest.cpp
     tests/Application/StartTestExecutionUseCaseTest.cpp
     tests/Application/StopTestExecutionUseCaseTest.cpp
+    tests/Application/TelemetryPlotBuilderTest.cpp
     tests/Application/UpdateTestProtocolUseCaseTest.cpp
+    tests/Application/UavSpecificationMapperTest.cpp
+    tests/Presentation/ControlChartsTabPresenterTest.cpp
+    tests/Presentation/ShellPresenterTest.cpp
+    tests/Ui/PlotRendererTest.cpp
+    tests/Infrastructure/ConfigTemplateServiceTest.cpp
+    tests/Infrastructure/LegacyAxisProtocolCodecTest.cpp
+    tests/Infrastructure/StandTraceFormatterTest.cpp
+    tests/Infrastructure/QtTestExecutionSchedulerTest.cpp
     tests/Infrastructure/SimpleFunctionEngineTest.cpp
     src/Application/Session/SessionState.cpp
     src/Application/Session/Subscription.cpp
+    src/Application/Services/ControlPlotBuilder.cpp
+    src/Application/Services/ControlFunctionWorstCaseAnalyzer.cpp
+    src/Application/Services/ControlProfilePreviewService.cpp
+    src/Application/Services/AppliedStandImpactSender.cpp
+    src/Application/Services/TelemetryPlotBuilder.cpp
+    src/Application/Services/TelemetrySessionClock.cpp
+    src/Application/Services/UavSpecificationMapper.cpp
+    src/Application/Services/ReadinessDiagnosticMessageBuilder.cpp
     src/Application/UseCases/BuildControlPlotUseCase.cpp
+    src/Application/UseCases/CalculateAndBuildControlPlotUseCase.cpp
     src/Application/UseCases/ConfigureTelemetryUseCase.cpp
     src/Application/UseCases/ConnectStandUseCase.cpp
+    src/Application/UseCases/DisconnectStandUseCase.cpp
+    src/Application/UseCases/EstimateTestDurationUseCase.cpp
+    src/Application/UseCases/ExportPdfUseCase.cpp
+    src/Application/UseCases/SetFunctionExpressionUseCase.cpp
+    src/Application/UseCases/SetLineColorUseCase.cpp
     src/Application/UseCases/SetControlChartsTabMinutesUseCase.cpp
+    src/Application/UseCases/SetWindImpactUseCase.cpp
+    src/Application/UseCases/SetOperatorTestDurationUseCase.cpp
+    src/Application/UseCases/SetTestTimeSourceUseCase.cpp
     src/Application/UseCases/SetStandControlModeUseCase.cpp
     src/Application/UseCases/SetStandImpactUseCase.cpp
+    src/Application/UseCases/SetTelemetryWindowUseCase.cpp
+    src/Application/UseCases/ApplyBeaufortImpactUseCase.cpp
+    src/Application/UseCases/ApplyWindDirectionUseCase.cpp
+    src/Application/UseCases/ApplyAngleOfAttackUseCase.cpp
+    src/Application/UseCases/PauseTestExecutionUseCase.cpp
+    src/Application/UseCases/ResumeTestExecutionUseCase.cpp
     src/Application/UseCases/StartTestExecutionUseCase.cpp
     src/Application/UseCases/StopTestExecutionUseCase.cpp
     src/Application/UseCases/UpdateTestProtocolUseCase.cpp
+    src/Presentation/ShellPresenter.cpp
+    src/Presentation/ControlChartsTab/ControlChartsTabPresenter.cpp
+    src/Ui/Render/PlotRenderer.cpp
+    src/Infrastructure/QtTestExecutionScheduler.cpp
+    src/Infrastructure/ConfigTemplates/ConfigTemplateService.cpp
+    src/Infrastructure/AxisTcp/LegacyAxisProtocolCodec.cpp
+    src/Infrastructure/AxisTcp/StandTraceFormatter.cpp
   )
 
   target_include_directories(domain_tests
@@ -246,6 +351,8 @@ if (BUILD_TESTING)
 
   target_link_libraries(domain_tests
     PRIVATE
+      Qt::Core
+      Qt::Gui
       GTest::gtest_main
   )
 

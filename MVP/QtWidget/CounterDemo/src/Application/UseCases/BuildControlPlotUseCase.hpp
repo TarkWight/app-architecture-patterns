@@ -1,9 +1,11 @@
 #ifndef BUILDCONTROLPLOTUSECASE_HPP
 #define BUILDCONTROLPLOTUSECASE_HPP
 
+#include "../Services/ControlProfilePreviewService.hpp"
+#include "../Services/ControlPlotBuilder.hpp"
 #include "../Ports/IFunctionEngine.hpp"
 #include "../Session/SessionState.hpp"
-#include "../../Domain/Plot.hpp"
+#include "../../Application/Dto/PlotModel.hpp"
 
 namespace application::useCases {
 
@@ -12,12 +14,14 @@ class BuildControlPlotUseCase final {
     BuildControlPlotUseCase(application::session::SessionState &state,
                             const application::ports::IFunctionEngine &engine);
 
-    domain::PlotModel execute();
-    domain::PlotModel refreshFromState();
+    application::dto::PlotModel execute();
+    application::dto::PlotModel refreshFromState();
 
   private:
     application::session::SessionState &state;
     const application::ports::IFunctionEngine &engine;
+    application::services::ControlProfilePreviewService profilePreviewService{};
+    application::services::ControlPlotBuilder plotBuilder{};
 };
 
 } // namespace application::useCases

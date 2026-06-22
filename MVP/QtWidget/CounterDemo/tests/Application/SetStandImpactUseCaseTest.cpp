@@ -67,7 +67,7 @@ class TelemetryClientSpy final : public application::ports::ITelemetryClient {
 
 TEST(SetStandImpactUseCaseTest, RecordsManualTargetAndSafeCommandTraceWhenAppliedImpactIsSent) {
     application::session::SessionState state{};
-    state.setElapsedSeconds(7);
+    state.setElapsedSeconds(domain::ElapsedSeconds::from(7));
     const auto target = domain::makeWindImpact(5.0, 90.0, 4.0);
     const auto safeCommand = domain::makeWindImpact(1.2, 20.0, 2.0);
 
@@ -77,12 +77,15 @@ TEST(SetStandImpactUseCaseTest, RecordsManualTargetAndSafeCommandTraceWhenApplie
     useCase.setTarget(target);
     useCase.setApplied(safeCommand);
 
-    ASSERT_EQ(state.get().controlTrace.size(), 1U);
-    EXPECT_DOUBLE_EQ(state.get().controlTrace.front().timeSeconds, 7.0);
-    EXPECT_DOUBLE_EQ(state.get().controlTrace.front().targetValue.beaufort.value(), 5.0);
-    EXPECT_DOUBLE_EQ(state.get().controlTrace.front().safeCommandValue.beaufort.value(), 1.2);
+    ASSERT_EQ(state.control().controlTrace.size(), 1U);
+    EXPECT_DOUBLE_EQ(state.control().controlTrace.front().time.seconds(), 7.0);
+    EXPECT_DOUBLE_EQ(state.control().controlTrace.front().targetValue.beaufort.value(), 5.0);
+    EXPECT_DOUBLE_EQ(state.control().controlTrace.front().safeCommandValue.beaufort.value(), 1.2);
+    ASSERT_TRUE(telemetryClient.axis0Command.has_value());
     ASSERT_TRUE(telemetryClient.axis1Command.has_value());
-    EXPECT_FLOAT_EQ(telemetryClient.axis1Command->torque, 1.2F);
+    EXPECT_FLOAT_EQ(telemetryClient.axis0Command->torque, 7.8F);
+    EXPECT_FLOAT_EQ(telemetryClient.axis1Command->torque, 6.0F);
+    EXPECT_NEAR(telemetryClient.axis1Command->position, 21.1F, 0.0001F);
 }
 
 } // namespace

@@ -15,6 +15,7 @@
 #include "../Domain/WindImpact.hpp"
 
 #include <QColorDialog>
+#include <QFileDialog>
 #include <QMessageBox>
 #include <QSignalBlocker>
 #include <QString>
@@ -22,6 +23,8 @@
 
 #include <array>
 #include <cmath>
+#include <exception>
+#include <filesystem>
 #include <iomanip>
 #include <sstream>
 #include <utility>
@@ -29,6 +32,7 @@
 namespace ui {
 
 namespace {
+namespace configTemplates = infrastructure::configTemplates;
 
 std::string compassLabel(double degrees) {
     constexpr std::array<const char *, 16> labels{"N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
@@ -53,9 +57,11 @@ MainWindow::MainWindow(Dependencies deps, QWidget *parent)
     : QMainWindow(parent), ui(std::make_unique<Ui::MainWindow>()), shellPresenter(deps.shellPresenter),
       telemetryChartsTabPresenter(deps.telemetryChartsTabPresenter),
       controlChartsTabPresenter(deps.controlChartsTabPresenter),
-      testProtocolTabPresenter(deps.testProtocolTabPresenter),
-      setStandControlModeUseCase(deps.setStandControlModeUseCase), setStandImpactUseCase(deps.setStandImpactUseCase),
-      sessionAdapter(deps.sessionAdapter) {
+      testProtocolTabPresenter(deps.testProtocolTabPresenter), setStandImpactUseCase(deps.setStandImpactUseCase),
+      applyBeaufortImpactUseCase(deps.applyBeaufortImpactUseCase),
+      applyWindDirectionUseCase(deps.applyWindDirectionUseCase),
+      applyAngleOfAttackUseCase(deps.applyAngleOfAttackUseCase), sessionAdapter(deps.sessionAdapter),
+      configTemplateService(deps.configTemplateService) {
     ui->setupUi(this);
 
     ui->comboBoxTestTimeSource->addItem(QStringLiteral("Авторасчёт"));
@@ -123,24 +129,27 @@ void MainWindow::showOperatorWarning(const std::string &title, const std::string
     QMessageBox::warning(this, QString::fromStdString(title), QString::fromStdString(message));
 }
 
+bool MainWindow::confirmDangerousReadinessStart(const std::string &title, const std::string &message) {
+    return QMessageBox::warning(this, QString::fromStdString(title), QString::fromStdString(message),
+                                QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes;
+}
+
+void MainWindow::freezeStandImpactTransition() {
+    standImpactTransitionTimer->stop();
+}
+
 void MainWindow::setupTabs() {
     telemetryChartsTabWidget = new TelemetryChartsTabWidget(telemetryChartsTabPresenter, sessionAdapter, this);
     controlChartsTabWidget = new ControlChartsTabWidget(controlChartsTabPresenter, sessionAdapter, this);
     testProtocolTabWidget = new TestProtocolTabWidget(testProtocolTabPresenter, sessionAdapter, this);
 
     ui->tabWidget->clear();
-    ui->tabWidget->addTab(telemetryChartsTabWidget, QStringLiteral("Вкладка 1"));
-    ui->tabWidget->addTab(controlChartsTabWidget, QStringLiteral("Вкладка 2"));
-    ui->tabWidget->addTab(testProtocolTabWidget, QStringLiteral("Вкладка 3"));
+    ui->tabWidget->addTab(telemetryChartsTabWidget, QStringLiteral("Телеметрия"));
+    ui->tabWidget->addTab(controlChartsTabWidget, QStringLiteral("Управляющие воздействия"));
+    ui->tabWidget->addTab(testProtocolTabWidget, QStringLiteral("Протокол"));
 }
 
 void MainWindow::setupStandControlPanel() {
-    ui->comboBoxStandControlMode->addItem(QStringLiteral("Ручной"), static_cast<int>(domain::StandControlMode::Manual));
-    ui->comboBoxStandControlMode->addItem(QStringLiteral("Гибридный"),
-                                          static_cast<int>(domain::StandControlMode::Hybrid));
-    ui->comboBoxStandControlMode->addItem(QStringLiteral("Заготовленный"),
-                                          static_cast<int>(domain::StandControlMode::PresetScenario));
-
     ui->doubleSpinBoxStandBeaufort->setRange(domain::minOperationalBeaufort, domain::maxOperationalBeaufort);
     ui->doubleSpinBoxStandAngleOfAttack->setRange(domain::minAngleOfAttack, domain::maxAngleOfAttack);
 
@@ -173,6 +182,12 @@ void MainWindow::setupStandControlPanel() {
 }
 
 void MainWindow::connectShellSignals() {
+    connectTestControlSignals();
+    connectConfigTemplateSignals();
+    connectStandControlSignals();
+}
+
+void MainWindow::connectTestControlSignals() {
     QObject::connect(ui->buttonStart, &QPushButton::clicked, this, [this]() { shellPresenter.onStartPressed(); });
 
     QObject::connect(ui->buttonPause, &QPushButton::clicked, this, [this]() { shellPresenter.onPauseResumePressed(); });
@@ -183,8 +198,10 @@ void MainWindow::connectShellSignals() {
                      [this](const QString &expression) { shellPresenter.onFunctionEdited(expression.toStdString()); });
     QObject::connect(controlChartsTabWidget, &ControlChartsTabWidget::formulaTemplateSelected, this,
                      [this](const QString &key) { shellPresenter.onFormulaTemplateSelected(key.toStdString()); });
-    QObject::connect(controlChartsTabWidget, &ControlChartsTabWidget::calculateRequested, this,
-                     [this]() { shellPresenter.onCalculatePressed(); });
+    QObject::connect(controlChartsTabWidget, &ControlChartsTabWidget::calculateRequested, this, [this]() {
+        shellPresenter.onCalculatePressed();
+        controlChartsTabPresenter.onCalculationResultChanged();
+    });
     QObject::connect(controlChartsTabWidget, &ControlChartsTabWidget::lineColorRequested, this, [this]() {
         const QColor color = QColorDialog::getColor(Qt::red, this);
         if (!color.isValid()) {
@@ -217,39 +234,68 @@ void MainWindow::connectShellSignals() {
 
         shellPresenter.onTestTimeSourceChanged(source);
     });
+}
 
+void MainWindow::connectConfigTemplateSignals() {
     QObject::connect(ui->buttonConnectTelemetry, &QPushButton::clicked, this, [this]() {
-        shellPresenter.onConnectTelemetryPressed(
-            "/Users/tarkwight/Documents/Development/app-architecture-patterns/MVP/QtWidget/CounterDemo/telemetry.toml");
+        if (!shellPresenter.telemetryConfigRequiredForConnection()) {
+            shellPresenter.onConnectTelemetryPressed({});
+            return;
+        }
+
+        const auto telemetryConfig = configTemplateService.resolvePath(configTemplates::ConfigTemplateType::Telemetry,
+                                                                       selectedTelemetryConfigPath);
+
+        if (!telemetryConfig.exists()) {
+            if (telemetryConfig.status == configTemplates::ConfigTemplateResolutionStatus::MissingOperatorSelected) {
+                appendLog("selected telemetry.toml is not available: " + telemetryConfig.path.string());
+                showOperatorWarning("telemetry.toml недоступен",
+                                    "Выбранный файл telemetry.toml недоступен. Выберите существующий файл.");
+                return;
+            }
+
+            appendLog("telemetry.toml not found: " + telemetryConfig.path.string());
+            showOperatorWarning("telemetry.toml не найден",
+                                "Файл telemetry.toml не найден рядом с приложением. Создайте шаблон и заполните "
+                                "параметры подключения стенда или выберите файл вручную.");
+            return;
+        }
+
+        shellPresenter.onConnectTelemetryPressed(telemetryConfig.path.string());
     });
 
-    QObject::connect(ui->comboBoxStandControlMode, &QComboBox::currentIndexChanged, this, [this]() {
-        const auto mode = static_cast<domain::StandControlMode>(ui->comboBoxStandControlMode->currentData().toInt());
-        setStandControlModeUseCase.execute(mode);
-        updateManualStandControlsEnabled();
-        scheduleControlPlotRebuild();
-    });
+    QObject::connect(ui->buttonCreateTelemetryTemplate, &QPushButton::clicked, this,
+                     [this]() { createTelemetryTemplate(); });
 
+    QObject::connect(ui->buttonSelectTelemetryConfig, &QPushButton::clicked, this,
+                     [this]() { selectTelemetryConfig(); });
+}
+
+void MainWindow::connectStandControlSignals() {
     QObject::connect(ui->comboBoxTelemetrySource, &QComboBox::currentIndexChanged, this, [this](int index) {
         const QSignalBlocker visibleBlocker{ui->checkBoxTelemetryCurveVisible};
 
         const auto &stateData = sessionAdapter.getState().get();
-        ui->checkBoxTelemetryCurveVisible->setChecked(index == 0 ? stateData.telemetryAxisYVisible
-                                                                 : stateData.telemetryAxisZVisible);
+        ui->checkBoxTelemetryCurveVisible->setChecked(index == 0 ? stateData.telemetry.telemetryAxisYVisible
+                                                                 : stateData.telemetry.telemetryAxisZVisible);
     });
 
     QObject::connect(ui->checkBoxTelemetryCurveVisible, &QCheckBox::toggled, this, [this](bool checked) {
         telemetryChartsTabPresenter.onTelemetryAxisVisibilityChanged(selectedTelemetryAxisId(), checked);
     });
 
-    QObject::connect(ui->buttonApplyStandImpact, &QPushButton::clicked, this, [this]() { applyStandInputs(); });
+    QObject::connect(ui->buttonApplyStandBeaufort, &QPushButton::clicked, this, [this]() { applyBeaufortImpact(); });
+    QObject::connect(ui->buttonApplyStandDirection, &QPushButton::clicked, this,
+                     [this]() { applyWindDirectionImpact(); });
+    QObject::connect(ui->buttonApplyStandAngleOfAttack, &QPushButton::clicked, this,
+                     [this]() { applyAngleOfAttackImpact(); });
     QObject::connect(ui->buttonTelemetryLineColor, &QPushButton::clicked, this,
                      [this]() { selectTelemetryAxisColor(); });
 }
 
 void MainWindow::connectSessionSignals() {
     observedTestProtocolModeKey =
-        std::string{domain::testModeKey(sessionAdapter.getState().get().testProtocol.testMode)};
+        std::string{domain::testModeKey(sessionAdapter.getState().get().protocol.testProtocol.testMode)};
 
     QObject::connect(
         &sessionAdapter, &infrastructure::SessionStateQtAdapter::testTimeModelChanged, this,
@@ -266,9 +312,7 @@ void MainWindow::connectSessionSignals() {
                          }
 
                          observedTestProtocolModeKey = modeKey;
-                         updateStandControlModeSelection();
                          updateManualStandControlsEnabled();
-                         scheduleControlPlotRebuild();
                      });
 }
 
@@ -299,41 +343,67 @@ void MainWindow::setTestTimeSourceEnabled(bool enabled) {
     ui->comboBoxTestTimeSource->setEnabled(enabled);
 }
 
-void MainWindow::applyStandInputs() {
-    const auto &stateData = sessionAdapter.getState().get();
-    const domain::StandScenario scenario{stateData.standControlMode};
-    if (!scenario.allowsManualImpact()) {
-        const std::string message = "Manual stand control is disabled for this test mode";
-        appendLog(message);
-        showOperatorWarning("Ручное управление заблокировано", message);
+void MainWindow::applyBeaufortImpact() {
+    const auto previousTarget = sessionAdapter.getState().get().control.targetStandImpact;
+    if (!applyBeaufortImpactUseCase.execute(domain::Beaufort::from(ui->doubleSpinBoxStandBeaufort->value()))) {
+        handleManualImpactRejected();
         return;
     }
 
-    domain::WindImpact target =
-        domain::makeWindImpact(ui->doubleSpinBoxStandBeaufort->value(), selectedStandDirectionDegrees(),
-                               ui->doubleSpinBoxStandAngleOfAttack->value());
+    handleManualImpactAccepted(previousTarget, "beaufort");
+}
 
-    setStandImpactUseCase.setTarget(target);
+void MainWindow::applyWindDirectionImpact() {
+    const auto previousTarget = sessionAdapter.getState().get().control.targetStandImpact;
+    if (!applyWindDirectionUseCase.execute(domain::WindDirection::from(selectedStandDirectionDegrees()))) {
+        handleManualImpactRejected();
+        return;
+    }
+
+    handleManualImpactAccepted(previousTarget, "direction");
+}
+
+void MainWindow::applyAngleOfAttackImpact() {
+    const auto previousTarget = sessionAdapter.getState().get().control.targetStandImpact;
+    if (!applyAngleOfAttackUseCase.execute(domain::AngleOfAttack::from(ui->doubleSpinBoxStandAngleOfAttack->value()))) {
+        handleManualImpactRejected();
+        return;
+    }
+
+    handleManualImpactAccepted(previousTarget, "angle of attack");
+}
+
+void MainWindow::handleManualImpactAccepted(const domain::WindImpact &previousTarget,
+                                            const std::string &changedParameter) {
+    const auto &stateData = sessionAdapter.getState().get();
+    const domain::StandScenario scenario{stateData.control.standControlMode};
     standImpactTransitionTimer->start();
 
-    appendLog("Manual stand impact target accepted: " + formatImpact(stateData.appliedStandImpact) + " -> " +
-              formatImpact(target));
+    appendLog("Manual stand " + changedParameter + " target accepted: target " + formatImpact(previousTarget) + " -> " +
+              formatImpact(stateData.control.targetStandImpact) + ", applied " +
+              formatImpact(stateData.control.appliedStandImpact));
 
     if (scenario.manualImpactPolicy() == domain::ManualImpactPolicy::ReturnToScenarioAfterManualImpact) {
         appendLog("Hybrid stand mode accepted manual impact as a temporary override");
     }
 }
 
+void MainWindow::handleManualImpactRejected() {
+    const std::string message = "Manual stand control is disabled for this test mode";
+    appendLog(message);
+    showOperatorWarning("Ручное управление заблокировано", message);
+}
+
 void MainWindow::advanceStandImpactTransition() {
     const auto &stateData = sessionAdapter.getState().get();
-    const domain::StandScenario scenario{stateData.standControlMode};
+    const domain::StandScenario scenario{stateData.control.standControlMode};
     if (!scenario.allowsManualImpact()) {
         standImpactTransitionTimer->stop();
         return;
     }
 
-    const auto transition =
-        domain::StandImpactTransition{}.advance(stateData.appliedStandImpact, stateData.targetStandImpact);
+    const auto transition = domain::StandImpactTransition{}.advance(stateData.control.appliedStandImpact,
+                                                                    stateData.control.targetStandImpact);
     const auto &next = transition.impact;
 
     setStandImpactUseCase.setApplied(next);
@@ -346,10 +416,6 @@ void MainWindow::advanceStandImpactTransition() {
     if (transition.targetReached) {
         standImpactTransitionTimer->stop();
         appendLog("Manual stand impact target reached: " + formatImpact(next));
-
-        if (scenario.manualImpactPolicy() == domain::ManualImpactPolicy::ReturnToScenarioAfterManualImpact) {
-            appendLog("Hybrid scenario return is pending scenario engine implementation");
-        }
     }
 }
 
@@ -363,18 +429,6 @@ void MainWindow::selectTelemetryAxisColor() {
                                                              MainWindowUiAdapter::toDomainColor(color));
 }
 
-void MainWindow::scheduleControlPlotRebuild() {
-    if (controlPlotRebuildScheduled) {
-        return;
-    }
-
-    controlPlotRebuildScheduled = true;
-    QTimer::singleShot(0, this, [this]() {
-        controlPlotRebuildScheduled = false;
-        controlChartsTabPresenter.onRebuildPlotPressed();
-    });
-}
-
 double MainWindow::selectedStandDirectionDegrees() const {
     return ui->comboBoxStandDirection->currentData().toDouble();
 }
@@ -383,25 +437,50 @@ void MainWindow::updateControlFormulaTemplateSelection(const std::string &expres
     controlChartsTabWidget->setFunctionExpression(expression);
 }
 
-void MainWindow::updateStandControlModeSelection() {
-    const auto mode = sessionAdapter.getState().get().standControlMode;
-    const int index = ui->comboBoxStandControlMode->findData(static_cast<int>(mode));
-    if (index < 0 || ui->comboBoxStandControlMode->currentIndex() == index) {
+void MainWindow::createTelemetryTemplate() {
+    const auto defaultPath = configTemplateService.pathFor(configTemplates::ConfigTemplateType::Telemetry);
+    const QString filePath = QFileDialog::getSaveFileName(this, QStringLiteral("Создать telemetry.toml"),
+                                                          QString::fromStdString(defaultPath.string()),
+                                                          QStringLiteral("TOML Files (*.toml);;All Files (*)"));
+
+    if (filePath.isEmpty()) {
         return;
     }
 
-    const QSignalBlocker blocker{ui->comboBoxStandControlMode};
-    ui->comboBoxStandControlMode->setCurrentIndex(index);
+    try {
+        configTemplateService.createTemplate(configTemplates::ConfigTemplateType::Telemetry,
+                                             std::filesystem::path{filePath.toStdString()});
+        appendLog("telemetry.toml template created or already exists: " + filePath.toStdString());
+    } catch (const std::exception &e) {
+        appendLog(std::string{"telemetry.toml template creation failed: "} + e.what());
+        showOperatorWarning("Ошибка создания шаблона", e.what());
+    }
+}
+
+void MainWindow::selectTelemetryConfig() {
+    const auto defaultPath = configTemplateService.pathFor(configTemplates::ConfigTemplateType::Telemetry);
+    const QString filePath = QFileDialog::getOpenFileName(this, QStringLiteral("Выбрать telemetry.toml"),
+                                                          QString::fromStdString(defaultPath.string()),
+                                                          QStringLiteral("TOML Files (*.toml);;All Files (*)"));
+
+    if (filePath.isEmpty()) {
+        return;
+    }
+
+    selectedTelemetryConfigPath = filePath.toStdString();
+    appendLog("telemetry.toml selected: " + selectedTelemetryConfigPath);
 }
 
 void MainWindow::updateManualStandControlsEnabled() {
-    const auto mode = static_cast<domain::StandControlMode>(ui->comboBoxStandControlMode->currentData().toInt());
+    const auto mode = sessionAdapter.getState().control().standControlMode;
     const bool manualEnabled = !domain::StandScenario{mode}.locksManualControls();
 
     ui->doubleSpinBoxStandBeaufort->setEnabled(manualEnabled);
     ui->doubleSpinBoxStandAngleOfAttack->setEnabled(manualEnabled);
     ui->comboBoxStandDirection->setEnabled(manualEnabled);
-    ui->buttonApplyStandImpact->setEnabled(manualEnabled);
+    ui->buttonApplyStandBeaufort->setEnabled(manualEnabled);
+    ui->buttonApplyStandDirection->setEnabled(manualEnabled);
+    ui->buttonApplyStandAngleOfAttack->setEnabled(manualEnabled);
 }
 
 domain::AxisId MainWindow::selectedTelemetryAxisId() const {

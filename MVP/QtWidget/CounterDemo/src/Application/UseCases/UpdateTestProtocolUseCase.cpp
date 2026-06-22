@@ -1,29 +1,8 @@
 #include "UpdateTestProtocolUseCase.hpp"
 
-#include "../../Domain/StandControlMode.hpp"
-#include "../../Domain/TestTimeDirection.hpp"
-#include "../../Domain/TestTimeSource.hpp"
+#include "../../Domain/TestModeStatePolicy.hpp"
 
 namespace application::useCases {
-
-namespace {
-
-void applyTestModeState(application::session::SessionState &state, domain::TestMode mode) {
-    const auto standMode = domain::standControlModeForTestMode(mode);
-
-    switch (mode) {
-    case domain::TestMode::Manual:
-        state.setTestModeState(mode, standMode, domain::TestTimeSource::FreeRun, domain::TestTimeDirection::CountUp);
-        break;
-    case domain::TestMode::Hybrid:
-    case domain::TestMode::Automatic:
-        state.setTestModeState(mode, standMode, domain::TestTimeSource::AutoCalculated,
-                               domain::TestTimeDirection::CountDown);
-        break;
-    }
-}
-
-} // namespace
 
 UpdateTestProtocolUseCase::UpdateTestProtocolUseCase(application::session::SessionState &state) : state(state) {
 }
@@ -38,8 +17,10 @@ void UpdateTestProtocolUseCase::updateLine(int index, std::string line) {
 
 void UpdateTestProtocolUseCase::updateMode(std::string mode) {
     const auto testMode = domain::testModeFromKey(mode);
+    const auto modeState = domain::TestModeStatePolicy::fromTestMode(testMode);
 
-    applyTestModeState(state, testMode);
+    state.setTestModeState(modeState.testMode, modeState.standControlMode, modeState.timeSource,
+                           modeState.timeDirection);
 }
 
 void UpdateTestProtocolUseCase::updateProgram(std::string program) {

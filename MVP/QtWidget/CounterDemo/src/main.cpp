@@ -14,9 +14,12 @@ int main(int argc, char *argv[]) {
                                      .telemetryChartsTabPresenter = context.telemetryChartsTabPresenter,
                                      .controlChartsTabPresenter = context.controlChartsTabPresenter,
                                      .testProtocolTabPresenter = context.testProtocolTabPresenter,
-                                     .setStandControlModeUseCase = context.setStandControlModeUseCase,
                                      .setStandImpactUseCase = context.setStandImpactUseCase,
-                                     .sessionAdapter = context.sessionAdapter}};
+                                     .applyBeaufortImpactUseCase = context.applyBeaufortImpactUseCase,
+                                     .applyWindDirectionUseCase = context.applyWindDirectionUseCase,
+                                     .applyAngleOfAttackUseCase = context.applyAngleOfAttackUseCase,
+                                     .sessionAdapter = context.sessionAdapter,
+                                     .configTemplateService = context.configTemplateService}};
 
     window.show();
 

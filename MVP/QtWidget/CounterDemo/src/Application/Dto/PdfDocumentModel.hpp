@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "../../Domain/Plot.hpp"
+#include "../../Application/Dto/PlotModel.hpp"
 #include "../../Domain/TestProtocol.hpp"
 
 namespace application::dto {
@@ -36,10 +36,10 @@ struct PdfDocumentModel final {
     std::vector<PdfReportTableRow> tableRows{};
 
     std::array<std::string, 4> firstStanza{};
-    domain::PlotModel telemetryPlot{};
+    application::dto::PlotModel telemetryPlot{};
     std::string telemetryPlotCaption{"Рисунок 2 - Изменение положения стенда во время теста."};
 
-    domain::PlotModel controlPlot{};
+    application::dto::PlotModel controlPlot{};
     std::string controlPlotCaption{"Рисунок 1 - Изменение силы ветра во время теста."};
     std::array<std::string, 4> secondStanza{};
 };

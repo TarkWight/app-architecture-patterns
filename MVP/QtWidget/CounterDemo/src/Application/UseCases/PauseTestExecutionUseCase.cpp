@@ -1,17 +1,28 @@
 #include "PauseTestExecutionUseCase.hpp"
 
+#include "../../Domain/StandConnectionTransitions.hpp"
 #include "../../Domain/TestExecutionStatus.hpp"
 #include "../../Domain/TestExecutionTransitions.hpp"
 
 namespace application::useCases {
 
 PauseTestExecutionUseCase::PauseTestExecutionUseCase(
-    application::session::SessionState &state, application::ports::ITestExecutionScheduler &testExecutionScheduler)
-    : state(state), testExecutionScheduler(testExecutionScheduler) {
+    application::session::SessionState &state, application::ports::ITestExecutionScheduler &testExecutionScheduler,
+    application::ports::ITelemetryClient &telemetryClient)
+    : state(state), testExecutionScheduler(testExecutionScheduler), telemetryClient(telemetryClient) {
+}
+
+PauseTestExecutionUseCase::PauseTestExecutionUseCase(
+    application::session::SessionState &state, application::ports::ITestExecutionScheduler &testExecutionScheduler,
+    application::ports::ITelemetryClient &telemetryClient,
+    application::services::TelemetrySessionClock &telemetrySessionClock)
+    : state(state), testExecutionScheduler(testExecutionScheduler), telemetryClient(telemetryClient),
+      telemetrySessionClock(&telemetrySessionClock) {
 }
 
 void PauseTestExecutionUseCase::execute() {
-    if (!domain::canPause(state.get().testExecutionStatus)) {
+    const auto transition = domain::transitionAfterPauseRequested(state.get().execution.testExecutionStatus);
+    if (!transition.has_value()) {
         return;
     }
 
@@ -20,7 +31,17 @@ void PauseTestExecutionUseCase::execute() {
     }
 
     testExecutionScheduler.pause();
-    state.setTestExecutionStatus(domain::TestExecutionStatus::Paused);
+    if (telemetrySessionClock != nullptr) {
+        telemetrySessionClock->pause();
+    }
+
+    const auto pollingTransition = domain::transitionAfterPollingStopped(state.connection().standConnectionStatus);
+    if (pollingTransition.has_value()) {
+        telemetryClient.stopPolling();
+        state.setStandConnectionStatus(*pollingTransition);
+    }
+
+    state.setTestExecutionStatus(*transition);
 }
 
 } // namespace application::useCases

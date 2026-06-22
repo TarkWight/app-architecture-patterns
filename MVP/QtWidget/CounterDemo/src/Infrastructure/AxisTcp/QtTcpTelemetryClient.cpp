@@ -1,5 +1,7 @@
 #include "QtTcpTelemetryClient.hpp"
 
+#include "StandTraceFormatter.hpp"
+
 #include <QDateTime>
 #include <QThread>
 
@@ -35,6 +37,10 @@ void QtTcpTelemetryClient::setErrorCallback(ErrorCallback callback) {
     errorCallback = std::move(callback);
 }
 
+void QtTcpTelemetryClient::setTraceCallback(TraceCallback callback) {
+    traceCallback = std::move(callback);
+}
+
 void QtTcpTelemetryClient::configureAxis(domain::AxisId axisId, std::string host, int port) {
     assertCurrentThreadOwns(*this);
 
@@ -45,6 +51,8 @@ void QtTcpTelemetryClient::configureAxis(domain::AxisId axisId, std::string host
     connection.configured = true;
 
     emitStatus(axisId, domain::TelemetryConnectionStatus::Disconnected, "Axis configured");
+    emitTrace(formatStandLifecycleTrace("CONFIG", axisId,
+                                        connection.host.toStdString() + ":" + std::to_string(connection.port)));
 }
 
 void QtTcpTelemetryClient::connectAxis(domain::AxisId axisId) {
@@ -73,6 +81,8 @@ void QtTcpTelemetryClient::connectAxis(domain::AxisId axisId) {
     connection->lastReconnectAttemptMs = nowMs();
 
     emitStatus(axisId, domain::TelemetryConnectionStatus::Connecting, "Connecting");
+    emitTrace(formatStandLifecycleTrace("CONNECT", axisId,
+                                        connection->host.toStdString() + ":" + std::to_string(connection->port)));
 
     connection->socket->connectToHost(connection->host, static_cast<quint16>(connection->port));
 }
@@ -90,6 +100,7 @@ void QtTcpTelemetryClient::disconnectAxis(domain::AxisId axisId) {
     connection->requestPending = false;
 
     emitStatus(axisId, domain::TelemetryConnectionStatus::Disconnected, "Disconnected");
+    emitTrace(formatStandLifecycleTrace("DISCONNECT", axisId, "requested"));
 }
 
 void QtTcpTelemetryClient::connectAll() {
@@ -119,6 +130,7 @@ void QtTcpTelemetryClient::disconnectAll() {
         connection.requestPending = false;
 
         emitStatus(axisId, domain::TelemetryConnectionStatus::Disconnected, "Disconnected");
+        emitTrace(formatStandLifecycleTrace("DISCONNECT", axisId, "requested"));
     }
 }
 
@@ -132,6 +144,7 @@ void QtTcpTelemetryClient::startPolling(int intervalMs) {
     for (const auto &[axisId, connection] : axes) {
         if (connection.socket != nullptr && connection.socket->state() == QAbstractSocket::ConnectedState) {
             emitStatus(axisId, domain::TelemetryConnectionStatus::Polling, "Polling started");
+            emitTrace(formatStandLifecycleTrace("POLLING", axisId, "started"));
         }
     }
 }
@@ -146,6 +159,7 @@ void QtTcpTelemetryClient::stopPolling() {
 
         if (connection.socket != nullptr && connection.socket->state() == QAbstractSocket::ConnectedState) {
             emitStatus(axisId, domain::TelemetryConnectionStatus::Connected, "Polling stopped");
+            emitTrace(formatStandLifecycleTrace("POLLING", axisId, "stopped"));
         }
     }
 }
@@ -197,6 +211,7 @@ void QtTcpTelemetryClient::pollOnce(domain::AxisId axisId) {
     connection->lastRequestMs = nowMs();
 
     emitStatus(axisId, domain::TelemetryConnectionStatus::Polling, "Command sent");
+    emitTrace(formatStandTxTrace(axisId, connection->command));
 }
 
 QtTcpTelemetryClient::AxisConnection *QtTcpTelemetryClient::findAxis(domain::AxisId axisId) {
@@ -251,6 +266,7 @@ void QtTcpTelemetryClient::handleConnected(domain::AxisId axisId) {
     connection->requestPending = false;
 
     emitStatus(axisId, domain::TelemetryConnectionStatus::Connected, "Connected");
+    emitTrace(formatStandLifecycleTrace("CONNECTED", axisId));
 }
 
 void QtTcpTelemetryClient::handleDisconnected(domain::AxisId axisId) {
@@ -263,6 +279,7 @@ void QtTcpTelemetryClient::handleDisconnected(domain::AxisId axisId) {
     connection->requestPending = false;
 
     emitStatus(axisId, domain::TelemetryConnectionStatus::Disconnected, "Disconnected");
+    emitTrace(formatStandLifecycleTrace("DISCONNECTED", axisId));
 }
 
 void QtTcpTelemetryClient::handleSocketError(domain::AxisId axisId, QAbstractSocket::SocketError /*error*/) {
@@ -276,6 +293,7 @@ void QtTcpTelemetryClient::handleSocketError(domain::AxisId axisId, QAbstractSoc
 
     emitStatus(axisId, domain::TelemetryConnectionStatus::Error, connection->socket->errorString().toStdString());
     emitError(axisId, connection->socket->errorString().toStdString());
+    emitTrace(formatStandLifecycleTrace("ERROR", axisId, connection->socket->errorString().toStdString()));
 }
 
 void QtTcpTelemetryClient::handleReadyRead(domain::AxisId axisId) {
@@ -307,6 +325,7 @@ void QtTcpTelemetryClient::processReadBuffer(domain::AxisId axisId, AxisConnecti
         }
 
         connection.requestPending = false;
+        emitTrace(formatStandRxTrace(*sample));
 
         if (telemetryCallback) {
             telemetryCallback(*sample);
@@ -330,6 +349,7 @@ void QtTcpTelemetryClient::handlePendingTimeouts() {
         connection.readBuffer.clear();
 
         emitError(axisId, "Telemetry response timeout");
+        emitTrace(formatStandLifecycleTrace("ERROR", axisId, "Telemetry response timeout"));
 
         if (connection.socket != nullptr) {
             connection.socket->abort();
@@ -373,6 +393,12 @@ void QtTcpTelemetryClient::emitStatus(domain::AxisId axisId, domain::TelemetryCo
 void QtTcpTelemetryClient::emitError(domain::AxisId axisId, const std::string &message) {
     if (errorCallback) {
         errorCallback(axisId, message);
+    }
+}
+
+void QtTcpTelemetryClient::emitTrace(const std::string &message) {
+    if (traceCallback) {
+        traceCallback(message);
     }
 }
 

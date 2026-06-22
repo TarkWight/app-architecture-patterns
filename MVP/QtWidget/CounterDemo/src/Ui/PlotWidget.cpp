@@ -21,7 +21,7 @@ PlotWidget::PlotWidget(QWidget *parent) : QWidget(parent) {
     QObject::connect(&animationTimer, &QTimer::timeout, this, &PlotWidget::advanceAnimationFrame);
 }
 
-void PlotWidget::setPlot(domain::PlotModel plot) {
+void PlotWidget::setPlot(application::dto::PlotModel plot) {
     targetPlot = std::move(plot);
 
     if (!animationTimer.isActive() && this->plot.title.empty() && this->plot.series.points.empty() &&
@@ -35,7 +35,7 @@ void PlotWidget::setPlot(domain::PlotModel plot) {
     update();
 }
 
-const domain::PlotModel &PlotWidget::getPlot() const {
+const application::dto::PlotModel &PlotWidget::getPlot() const {
     return plot;
 }
 
@@ -60,8 +60,9 @@ void PlotWidget::advanceAnimationFrame() {
     update();
 }
 
-domain::PlotModel PlotWidget::interpolatePlot(const domain::PlotModel &current, const domain::PlotModel &target) {
-    domain::PlotModel result = target;
+application::dto::PlotModel PlotWidget::interpolatePlot(const application::dto::PlotModel &current,
+                                                        const application::dto::PlotModel &target) {
+    application::dto::PlotModel result = target;
     result.x = interpolateAxis(current.x, target.x);
     result.y = interpolateAxis(current.y, target.y);
     result.marker.x = interpolateValue(current.marker.x, target.marker.x);
@@ -73,7 +74,7 @@ domain::PlotModel PlotWidget::interpolatePlot(const domain::PlotModel &current, 
         result.seriesList.reserve(target.seriesList.size());
 
         for (std::size_t index = 0; index < target.seriesList.size(); ++index) {
-            domain::NamedSeries series = target.seriesList[index];
+            application::dto::NamedSeries series = target.seriesList[index];
             series.color = interpolateColor(current.seriesList[index].color, target.seriesList[index].color);
             series.series = interpolateSeries(current.seriesList[index].series, target.seriesList[index].series);
             result.seriesList.push_back(std::move(series));
@@ -83,37 +84,42 @@ domain::PlotModel PlotWidget::interpolatePlot(const domain::PlotModel &current, 
     return result;
 }
 
-domain::AxisSpec PlotWidget::interpolateAxis(domain::AxisSpec current, domain::AxisSpec target) {
+application::dto::AxisSpec PlotWidget::interpolateAxis(application::dto::AxisSpec current,
+                                                       application::dto::AxisSpec target) {
     target.min = interpolateValue(current.min, target.min);
     target.max = interpolateValue(current.max, target.max);
     target.step = interpolateValue(current.step, target.step);
     return target;
 }
 
-domain::Series PlotWidget::interpolateSeries(const domain::Series &current, const domain::Series &target) {
+application::dto::Series PlotWidget::interpolateSeries(const application::dto::Series &current,
+                                                       const application::dto::Series &target) {
     if (current.points.size() != target.points.size()) {
         return target;
     }
 
-    domain::Series result{};
+    application::dto::Series result = target;
+    result.points.clear();
     result.points.reserve(target.points.size());
 
     for (std::size_t index = 0; index < target.points.size(); ++index) {
-        result.points.push_back(domain::Point{.x = interpolateValue(current.points[index].x, target.points[index].x),
-                                              .y = interpolateValue(current.points[index].y, target.points[index].y)});
+        result.points.push_back(
+            application::dto::Point{.x = interpolateValue(current.points[index].x, target.points[index].x),
+                                    .y = interpolateValue(current.points[index].y, target.points[index].y)});
     }
 
     return result;
 }
 
-domain::RgbColor PlotWidget::interpolateColor(domain::RgbColor current, domain::RgbColor target) {
+application::dto::RgbColor PlotWidget::interpolateColor(application::dto::RgbColor current,
+                                                        application::dto::RgbColor target) {
     auto blend = [](std::uint8_t from, std::uint8_t to) {
         return static_cast<std::uint8_t>(std::clamp(
             static_cast<int>(std::lround(interpolateValue(static_cast<double>(from), static_cast<double>(to)))), 0,
             255));
     };
 
-    return domain::RgbColor{
+    return application::dto::RgbColor{
         .r = blend(current.r, target.r), .g = blend(current.g, target.g), .b = blend(current.b, target.b)};
 }
 
@@ -122,7 +128,7 @@ double PlotWidget::interpolateValue(double current, double target) {
     return current + ((target - current) * factor);
 }
 
-bool PlotWidget::isClose(const domain::PlotModel &current, const domain::PlotModel &target) {
+bool PlotWidget::isClose(const application::dto::PlotModel &current, const application::dto::PlotModel &target) {
     constexpr double epsilon = 0.01;
     if (!isClose(current.x, target.x) || !isClose(current.y, target.y) ||
         std::abs(current.marker.x - target.marker.x) >= epsilon || !isClose(current.series, target.series) ||
@@ -139,13 +145,13 @@ bool PlotWidget::isClose(const domain::PlotModel &current, const domain::PlotMod
     return true;
 }
 
-bool PlotWidget::isClose(const domain::AxisSpec &current, const domain::AxisSpec &target) {
+bool PlotWidget::isClose(const application::dto::AxisSpec &current, const application::dto::AxisSpec &target) {
     constexpr double epsilon = 0.01;
     return std::abs(current.min - target.min) < epsilon && std::abs(current.max - target.max) < epsilon &&
            std::abs(current.step - target.step) < epsilon;
 }
 
-bool PlotWidget::isClose(const domain::Series &current, const domain::Series &target) {
+bool PlotWidget::isClose(const application::dto::Series &current, const application::dto::Series &target) {
     constexpr double epsilon = 0.01;
     if (current.points.size() != target.points.size()) {
         return false;
@@ -161,7 +167,7 @@ bool PlotWidget::isClose(const domain::Series &current, const domain::Series &ta
     return true;
 }
 
-bool PlotWidget::isClose(const domain::NamedSeries &current, const domain::NamedSeries &target) {
+bool PlotWidget::isClose(const application::dto::NamedSeries &current, const application::dto::NamedSeries &target) {
     return isClose(current.series, target.series);
 }
 

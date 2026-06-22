@@ -3,18 +3,22 @@
 
 #include "../Application/Session/SessionState.hpp"
 #include "../Application/UseCases/BuildControlPlotUseCase.hpp"
+#include "../Application/UseCases/CalculateAndBuildControlPlotUseCase.hpp"
 #include "../Application/UseCases/SetFunctionExpressionUseCase.hpp"
 #include "../Application/UseCases/SetLineColorUseCase.hpp"
+#include "../Application/UseCases/SetStandControlModeUseCase.hpp"
 #include "../Application/UseCases/StartTestExecutionUseCase.hpp"
 #include "../Application/UseCases/PauseTestExecutionUseCase.hpp"
 #include "../Application/UseCases/ResumeTestExecutionUseCase.hpp"
 #include "../Application/UseCases/StopTestExecutionUseCase.hpp"
-#include "../Domain/Plot.hpp"
+#include "../Application/Dto/PlotModel.hpp"
 #include "../Domain/TestExecutionStatus.hpp"
 #include "../Application/UseCases/SetTestTimeSourceUseCase.hpp"
 #include "../Application/UseCases/ConfigureTelemetryUseCase.hpp"
 #include "../Application/UseCases/ConnectStandUseCase.hpp"
 #include "../Application/UseCases/DisconnectStandUseCase.hpp"
+#include "../Application/UseCases/EstimateTestDurationUseCase.hpp"
+#include "../Application/Ports/ITelemetryClient.hpp"
 #include "../Domain/StandConnectionStatus.hpp"
 
 #include "IShellView.hpp"
@@ -32,10 +36,13 @@ class ShellPresenter final {
         application::useCases::SetTestTimeSourceUseCase &setTestTimeSourceUseCase;
         application::useCases::SetFunctionExpressionUseCase &setFunctionExpressionUseCase;
         application::useCases::SetLineColorUseCase &setLineColorUseCase;
-        application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
+        application::useCases::SetStandControlModeUseCase &setStandControlModeUseCase;
+        application::useCases::CalculateAndBuildControlPlotUseCase &calculateAndBuildControlPlotUseCase;
+        application::useCases::EstimateTestDurationUseCase &estimateTestDurationUseCase;
         application::useCases::ConfigureTelemetryUseCase &configureTelemetryUseCase;
         application::useCases::ConnectStandUseCase &connectStandUseCase;
         application::useCases::DisconnectStandUseCase &disconnectStandUseCase;
+        application::ports::ITelemetryClient &telemetryClient;
     };
 
     explicit ShellPresenter(Dependencies deps);
@@ -54,9 +61,11 @@ class ShellPresenter final {
 
     void onFunctionEdited(std::string expression);
     void onFormulaTemplateSelected(std::string key);
-    void onLineColorSelected(domain::RgbColor color);
+    void onLineColorSelected(application::dto::RgbColor color);
     void onTestTimeSourceChanged(domain::TestTimeSource source);
+    void onStandControlModeChanged(domain::StandControlMode mode);
     void onConnectTelemetryPressed(std::string configPath);
+    [[nodiscard]] bool telemetryConfigRequiredForConnection() const;
 
   private:
     application::session::SessionState &state;
@@ -66,11 +75,14 @@ class ShellPresenter final {
     application::useCases::StopTestExecutionUseCase &stopTestExecutionUseCase;
     application::useCases::SetFunctionExpressionUseCase &setFunctionExpressionUseCase;
     application::useCases::SetLineColorUseCase &setLineColorUseCase;
-    application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
+    application::useCases::CalculateAndBuildControlPlotUseCase &calculateAndBuildControlPlotUseCase;
+    application::useCases::EstimateTestDurationUseCase &estimateTestDurationUseCase;
     application::useCases::SetTestTimeSourceUseCase &setTestTimeSourceUseCase;
     application::useCases::ConfigureTelemetryUseCase &configureTelemetryUseCase;
     application::useCases::ConnectStandUseCase &connectStandUseCase;
     application::useCases::DisconnectStandUseCase &disconnectStandUseCase;
+    application::useCases::SetStandControlModeUseCase &setStandControlModeUseCase;
+    application::ports::ITelemetryClient &telemetryClient;
 
     IShellView *view{nullptr};
     domain::StandConnectionStatus lastStandConnectionStatus{domain::StandConnectionStatus::Disconnected};
@@ -86,6 +98,11 @@ class ShellPresenter final {
     void refreshStandConnectionButton();
     void refreshStandConnectionStatusText();
     void notifyStandConnectionStatusChanged(domain::StandConnectionStatus status);
+    [[nodiscard]] bool readinessAllowsStart();
+    [[nodiscard]] bool connectionAllowsStart();
+    [[nodiscard]] bool confirmDangerousReadinessStart(application::session::ReadinessStatus status);
+    [[nodiscard]] static bool readinessGateRequired(domain::TestMode mode);
+    [[nodiscard]] static bool readinessConfirmationRequired(application::session::ReadinessStatus status);
 };
 
 } // namespace presentation

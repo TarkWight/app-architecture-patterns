@@ -9,7 +9,6 @@
 
 #include <vector>
 
-class QComboBox;
 class QGridLayout;
 class QLineEdit;
 class QPushButton;
@@ -30,11 +29,8 @@ class TestProtocolTabWidget final : public QWidget, public presentation::testPro
                                    infrastructure::SessionStateQtAdapter &sessionAdapter, QWidget *parent = nullptr);
     ~TestProtocolTabWidget() override;
 
-    void setOperatorTestDurationMinutes(int minutes) override;
     void setTestProtocolTitle(const std::string &title) override;
     void setTestProtocolLine(int index, const std::string &line) override;
-    void setTestProtocolMode(const std::string &mode) override;
-    void setTestProtocolProgram(const std::string &program) override;
     void setTestProtocolDroneParameters(const std::vector<domain::TestProtocolParameter> &parameters) override;
     void showExportSuccess(const std::string &filePath) override;
     void appendLog(const std::string &text) override;
@@ -43,8 +39,6 @@ class TestProtocolTabWidget final : public QWidget, public presentation::testPro
     Ui::TestProtocolTabWidget *ui;
     presentation::testProtocolTab::TestProtocolTabPresenter &presenter;
     infrastructure::SessionStateQtAdapter &sessionAdapter;
-    QComboBox *testModeComboBox{nullptr};
-    QComboBox *testProgramComboBox{nullptr};
     QPushButton *loadPdfTomlButton{nullptr};
     QPushButton *savePdfTomlTemplateButton{nullptr};
     QGridLayout *droneParametersLayout{nullptr};
@@ -54,7 +48,6 @@ class TestProtocolTabWidget final : public QWidget, public presentation::testPro
     void connectSessionSignals();
     void setupScrollableContent();
     void setupReportFormLabels();
-    void setupTestSelectionControls();
     void setupDroneParametersEditor();
 };
 

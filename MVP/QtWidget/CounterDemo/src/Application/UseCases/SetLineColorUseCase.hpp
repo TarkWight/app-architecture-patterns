@@ -2,7 +2,7 @@
 #define SETLINECOLORUSECASE_HPP
 
 #include "../Session/SessionState.hpp"
-#include "../../Domain/Plot.hpp"
+#include "../../Application/Dto/PlotModel.hpp"
 
 namespace application::useCases {
 
@@ -10,7 +10,7 @@ class SetLineColorUseCase final {
   public:
     explicit SetLineColorUseCase(application::session::SessionState &state);
 
-    void execute(domain::RgbColor color);
+    void execute(application::dto::RgbColor color);
 
   private:
     application::session::SessionState &state;

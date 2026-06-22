@@ -6,7 +6,7 @@ SetOperatorTestDurationUseCase::SetOperatorTestDurationUseCase(application::sess
     : state(state) {
 }
 
-void SetOperatorTestDurationUseCase::execute(int minutes) {
+void SetOperatorTestDurationUseCase::execute(domain::DurationMinutes minutes) {
     state.setOperatorTestDurationMinutes(minutes);
 }
 

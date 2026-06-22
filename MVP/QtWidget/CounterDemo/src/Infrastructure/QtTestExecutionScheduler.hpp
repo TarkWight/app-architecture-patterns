@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QTimer>
+#include <cstdint>
 
 #include "../Application/Ports/ITestExecutionScheduler.hpp"
 
@@ -13,6 +14,7 @@ class QtTestExecutionScheduler final : public QObject, public application::ports
 
   public:
     explicit QtTestExecutionScheduler(QObject *parent = nullptr);
+    explicit QtTestExecutionScheduler(int intervalMs, QObject *parent = nullptr);
 
     void start(int initialElapsedSeconds, TickCallback onTick) override;
     void pause() override;
@@ -22,16 +24,17 @@ class QtTestExecutionScheduler final : public QObject, public application::ports
     bool isRunning() const override;
     bool isPaused() const override;
 
-  private slots:
-    void handleTimeout();
-
   private:
     enum class State { Idle, Running, Paused };
 
-    QTimer timer{};
+    int intervalMs{1000};
     TickCallback callback{};
     int elapsedSeconds{0};
+    std::uint64_t generation{0};
     State state{State::Idle};
+
+    void scheduleNextTick();
+    void handleTimeout(std::uint64_t expectedGeneration);
 };
 
 } // namespace infrastructure

@@ -49,7 +49,7 @@ struct DrawingContext {
 };
 
 struct PlotBlock {
-    const domain::PlotModel &plot;
+    const application::dto::PlotModel &plot;
     QString caption;
 };
 

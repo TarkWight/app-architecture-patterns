@@ -1,6 +1,6 @@
 #include "ConnectStandUseCase.hpp"
 
-#include "../../Domain/StandConnectionStatus.hpp"
+#include "../../Domain/StandConnectionTransitions.hpp"
 
 namespace application::useCases {
 
@@ -10,14 +10,12 @@ ConnectStandUseCase::ConnectStandUseCase(application::session::SessionState &sta
 }
 
 void ConnectStandUseCase::execute() {
-    const auto currentStatus = state.get().standConnectionStatus;
-    if (currentStatus == domain::StandConnectionStatus::Connecting ||
-        currentStatus == domain::StandConnectionStatus::Connected ||
-        currentStatus == domain::StandConnectionStatus::Polling) {
+    const auto transition = domain::transitionToConnecting(state.get().connection.standConnectionStatus);
+    if (!transition.has_value()) {
         return;
     }
 
-    state.setStandConnectionStatus(domain::StandConnectionStatus::Connecting);
+    state.setStandConnectionStatus(*transition);
 
     telemetryClient.connectAll();
 }

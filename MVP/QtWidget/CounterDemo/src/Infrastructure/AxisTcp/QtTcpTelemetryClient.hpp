@@ -26,6 +26,7 @@ class QtTcpTelemetryClient final : public QObject, public application::ports::IT
     void setTelemetryCallback(TelemetryCallback callback) override;
     void setStatusCallback(StatusCallback callback) override;
     void setErrorCallback(ErrorCallback callback) override;
+    void setTraceCallback(TraceCallback callback) override;
 
     void configureAxis(domain::AxisId axisId, std::string host, int port) override;
 
@@ -69,6 +70,7 @@ class QtTcpTelemetryClient final : public QObject, public application::ports::IT
     TelemetryCallback telemetryCallback{};
     StatusCallback statusCallback{};
     ErrorCallback errorCallback{};
+    TraceCallback traceCallback{};
 
     int pollingIntervalMs{1000};
 
@@ -94,6 +96,7 @@ class QtTcpTelemetryClient final : public QObject, public application::ports::IT
     void emitStatus(domain::AxisId axisId, domain::TelemetryConnectionStatus status, const std::string &message);
 
     void emitError(domain::AxisId axisId, const std::string &message);
+    void emitTrace(const std::string &message);
 
     static qint64 nowMs();
     static double nowSeconds();

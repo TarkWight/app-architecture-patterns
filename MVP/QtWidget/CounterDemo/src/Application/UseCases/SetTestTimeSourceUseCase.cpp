@@ -1,6 +1,6 @@
 #include "SetTestTimeSourceUseCase.hpp"
 
-#include "../../Domain/TestTimeDirection.hpp"
+#include "../../Domain/TestModeStatePolicy.hpp"
 
 namespace application::useCases {
 
@@ -9,17 +9,7 @@ SetTestTimeSourceUseCase::SetTestTimeSourceUseCase(application::session::Session
 
 void SetTestTimeSourceUseCase::execute(domain::TestTimeSource source) {
     state.setTestTimeSource(source);
-
-    switch (source) {
-    case domain::TestTimeSource::AutoCalculated:
-    case domain::TestTimeSource::OperatorDefined:
-        state.setTestTimeDirection(domain::TestTimeDirection::CountDown);
-        break;
-
-    case domain::TestTimeSource::FreeRun:
-        state.setTestTimeDirection(domain::TestTimeDirection::CountUp);
-        break;
-    }
+    state.setTestTimeDirection(domain::TestModeStatePolicy::directionForTimeSource(source));
 }
 
 } // namespace application::useCases

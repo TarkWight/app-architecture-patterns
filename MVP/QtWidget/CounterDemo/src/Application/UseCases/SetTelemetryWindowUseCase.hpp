@@ -3,13 +3,15 @@
 
 #include "../Session/SessionState.hpp"
 
+#include "../../Domain/TelemetryWindow.hpp"
+
 namespace application::useCases {
 
 class SetTelemetryWindowUseCase final {
   public:
     explicit SetTelemetryWindowUseCase(application::session::SessionState &state);
 
-    void execute(double windowEndSeconds);
+    void execute(domain::TelemetryWindowEnd windowEndSeconds);
     void followTail();
 
   private:

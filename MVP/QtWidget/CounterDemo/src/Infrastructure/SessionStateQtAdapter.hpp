@@ -46,7 +46,7 @@ class SessionStateQtAdapter final : public QObject {
     application::session::SessionState &state;
     application::session::Subscription subscription;
 
-    static QColor toQColor(domain::RgbColor color);
+    static QColor toQColor(application::dto::RgbColor color);
     static presentation::viewModels::TestTimeViewModel
     toTestTimeViewModel(const application::session::SessionStateData &data);
     void emitState(const application::session::SessionStateData &data);

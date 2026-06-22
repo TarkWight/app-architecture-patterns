@@ -5,7 +5,7 @@ namespace application::useCases {
 SetLineColorUseCase::SetLineColorUseCase(application::session::SessionState &state) : state(state) {
 }
 
-void SetLineColorUseCase::execute(domain::RgbColor color) {
+void SetLineColorUseCase::execute(application::dto::RgbColor color) {
     state.setLineColor(color);
 }
 

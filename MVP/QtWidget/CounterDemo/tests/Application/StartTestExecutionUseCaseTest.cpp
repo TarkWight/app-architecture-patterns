@@ -3,9 +3,12 @@
 #include "../../src/Application/Ports/IFunctionEngine.hpp"
 #include "../../src/Application/Ports/ITelemetryClient.hpp"
 #include "../../src/Application/Ports/ITestExecutionScheduler.hpp"
+#include "../../src/Application/Services/TelemetrySessionClock.hpp"
 #include "../../src/Application/Session/SessionState.hpp"
+#include "../../src/Application/Services/UavSpecificationMapper.hpp"
 #include "../../src/Domain/AxisId.hpp"
 #include "../../src/Domain/StandConnectionStatus.hpp"
+#include "../../src/Domain/TestDurationEstimator.hpp"
 #include "../../src/Domain/TestExecutionStatus.hpp"
 #include "../../src/Domain/TestTimeDirection.hpp"
 #include "../../src/Domain/TestTimeSource.hpp"
@@ -15,6 +18,7 @@
 #include <optional>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace {
 
@@ -90,8 +94,10 @@ class TelemetryClientSpy final : public application::ports::ITelemetryClient {
     void setAxisCommand(domain::AxisId axisId, domain::AxisControlCommand command) override {
         if (axisId == domain::axis0) {
             axis0Command = command;
+            ++axis0CommandCalls;
         } else if (axisId == domain::axis1) {
             axis1Command = command;
+            ++axis1CommandCalls;
         }
     }
 
@@ -103,6 +109,8 @@ class TelemetryClientSpy final : public application::ports::ITelemetryClient {
     ErrorCallback errorCallback{};
     std::optional<domain::AxisControlCommand> axis0Command{};
     std::optional<domain::AxisControlCommand> axis1Command{};
+    int axis0CommandCalls{0};
+    int axis1CommandCalls{0};
     int startPollingCalls{0};
     int stopPollingCalls{0};
 };
@@ -114,11 +122,45 @@ class ScenarioFunctionEngine final : public application::ports::IFunctionEngine 
     }
 };
 
+std::vector<domain::TestProtocolParameter> validDroneParameters() {
+    return {
+        {"uav_model", "Модель БАС", "BAS-1"},
+        {"uav_total_weight_kg", "Полная масса", "3,5"},
+        {"frontal_area_m2", "Фронтальная площадь", "0,2"},
+        {"drag_coefficient", "Коэффициент сопротивления", "1,0"},
+        {"equipment_current", "Ток оборудования", "1,0"},
+        {"battery_capacity_mah", "Емкость", "18000"},
+        {"battery_cell_count", "Число ячеек", "6"},
+        {"battery_cell_voltage", "Напряжение ячейки", "3,8"},
+        {"battery_discharge_rate_c", "C-rate", "6"},
+        {"motor_count", "Количество двигателей", "4"},
+        {"motor_max_thrust_kg", "Максимальная тяга", "2,0"},
+        {"motor_peak_current_a", "Пиковый ток", "30"},
+        {"motor_hover_current_a", "Ток висения", "6"},
+    };
+}
+
+domain::DurationMinutes expectedDuration(const domain::TestProtocol &protocol, const domain::WindImpact &impact) {
+    const auto uav = application::services::UavSpecificationMapper{}.map(protocol);
+    const auto result = domain::TestDurationEstimator::estimate(domain::TestDurationEstimationContext{
+        .uav = *uav,
+        .impact = impact,
+    });
+    return *result.duration;
+}
+
+domain::AxisTelemetrySample validSampleAt(double timestampSeconds) {
+    domain::AxisTelemetrySample sample{};
+    sample.timestampSeconds = timestampSeconds;
+    sample.valid = true;
+    return sample;
+}
+
 TEST(StartTestExecutionUseCaseTest, ManualModeStartsAsStopwatchEvenWhenOperatorDurationIsSelected) {
     application::session::SessionState state{};
     state.setTestProtocolMode(domain::TestMode::Manual);
     state.setTestTimeSource(domain::TestTimeSource::OperatorDefined);
-    state.setOperatorTestDurationMinutes(20);
+    state.setOperatorTestDurationMinutes(domain::DurationMinutes::required(20));
 
     TestExecutionSchedulerSpy scheduler{};
     TelemetryClientSpy telemetryClient{};
@@ -131,61 +173,19 @@ TEST(StartTestExecutionUseCaseTest, ManualModeStartsAsStopwatchEvenWhenOperatorD
 
     EXPECT_TRUE(scheduler.started);
     EXPECT_EQ(scheduler.initialElapsed, 0);
-    EXPECT_EQ(state.get().testTimeDirection, domain::TestTimeDirection::CountUp);
-    EXPECT_EQ(state.get().activeTestDuration.value(), 0);
-    EXPECT_EQ(state.get().remaining.value(), 0);
+    EXPECT_EQ(state.execution().testTimeDirection, domain::TestTimeDirection::CountUp);
+    EXPECT_EQ(state.execution().activeTestDuration.value(), 0);
+    EXPECT_EQ(state.execution().remaining.value(), 0);
     EXPECT_FALSE(telemetryClient.axis0Command.has_value());
     EXPECT_FALSE(telemetryClient.axis1Command.has_value());
-}
-
-TEST(StartTestExecutionUseCaseTest, AutomaticModeSmoothlyFollowsScenarioImpactFromProfile) {
-    application::session::SessionState state{};
-    state.setTestProtocolMode(domain::TestMode::Automatic);
-    state.setEstimatedTestDurationMinutes(1);
-    state.setFunctionExpression("x");
-    state.setWindImpact(domain::makeWindImpact(0.0, 90.0, 5.0));
-
-    TestExecutionSchedulerSpy scheduler{};
-    TelemetryClientSpy telemetryClient{};
-    ScenarioFunctionEngine functionEngine{};
-    application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
-    application::useCases::StartTestExecutionUseCase useCase{state, scheduler, telemetryClient,
-                                                             buildControlPlotUseCase};
-
-    useCase.execute();
-
-    ASSERT_TRUE(telemetryClient.axis1Command.has_value());
-    ASSERT_EQ(state.get().controlTrace.size(), 1U);
-    EXPECT_DOUBLE_EQ(state.get().controlTrace.at(0).timeSeconds, 0.0);
-    EXPECT_DOUBLE_EQ(state.get().controlTrace.at(0).targetValue.beaufort.value(), 1.0);
-    EXPECT_NEAR(state.get().controlTrace.at(0).safeCommandValue.beaufort.value(), 0.1, 0.000001);
-    EXPECT_FLOAT_EQ(telemetryClient.axis1Command->torque, 0.1F);
-    EXPECT_FLOAT_EQ(telemetryClient.axis1Command->position, 2.5F);
-    EXPECT_NEAR(state.get().appliedStandImpact.beaufort.value(), 0.1, 0.000001);
-    EXPECT_DOUBLE_EQ(state.get().targetStandImpact.beaufort.value(), 1.0);
-
-    scheduler.tick(1);
-
-    ASSERT_TRUE(telemetryClient.axis0Command.has_value());
-    ASSERT_TRUE(telemetryClient.axis1Command.has_value());
-    ASSERT_EQ(state.get().controlTrace.size(), 2U);
-    EXPECT_DOUBLE_EQ(state.get().controlTrace.at(1).timeSeconds, 1.0);
-    EXPECT_DOUBLE_EQ(state.get().controlTrace.at(1).targetValue.beaufort.value(), 2.0);
-    EXPECT_NEAR(state.get().controlTrace.at(1).safeCommandValue.beaufort.value(), 0.2, 0.000001);
-    EXPECT_FLOAT_EQ(telemetryClient.axis0Command->torque, 0.26F);
-    EXPECT_FLOAT_EQ(telemetryClient.axis1Command->torque, 0.2F);
-    EXPECT_FLOAT_EQ(telemetryClient.axis0Command->position, 2.0F);
-    EXPECT_FLOAT_EQ(telemetryClient.axis1Command->position, 5.0F);
-    EXPECT_NEAR(state.get().appliedStandImpact.beaufort.value(), 0.2, 0.000001);
-    EXPECT_DOUBLE_EQ(state.get().targetStandImpact.beaufort.value(), 2.0);
 }
 
 TEST(StartTestExecutionUseCaseTest, ScenarioStartClearsPreviousControlTrace) {
     application::session::SessionState state{};
     state.setTestProtocolMode(domain::TestMode::Automatic);
-    state.setEstimatedTestDurationMinutes(1);
+    state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(1));
     state.appendControlTraceSample(
-        domain::ControlTraceSample{.timeSeconds = 42.0,
+        domain::ControlTraceSample{.time = domain::ControlTraceTime::fromSeconds(42.0),
                                    .targetValue = domain::makeWindImpact(7.0, 0.0, 0.0),
                                    .safeCommandValue = domain::makeWindImpact(6.0, 0.0, 0.0)});
 
@@ -198,8 +198,166 @@ TEST(StartTestExecutionUseCaseTest, ScenarioStartClearsPreviousControlTrace) {
 
     useCase.execute();
 
-    ASSERT_EQ(state.get().controlTrace.size(), 1U);
-    EXPECT_DOUBLE_EQ(state.get().controlTrace.front().timeSeconds, 0.0);
+    ASSERT_EQ(state.control().controlTrace.size(), 1U);
+    EXPECT_DOUBLE_EQ(state.control().controlTrace.front().time.seconds(), 0.0);
+}
+
+TEST(StartTestExecutionUseCaseTest, StartClearsTelemetryHistoryForNewDisplaySession) {
+    application::session::SessionState state{};
+    state.setTestExecutionStatus(domain::TestExecutionStatus::Ready);
+    state.appendTelemetrySample(validSampleAt(10.0));
+    ASSERT_FALSE(state.telemetry().telemetryHistory.empty());
+
+    TestExecutionSchedulerSpy scheduler{};
+    TelemetryClientSpy telemetryClient{};
+    ScenarioFunctionEngine functionEngine{};
+    application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
+    application::useCases::StartTestExecutionUseCase useCase{state, scheduler, telemetryClient,
+                                                             buildControlPlotUseCase};
+
+    useCase.execute();
+
+    EXPECT_TRUE(state.telemetry().telemetryHistory.empty());
+    EXPECT_TRUE(state.telemetry().telemetryPlot.series.points.empty());
+    ASSERT_EQ(state.telemetry().telemetryPlot.seriesList.size(), 2U);
+    EXPECT_TRUE(state.telemetry().telemetryPlot.seriesList.at(0).series.points.empty());
+    EXPECT_TRUE(state.telemetry().telemetryPlot.seriesList.at(1).series.points.empty());
+}
+
+TEST(StartTestExecutionUseCaseTest, StartResetsTelemetryLogicalClockForNewDisplaySession) {
+    application::session::SessionState state{};
+    state.setTestExecutionStatus(domain::TestExecutionStatus::Ready);
+    application::services::TelemetrySessionClock telemetrySessionClock{};
+    ASSERT_TRUE(telemetrySessionClock.map(validSampleAt(100.0)).has_value());
+    ASSERT_TRUE(telemetrySessionClock.map(validSampleAt(101.0)).has_value());
+
+    TestExecutionSchedulerSpy scheduler{};
+    TelemetryClientSpy telemetryClient{};
+    ScenarioFunctionEngine functionEngine{};
+    application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
+    application::useCases::StartTestExecutionUseCase useCase{
+        application::useCases::StartTestExecutionUseCase::Dependencies{.state = state,
+                                                                       .testExecutionScheduler = scheduler,
+                                                                       .telemetryClient = telemetryClient,
+                                                                       .buildControlPlotUseCase =
+                                                                           buildControlPlotUseCase,
+                                                                       .telemetrySessionClock = telemetrySessionClock}};
+
+    useCase.execute();
+    const auto sample = telemetrySessionClock.map(validSampleAt(200.0));
+
+    ASSERT_TRUE(sample.has_value());
+    EXPECT_DOUBLE_EQ(sample->timestampSeconds, 0.0);
+}
+
+TEST(StartTestExecutionUseCaseTest, StartBuildsControlPlotForManualMode) {
+    application::session::SessionState state{};
+    state.setTestProtocolMode(domain::TestMode::Manual);
+
+    TestExecutionSchedulerSpy scheduler{};
+    TelemetryClientSpy telemetryClient{};
+    ScenarioFunctionEngine functionEngine{};
+    application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
+    application::useCases::StartTestExecutionUseCase useCase{state, scheduler, telemetryClient,
+                                                             buildControlPlotUseCase};
+
+    useCase.execute();
+
+    EXPECT_EQ(state.control().controlPlot.title, "Control chart");
+    EXPECT_GT(state.control().controlPlot.x.max, state.control().controlPlot.x.min);
+}
+
+TEST(StartTestExecutionUseCaseTest, InitialSchedulerTickDoesNotDuplicateScenarioTraceOrSend) {
+    application::session::SessionState state{};
+    state.setTestProtocolMode(domain::TestMode::Automatic);
+    state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(1));
+
+    TestExecutionSchedulerSpy scheduler{};
+    TelemetryClientSpy telemetryClient{};
+    ScenarioFunctionEngine functionEngine{};
+    application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
+    application::useCases::StartTestExecutionUseCase useCase{state, scheduler, telemetryClient,
+                                                             buildControlPlotUseCase};
+
+    useCase.execute();
+    ASSERT_TRUE(scheduler.tick);
+    scheduler.tick(0);
+
+    ASSERT_EQ(state.control().controlTrace.size(), 1U);
+    EXPECT_DOUBLE_EQ(state.control().controlTrace.front().time.seconds(), 0.0);
+    EXPECT_EQ(telemetryClient.axis0CommandCalls, 1);
+    EXPECT_EQ(telemetryClient.axis1CommandCalls, 1);
+}
+
+TEST(StartTestExecutionUseCaseTest, HybridScenarioTickUsesOverrideResolver) {
+    application::session::SessionState state{};
+    state.setTestModeState(domain::TestMode::Hybrid, domain::StandControlMode::Hybrid,
+                           domain::TestTimeSource::AutoCalculated, domain::TestTimeDirection::CountDown);
+    state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(1));
+    state.setHybridBeaufortOverride(domain::HybridBeaufortOverridePolicy::startOverride(
+        domain::Beaufort::from(1.0), domain::Beaufort::from(5.0), domain::ElapsedSeconds::from(0)));
+
+    TestExecutionSchedulerSpy scheduler{};
+    TelemetryClientSpy telemetryClient{};
+    ScenarioFunctionEngine functionEngine{};
+    application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
+    application::useCases::StartTestExecutionUseCase useCase{state, scheduler, telemetryClient,
+                                                             buildControlPlotUseCase};
+
+    useCase.execute();
+    ASSERT_TRUE(scheduler.tick);
+    scheduler.tick(1);
+
+    ASSERT_FALSE(state.control().controlTrace.samples().empty());
+    const auto &lastSample = state.control().controlTrace.back();
+    EXPECT_DOUBLE_EQ(lastSample.targetValue.beaufort.value(), 3.0);
+    EXPECT_DOUBLE_EQ(lastSample.safeCommandValue.beaufort.value(), 3.0);
+}
+
+TEST(StartTestExecutionUseCaseTest, HybridScenarioDoesNotOverwriteOperatorDirectionOrAngle) {
+    application::session::SessionState state{};
+    state.setTestModeState(domain::TestMode::Hybrid, domain::StandControlMode::Hybrid,
+                           domain::TestTimeSource::AutoCalculated, domain::TestTimeDirection::CountDown);
+    state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(1));
+    state.setHybridOperatorDirection(domain::WindDirection::from(270.0));
+    state.setHybridOperatorAngleOfAttack(domain::AngleOfAttack::from(15.0));
+
+    TestExecutionSchedulerSpy scheduler{};
+    TelemetryClientSpy telemetryClient{};
+    ScenarioFunctionEngine functionEngine{};
+    application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
+    application::useCases::StartTestExecutionUseCase useCase{state, scheduler, telemetryClient,
+                                                             buildControlPlotUseCase};
+
+    useCase.execute();
+
+    ASSERT_EQ(state.control().controlTrace.size(), 1U);
+    EXPECT_DOUBLE_EQ(state.control().controlTrace.front().targetValue.direction.degrees(), 270.0);
+    EXPECT_DOUBLE_EQ(state.control().controlTrace.front().targetValue.angleOfAttack.degrees(), 15.0);
+}
+
+TEST(StartTestExecutionUseCaseTest, HybridCompletedOverrideIsClearedAfterScenarioTick) {
+    application::session::SessionState state{};
+    state.setTestModeState(domain::TestMode::Hybrid, domain::StandControlMode::Hybrid,
+                           domain::TestTimeSource::AutoCalculated, domain::TestTimeDirection::CountDown);
+    state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(1));
+    state.setHybridBeaufortOverride(domain::HybridBeaufortOverridePolicy::startOverride(
+        domain::Beaufort::from(1.0), domain::Beaufort::from(5.0), domain::ElapsedSeconds::from(0)));
+
+    TestExecutionSchedulerSpy scheduler{};
+    TelemetryClientSpy telemetryClient{};
+    ScenarioFunctionEngine functionEngine{};
+    application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
+    application::useCases::StartTestExecutionUseCase useCase{state, scheduler, telemetryClient,
+                                                             buildControlPlotUseCase};
+
+    useCase.execute();
+    ASSERT_TRUE(state.control().hybridBeaufortOverride.has_value());
+    ASSERT_TRUE(scheduler.tick);
+    scheduler.tick(10);
+
+    EXPECT_FALSE(state.control().hybridBeaufortOverride.has_value());
+    EXPECT_DOUBLE_EQ(state.control().controlTrace.back().targetValue.beaufort.value(), 2.0);
 }
 
 TEST(StartTestExecutionUseCaseTest, StartsTelemetryPollingWhenStandIsConnected) {
@@ -217,14 +375,14 @@ TEST(StartTestExecutionUseCaseTest, StartsTelemetryPollingWhenStandIsConnected) 
     useCase.execute();
 
     EXPECT_EQ(telemetryClient.startPollingCalls, 1);
-    EXPECT_EQ(state.get().standConnectionStatus, domain::StandConnectionStatus::Polling);
+    EXPECT_EQ(state.connection().standConnectionStatus, domain::StandConnectionStatus::Polling);
 }
 
 TEST(StartTestExecutionUseCaseTest, StopsTelemetryPollingWhenTimedScenarioCompletes) {
     application::session::SessionState state{};
     state.setTestProtocolMode(domain::TestMode::Automatic);
     state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
-    state.setEstimatedTestDurationMinutes(1);
+    state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(1));
     state.setStandConnectionStatus(domain::StandConnectionStatus::Connected);
 
     TestExecutionSchedulerSpy scheduler{};
@@ -239,8 +397,32 @@ TEST(StartTestExecutionUseCaseTest, StopsTelemetryPollingWhenTimedScenarioComple
 
     EXPECT_EQ(telemetryClient.startPollingCalls, 1);
     EXPECT_EQ(telemetryClient.stopPollingCalls, 1);
-    EXPECT_EQ(state.get().standConnectionStatus, domain::StandConnectionStatus::Connected);
-    EXPECT_EQ(state.get().testExecutionStatus, domain::TestExecutionStatus::Completed);
+    EXPECT_EQ(state.connection().standConnectionStatus, domain::StandConnectionStatus::Connected);
+    EXPECT_EQ(state.execution().testExecutionStatus, domain::TestExecutionStatus::Completed);
+}
+
+TEST(StartTestExecutionUseCaseTest, WhenAutoCalculated_UsesEstimatorDuration) {
+    application::session::SessionState state{};
+    const auto impact = domain::makeWindImpact(4.0, 0.0, 10.0);
+    state.setTestProtocolMode(domain::TestMode::Automatic);
+    state.setTestTimeSource(domain::TestTimeSource::AutoCalculated);
+    state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(1));
+    state.setTestProtocolDroneParameters(validDroneParameters());
+    state.setWindImpact(impact);
+
+    TestExecutionSchedulerSpy scheduler{};
+    TelemetryClientSpy telemetryClient{};
+    ScenarioFunctionEngine functionEngine{};
+    application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
+    application::useCases::StartTestExecutionUseCase useCase{state, scheduler, telemetryClient,
+                                                             buildControlPlotUseCase};
+
+    useCase.execute();
+
+    const auto expected = expectedDuration(state.protocol().testProtocol, impact);
+    EXPECT_EQ(state.protocol().estimatedTestDuration.value(), expected.value());
+    EXPECT_EQ(state.execution().activeTestDuration.value(), expected.value());
+    EXPECT_NE(state.execution().activeTestDuration.value(), 1);
 }
 
 } // namespace

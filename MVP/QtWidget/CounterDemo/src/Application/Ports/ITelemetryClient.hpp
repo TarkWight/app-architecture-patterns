@@ -16,12 +16,15 @@ class ITelemetryClient {
     using TelemetryCallback = std::function<void(const domain::AxisTelemetrySample &)>;
     using StatusCallback = std::function<void(domain::AxisId, domain::TelemetryConnectionStatus, const std::string &)>;
     using ErrorCallback = std::function<void(domain::AxisId, const std::string &)>;
+    using TraceCallback = std::function<void(const std::string &)>;
 
     virtual ~ITelemetryClient() = default;
 
     virtual void setTelemetryCallback(TelemetryCallback callback) = 0;
     virtual void setStatusCallback(StatusCallback callback) = 0;
     virtual void setErrorCallback(ErrorCallback callback) = 0;
+    virtual void setTraceCallback(TraceCallback /*callback*/) {
+    }
 
     virtual void configureAxis(domain::AxisId axisId, std::string host, int port) = 0;
 

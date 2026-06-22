@@ -22,14 +22,21 @@ ShellPresenter::ShellPresenter(Dependencies deps)
       estimateTestDurationUseCase(deps.estimateTestDurationUseCase),
       setTestTimeSourceUseCase(deps.setTestTimeSourceUseCase),
       configureTelemetryUseCase(deps.configureTelemetryUseCase), connectStandUseCase(deps.connectStandUseCase),
-      disconnectStandUseCase(deps.disconnectStandUseCase), setStandControlModeUseCase(deps.setStandControlModeUseCase) {
+      disconnectStandUseCase(deps.disconnectStandUseCase), setStandControlModeUseCase(deps.setStandControlModeUseCase),
+      telemetryClient(deps.telemetryClient) {
 }
 
 void ShellPresenter::attachView(IShellView &view) {
     this->view = &view;
+    telemetryClient.setTraceCallback([this](const std::string &message) {
+        if (this->view != nullptr) {
+            this->view->appendLog(message);
+        }
+    });
 }
 
 void ShellPresenter::detachView() {
+    telemetryClient.setTraceCallback({});
     view = nullptr;
 }
 

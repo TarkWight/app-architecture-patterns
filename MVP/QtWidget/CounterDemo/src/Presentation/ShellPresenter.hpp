@@ -18,6 +18,7 @@
 #include "../Application/UseCases/ConnectStandUseCase.hpp"
 #include "../Application/UseCases/DisconnectStandUseCase.hpp"
 #include "../Application/UseCases/EstimateTestDurationUseCase.hpp"
+#include "../Application/Ports/ITelemetryClient.hpp"
 #include "../Domain/StandConnectionStatus.hpp"
 
 #include "IShellView.hpp"
@@ -41,6 +42,7 @@ class ShellPresenter final {
         application::useCases::ConfigureTelemetryUseCase &configureTelemetryUseCase;
         application::useCases::ConnectStandUseCase &connectStandUseCase;
         application::useCases::DisconnectStandUseCase &disconnectStandUseCase;
+        application::ports::ITelemetryClient &telemetryClient;
     };
 
     explicit ShellPresenter(Dependencies deps);
@@ -80,6 +82,7 @@ class ShellPresenter final {
     application::useCases::ConnectStandUseCase &connectStandUseCase;
     application::useCases::DisconnectStandUseCase &disconnectStandUseCase;
     application::useCases::SetStandControlModeUseCase &setStandControlModeUseCase;
+    application::ports::ITelemetryClient &telemetryClient;
 
     IShellView *view{nullptr};
     domain::StandConnectionStatus lastStandConnectionStatus{domain::StandConnectionStatus::Disconnected};

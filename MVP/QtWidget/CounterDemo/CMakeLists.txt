@@ -190,6 +190,8 @@ qt_add_executable(develop
 
   src/Infrastructure/AxisTcp/LegacyAxisProtocolCodec.hpp
   src/Infrastructure/AxisTcp/LegacyAxisProtocolCodec.cpp
+  src/Infrastructure/AxisTcp/StandTraceFormatter.hpp
+  src/Infrastructure/AxisTcp/StandTraceFormatter.cpp
   src/Infrastructure/AxisTcp/QtTcpTelemetryClient.hpp
   src/Infrastructure/AxisTcp/QtTcpTelemetryClient.cpp
 
@@ -296,6 +298,7 @@ if (BUILD_TESTING)
     tests/Ui/PlotRendererTest.cpp
     tests/Infrastructure/ConfigTemplateServiceTest.cpp
     tests/Infrastructure/LegacyAxisProtocolCodecTest.cpp
+    tests/Infrastructure/StandTraceFormatterTest.cpp
     tests/Infrastructure/QtTestExecutionSchedulerTest.cpp
     tests/Infrastructure/SimpleFunctionEngineTest.cpp
     src/Application/Session/SessionState.cpp
@@ -338,6 +341,7 @@ if (BUILD_TESTING)
     src/Infrastructure/QtTestExecutionScheduler.cpp
     src/Infrastructure/ConfigTemplates/ConfigTemplateService.cpp
     src/Infrastructure/AxisTcp/LegacyAxisProtocolCodec.cpp
+    src/Infrastructure/AxisTcp/StandTraceFormatter.cpp
   )
 
   target_include_directories(domain_tests

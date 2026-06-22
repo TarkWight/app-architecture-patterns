@@ -89,6 +89,10 @@ class TelemetryClientSpy final : public application::ports::ITelemetryClient {
         errorCallback = std::move(callbackValue);
     }
 
+    void setTraceCallback(TraceCallback callbackValue) override {
+        traceCallback = std::move(callbackValue);
+    }
+
     void configureAxis(domain::AxisId /*axisId*/, std::string /*host*/, int /*port*/) override {
     }
 
@@ -119,6 +123,7 @@ class TelemetryClientSpy final : public application::ports::ITelemetryClient {
     TelemetryCallback telemetryCallback{};
     StatusCallback statusCallback{};
     ErrorCallback errorCallback{};
+    TraceCallback traceCallback{};
 };
 
 class ConfigRepositoryStub final : public application::ports::IConfigRepository {
@@ -290,7 +295,8 @@ struct ShellPresenterFixture {
         .estimateTestDurationUseCase = estimateTestDurationUseCase,
         .configureTelemetryUseCase = configureTelemetryUseCase,
         .connectStandUseCase = connectStandUseCase,
-        .disconnectStandUseCase = disconnectStandUseCase}};
+        .disconnectStandUseCase = disconnectStandUseCase,
+        .telemetryClient = telemetryClient}};
     ShellViewSpy view{};
 };
 
@@ -349,6 +355,18 @@ TEST(ShellPresenterTest, CalculatePressedUpdatesReadinessAndBuildsControlPlot) {
     EXPECT_FALSE(fixture.state.control().controlProfile.samples.empty());
     EXPECT_FALSE(fixture.state.control().controlPlot.series.points.empty());
     EXPECT_NE(fixture.state.control().controlProfile.duration.value(), 1);
+}
+
+TEST(ShellPresenterTest, StandTraceMessageAppendsLog) {
+    ShellPresenterFixture fixture{};
+    fixture.presenter.attachView(fixture.view);
+
+    ASSERT_TRUE(static_cast<bool>(fixture.telemetryClient.traceCallback));
+
+    fixture.telemetryClient.traceCallback("[STAND][CONNECTED][axis0]");
+
+    ASSERT_FALSE(fixture.view.logs.empty());
+    EXPECT_EQ(fixture.view.logs.back(), "[STAND][CONNECTED][axis0]");
 }
 
 TEST(ShellPresenterTest, AutoWithOkStartsWithoutConfirmation) {

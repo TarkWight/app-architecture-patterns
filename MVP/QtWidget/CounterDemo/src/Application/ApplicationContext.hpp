@@ -151,7 +151,8 @@ struct ApplicationContext {
         .estimateTestDurationUseCase = estimateTestDurationUseCase,
         .configureTelemetryUseCase = configureTelemetryUseCase,
         .connectStandUseCase = connectStandUseCase,
-        .disconnectStandUseCase = disconnectStandUseCase}};
+        .disconnectStandUseCase = disconnectStandUseCase,
+        .telemetryClient = telemetryClient}};
 
     presentation::telemetryChartsTab::TelemetryChartsTabPresenter telemetryChartsTabPresenter{
         presentation::telemetryChartsTab::TelemetryChartsTabPresenter::Dependencies{

@@ -1,8 +1,19 @@
 #include "../../src/Ui/Render/PlotRenderer.hpp"
 
+#include <QApplication>
+#include <QImage>
+#include <QPainter>
+
 #include <gtest/gtest.h>
 
 namespace {
+
+constexpr int rightMargin = 20;
+
+int qtArgc = 1;
+char qtArg0[] = "plot-renderer-test";
+char *qtArgv[] = {qtArg0, nullptr};
+QApplication qtApplication{qtArgc, qtArgv};
 
 TEST(PlotRendererTest, CyclicSeriesBreaksAtLargeDelta) {
     application::dto::Series series{};
@@ -35,6 +46,30 @@ TEST(PlotRendererTest, NonCyclicSeriesKeepsContinuousLine) {
 
     ASSERT_EQ(segments.size(), 1U);
     ASSERT_EQ(segments.front().points.size(), 2U);
+}
+
+TEST(PlotRendererTest, ClipsSeriesPointsOutsideRightPlotBoundary) {
+    application::dto::PlotModel plot{};
+    plot.x = application::dto::AxisSpec{.min = 0.0, .max = 10.0, .step = 1.0, .label = "seconds"};
+    plot.y = application::dto::AxisSpec{.min = 0.0, .max = 10.0, .step = 1.0, .label = "degrees"};
+    plot.color = application::dto::RgbColor{255, 0, 0};
+    plot.series.points = {application::dto::Point{.x = 10.25, .y = 5.0}};
+
+    QImage image{400, 300, QImage::Format_ARGB32};
+    image.fill(Qt::white);
+
+    QPainter painter{&image};
+    ui::render::PlotRenderer::drawPlot(painter, QRect{0, 0, image.width(), image.height()}, plot);
+    painter.end();
+
+    const int plotRight = image.width() - rightMargin;
+    for (int y = 0; y < image.height(); ++y) {
+        for (int x = plotRight + 1; x < image.width(); ++x) {
+            const QColor color = image.pixelColor(x, y);
+            EXPECT_FALSE(color.red() > 200 && color.green() < 80 && color.blue() < 80)
+                << "Unexpected series pixel outside plot area at " << x << "," << y;
+        }
+    }
 }
 
 } // namespace

@@ -45,7 +45,12 @@ void PlotRenderer::drawPlot(QPainter &painter, const QRect &rect, const applicat
         return;
     }
 
+    painter.save();
+    painter.setClipRect(plotRect);
     drawSeries(painter, plotRect, drawablePlot);
+    painter.restore();
+
+    drawLegend(painter, plotRect, drawablePlot);
     drawMarker(painter, plotRect, drawablePlot);
 }
 
@@ -258,7 +263,6 @@ void PlotRenderer::drawSeries(QPainter &painter, const QRect &plotRect, const ap
             }
         }
 
-        drawLegend(painter, plotRect, plot);
         return;
     }
 

@@ -58,6 +58,7 @@ void StartTestExecutionUseCase::execute() {
     state.setTestExecutionStatus(*transition);
     startTelemetryPollingIfConnected();
     applyScenarioImpact(domain::ElapsedSeconds::from(0));
+    recordManualControlTrace(domain::ElapsedSeconds::from(0));
 
     testExecutionScheduler.start(0, [this, plan](int elapsedSeconds) {
         const auto elapsed = domain::ElapsedSeconds::from(elapsedSeconds);
@@ -67,6 +68,7 @@ void StartTestExecutionUseCase::execute() {
 
         state.setElapsedSeconds(elapsed);
         applyScenarioImpact(elapsed);
+        recordManualControlTrace(elapsed);
 
         const auto remaining = plan.remainingAt(elapsed);
 
@@ -137,6 +139,17 @@ void StartTestExecutionUseCase::applyScenarioImpact(domain::ElapsedSeconds elaps
         domain::ControlTraceSample::manualCommand(elapsed, effectiveImpact, effectiveImpact));
     buildControlPlotUseCase.refreshFromState();
     appliedStandImpactSender.send(effectiveImpact, elapsed, protocol.testProtocol);
+}
+
+void StartTestExecutionUseCase::recordManualControlTrace(domain::ElapsedSeconds elapsed) {
+    if (state.protocol().testProtocol.testMode != domain::TestMode::Manual) {
+        return;
+    }
+
+    const auto &control = state.control();
+    state.appendControlTraceSample(
+        domain::ControlTraceSample::manualCommand(elapsed, control.targetStandImpact, control.appliedStandImpact));
+    buildControlPlotUseCase.refreshFromState();
 }
 
 } // namespace application::useCases

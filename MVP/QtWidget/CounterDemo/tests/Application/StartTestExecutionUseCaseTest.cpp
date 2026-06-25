@@ -267,6 +267,48 @@ TEST(StartTestExecutionUseCaseTest, StartBuildsControlPlotForManualMode) {
     EXPECT_GT(state.control().controlPlot.x.max, state.control().controlPlot.x.min);
 }
 
+TEST(StartTestExecutionUseCaseTest, ManualModeRecordsControlTraceOnEveryTick) {
+    application::session::SessionState state{};
+    state.setTestProtocolMode(domain::TestMode::Manual);
+    state.setTargetStandImpact(domain::makeWindImpact(2.0, 90.0, 10.0));
+    state.setAppliedStandImpact(domain::makeWindImpact(2.0, 90.0, 10.0));
+
+    TestExecutionSchedulerSpy scheduler{};
+    TelemetryClientSpy telemetryClient{};
+    ScenarioFunctionEngine functionEngine{};
+    application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
+    application::useCases::StartTestExecutionUseCase useCase{state, scheduler, telemetryClient,
+                                                             buildControlPlotUseCase};
+
+    useCase.execute();
+    ASSERT_TRUE(scheduler.tick);
+    scheduler.tick(1);
+    scheduler.tick(2);
+
+    ASSERT_EQ(state.control().controlTrace.size(), 3U);
+    EXPECT_DOUBLE_EQ(state.control().controlTrace.at(0).time.seconds(), 0.0);
+    EXPECT_DOUBLE_EQ(state.control().controlTrace.at(1).time.seconds(), 1.0);
+    EXPECT_DOUBLE_EQ(state.control().controlTrace.at(2).time.seconds(), 2.0);
+    for (std::size_t index = 0; index < 3; ++index) {
+        EXPECT_DOUBLE_EQ(state.control().controlTrace.at(index).targetValue.beaufort.value(), 2.0);
+        EXPECT_DOUBLE_EQ(state.control().controlTrace.at(index).safeCommandValue.beaufort.value(), 2.0);
+        EXPECT_DOUBLE_EQ(state.control().controlTrace.at(index).targetValue.direction.degrees(), 90.0);
+        EXPECT_DOUBLE_EQ(state.control().controlTrace.at(index).targetValue.angleOfAttack.degrees(), 10.0);
+    }
+
+    state.setTargetStandImpact(domain::makeWindImpact(5.0, 180.0, 20.0));
+    state.setAppliedStandImpact(domain::makeWindImpact(5.0, 180.0, 20.0));
+    scheduler.tick(3);
+
+    ASSERT_EQ(state.control().controlTrace.size(), 4U);
+    EXPECT_DOUBLE_EQ(state.control().controlTrace.back().time.seconds(), 3.0);
+    EXPECT_DOUBLE_EQ(state.control().controlTrace.back().targetValue.beaufort.value(), 5.0);
+    EXPECT_DOUBLE_EQ(state.control().controlTrace.back().safeCommandValue.beaufort.value(), 5.0);
+    EXPECT_DOUBLE_EQ(state.control().controlTrace.back().targetValue.direction.degrees(), 180.0);
+    EXPECT_DOUBLE_EQ(state.control().controlTrace.back().targetValue.angleOfAttack.degrees(), 20.0);
+    EXPECT_GE(state.control().controlPlot.seriesList.size(), 2U);
+}
+
 TEST(StartTestExecutionUseCaseTest, InitialSchedulerTickDoesNotDuplicateScenarioTraceOrSend) {
     application::session::SessionState state{};
     state.setTestProtocolMode(domain::TestMode::Automatic);

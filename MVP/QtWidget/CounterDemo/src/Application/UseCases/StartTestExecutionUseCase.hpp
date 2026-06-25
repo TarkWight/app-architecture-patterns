@@ -45,6 +45,7 @@ class StartTestExecutionUseCase final {
     void startTelemetryPollingIfConnected();
     void stopTelemetryPollingIfActive();
     void applyScenarioImpact(domain::ElapsedSeconds elapsed);
+    void recordManualControlTrace(domain::ElapsedSeconds elapsed);
 };
 
 } // namespace application::useCases

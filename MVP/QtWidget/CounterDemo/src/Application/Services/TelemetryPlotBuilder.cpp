@@ -33,6 +33,9 @@ application::dto::PlotModel TelemetryPlotBuilder::build(const session::Telemetry
     axisZ.series.breakOnLargeDelta = true;
     axisZ.series.wrapThreshold = 180.0;
 
+    // Реальный стенд передаёт положение оси в setPosition.
+    // Поле position на практике остаётся около нуля, поэтому для графика
+    // телеметрии используется sample.setPosition.
     if (!telemetry.telemetryHistory.empty()) {
         const double baseTimestamp = telemetry.telemetryHistory.front().timestampSeconds;
 
@@ -43,9 +46,9 @@ application::dto::PlotModel TelemetryPlotBuilder::build(const session::Telemetry
             }
 
             if (sample.axisId == domain::axis0 && telemetry.telemetryAxisYVisible) {
-                axisY.series.points.push_back(application::dto::Point{.x = x, .y = sample.position});
+                axisY.series.points.push_back(application::dto::Point{.x = x, .y = sample.setPosition});
             } else if (sample.axisId == domain::axis1 && telemetry.telemetryAxisZVisible) {
-                axisZ.series.points.push_back(application::dto::Point{.x = x, .y = sample.position});
+                axisZ.series.points.push_back(application::dto::Point{.x = x, .y = sample.setPosition});
             }
         }
     }

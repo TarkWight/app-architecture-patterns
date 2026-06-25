@@ -104,7 +104,9 @@ void addControlTraceSeries(application::dto::PlotModel &plot, const domain::Cont
     plot.seriesList.push_back(std::move(target));
     plot.seriesList.push_back(std::move(safeCommand));
 
-    plot.marker = application::dto::PlotMarker{.x = markerX, .label = "Сейчас", .visible = true};
+    if (overlayFormula) {
+        plot.marker = application::dto::PlotMarker{.x = markerX, .label = "Сейчас", .visible = true};
+    }
 }
 
 } // namespace

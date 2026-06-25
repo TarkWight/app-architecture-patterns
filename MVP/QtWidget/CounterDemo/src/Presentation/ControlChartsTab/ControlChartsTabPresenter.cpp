@@ -11,8 +11,9 @@ namespace presentation::controlChartsTab {
 
 ControlChartsTabPresenter::ControlChartsTabPresenter(Dependencies deps)
     : state(deps.state), setControlChartsTabMinutesUseCase(deps.setControlChartsTabMinutesUseCase),
-      setWindImpactUseCase(deps.setWindImpactUseCase), buildControlPlotUseCase(deps.buildControlPlotUseCase),
-      updateTestProtocolUseCase(deps.updateTestProtocolUseCase) {
+      setWindImpactUseCase(deps.setWindImpactUseCase),
+      setUseAngleOfAttackModelUseCase(deps.setUseAngleOfAttackModelUseCase),
+      buildControlPlotUseCase(deps.buildControlPlotUseCase), updateTestProtocolUseCase(deps.updateTestProtocolUseCase) {
 }
 
 void ControlChartsTabPresenter::attachView(IControlChartsTabView &view) {
@@ -34,6 +35,7 @@ void ControlChartsTabPresenter::onViewReady() {
     view->setBeaufort(stateData.control.windImpact.beaufort.value());
     view->setDirection(stateData.control.windImpact.direction.degrees());
     view->setAngleOfAttack(stateData.control.windImpact.angleOfAttack.degrees());
+    view->setUseAngleOfAttackModel(stateData.control.useAngleOfAttackModel);
     view->setTestProtocolMode(std::string{domain::testModeKey(stateData.protocol.testProtocol.testMode)});
     view->setTestProtocolProgram(std::string{domain::testProgramKey(stateData.protocol.testProtocol.testProgram)});
 
@@ -101,6 +103,14 @@ void ControlChartsTabPresenter::onAngleOfAttackChanged(double value) {
 
     if (view != nullptr) {
         view->appendLog("Angle of attack updated");
+    }
+}
+
+void ControlChartsTabPresenter::onUseAngleOfAttackModelChanged(bool enabled) {
+    setUseAngleOfAttackModelUseCase.execute(enabled);
+
+    if (view != nullptr) {
+        view->appendLog("Angle of attack model setting updated");
     }
 }
 

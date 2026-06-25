@@ -92,6 +92,11 @@ void ControlChartsTabWidget::setAngleOfAttack(double value) {
     ui->doubleSpinBoxAngleOfAttack->setValue(value);
 }
 
+void ControlChartsTabWidget::setUseAngleOfAttackModel(bool enabled) {
+    const QSignalBlocker blocker{ui->checkBoxUseAngleOfAttackModel};
+    ui->checkBoxUseAngleOfAttackModel->setChecked(enabled);
+}
+
 void ControlChartsTabWidget::refreshPlot() {
     plotWidget->setPlot(sessionAdapter.getState().get().control.controlPlot);
 }
@@ -144,6 +149,9 @@ void ControlChartsTabWidget::connectSignals() {
 
     QObject::connect(ui->doubleSpinBoxAngleOfAttack, qOverload<double>(&QDoubleSpinBox::valueChanged), this,
                      [this](double value) { presenter.onAngleOfAttackChanged(value); });
+
+    QObject::connect(ui->checkBoxUseAngleOfAttackModel, &QCheckBox::toggled, this,
+                     [this](bool enabled) { presenter.onUseAngleOfAttackModelChanged(enabled); });
 }
 
 void ControlChartsTabWidget::connectSessionSignals() {
@@ -205,6 +213,15 @@ void ControlChartsTabWidget::connectSessionSignals() {
                          }
 
                          setAngleOfAttack(value);
+                     });
+
+    QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::useAngleOfAttackModelChanged, this,
+                     [this](bool enabled) {
+                         if (ui->checkBoxUseAngleOfAttackModel->isChecked() == enabled) {
+                             return;
+                         }
+
+                         setUseAngleOfAttackModel(enabled);
                      });
 
     QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::controlPlotChanged, this,

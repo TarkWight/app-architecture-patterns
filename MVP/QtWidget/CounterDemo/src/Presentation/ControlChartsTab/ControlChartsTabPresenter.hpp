@@ -3,6 +3,7 @@
 
 #include "../../Application/UseCases/BuildControlPlotUseCase.hpp"
 #include "../../Application/UseCases/SetControlChartsTabMinutesUseCase.hpp"
+#include "../../Application/UseCases/SetUseAngleOfAttackModelUseCase.hpp"
 #include "../../Application/UseCases/SetWindImpactUseCase.hpp"
 #include "../../Application/UseCases/UpdateTestProtocolUseCase.hpp"
 
@@ -16,6 +17,7 @@ class ControlChartsTabPresenter final {
         application::session::SessionState &state;
         application::useCases::SetControlChartsTabMinutesUseCase &setControlChartsTabMinutesUseCase;
         application::useCases::SetWindImpactUseCase &setWindImpactUseCase;
+        application::useCases::SetUseAngleOfAttackModelUseCase &setUseAngleOfAttackModelUseCase;
         application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
         application::useCases::UpdateTestProtocolUseCase &updateTestProtocolUseCase;
     };
@@ -35,6 +37,7 @@ class ControlChartsTabPresenter final {
     void onBeaufortChanged(double value);
     void onDirectionChanged(double value);
     void onAngleOfAttackChanged(double value);
+    void onUseAngleOfAttackModelChanged(bool enabled);
 
     void onRebuildPlotPressed();
     void onCalculationResultChanged();
@@ -44,6 +47,7 @@ class ControlChartsTabPresenter final {
     application::session::SessionState &state;
     application::useCases::SetControlChartsTabMinutesUseCase &setControlChartsTabMinutesUseCase;
     application::useCases::SetWindImpactUseCase &setWindImpactUseCase;
+    application::useCases::SetUseAngleOfAttackModelUseCase &setUseAngleOfAttackModelUseCase;
     application::useCases::BuildControlPlotUseCase &buildControlPlotUseCase;
     application::useCases::UpdateTestProtocolUseCase &updateTestProtocolUseCase;
 

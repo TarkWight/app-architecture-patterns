@@ -32,6 +32,7 @@ class SessionStateQtAdapter final : public QObject {
     void beaufortChanged(double value);
     void directionChanged(double value);
     void angleOfAttackChanged(double value);
+    void useAngleOfAttackModelChanged(bool enabled);
 
     void testProtocolTitleChanged(const QString &title);
     void testProtocolLineChanged(int index, const QString &line);

@@ -34,6 +34,7 @@ class ControlChartsTabWidget final : public QWidget, public presentation::contro
     void setBeaufort(double value) override;
     void setDirection(double value) override;
     void setAngleOfAttack(double value) override;
+    void setUseAngleOfAttackModel(bool enabled) override;
     void refreshPlot() override;
     void showReadinessMessage(const std::string &message) override;
     void appendLog(const std::string &text) override;

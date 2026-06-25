@@ -4,6 +4,7 @@
 #include "../../src/Application/Session/SessionState.hpp"
 #include "../../src/Application/UseCases/BuildControlPlotUseCase.hpp"
 #include "../../src/Application/UseCases/SetControlChartsTabMinutesUseCase.hpp"
+#include "../../src/Application/UseCases/SetUseAngleOfAttackModelUseCase.hpp"
 #include "../../src/Application/UseCases/SetWindImpactUseCase.hpp"
 #include "../../src/Application/UseCases/UpdateTestProtocolUseCase.hpp"
 
@@ -63,6 +64,10 @@ class ControlChartsTabViewSpy final : public presentation::controlChartsTab::ICo
         angleOfAttack = value;
     }
 
+    void setUseAngleOfAttackModel(bool enabled) override {
+        useAngleOfAttackModel = enabled;
+    }
+
     void refreshPlot() override {
         ++plotRefreshCount;
     }
@@ -85,6 +90,7 @@ class ControlChartsTabViewSpy final : public presentation::controlChartsTab::ICo
     double beaufort{0.0};
     double direction{0.0};
     double angleOfAttack{0.0};
+    bool useAngleOfAttackModel{false};
     int plotRefreshCount{0};
     std::string readinessMessage{};
     std::vector<std::string> logMessages{};
@@ -123,6 +129,7 @@ struct PresenterFixture {
     application::session::SessionState state{};
     application::useCases::SetControlChartsTabMinutesUseCase setMinutesUseCase{state};
     application::useCases::SetWindImpactUseCase setWindImpactUseCase{state};
+    application::useCases::SetUseAngleOfAttackModelUseCase setUseAngleOfAttackModelUseCase{state};
     FunctionEngineStub functionEngine{};
     application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
     application::useCases::UpdateTestProtocolUseCase updateTestProtocolUseCase{state};
@@ -131,6 +138,7 @@ struct PresenterFixture {
             .state = state,
             .setControlChartsTabMinutesUseCase = setMinutesUseCase,
             .setWindImpactUseCase = setWindImpactUseCase,
+            .setUseAngleOfAttackModelUseCase = setUseAngleOfAttackModelUseCase,
             .buildControlPlotUseCase = buildControlPlotUseCase,
             .updateTestProtocolUseCase = updateTestProtocolUseCase}};
     ControlChartsTabViewSpy view{};
@@ -151,6 +159,16 @@ TEST(ControlChartsTabPresenterTest, ViewReadySyncsTestModeAndProgram) {
     EXPECT_EQ(fixture.view.plotRefreshCount, 0);
 }
 
+TEST(ControlChartsTabPresenterTest, ViewReadySyncsAngleOfAttackModelFlag) {
+    PresenterFixture fixture{};
+    fixture.state.setUseAngleOfAttackModel(true);
+    fixture.presenter.attachView(fixture.view);
+
+    fixture.presenter.onViewReady();
+
+    EXPECT_TRUE(fixture.view.useAngleOfAttackModel);
+}
+
 TEST(ControlChartsTabPresenterTest, TestModeChangeUpdatesProtocolStateWithoutRebuildingPlot) {
     PresenterFixture fixture{};
     fixture.presenter.attachView(fixture.view);
@@ -161,6 +179,30 @@ TEST(ControlChartsTabPresenterTest, TestModeChangeUpdatesProtocolStateWithoutReb
     EXPECT_EQ(fixture.state.control().standControlMode, domain::StandControlMode::PresetScenario);
     EXPECT_EQ(fixture.state.protocol().testTimeSource, domain::TestTimeSource::AutoCalculated);
     EXPECT_EQ(fixture.view.plotRefreshCount, 0);
+}
+
+TEST(ControlChartsTabPresenterTest, AngleOfAttackModelChangeUpdatesStateWithoutRebuildingPlot) {
+    PresenterFixture fixture{};
+    fixture.presenter.attachView(fixture.view);
+
+    fixture.presenter.onUseAngleOfAttackModelChanged(true);
+
+    EXPECT_TRUE(fixture.state.control().useAngleOfAttackModel);
+    EXPECT_EQ(fixture.view.plotRefreshCount, 0);
+}
+
+TEST(ControlChartsTabPresenterTest, AngleOfAttackModelChangeResetsReadiness) {
+    PresenterFixture fixture{};
+    domain::EstimatedTestDurationResult result{};
+    result.duration = domain::DurationMinutes::required(37);
+    fixture.state.setReadinessFromEstimationResult(result, domain::makeWindImpact(1.0, 0.0, 0.0));
+    ASSERT_EQ(fixture.state.readiness().status, application::session::ReadinessStatus::Ok);
+    fixture.presenter.attachView(fixture.view);
+
+    fixture.presenter.onUseAngleOfAttackModelChanged(true);
+
+    EXPECT_EQ(fixture.state.readiness().status, application::session::ReadinessStatus::Unknown);
+    EXPECT_TRUE(fixture.view.readinessMessage.empty());
 }
 
 TEST(ControlChartsTabPresenterTest, TestProgramChangeUpdatesProtocolStateAndFormulaWithoutRebuildingPlot) {

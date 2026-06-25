@@ -20,6 +20,7 @@ class IControlChartsTabView {
     virtual void setBeaufort(double value) = 0;
     virtual void setDirection(double value) = 0;
     virtual void setAngleOfAttack(double value) = 0;
+    virtual void setUseAngleOfAttackModel(bool enabled) = 0;
 
     virtual void refreshPlot() = 0;
     virtual void showReadinessMessage(const std::string &message) = 0;

@@ -149,6 +149,8 @@ qt_add_executable(develop
   src/Application/UseCases/SetControlChartsTabMinutesUseCase.cpp
   src/Application/UseCases/SetWindImpactUseCase.hpp
   src/Application/UseCases/SetWindImpactUseCase.cpp
+  src/Application/UseCases/SetUseAngleOfAttackModelUseCase.hpp
+  src/Application/UseCases/SetUseAngleOfAttackModelUseCase.cpp
   src/Application/UseCases/PauseTestExecutionUseCase.hpp
   src/Application/UseCases/PauseTestExecutionUseCase.cpp
   src/Application/UseCases/ResumeTestExecutionUseCase.hpp
@@ -323,6 +325,7 @@ if (BUILD_TESTING)
     src/Application/UseCases/SetLineColorUseCase.cpp
     src/Application/UseCases/SetControlChartsTabMinutesUseCase.cpp
     src/Application/UseCases/SetWindImpactUseCase.cpp
+    src/Application/UseCases/SetUseAngleOfAttackModelUseCase.cpp
     src/Application/UseCases/SetOperatorTestDurationUseCase.cpp
     src/Application/UseCases/SetTestTimeSourceUseCase.cpp
     src/Application/UseCases/SetStandControlModeUseCase.cpp

@@ -44,6 +44,7 @@ void SessionStateQtAdapter::emitState(const application::session::SessionStateDa
     emit beaufortChanged(data.control.windImpact.beaufort.value());
     emit directionChanged(data.control.windImpact.direction.degrees());
     emit angleOfAttackChanged(data.control.windImpact.angleOfAttack.degrees());
+    emit useAngleOfAttackModelChanged(data.control.useAngleOfAttackModel);
 
     emit testProtocolTitleChanged(QString::fromStdString(data.protocol.testProtocol.title));
     emit testProtocolModeChanged(QString::fromUtf8(domain::testModeKey(data.protocol.testProtocol.testMode).data()));

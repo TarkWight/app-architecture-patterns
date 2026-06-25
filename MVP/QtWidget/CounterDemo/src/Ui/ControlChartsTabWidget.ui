@@ -232,6 +232,16 @@
       <item row="2" column="1">
        <widget class="QComboBox" name="comboBoxTestMode"/>
       </item>
+      <item row="2" column="2" colspan="3">
+       <widget class="QCheckBox" name="checkBoxUseAngleOfAttackModel">
+        <property name="text">
+         <string>Использовать модель угла атаки</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
       <item row="3" column="0">
        <widget class="QLabel" name="labelEstimatedDurationCaption">
         <property name="text">

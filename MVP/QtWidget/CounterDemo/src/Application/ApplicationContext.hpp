@@ -22,6 +22,7 @@
 #include "UseCases/ApplyBeaufortImpactUseCase.hpp"
 #include "UseCases/ApplyWindDirectionUseCase.hpp"
 #include "UseCases/ApplyAngleOfAttackUseCase.hpp"
+#include "UseCases/SetUseAngleOfAttackModelUseCase.hpp"
 #include "UseCases/StartTestExecutionUseCase.hpp"
 #include "UseCases/StopTestExecutionUseCase.hpp"
 #include "UseCases/UpdateTestProtocolUseCase.hpp"
@@ -131,6 +132,8 @@ struct ApplicationContext {
 
     application::useCases::SetWindImpactUseCase setWindImpactUseCase{sessionState};
 
+    application::useCases::SetUseAngleOfAttackModelUseCase setUseAngleOfAttackModelUseCase{sessionState};
+
     application::useCases::UpdateTestProtocolUseCase updateTestProtocolUseCase{sessionState};
 
     application::useCases::LoadPdfReportDefaultsUseCase loadPdfReportDefaultsUseCase{sessionState, configRepository};
@@ -165,6 +168,7 @@ struct ApplicationContext {
             .state = sessionState,
             .setControlChartsTabMinutesUseCase = setControlChartsTabMinutesUseCase,
             .setWindImpactUseCase = setWindImpactUseCase,
+            .setUseAngleOfAttackModelUseCase = setUseAngleOfAttackModelUseCase,
             .buildControlPlotUseCase = buildControlPlotUseCase,
             .updateTestProtocolUseCase = updateTestProtocolUseCase}};
 

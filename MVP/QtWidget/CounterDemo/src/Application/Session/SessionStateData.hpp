@@ -83,6 +83,8 @@ struct ControlStateData {
     std::optional<domain::HybridBeaufortOverride> hybridBeaufortOverride{};
     domain::WindDirection hybridOperatorDirection{domain::WindDirection::from(0.0)};
     domain::AngleOfAttack hybridOperatorAngleOfAttack{domain::AngleOfAttack::from(0.0)};
+    // TODO(UI): expose the angle-of-attack model toggle when the operator workflow is defined.
+    bool useAngleOfAttackModel{false};
 };
 
 struct TelemetryStateData {

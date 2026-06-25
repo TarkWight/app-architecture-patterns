@@ -85,6 +85,21 @@ TEST(SetStandImpactUseCaseTest, RecordsManualTargetAndSafeCommandTraceWhenApplie
     ASSERT_TRUE(telemetryClient.axis1Command.has_value());
     EXPECT_FLOAT_EQ(telemetryClient.axis0Command->torque, 7.8F);
     EXPECT_FLOAT_EQ(telemetryClient.axis1Command->torque, 6.0F);
+    EXPECT_NEAR(telemetryClient.axis1Command->position, 22.0F, 0.0001F);
+}
+
+TEST(SetStandImpactUseCaseTest, AppliesYawOscillationWhenAngleModelIsEnabled) {
+    application::session::SessionState state{};
+    state.setElapsedSeconds(domain::ElapsedSeconds::from(7));
+    state.setUseAngleOfAttackModel(true);
+    const auto safeCommand = domain::makeWindImpact(1.2, 20.0, 2.0);
+
+    TelemetryClientSpy telemetryClient{};
+    application::useCases::SetStandImpactUseCase useCase{state, telemetryClient};
+
+    useCase.setApplied(safeCommand);
+
+    ASSERT_TRUE(telemetryClient.axis1Command.has_value());
     EXPECT_NEAR(telemetryClient.axis1Command->position, 21.1F, 0.0001F);
 }
 

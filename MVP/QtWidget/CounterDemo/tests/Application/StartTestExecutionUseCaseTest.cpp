@@ -378,6 +378,94 @@ TEST(StartTestExecutionUseCaseTest, HybridScenarioDoesNotOverwriteOperatorDirect
     EXPECT_DOUBLE_EQ(state.control().controlTrace.front().targetValue.angleOfAttack.degrees(), 15.0);
 }
 
+TEST(StartTestExecutionUseCaseTest, AutomaticScenarioDoesNotApplyYawOscillationWhenAngleModelIsDisabled) {
+    application::session::SessionState state{};
+    state.setTestProtocolMode(domain::TestMode::Automatic);
+    state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(1));
+
+    TestExecutionSchedulerSpy scheduler{};
+    TelemetryClientSpy telemetryClient{};
+    ScenarioFunctionEngine functionEngine{};
+    application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
+    application::useCases::StartTestExecutionUseCase useCase{state, scheduler, telemetryClient,
+                                                             buildControlPlotUseCase};
+
+    useCase.execute();
+    ASSERT_TRUE(scheduler.tick);
+    scheduler.tick(3);
+
+    ASSERT_TRUE(telemetryClient.axis1Command.has_value());
+    EXPECT_NEAR(telemetryClient.axis1Command->position, 0.0F, 0.0001F);
+}
+
+TEST(StartTestExecutionUseCaseTest, AutomaticScenarioAppliesYawOscillationWhenAngleModelIsEnabled) {
+    application::session::SessionState state{};
+    state.setTestProtocolMode(domain::TestMode::Automatic);
+    state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(1));
+    state.setUseAngleOfAttackModel(true);
+
+    TestExecutionSchedulerSpy scheduler{};
+    TelemetryClientSpy telemetryClient{};
+    ScenarioFunctionEngine functionEngine{};
+    application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
+    application::useCases::StartTestExecutionUseCase useCase{state, scheduler, telemetryClient,
+                                                             buildControlPlotUseCase};
+
+    useCase.execute();
+    ASSERT_TRUE(scheduler.tick);
+    scheduler.tick(3);
+
+    ASSERT_TRUE(telemetryClient.axis1Command.has_value());
+    EXPECT_NEAR(telemetryClient.axis1Command->position, 3.0F, 0.0001F);
+}
+
+TEST(StartTestExecutionUseCaseTest, HybridScenarioDoesNotApplyYawOscillationWhenAngleModelIsDisabled) {
+    application::session::SessionState state{};
+    state.setTestModeState(domain::TestMode::Hybrid, domain::StandControlMode::Hybrid,
+                           domain::TestTimeSource::AutoCalculated, domain::TestTimeDirection::CountDown);
+    state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(1));
+    state.setHybridOperatorDirection(domain::WindDirection::from(90.0));
+    state.setHybridOperatorAngleOfAttack(domain::AngleOfAttack::from(15.0));
+
+    TestExecutionSchedulerSpy scheduler{};
+    TelemetryClientSpy telemetryClient{};
+    ScenarioFunctionEngine functionEngine{};
+    application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
+    application::useCases::StartTestExecutionUseCase useCase{state, scheduler, telemetryClient,
+                                                             buildControlPlotUseCase};
+
+    useCase.execute();
+    ASSERT_TRUE(scheduler.tick);
+    scheduler.tick(3);
+
+    ASSERT_TRUE(telemetryClient.axis1Command.has_value());
+    EXPECT_NEAR(telemetryClient.axis1Command->position, 105.0F, 0.0001F);
+}
+
+TEST(StartTestExecutionUseCaseTest, HybridScenarioAppliesYawOscillationWhenAngleModelIsEnabled) {
+    application::session::SessionState state{};
+    state.setTestModeState(domain::TestMode::Hybrid, domain::StandControlMode::Hybrid,
+                           domain::TestTimeSource::AutoCalculated, domain::TestTimeDirection::CountDown);
+    state.setEstimatedTestDurationMinutes(domain::DurationMinutes::required(1));
+    state.setHybridOperatorDirection(domain::WindDirection::from(90.0));
+    state.setHybridOperatorAngleOfAttack(domain::AngleOfAttack::from(15.0));
+    state.setUseAngleOfAttackModel(true);
+
+    TestExecutionSchedulerSpy scheduler{};
+    TelemetryClientSpy telemetryClient{};
+    ScenarioFunctionEngine functionEngine{};
+    application::useCases::BuildControlPlotUseCase buildControlPlotUseCase{state, functionEngine};
+    application::useCases::StartTestExecutionUseCase useCase{state, scheduler, telemetryClient,
+                                                             buildControlPlotUseCase};
+
+    useCase.execute();
+    ASSERT_TRUE(scheduler.tick);
+    scheduler.tick(3);
+
+    ASSERT_TRUE(telemetryClient.axis1Command.has_value());
+    EXPECT_NEAR(telemetryClient.axis1Command->position, 108.0F, 0.0001F);
+}
+
 TEST(StartTestExecutionUseCaseTest, HybridCompletedOverrideIsClearedAfterScenarioTick) {
     application::session::SessionState state{};
     state.setTestModeState(domain::TestMode::Hybrid, domain::StandControlMode::Hybrid,

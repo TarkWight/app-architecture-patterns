@@ -138,7 +138,8 @@ void StartTestExecutionUseCase::applyScenarioImpact(domain::ElapsedSeconds elaps
     state.appendControlTraceSample(
         domain::ControlTraceSample::manualCommand(elapsed, effectiveImpact, effectiveImpact));
     buildControlPlotUseCase.refreshFromState();
-    appliedStandImpactSender.send(effectiveImpact, elapsed, protocol.testProtocol);
+    appliedStandImpactSender.send(effectiveImpact, elapsed, protocol.testProtocol,
+                                  state.control().useAngleOfAttackModel);
 }
 
 void StartTestExecutionUseCase::recordManualControlTrace(domain::ElapsedSeconds elapsed) {

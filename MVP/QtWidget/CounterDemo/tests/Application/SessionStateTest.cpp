@@ -111,4 +111,17 @@ TEST(SessionStateTest, RuntimeTargetStandImpactDoesNotResetReadiness) {
     EXPECT_TRUE(state.readiness().hasCalculatedForImpact);
 }
 
+TEST(SessionStateTest, ResetsReadinessWhenAngleOfAttackModelFlagChanges) {
+    application::session::SessionState state{};
+    domain::EstimatedTestDurationResult result{};
+    result.duration = domain::DurationMinutes::required(12);
+    state.setReadinessFromEstimationResult(result, domain::makeWindImpact(1.0, 0.0, 0.0));
+    ASSERT_EQ(state.readiness().status, application::session::ReadinessStatus::Ok);
+
+    state.setUseAngleOfAttackModel(true);
+
+    EXPECT_EQ(state.readiness().status, application::session::ReadinessStatus::Unknown);
+    EXPECT_FALSE(state.readiness().hasCalculatedForImpact);
+}
+
 } // namespace

@@ -19,7 +19,8 @@ void SetStandImpactUseCase::setApplied(domain::WindImpact profile) {
 
     state.setAppliedStandImpact(profile);
     state.appendControlTraceSample(domain::ControlTraceSample::manualCommand(elapsed, target, profile));
-    appliedStandImpactSender.send(profile, elapsed, state.protocol().testProtocol);
+    appliedStandImpactSender.send(profile, elapsed, state.protocol().testProtocol,
+                                  state.control().useAngleOfAttackModel);
 }
 
 } // namespace application::useCases

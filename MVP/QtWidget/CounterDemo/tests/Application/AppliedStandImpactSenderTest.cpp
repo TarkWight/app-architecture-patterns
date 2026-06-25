@@ -64,7 +64,7 @@ class TelemetryClientSpy final : public application::ports::ITelemetryClient {
     std::optional<domain::AxisControlCommand> axis1Command{};
 };
 
-TEST(AppliedStandImpactSenderTest, SendsMappedAxisCommandsWithYawOscillation) {
+TEST(AppliedStandImpactSenderTest, SendsMappedAxisCommandsWithoutYawOscillationWhenAngleModelIsDisabled) {
     TelemetryClientSpy telemetryClient{};
     application::services::AppliedStandImpactSender sender{telemetryClient};
     domain::TestProtocol protocol{};
@@ -73,7 +73,28 @@ TEST(AppliedStandImpactSenderTest, SendsMappedAxisCommandsWithYawOscillation) {
         {"battery_weight", "Вес аккумулятора", "2,4"},
     };
 
-    sender.send(domain::makeWindImpact(4.0, 70.0, 30.0), domain::ElapsedSeconds::from(3), protocol);
+    sender.send(domain::makeWindImpact(4.0, 70.0, 30.0), domain::ElapsedSeconds::from(3), protocol, false);
+
+    ASSERT_TRUE(telemetryClient.axis0Command.has_value());
+    ASSERT_TRUE(telemetryClient.axis1Command.has_value());
+    EXPECT_FLOAT_EQ(telemetryClient.axis0Command->position, 0.0F);
+    EXPECT_FLOAT_EQ(telemetryClient.axis0Command->velocity, domain::axisCommandVelocity);
+    EXPECT_FLOAT_EQ(telemetryClient.axis0Command->torque, 26.0F);
+    EXPECT_FLOAT_EQ(telemetryClient.axis1Command->position, 100.0F);
+    EXPECT_FLOAT_EQ(telemetryClient.axis1Command->velocity, domain::axisCommandVelocity);
+    EXPECT_FLOAT_EQ(telemetryClient.axis1Command->torque, 20.0F);
+}
+
+TEST(AppliedStandImpactSenderTest, SendsMappedAxisCommandsWithYawOscillationWhenAngleModelIsEnabled) {
+    TelemetryClientSpy telemetryClient{};
+    application::services::AppliedStandImpactSender sender{telemetryClient};
+    domain::TestProtocol protocol{};
+    protocol.droneParameters = {
+        {"uav_model", "Модель БПЛА", "BAS-1"},
+        {"battery_weight", "Вес аккумулятора", "2,4"},
+    };
+
+    sender.send(domain::makeWindImpact(4.0, 70.0, 30.0), domain::ElapsedSeconds::from(3), protocol, true);
 
     ASSERT_TRUE(telemetryClient.axis0Command.has_value());
     ASSERT_TRUE(telemetryClient.axis1Command.has_value());

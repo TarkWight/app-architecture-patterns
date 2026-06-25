@@ -14,10 +14,12 @@ AppliedStandImpactSender::AppliedStandImpactSender(application::ports::ITelemetr
 }
 
 void AppliedStandImpactSender::send(const domain::WindImpact &impact, domain::ElapsedSeconds elapsed,
-                                    const domain::TestProtocol &protocol) const {
+                                    const domain::TestProtocol &protocol, bool useAngleOfAttackModel) const {
     const auto uavSpecification = UavSpecificationMapper{}.map(protocol);
-    const auto yawOffset = domain::YawOscillationPolicy::calculate(domain::StandImpactCalculationContext{
-        .impact = impact, .elapsed = elapsed, .uavSpecification = uavSpecification});
+    const auto yawOffset = useAngleOfAttackModel
+                               ? domain::YawOscillationPolicy::calculate(domain::StandImpactCalculationContext{
+                                     .impact = impact, .elapsed = elapsed, .uavSpecification = uavSpecification})
+                               : domain::YawOscillationOffset::from(0.0);
     const auto commands = domain::StandCommandMapper::map(impact, yawOffset);
     telemetryClient.setAxisCommand(domain::axis0, commands.axis0);
     telemetryClient.setAxisCommand(domain::axis1, commands.axis1);

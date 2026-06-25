@@ -82,6 +82,7 @@ class SessionState {
     void clearHybridBeaufortOverride();
     void setHybridOperatorDirection(domain::WindDirection direction);
     void setHybridOperatorAngleOfAttack(domain::AngleOfAttack angleOfAttack);
+    void setUseAngleOfAttackModel(bool enabled);
 
     void setTestProtocolTitle(std::string title);
     void setTestProtocolLine(int idx, std::string line);

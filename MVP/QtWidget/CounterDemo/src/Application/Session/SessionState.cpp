@@ -259,6 +259,12 @@ void application::session::SessionState::setHybridOperatorAngleOfAttack(domain::
     notify();
 }
 
+void application::session::SessionState::setUseAngleOfAttackModel(bool enabled) {
+    data.control.useAngleOfAttackModel = enabled;
+    resetReadinessWithoutNotify();
+    notify();
+}
+
 void application::session::SessionState::setControlPlot(application::dto::PlotModel plot) {
     data.control.controlPlot = std::move(plot);
     notify();

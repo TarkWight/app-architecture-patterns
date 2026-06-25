@@ -41,7 +41,6 @@ class ControlChartsTabWidget final : public QWidget, public presentation::contro
 
   signals:
     void functionEdited(const QString &expression);
-    void formulaTemplateSelected(const QString &key);
     void calculateRequested();
     void lineColorRequested();
     void logMessage(const QString &text);
@@ -54,9 +53,9 @@ class ControlChartsTabWidget final : public QWidget, public presentation::contro
 
     void connectSignals();
     void connectSessionSignals();
-    void populateFormulaTemplates();
+    void populateTestProgramSelection();
     void populateTestSelectionControls();
-    void updateFormulaTemplateSelection(const std::string &expression);
+    void updateFormulaEditability(const std::string &program);
 };
 
 } // namespace ui

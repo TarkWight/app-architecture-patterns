@@ -16,9 +16,11 @@ TEST(TestProtocolTest, FallsBackToManualModeForUnknownKey) {
 }
 
 TEST(TestProtocolTest, ParsesKnownProgramKeys) {
+    EXPECT_EQ(domain::testProgramFromKey("custom"), domain::TestProgram::Custom);
     EXPECT_EQ(domain::testProgramFromKey("test1"), domain::TestProgram::StabilityInIdealConditions);
     EXPECT_EQ(domain::testProgramFromKey("test2"), domain::TestProgram::MaximumWindLoad);
     EXPECT_EQ(domain::testProgramFromKey("test3"), domain::TestProgram::WindLoadTemporalPerspective);
+    EXPECT_EQ(domain::testProgramFromKey("attenuated_oscillation"), domain::TestProgram::AttenuatedOscillation);
 }
 
 TEST(TestProtocolTest, FallsBackToIdealConditionsProgramForUnknownKey) {
@@ -34,8 +36,21 @@ TEST(TestProtocolTest, ExposesFormulaTemplatesForControlProfileCalculation) {
     EXPECT_EQ(domain::formulaTemplateByKey("calm").expression, "0");
     EXPECT_EQ(domain::formulaTemplateByKey("max_parameters").expression, "60 * sin(0.0053 * x)");
     EXPECT_EQ(domain::formulaTemplateByKey("temporal_perspective").expression, "sin(x) * (6.9 * sin(10 * x))");
-    EXPECT_EQ(domain::formulaTemplateByKey("attenuated_oscillation").expression, "abs(x * sin(x) / (1 + x**2))");
+    EXPECT_EQ(domain::formulaTemplateByKey("attenuated_oscillation").expression, "15 * abs(x * sin(x) / (1 + x**2))");
     EXPECT_EQ(domain::formulaTemplateKeyByExpression("0"), "calm");
+}
+
+TEST(TestProtocolTest, MapsTestProgramsToSingleScenarioFormula) {
+    EXPECT_TRUE(domain::testProgramUsesCustomFormula(domain::TestProgram::Custom));
+    EXPECT_FALSE(domain::testProgramUsesCustomFormula(domain::TestProgram::MaximumWindLoad));
+    EXPECT_EQ(domain::formulaTemplateForTestProgram(domain::TestProgram::Custom).expression, "");
+    EXPECT_EQ(domain::formulaTemplateForTestProgram(domain::TestProgram::StabilityInIdealConditions).expression, "0");
+    EXPECT_EQ(domain::formulaTemplateForTestProgram(domain::TestProgram::MaximumWindLoad).expression,
+              "60 * sin(0.0053 * x)");
+    EXPECT_EQ(domain::formulaTemplateForTestProgram(domain::TestProgram::WindLoadTemporalPerspective).expression,
+              "sin(x) * (6.9 * sin(10 * x))");
+    EXPECT_EQ(domain::formulaTemplateForTestProgram(domain::TestProgram::AttenuatedOscillation).expression,
+              "15 * abs(x * sin(x) / (1 + x**2))");
 }
 
 } // namespace

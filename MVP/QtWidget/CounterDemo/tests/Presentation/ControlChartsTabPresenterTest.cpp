@@ -163,13 +163,41 @@ TEST(ControlChartsTabPresenterTest, TestModeChangeUpdatesProtocolStateWithoutReb
     EXPECT_EQ(fixture.view.plotRefreshCount, 0);
 }
 
-TEST(ControlChartsTabPresenterTest, TestProgramChangeUpdatesProtocolState) {
+TEST(ControlChartsTabPresenterTest, TestProgramChangeUpdatesProtocolStateAndFormulaWithoutRebuildingPlot) {
     PresenterFixture fixture{};
+    fixture.state.setFunctionExpression("operator_custom_formula");
     fixture.presenter.attachView(fixture.view);
 
     fixture.presenter.onTestProtocolProgramChanged("test3");
 
     EXPECT_EQ(fixture.state.protocol().testProtocol.testProgram, domain::TestProgram::WindLoadTemporalPerspective);
+    EXPECT_EQ(fixture.state.control().functionExpression.value, "sin(x) * (6.9 * sin(10 * x))");
+    EXPECT_EQ(fixture.view.plotRefreshCount, 0);
+}
+
+TEST(ControlChartsTabPresenterTest, CustomTestProgramKeepsOperatorFormulaEditableSource) {
+    PresenterFixture fixture{};
+    fixture.state.setFunctionExpression("operator_custom_formula");
+    fixture.presenter.attachView(fixture.view);
+
+    fixture.presenter.onTestProtocolProgramChanged("custom");
+
+    EXPECT_EQ(fixture.state.protocol().testProtocol.testProgram, domain::TestProgram::Custom);
+    EXPECT_EQ(fixture.state.control().functionExpression.value, "operator_custom_formula");
+    EXPECT_EQ(fixture.view.plotRefreshCount, 0);
+}
+
+TEST(ControlChartsTabPresenterTest, TestProgramChangeResetsReadiness) {
+    PresenterFixture fixture{};
+    domain::EstimatedTestDurationResult result{};
+    result.duration = domain::DurationMinutes::required(37);
+    fixture.state.setReadinessFromEstimationResult(result, domain::makeWindImpact(1.0, 0.0, 0.0));
+    ASSERT_EQ(fixture.state.readiness().status, application::session::ReadinessStatus::Ok);
+    fixture.presenter.attachView(fixture.view);
+
+    fixture.presenter.onTestProtocolProgramChanged("test2");
+
+    EXPECT_EQ(fixture.state.readiness().status, application::session::ReadinessStatus::Unknown);
 }
 
 TEST(ControlChartsTabPresenterTest, CalculationResultDisplaysOkReadinessMessage) {

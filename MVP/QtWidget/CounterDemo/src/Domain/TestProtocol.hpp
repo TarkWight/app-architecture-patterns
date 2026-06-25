@@ -10,7 +10,13 @@ namespace domain {
 
 enum class TestMode { Manual, Hybrid, Automatic };
 
-enum class TestProgram { StabilityInIdealConditions, MaximumWindLoad, WindLoadTemporalPerspective };
+enum class TestProgram {
+    Custom,
+    StabilityInIdealConditions,
+    MaximumWindLoad,
+    WindLoadTemporalPerspective,
+    AttenuatedOscillation
+};
 
 constexpr TestMode testModeFromKey(std::string_view key) {
     if (key == "hybrid") {
@@ -47,49 +53,71 @@ constexpr std::string_view testModeTitle(TestMode mode) {
 }
 
 constexpr TestProgram testProgramFromKey(std::string_view key) {
+    if (key == "custom") {
+        return TestProgram::Custom;
+    }
     if (key == "test2") {
         return TestProgram::MaximumWindLoad;
     }
     if (key == "test3") {
         return TestProgram::WindLoadTemporalPerspective;
     }
+    if (key == "attenuated_oscillation") {
+        return TestProgram::AttenuatedOscillation;
+    }
     return TestProgram::StabilityInIdealConditions;
 }
 
 constexpr std::string_view testProgramKey(TestProgram program) {
     switch (program) {
+    case TestProgram::Custom:
+        return "custom";
     case TestProgram::StabilityInIdealConditions:
         return "test1";
     case TestProgram::MaximumWindLoad:
         return "test2";
     case TestProgram::WindLoadTemporalPerspective:
         return "test3";
+    case TestProgram::AttenuatedOscillation:
+        return "attenuated_oscillation";
     }
     return "test1";
 }
 
 constexpr std::string_view testProgramTitle(TestProgram program) {
     switch (program) {
+    case TestProgram::Custom:
+        return "ПОЛЬЗОВАТЕЛЬСКОЕ ИСПЫТАНИЕ БПЛА";
     case TestProgram::StabilityInIdealConditions:
         return "ИСПЫТАНИЕ УСТОЙЧИВОСТИ БПЛА В ИДЕАЛЬНЫХ УСЛОВИЯХ";
     case TestProgram::MaximumWindLoad:
         return "ИСПЫТАНИЕ МАКСИМАЛЬНОЙ ВЕТРОВОЙ НАГРУЗКИ БПЛА";
     case TestProgram::WindLoadTemporalPerspective:
         return "ИСПЫТАНИЕ БПЛА С УЧЕТОМ ВЕТРОВОЙ НАГРУЗКИ";
+    case TestProgram::AttenuatedOscillation:
+        return "ИСПЫТАНИЕ БПЛА С ЗАТУХАЮЩЕЙ ОСЦИЛЛЯЦИЕЙ ВЕТРОВОЙ НАГРУЗКИ";
     }
     return "ИСПЫТАНИЕ УСТОЙЧИВОСТИ БПЛА В ИДЕАЛЬНЫХ УСЛОВИЯХ";
 }
 
 constexpr std::string_view testProgramShortTitle(TestProgram program) {
     switch (program) {
+    case TestProgram::Custom:
+        return "Пользовательское";
     case TestProgram::StabilityInIdealConditions:
         return "Полет в штиль";
     case TestProgram::MaximumWindLoad:
         return "Определение максимальных параметров";
     case TestProgram::WindLoadTemporalPerspective:
         return "Исследование временной перспективы";
+    case TestProgram::AttenuatedOscillation:
+        return "Затухающая осцилляция";
     }
     return "Полет в штиль";
+}
+
+constexpr bool testProgramUsesCustomFormula(TestProgram program) {
+    return program == TestProgram::Custom;
 }
 
 struct TestProtocolParameter {

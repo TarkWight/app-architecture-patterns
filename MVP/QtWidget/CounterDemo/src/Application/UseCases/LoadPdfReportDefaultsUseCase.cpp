@@ -1,5 +1,7 @@
 #include "LoadPdfReportDefaultsUseCase.hpp"
 
+#include "../../Domain/FormulaTemplate.hpp"
+
 #include <array>
 #include <algorithm>
 #include <utility>
@@ -79,7 +81,13 @@ void applyConfig(application::session::SessionState &state, const application::d
     }
 
     state.setTestProtocolMode(domain::testModeFromKey(config.testMode));
-    state.setTestProtocolProgram(domain::testProgramFromKey(config.testProgram));
+    const auto testProgram = domain::testProgramFromKey(config.testProgram);
+    if (domain::testProgramUsesCustomFormula(testProgram)) {
+        state.setTestProtocolProgram(testProgram);
+    } else {
+        state.setTestProtocolProgramAndFunctionExpression(
+            testProgram, std::string{domain::formulaTemplateForTestProgram(testProgram).expression});
+    }
     state.setTestProtocolDroneParameters(mergeWithRequiredParameters(config.droneParameters));
 }
 

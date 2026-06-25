@@ -60,7 +60,6 @@ class ShellPresenter final {
     void onCalculatePressed();
 
     void onFunctionEdited(std::string expression);
-    void onFormulaTemplateSelected(std::string key);
     void onLineColorSelected(application::dto::RgbColor color);
     void onTestTimeSourceChanged(domain::TestTimeSource source);
     void onStandControlModeChanged(domain::StandControlMode mode);

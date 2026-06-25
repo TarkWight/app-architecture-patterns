@@ -1,6 +1,8 @@
 #ifndef FORMULATEMPLATE_HPP
 #define FORMULATEMPLATE_HPP
 
+#include "TestProtocol.hpp"
+
 #include <array>
 #include <string_view>
 
@@ -21,7 +23,7 @@ constexpr std::array<FormulaTemplate, 4> formulaTemplates{{
                     .expression = "sin(x) * (6.9 * sin(10 * x))"},
     FormulaTemplate{.key = "attenuated_oscillation",
                     .title = "Затухающая осцилляция",
-                    .expression = "abs(x * sin(x) / (1 + x**2))"},
+                    .expression = "15 * abs(x * sin(x) / (1 + x**2))"},
 }};
 
 constexpr FormulaTemplate formulaTemplateByKey(std::string_view key) {
@@ -42,6 +44,23 @@ constexpr std::string_view formulaTemplateKeyByExpression(std::string_view expre
     }
 
     return {};
+}
+
+constexpr FormulaTemplate formulaTemplateForTestProgram(TestProgram program) {
+    switch (program) {
+    case TestProgram::Custom:
+        return FormulaTemplate{.key = "custom", .title = "Пользовательское", .expression = ""};
+    case TestProgram::StabilityInIdealConditions:
+        return formulaTemplateByKey("calm");
+    case TestProgram::MaximumWindLoad:
+        return formulaTemplateByKey("max_parameters");
+    case TestProgram::WindLoadTemporalPerspective:
+        return formulaTemplateByKey("temporal_perspective");
+    case TestProgram::AttenuatedOscillation:
+        return formulaTemplateByKey("attenuated_oscillation");
+    }
+
+    return formulaTemplateByKey("calm");
 }
 
 } // namespace domain

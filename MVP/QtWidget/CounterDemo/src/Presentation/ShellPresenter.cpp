@@ -1,6 +1,5 @@
 #include "ShellPresenter.hpp"
 
-#include "../Domain/FormulaTemplate.hpp"
 #include "../Domain/StandConnectionStatus.hpp"
 #include "../Domain/StandConnectionTransitions.hpp"
 #include "../Domain/TestExecutionTransitions.hpp"
@@ -164,15 +163,6 @@ void ShellPresenter::onFunctionEdited(std::string expression) {
 
     if (view != nullptr) {
         view->appendLog("Function expression updated");
-    }
-}
-
-void ShellPresenter::onFormulaTemplateSelected(std::string key) {
-    const auto formulaTemplate = domain::formulaTemplateByKey(key);
-    setFunctionExpressionUseCase.execute(std::string{formulaTemplate.expression});
-
-    if (view != nullptr) {
-        view->appendLog(std::string{"Formula template selected: "} + std::string{formulaTemplate.title});
     }
 }
 

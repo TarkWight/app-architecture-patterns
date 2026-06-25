@@ -322,6 +322,15 @@ void application::session::SessionState::setTestProtocolMode(domain::TestMode mo
 
 void application::session::SessionState::setTestProtocolProgram(domain::TestProgram program) {
     data.protocol.testProtocol.testProgram = program;
+    resetReadinessWithoutNotify();
+    notify();
+}
+
+void application::session::SessionState::setTestProtocolProgramAndFunctionExpression(domain::TestProgram program,
+                                                                                     std::string expression) {
+    data.protocol.testProtocol.testProgram = program;
+    data.control.functionExpression.value = std::move(expression);
+    resetReadinessWithoutNotify();
     notify();
 }
 

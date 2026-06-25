@@ -196,8 +196,6 @@ void MainWindow::connectTestControlSignals() {
 
     QObject::connect(controlChartsTabWidget, &ControlChartsTabWidget::functionEdited, this,
                      [this](const QString &expression) { shellPresenter.onFunctionEdited(expression.toStdString()); });
-    QObject::connect(controlChartsTabWidget, &ControlChartsTabWidget::formulaTemplateSelected, this,
-                     [this](const QString &key) { shellPresenter.onFormulaTemplateSelected(key.toStdString()); });
     QObject::connect(controlChartsTabWidget, &ControlChartsTabWidget::calculateRequested, this, [this]() {
         shellPresenter.onCalculatePressed();
         controlChartsTabPresenter.onCalculationResultChanged();

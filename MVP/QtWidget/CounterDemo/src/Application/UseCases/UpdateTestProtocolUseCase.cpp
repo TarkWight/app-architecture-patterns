@@ -1,5 +1,6 @@
 #include "UpdateTestProtocolUseCase.hpp"
 
+#include "../../Domain/FormulaTemplate.hpp"
 #include "../../Domain/TestModeStatePolicy.hpp"
 
 namespace application::useCases {
@@ -24,7 +25,15 @@ void UpdateTestProtocolUseCase::updateMode(std::string mode) {
 }
 
 void UpdateTestProtocolUseCase::updateProgram(std::string program) {
-    state.setTestProtocolProgram(domain::testProgramFromKey(program));
+    const auto testProgram = domain::testProgramFromKey(program);
+
+    if (domain::testProgramUsesCustomFormula(testProgram)) {
+        state.setTestProtocolProgram(testProgram);
+        return;
+    }
+
+    state.setTestProtocolProgramAndFunctionExpression(
+        testProgram, std::string{domain::formulaTemplateForTestProgram(testProgram).expression});
 }
 
 void UpdateTestProtocolUseCase::updateDroneParameterValue(int index, std::string value) {

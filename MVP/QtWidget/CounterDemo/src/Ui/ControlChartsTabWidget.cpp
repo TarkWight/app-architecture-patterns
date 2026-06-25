@@ -1,7 +1,7 @@
 #include "ControlChartsTabWidget.hpp"
 #include "ui_ControlChartsTabWidget.h"
 
-#include "../Domain/FormulaTemplate.hpp"
+#include "../Domain/TestProtocol.hpp"
 #include "../Domain/WindImpact.hpp"
 
 #include <QSignalBlocker>
@@ -15,7 +15,7 @@ ControlChartsTabWidget::ControlChartsTabWidget(presentation::controlChartsTab::C
     ui->setupUi(this);
     ui->doubleSpinBoxBeaufort->setRange(domain::minOperationalBeaufort, domain::maxOperationalBeaufort);
     populateTestSelectionControls();
-    populateFormulaTemplates();
+    populateTestProgramSelection();
 
     ui->labelBeaufortCaption->hide();
     ui->doubleSpinBoxBeaufort->hide();
@@ -71,9 +71,10 @@ void ControlChartsTabWidget::setTestProtocolMode(const std::string &mode) {
 }
 
 void ControlChartsTabWidget::setTestProtocolProgram(const std::string &program) {
-    const QSignalBlocker blocker{ui->comboBoxTestProgram};
-    const int index = ui->comboBoxTestProgram->findData(QString::fromStdString(program));
-    ui->comboBoxTestProgram->setCurrentIndex(index >= 0 ? index : 0);
+    const QSignalBlocker blocker{ui->comboBoxFormulaTemplate};
+    const int index = ui->comboBoxFormulaTemplate->findData(QString::fromStdString(program));
+    ui->comboBoxFormulaTemplate->setCurrentIndex(index >= 0 ? index : 0);
+    updateFormulaEditability(program);
 }
 
 void ControlChartsTabWidget::setBeaufort(double value) {
@@ -104,9 +105,8 @@ void ControlChartsTabWidget::appendLog(const std::string &text) {
 }
 
 void ControlChartsTabWidget::setFunctionExpression(const std::string &expression) {
-    updateFormulaTemplateSelection(expression);
-
-    if (ui->lineEditFormula->hasFocus() || ui->lineEditFormula->text().toStdString() == expression) {
+    if ((!ui->lineEditFormula->isReadOnly() && ui->lineEditFormula->hasFocus()) ||
+        ui->lineEditFormula->text().toStdString() == expression) {
         return;
     }
 
@@ -119,11 +119,13 @@ void ControlChartsTabWidget::connectSignals() {
                      [this]() { emit functionEdited(ui->lineEditFormula->text()); });
 
     QObject::connect(ui->comboBoxFormulaTemplate, &QComboBox::currentIndexChanged, this, [this](int index) {
-        if (index <= 0) {
+        if (index < 0) {
             return;
         }
 
-        emit formulaTemplateSelected(ui->comboBoxFormulaTemplate->currentData().toString());
+        const auto program = ui->comboBoxFormulaTemplate->currentData().toString();
+        updateFormulaEditability(program.toStdString());
+        presenter.onTestProtocolProgramChanged(program.toStdString());
     });
 
     QObject::connect(ui->buttonCalculatePlot, &QPushButton::clicked, this, [this]() { emit calculateRequested(); });
@@ -131,10 +133,6 @@ void ControlChartsTabWidget::connectSignals() {
     QObject::connect(ui->comboBoxTestMode, &QComboBox::currentIndexChanged, this, [this]() {
         presenter.onTestProtocolModeChanged(ui->comboBoxTestMode->currentData().toString().toStdString());
     });
-    QObject::connect(ui->comboBoxTestProgram, &QComboBox::currentIndexChanged, this, [this]() {
-        presenter.onTestProtocolProgramChanged(ui->comboBoxTestProgram->currentData().toString().toStdString());
-    });
-
     QObject::connect(ui->spinBoxMinutes, qOverload<int>(&QSpinBox::valueChanged), this,
                      [this](int value) { presenter.onMinutesChanged(value); });
 
@@ -166,7 +164,7 @@ void ControlChartsTabWidget::connectSessionSignals() {
 
     QObject::connect(&sessionAdapter, &infrastructure::SessionStateQtAdapter::testProtocolProgramChanged, this,
                      [this](const QString &program) {
-                         if (ui->comboBoxTestProgram->currentData().toString() == program) {
+                         if (ui->comboBoxFormulaTemplate->currentData().toString() == program) {
                              return;
                          }
 
@@ -213,34 +211,25 @@ void ControlChartsTabWidget::connectSessionSignals() {
                      [this]() { refreshPlot(); });
 }
 
-void ControlChartsTabWidget::populateFormulaTemplates() {
-    ui->comboBoxFormulaTemplate->addItem(QStringLiteral("Своя формула"), QString{});
+void ControlChartsTabWidget::populateTestProgramSelection() {
+    ui->comboBoxFormulaTemplate->addItem(QStringLiteral("Пользовательское"), QStringLiteral("custom"));
 
-    for (const auto &formulaTemplate : domain::formulaTemplates) {
-        ui->comboBoxFormulaTemplate->addItem(
-            QString::fromUtf8(formulaTemplate.title.data(), static_cast<qsizetype>(formulaTemplate.title.size())),
-            QString::fromUtf8(formulaTemplate.key.data(), static_cast<qsizetype>(formulaTemplate.key.size())));
-    }
+    ui->comboBoxFormulaTemplate->addItem(QStringLiteral("Полет в штиль"), QStringLiteral("test1"));
+    ui->comboBoxFormulaTemplate->addItem(QStringLiteral("Определение максимальных параметров"),
+                                         QStringLiteral("test2"));
+    ui->comboBoxFormulaTemplate->addItem(QStringLiteral("Исследование временной перспективы"), QStringLiteral("test3"));
+    ui->comboBoxFormulaTemplate->addItem(QStringLiteral("Затухающая осцилляция"),
+                                         QStringLiteral("attenuated_oscillation"));
 }
 
 void ControlChartsTabWidget::populateTestSelectionControls() {
     ui->comboBoxTestMode->addItem(QStringLiteral("Ручное"), QStringLiteral("manual"));
     ui->comboBoxTestMode->addItem(QStringLiteral("Гибридное"), QStringLiteral("hybrid"));
     ui->comboBoxTestMode->addItem(QStringLiteral("Автоматическое"), QStringLiteral("automatic"));
-
-    ui->comboBoxTestProgram->addItem(QStringLiteral("Полет в штиль"), QStringLiteral("test1"));
-    ui->comboBoxTestProgram->addItem(QStringLiteral("Определение максимальных параметров"), QStringLiteral("test2"));
-    ui->comboBoxTestProgram->addItem(QStringLiteral("Исследование временной перспективы"), QStringLiteral("test3"));
 }
 
-void ControlChartsTabWidget::updateFormulaTemplateSelection(const std::string &expression) {
-    const QSignalBlocker blocker{ui->comboBoxFormulaTemplate};
-    const auto key = domain::formulaTemplateKeyByExpression(expression);
-    const int index =
-        key.empty()
-            ? 0
-            : ui->comboBoxFormulaTemplate->findData(QString::fromUtf8(key.data(), static_cast<qsizetype>(key.size())));
-    ui->comboBoxFormulaTemplate->setCurrentIndex(index >= 0 ? index : 0);
+void ControlChartsTabWidget::updateFormulaEditability(const std::string &program) {
+    ui->lineEditFormula->setReadOnly(!domain::testProgramUsesCustomFormula(domain::testProgramFromKey(program)));
 }
 
 } // namespace ui

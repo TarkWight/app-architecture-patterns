@@ -296,6 +296,7 @@ if (BUILD_TESTING)
     tests/Presentation/ControlChartsTabPresenterTest.cpp
     tests/Presentation/ShellPresenterTest.cpp
     tests/Ui/PlotRendererTest.cpp
+    tests/Ui/PlotWidgetTest.cpp
     tests/Infrastructure/ConfigTemplateServiceTest.cpp
     tests/Infrastructure/LegacyAxisProtocolCodecTest.cpp
     tests/Infrastructure/StandTraceFormatterTest.cpp
@@ -337,6 +338,7 @@ if (BUILD_TESTING)
     src/Application/UseCases/UpdateTestProtocolUseCase.cpp
     src/Presentation/ShellPresenter.cpp
     src/Presentation/ControlChartsTab/ControlChartsTabPresenter.cpp
+    src/Ui/PlotWidget.cpp
     src/Ui/Render/PlotRenderer.cpp
     src/Infrastructure/QtTestExecutionScheduler.cpp
     src/Infrastructure/ConfigTemplates/ConfigTemplateService.cpp
@@ -353,6 +355,7 @@ if (BUILD_TESTING)
     PRIVATE
       Qt::Core
       Qt::Gui
+      Qt::Widgets
       GTest::gtest_main
   )
 

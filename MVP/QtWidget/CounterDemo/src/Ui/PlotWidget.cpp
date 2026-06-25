@@ -31,6 +31,10 @@ void PlotWidget::setPlot(application::dto::PlotModel plot) {
         return;
     }
 
+    if (targetPlot.renderMode == application::dto::PlotRenderMode::RealtimeTimeSeries) {
+        this->plot = prepareRealtimePlotForAnimation(this->plot, targetPlot);
+    }
+
     animationTimer.start();
     update();
 }
@@ -62,6 +66,14 @@ void PlotWidget::advanceAnimationFrame() {
     }
 
     update();
+}
+
+application::dto::PlotModel PlotWidget::prepareRealtimePlotForAnimation(const application::dto::PlotModel &current,
+                                                                        const application::dto::PlotModel &target) {
+    application::dto::PlotModel result = target;
+    result.x.min = current.x.min;
+    result.x.max = current.x.max;
+    return result;
 }
 
 application::dto::PlotModel PlotWidget::interpolateRealtimeViewport(const application::dto::PlotModel &current,

@@ -17,6 +17,11 @@ class PlotWidget final : public QWidget {
     void setPlot(application::dto::PlotModel plot);
     const application::dto::PlotModel &getPlot() const;
 
+    static application::dto::PlotModel prepareRealtimePlotForAnimation(const application::dto::PlotModel &current,
+                                                                       const application::dto::PlotModel &target);
+    static application::dto::PlotModel interpolateRealtimeViewport(const application::dto::PlotModel &current,
+                                                                   const application::dto::PlotModel &target);
+
   protected:
     void paintEvent(QPaintEvent *event) override;
 
@@ -27,8 +32,6 @@ class PlotWidget final : public QWidget {
 
     void advanceAnimationFrame();
 
-    static application::dto::PlotModel interpolateRealtimeViewport(const application::dto::PlotModel &current,
-                                                                   const application::dto::PlotModel &target);
     static application::dto::PlotModel interpolatePlot(const application::dto::PlotModel &current,
                                                        const application::dto::PlotModel &target);
     static application::dto::AxisSpec interpolateAxis(application::dto::AxisSpec current,

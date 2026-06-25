@@ -34,6 +34,7 @@ inline application::dto::PlotModel makeInitialTelemetryPlot() {
     plot.title = "Telemetry";
     plot.x = application::dto::AxisSpec{.min = 0.0, .max = 60.0, .step = 10.0, .label = "seconds", .labelPrecision = 0};
     plot.y = application::dto::AxisSpec{.min = 0.0, .max = 360.0, .step = 45.0, .label = "degrees"};
+    plot.renderMode = application::dto::PlotRenderMode::RealtimeTimeSeries;
     return plot;
 }
 

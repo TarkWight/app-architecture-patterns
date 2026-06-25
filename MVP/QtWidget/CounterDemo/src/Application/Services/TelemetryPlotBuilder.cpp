@@ -10,6 +10,7 @@ namespace application::services {
 application::dto::PlotModel TelemetryPlotBuilder::build(const session::TelemetryStateData &telemetry) const {
     application::dto::PlotModel plot{};
     plot.title = "Telemetry";
+    plot.renderMode = application::dto::PlotRenderMode::RealtimeTimeSeries;
     plot.x.label = "seconds";
     plot.y = application::dto::AxisSpec{.min = 0.0, .max = 360.0, .step = 45.0, .label = "degrees"};
 

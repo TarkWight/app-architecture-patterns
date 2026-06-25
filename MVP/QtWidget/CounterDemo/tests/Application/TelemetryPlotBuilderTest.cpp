@@ -11,6 +11,7 @@ domain::AxisTelemetrySample validSample(domain::AxisId axisId, double timestampS
     sample.axisId = axisId;
     sample.timestampSeconds = timestampSeconds;
     sample.position = position;
+    sample.setPosition = position;
     sample.valid = true;
     return sample;
 }
@@ -22,6 +23,7 @@ TEST(TelemetryPlotBuilderTest, BuildsVisibleGridWhenHistoryIsEmpty) {
     const auto plot = builder.build(telemetry);
 
     EXPECT_EQ(plot.title, "Telemetry");
+    EXPECT_EQ(plot.renderMode, application::dto::PlotRenderMode::RealtimeTimeSeries);
     EXPECT_DOUBLE_EQ(plot.x.min, 0.0);
     EXPECT_DOUBLE_EQ(plot.x.max, 60.0);
     EXPECT_DOUBLE_EQ(plot.x.step, 10.0);

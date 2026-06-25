@@ -50,7 +50,11 @@ void PlotWidget::paintEvent(QPaintEvent *event) {
 }
 
 void PlotWidget::advanceAnimationFrame() {
-    plot = interpolatePlot(plot, targetPlot);
+    if (targetPlot.renderMode == application::dto::PlotRenderMode::RealtimeTimeSeries) {
+        plot = interpolateRealtimeViewport(plot, targetPlot);
+    } else {
+        plot = interpolatePlot(plot, targetPlot);
+    }
 
     if (isClose(plot, targetPlot)) {
         plot = targetPlot;
@@ -58,6 +62,14 @@ void PlotWidget::advanceAnimationFrame() {
     }
 
     update();
+}
+
+application::dto::PlotModel PlotWidget::interpolateRealtimeViewport(const application::dto::PlotModel &current,
+                                                                    const application::dto::PlotModel &target) {
+    application::dto::PlotModel result = target;
+    result.x.min = interpolateValue(current.x.min, target.x.min);
+    result.x.max = interpolateValue(current.x.max, target.x.max);
+    return result;
 }
 
 application::dto::PlotModel PlotWidget::interpolatePlot(const application::dto::PlotModel &current,

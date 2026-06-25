@@ -44,6 +44,8 @@ struct PlotMarker {
     bool visible{false};
 };
 
+enum class PlotRenderMode { AnimatedModel, RealtimeTimeSeries };
+
 struct PlotModel {
     AxisSpec x{};
     AxisSpec y{};
@@ -52,6 +54,7 @@ struct PlotModel {
     PlotMarker marker{};
     RgbColor color{};
     std::string title{};
+    PlotRenderMode renderMode{PlotRenderMode::AnimatedModel};
 };
 
 } // namespace application::dto

@@ -1,5 +1,7 @@
 #include "TestProtocolTabPresenter.hpp"
 
+#include "../../Localization/TestProtocolStrings.hpp"
+
 #include <exception>
 #include <utility>
 
@@ -26,10 +28,10 @@ void TestProtocolTabPresenter::onViewReady() {
 
     try {
         loadPdfReportDefaultsUseCase.execute(pdfReportConfigPath);
-        view->appendLog("PDF report defaults loaded");
+        view->appendLog(localization::testProtocol::pdfReportDefaultsLoaded);
     } catch (const std::exception &e) {
         loadPdfReportDefaultsUseCase.applyEmptyDefaults();
-        view->appendLog(std::string{"PDF report defaults load failed: "} + e.what());
+        view->appendLog(std::string{localization::testProtocol::pdfReportDefaultsLoadFailedPrefix} + e.what());
     }
 
     syncViewFromState();
@@ -55,7 +57,7 @@ void TestProtocolTabPresenter::onTestProtocolTitleChanged(std::string title) {
     updateTestProtocolUseCase.updateTitle(std::move(title));
 
     if (view != nullptr) {
-        view->appendLog("Test protocol title updated");
+        view->appendLog(localization::testProtocol::testProtocolTitleUpdated);
     }
 }
 
@@ -63,7 +65,7 @@ void TestProtocolTabPresenter::onTestProtocolLineChanged(int index, std::string 
     updateTestProtocolUseCase.updateLine(index, std::move(line));
 
     if (view != nullptr) {
-        view->appendLog("Test protocol line updated");
+        view->appendLog(localization::testProtocol::testProtocolLineUpdated);
     }
 }
 
@@ -79,9 +81,9 @@ void TestProtocolTabPresenter::onLoadPdfTomlPressed(const std::string &filePath)
     try {
         loadPdfReportDefaultsUseCase.execute(filePath);
         syncViewFromState();
-        view->appendLog(std::string{"PDF report fields loaded from TOML: "} + filePath);
+        view->appendLog(std::string{localization::testProtocol::pdfReportFieldsLoadedFromTomlPrefix} + filePath);
     } catch (const std::exception &e) {
-        view->appendLog(std::string{"PDF report TOML load failed: "} + e.what());
+        view->appendLog(std::string{localization::testProtocol::pdfReportTomlLoadFailedPrefix} + e.what());
     }
 }
 
@@ -92,9 +94,9 @@ void TestProtocolTabPresenter::onSavePdfTomlTemplatePressed(const std::string &f
 
     try {
         loadPdfReportDefaultsUseCase.saveEmptyTemplate(filePath);
-        view->appendLog(std::string{"Empty PDF report TOML template saved: "} + filePath);
+        view->appendLog(std::string{localization::testProtocol::emptyPdfReportTomlTemplateSavedPrefix} + filePath);
     } catch (const std::exception &e) {
-        view->appendLog(std::string{"PDF report TOML template save failed: "} + e.what());
+        view->appendLog(std::string{localization::testProtocol::pdfReportTomlTemplateSaveFailedPrefix} + e.what());
     }
 }
 
@@ -103,7 +105,7 @@ void TestProtocolTabPresenter::onExportPdfPressed(const std::string &filePath) {
 
     if (view != nullptr) {
         view->showExportSuccess(filePath);
-        view->appendLog("PDF exported");
+        view->appendLog(localization::testProtocol::pdfExported);
     }
 }
 

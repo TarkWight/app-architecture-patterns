@@ -1,6 +1,7 @@
 #include "MainWindow.hpp"
 
 #include "../Presentation/ViewModels/TestTimeViewModel.hpp"
+#include "../Localization/UiStrings.hpp"
 #include "MainWindowUiAdapter.hpp"
 #include "TelemetryChartsTabWidget.hpp"
 #include "ControlChartsTabWidget.hpp"
@@ -35,20 +36,28 @@ namespace {
 namespace configTemplates = infrastructure::configTemplates;
 
 std::string compassLabel(double degrees) {
-    constexpr std::array<const char *, 16> labels{"N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
-                                                  "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"};
-
     const auto normalized = std::fmod(degrees + 360.0, 360.0);
-    const auto index = static_cast<std::size_t>(std::lround(normalized / 22.5)) % labels.size();
-    return labels[index];
+    const auto index =
+        static_cast<std::size_t>(std::lround(normalized / 22.5)) % localization::ui::compassDirectionLabels.size();
+    return localization::ui::compassDirectionLabels[index];
 }
 
 std::string formatImpact(const domain::WindImpact &profile) {
-    std::ostringstream out;
-    out << std::fixed << std::setprecision(1) << "Bft=" << profile.beaufort.value()
-        << ", dir=" << compassLabel(profile.direction.degrees()) << " (" << profile.direction.degrees()
-        << " deg), AoA=" << profile.angleOfAttack.degrees() << " deg";
-    return out.str();
+    std::ostringstream beaufort;
+    beaufort << std::fixed << std::setprecision(1) << profile.beaufort.value();
+
+    std::ostringstream direction;
+    direction << std::fixed << std::setprecision(1) << profile.direction.degrees();
+
+    std::ostringstream angleOfAttack;
+    angleOfAttack << std::fixed << std::setprecision(1) << profile.angleOfAttack.degrees();
+
+    return localization::ui::formattedImpact(beaufort.str(), compassLabel(profile.direction.degrees()), direction.str(),
+                                             angleOfAttack.str());
+}
+
+QString uiText(const char *text) {
+    return QString::fromUtf8(text);
 }
 
 } // namespace
@@ -64,9 +73,9 @@ MainWindow::MainWindow(Dependencies deps, QWidget *parent)
       configTemplateService(deps.configTemplateService) {
     ui->setupUi(this);
 
-    ui->comboBoxTestTimeSource->addItem(QStringLiteral("Авторасчёт"));
-    ui->comboBoxTestTimeSource->addItem(QStringLiteral("Время оператора"));
-    ui->comboBoxTestTimeSource->addItem(QStringLiteral("Свободный режим"));
+    ui->comboBoxTestTimeSource->addItem(uiText(localization::ui::testTimeSourceAutoCalculated));
+    ui->comboBoxTestTimeSource->addItem(uiText(localization::ui::testTimeSourceOperatorDefined));
+    ui->comboBoxTestTimeSource->addItem(uiText(localization::ui::testTimeSourceFreeRun));
 
     standImpactTransitionTimer = new QTimer(this);
     standImpactTransitionTimer->setInterval(100);
@@ -144,9 +153,9 @@ void MainWindow::setupTabs() {
     testProtocolTabWidget = new TestProtocolTabWidget(testProtocolTabPresenter, sessionAdapter, this);
 
     ui->tabWidget->clear();
-    ui->tabWidget->addTab(telemetryChartsTabWidget, QStringLiteral("Телеметрия"));
-    ui->tabWidget->addTab(controlChartsTabWidget, QStringLiteral("Управляющие воздействия"));
-    ui->tabWidget->addTab(testProtocolTabWidget, QStringLiteral("Протокол"));
+    ui->tabWidget->addTab(telemetryChartsTabWidget, uiText(localization::ui::tabTelemetry));
+    ui->tabWidget->addTab(controlChartsTabWidget, uiText(localization::ui::tabControlCharts));
+    ui->tabWidget->addTab(testProtocolTabWidget, uiText(localization::ui::tabProtocol));
 }
 
 void MainWindow::setupStandControlPanel() {
@@ -154,22 +163,22 @@ void MainWindow::setupStandControlPanel() {
     ui->doubleSpinBoxStandAngleOfAttack->setRange(domain::minAngleOfAttack, domain::maxAngleOfAttack);
 
     const std::array<std::pair<const char *, double>, 16> directions{{
-        {"N", 0.0},
-        {"NNE", 22.5},
-        {"NE", 45.0},
-        {"ENE", 67.5},
-        {"E", 90.0},
-        {"ESE", 112.5},
-        {"SE", 135.0},
-        {"SSE", 157.5},
-        {"S", 180.0},
-        {"SSW", 202.5},
-        {"SW", 225.0},
-        {"WSW", 247.5},
-        {"W", 270.0},
-        {"WNW", 292.5},
-        {"NW", 315.0},
-        {"NNW", 337.5},
+        {localization::ui::compassDirectionLabels[0], 0.0},
+        {localization::ui::compassDirectionLabels[1], 22.5},
+        {localization::ui::compassDirectionLabels[2], 45.0},
+        {localization::ui::compassDirectionLabels[3], 67.5},
+        {localization::ui::compassDirectionLabels[4], 90.0},
+        {localization::ui::compassDirectionLabels[5], 112.5},
+        {localization::ui::compassDirectionLabels[6], 135.0},
+        {localization::ui::compassDirectionLabels[7], 157.5},
+        {localization::ui::compassDirectionLabels[8], 180.0},
+        {localization::ui::compassDirectionLabels[9], 202.5},
+        {localization::ui::compassDirectionLabels[10], 225.0},
+        {localization::ui::compassDirectionLabels[11], 247.5},
+        {localization::ui::compassDirectionLabels[12], 270.0},
+        {localization::ui::compassDirectionLabels[13], 292.5},
+        {localization::ui::compassDirectionLabels[14], 315.0},
+        {localization::ui::compassDirectionLabels[15], 337.5},
     }};
 
     for (const auto &[label, degrees] : directions) {
@@ -177,8 +186,8 @@ void MainWindow::setupStandControlPanel() {
             QStringLiteral("%1 (%2°)").arg(QString::fromUtf8(label)).arg(degrees, 0, 'f', 1), degrees);
     }
 
-    ui->comboBoxTelemetrySource->addItem(QStringLiteral("Ось Y / тангаж"), 0);
-    ui->comboBoxTelemetrySource->addItem(QStringLiteral("Ось Z / направление"), 1);
+    ui->comboBoxTelemetrySource->addItem(uiText(localization::ui::telemetryAxisY), 0);
+    ui->comboBoxTelemetrySource->addItem(uiText(localization::ui::telemetryAxisZ), 1);
 }
 
 void MainWindow::connectShellSignals() {
@@ -246,16 +255,16 @@ void MainWindow::connectConfigTemplateSignals() {
 
         if (!telemetryConfig.exists()) {
             if (telemetryConfig.status == configTemplates::ConfigTemplateResolutionStatus::MissingOperatorSelected) {
-                appendLog("selected telemetry.toml is not available: " + telemetryConfig.path.string());
-                showOperatorWarning("telemetry.toml недоступен",
-                                    "Выбранный файл telemetry.toml недоступен. Выберите существующий файл.");
+                appendLog(std::string{localization::ui::unavailableSelectedTelemetryConfigLog} +
+                          telemetryConfig.path.string());
+                showOperatorWarning(localization::ui::telemetryConfigUnavailableTitle,
+                                    localization::ui::telemetryConfigUnavailableMessage);
                 return;
             }
 
-            appendLog("telemetry.toml not found: " + telemetryConfig.path.string());
-            showOperatorWarning("telemetry.toml не найден",
-                                "Файл telemetry.toml не найден рядом с приложением. Создайте шаблон и заполните "
-                                "параметры подключения стенда или выберите файл вручную.");
+            appendLog(std::string{localization::ui::telemetryConfigNotFoundLog} + telemetryConfig.path.string());
+            showOperatorWarning(localization::ui::telemetryConfigNotFoundTitle,
+                                localization::ui::telemetryConfigNotFoundMessage);
             return;
         }
 
@@ -348,7 +357,7 @@ void MainWindow::applyBeaufortImpact() {
         return;
     }
 
-    handleManualImpactAccepted(previousTarget, "beaufort");
+    handleManualImpactAccepted(previousTarget, localization::ui::beaufortParameter);
 }
 
 void MainWindow::applyWindDirectionImpact() {
@@ -358,7 +367,7 @@ void MainWindow::applyWindDirectionImpact() {
         return;
     }
 
-    handleManualImpactAccepted(previousTarget, "direction");
+    handleManualImpactAccepted(previousTarget, localization::ui::directionParameter);
 }
 
 void MainWindow::applyAngleOfAttackImpact() {
@@ -368,7 +377,7 @@ void MainWindow::applyAngleOfAttackImpact() {
         return;
     }
 
-    handleManualImpactAccepted(previousTarget, "angle of attack");
+    handleManualImpactAccepted(previousTarget, localization::ui::angleOfAttackParameter);
 }
 
 void MainWindow::handleManualImpactAccepted(const domain::WindImpact &previousTarget,
@@ -377,19 +386,19 @@ void MainWindow::handleManualImpactAccepted(const domain::WindImpact &previousTa
     const domain::StandScenario scenario{stateData.control.standControlMode};
     standImpactTransitionTimer->start();
 
-    appendLog("Manual stand " + changedParameter + " target accepted: target " + formatImpact(previousTarget) + " -> " +
-              formatImpact(stateData.control.targetStandImpact) + ", applied " +
-              formatImpact(stateData.control.appliedStandImpact));
+    appendLog(localization::ui::manualImpactAcceptedLog(changedParameter, formatImpact(previousTarget),
+                                                        formatImpact(stateData.control.targetStandImpact),
+                                                        formatImpact(stateData.control.appliedStandImpact)));
 
     if (scenario.manualImpactPolicy() == domain::ManualImpactPolicy::ReturnToScenarioAfterManualImpact) {
-        appendLog("Hybrid stand mode accepted manual impact as a temporary override");
+        appendLog(localization::ui::hybridManualOverrideAccepted);
     }
 }
 
 void MainWindow::handleManualImpactRejected() {
-    const std::string message = "Manual stand control is disabled for this test mode";
+    const std::string message = localization::ui::manualControlBlockedMessage;
     appendLog(message);
-    showOperatorWarning("Ручное управление заблокировано", message);
+    showOperatorWarning(localization::ui::manualControlBlockedTitle, message);
 }
 
 void MainWindow::advanceStandImpactTransition() {
@@ -413,7 +422,7 @@ void MainWindow::advanceStandImpactTransition() {
 
     if (transition.targetReached) {
         standImpactTransitionTimer->stop();
-        appendLog("Manual stand impact target reached: " + formatImpact(next));
+        appendLog(localization::ui::manualImpactTargetReachedLog(formatImpact(next)));
     }
 }
 
@@ -437,9 +446,9 @@ void MainWindow::updateControlFormulaTemplateSelection(const std::string &expres
 
 void MainWindow::createTelemetryTemplate() {
     const auto defaultPath = configTemplateService.pathFor(configTemplates::ConfigTemplateType::Telemetry);
-    const QString filePath = QFileDialog::getSaveFileName(this, QStringLiteral("Создать telemetry.toml"),
-                                                          QString::fromStdString(defaultPath.string()),
-                                                          QStringLiteral("TOML Files (*.toml);;All Files (*)"));
+    const QString filePath = QFileDialog::getSaveFileName(
+        this, uiText(localization::ui::createTelemetryTemplateDialogTitle),
+        QString::fromStdString(defaultPath.string()), uiText(localization::ui::tomlFileFilter));
 
     if (filePath.isEmpty()) {
         return;
@@ -448,25 +457,25 @@ void MainWindow::createTelemetryTemplate() {
     try {
         configTemplateService.createTemplate(configTemplates::ConfigTemplateType::Telemetry,
                                              std::filesystem::path{filePath.toStdString()});
-        appendLog("telemetry.toml template created or already exists: " + filePath.toStdString());
+        appendLog(std::string{localization::ui::telemetryTemplateCreatedLog} + filePath.toStdString());
     } catch (const std::exception &e) {
-        appendLog(std::string{"telemetry.toml template creation failed: "} + e.what());
-        showOperatorWarning("Ошибка создания шаблона", e.what());
+        appendLog(std::string{localization::ui::telemetryTemplateCreationFailedLog} + e.what());
+        showOperatorWarning(localization::ui::templateCreationErrorTitle, e.what());
     }
 }
 
 void MainWindow::selectTelemetryConfig() {
     const auto defaultPath = configTemplateService.pathFor(configTemplates::ConfigTemplateType::Telemetry);
-    const QString filePath = QFileDialog::getOpenFileName(this, QStringLiteral("Выбрать telemetry.toml"),
-                                                          QString::fromStdString(defaultPath.string()),
-                                                          QStringLiteral("TOML Files (*.toml);;All Files (*)"));
+    const QString filePath = QFileDialog::getOpenFileName(
+        this, uiText(localization::ui::selectTelemetryConfigDialogTitle), QString::fromStdString(defaultPath.string()),
+        uiText(localization::ui::tomlFileFilter));
 
     if (filePath.isEmpty()) {
         return;
     }
 
     selectedTelemetryConfigPath = filePath.toStdString();
-    appendLog("telemetry.toml selected: " + selectedTelemetryConfigPath);
+    appendLog(std::string{localization::ui::telemetryConfigSelectedLog} + selectedTelemetryConfigPath);
 }
 
 void MainWindow::updateManualStandControlsEnabled() {

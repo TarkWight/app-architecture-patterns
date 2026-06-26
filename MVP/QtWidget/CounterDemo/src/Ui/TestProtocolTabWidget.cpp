@@ -1,6 +1,8 @@
 #include "TestProtocolTabWidget.hpp"
 #include "ui_TestProtocolTabWidget.h"
 
+#include "../Localization/UiStrings.hpp"
+
 #include <QGridLayout>
 #include <QFileDialog>
 #include <QFrame>
@@ -40,6 +42,10 @@ QLineEdit *lineEditByIndex(Ui::TestProtocolTabWidget *ui, int index) {
     default:
         return nullptr;
     }
+}
+
+QString uiText(const char *text) {
+    return QString::fromUtf8(text);
 }
 
 } // namespace
@@ -117,7 +123,8 @@ void TestProtocolTabWidget::setTestProtocolDroneParameters(
 }
 
 void TestProtocolTabWidget::showExportSuccess(const std::string &filePath) {
-    ui->labelExportStatus->setText(QStringLiteral("Exported: %1").arg(QString::fromStdString(filePath)));
+    ui->labelExportStatus->setText(
+        uiText(localization::ui::exportedPdfPrefix).append(QString::fromStdString(filePath)));
 }
 
 void TestProtocolTabWidget::appendLog(const std::string &text) {
@@ -143,22 +150,19 @@ void TestProtocolTabWidget::setupReportFormLabels() {
     auto *header = new QWidget(this);
     auto *headerLayout = new QHBoxLayout(header);
     headerLayout->setContentsMargins(0, 0, 0, 0);
-    headerLayout->addWidget(new QLabel(QStringLiteral("Данные PDF-протокола, организации и результата"), header));
+    headerLayout->addWidget(new QLabel(uiText(localization::ui::pdfFieldsHeader), header));
     headerLayout->addStretch(1);
 
-    loadPdfTomlButton = new QPushButton(QStringLiteral("Загрузить TOML"), header);
-    loadPdfTomlButton->setToolTip(QStringLiteral("Подгрузить значения полей протокола из .toml файла"));
+    loadPdfTomlButton = new QPushButton(uiText(localization::ui::loadTomlButton), header);
+    loadPdfTomlButton->setToolTip(uiText(localization::ui::loadTomlTooltip));
     headerLayout->addWidget(loadPdfTomlButton);
 
-    savePdfTomlTemplateButton = new QPushButton(QStringLiteral("Создать шаблон TOML"), header);
-    savePdfTomlTemplateButton->setToolTip(QStringLiteral("Сохранить пустой .toml шаблон для полей протокола"));
+    savePdfTomlTemplateButton = new QPushButton(uiText(localization::ui::saveTomlTemplateButton), header);
+    savePdfTomlTemplateButton->setToolTip(uiText(localization::ui::saveTomlTemplateTooltip));
     headerLayout->addWidget(savePdfTomlTemplateButton);
     ui->verticalLayoutRoot->insertWidget(2, header);
 
-    const std::array<const char *, 8> labels{"Организация", "Номер лицензии", "Адрес",     "ФИО оператора",
-                                             "Комментарий", "Заключение",     "Результат", "Резерв"};
-
-    for (int row = 0; row < static_cast<int>(labels.size()); ++row) {
+    for (int row = 0; row < static_cast<int>(localization::ui::protocolLineLabels.size()); ++row) {
         auto *lineEdit = lineEditByIndex(ui, row);
         if (lineEdit == nullptr) {
             continue;
@@ -172,7 +176,7 @@ void TestProtocolTabWidget::setupReportFormLabels() {
 
         lineEdit->setMinimumWidth(360);
         ui->gridLayoutTestProtocol->addWidget(
-            new QLabel(QString::fromUtf8(labels[static_cast<std::size_t>(row)]), this), row, 0);
+            new QLabel(uiText(localization::ui::protocolLineLabels[static_cast<std::size_t>(row)]), this), row, 0);
         ui->gridLayoutTestProtocol->addWidget(lineEdit, row, 1);
     }
 
@@ -181,7 +185,7 @@ void TestProtocolTabWidget::setupReportFormLabels() {
 }
 
 void TestProtocolTabWidget::setupDroneParametersEditor() {
-    auto *group = new QGroupBox(QStringLiteral("Конфигурация БПЛА и параметры теста"), this);
+    auto *group = new QGroupBox(uiText(localization::ui::droneParametersGroup), this);
     auto *layout = new QVBoxLayout(group);
 
     droneParametersLayout = new QGridLayout();
@@ -211,8 +215,8 @@ void TestProtocolTabWidget::connectSignals() {
 
     QObject::connect(loadPdfTomlButton, &QPushButton::clicked, this, [this]() {
         const QString filePath =
-            QFileDialog::getOpenFileName(this, QStringLiteral("Загрузить данные PDF из TOML"), QStringLiteral(""),
-                                         QStringLiteral("TOML Files (*.toml);;All Files (*)"));
+            QFileDialog::getOpenFileName(this, uiText(localization::ui::loadPdfTomlDialogTitle), QStringLiteral(""),
+                                         uiText(localization::ui::tomlFileFilter));
 
         if (filePath.isEmpty()) {
             return;
@@ -222,9 +226,9 @@ void TestProtocolTabWidget::connectSignals() {
     });
 
     QObject::connect(savePdfTomlTemplateButton, &QPushButton::clicked, this, [this]() {
-        const QString filePath = QFileDialog::getSaveFileName(this, QStringLiteral("Создать шаблон PDF TOML"),
-                                                              QStringLiteral("pdf_report.template.toml"),
-                                                              QStringLiteral("TOML Files (*.toml);;All Files (*)"));
+        const QString filePath = QFileDialog::getSaveFileName(
+            this, uiText(localization::ui::createPdfTomlTemplateDialogTitle),
+            uiText(localization::ui::pdfReportTemplateFileName), uiText(localization::ui::tomlFileFilter));
 
         if (filePath.isEmpty()) {
             return;
@@ -234,9 +238,9 @@ void TestProtocolTabWidget::connectSignals() {
     });
 
     QObject::connect(ui->buttonExportPdf, &QPushButton::clicked, this, [this]() {
-        const QString filePath =
-            QFileDialog::getSaveFileName(this, QStringLiteral("Export PDF"), QStringLiteral("testProtocol-report.pdf"),
-                                         QStringLiteral("PDF Files (*.pdf)"));
+        const QString filePath = QFileDialog::getSaveFileName(this, uiText(localization::ui::exportPdfDialogTitle),
+                                                              uiText(localization::ui::pdfReportFileName),
+                                                              uiText(localization::ui::pdfFileFilter));
 
         if (filePath.isEmpty()) {
             return;

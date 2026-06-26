@@ -3,11 +3,20 @@
 
 #include "../Domain/TestProtocol.hpp"
 #include "../Domain/WindImpact.hpp"
+#include "../Localization/UiStrings.hpp"
 
 #include <QSignalBlocker>
 #include <QString>
 
 namespace ui {
+
+namespace {
+
+QString uiText(const char *text) {
+    return QString::fromUtf8(text);
+}
+
+} // namespace
 
 ControlChartsTabWidget::ControlChartsTabWidget(presentation::controlChartsTab::ControlChartsTabPresenter &presenter,
                                                infrastructure::SessionStateQtAdapter &sessionAdapter, QWidget *parent)
@@ -229,20 +238,20 @@ void ControlChartsTabWidget::connectSessionSignals() {
 }
 
 void ControlChartsTabWidget::populateTestProgramSelection() {
-    ui->comboBoxFormulaTemplate->addItem(QStringLiteral("Пользовательское"), QStringLiteral("custom"));
+    ui->comboBoxFormulaTemplate->addItem(uiText(localization::ui::customTestProgram), QStringLiteral("custom"));
 
-    ui->comboBoxFormulaTemplate->addItem(QStringLiteral("Полет в штиль"), QStringLiteral("test1"));
-    ui->comboBoxFormulaTemplate->addItem(QStringLiteral("Определение максимальных параметров"),
-                                         QStringLiteral("test2"));
-    ui->comboBoxFormulaTemplate->addItem(QStringLiteral("Исследование временной перспективы"), QStringLiteral("test3"));
-    ui->comboBoxFormulaTemplate->addItem(QStringLiteral("Затухающая осцилляция"),
+    ui->comboBoxFormulaTemplate->addItem(uiText(localization::ui::calmTestProgram), QStringLiteral("test1"));
+    ui->comboBoxFormulaTemplate->addItem(uiText(localization::ui::maxParametersTestProgram), QStringLiteral("test2"));
+    ui->comboBoxFormulaTemplate->addItem(uiText(localization::ui::temporalPerspectiveTestProgram),
+                                         QStringLiteral("test3"));
+    ui->comboBoxFormulaTemplate->addItem(uiText(localization::ui::attenuatedOscillationTestProgram),
                                          QStringLiteral("attenuated_oscillation"));
 }
 
 void ControlChartsTabWidget::populateTestSelectionControls() {
-    ui->comboBoxTestMode->addItem(QStringLiteral("Ручное"), QStringLiteral("manual"));
-    ui->comboBoxTestMode->addItem(QStringLiteral("Гибридное"), QStringLiteral("hybrid"));
-    ui->comboBoxTestMode->addItem(QStringLiteral("Автоматическое"), QStringLiteral("automatic"));
+    ui->comboBoxTestMode->addItem(uiText(localization::ui::manualTestMode), QStringLiteral("manual"));
+    ui->comboBoxTestMode->addItem(uiText(localization::ui::hybridTestMode), QStringLiteral("hybrid"));
+    ui->comboBoxTestMode->addItem(uiText(localization::ui::automaticTestMode), QStringLiteral("automatic"));
 }
 
 void ControlChartsTabWidget::updateFormulaEditability(const std::string &program) {

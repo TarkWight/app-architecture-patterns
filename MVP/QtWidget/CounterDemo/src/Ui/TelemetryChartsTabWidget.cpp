@@ -1,6 +1,8 @@
 #include "TelemetryChartsTabWidget.hpp"
 #include "ui_TelemetryChartsTabWidget.h"
 
+#include "../Localization/UiStrings.hpp"
+
 #include <QScrollBar>
 #include <QSignalBlocker>
 #include <QString>
@@ -9,6 +11,14 @@
 #include <cmath>
 
 namespace ui {
+
+namespace {
+
+QString uiText(const char *text) {
+    return QString::fromUtf8(text);
+}
+
+} // namespace
 
 TelemetryChartsTabWidget::TelemetryChartsTabWidget(
     presentation::telemetryChartsTab::TelemetryChartsTabPresenter &presenter,
@@ -22,7 +32,7 @@ TelemetryChartsTabWidget::TelemetryChartsTabWidget(
 
     telemetryScrollBar = new QScrollBar(Qt::Horizontal, this);
     ui->verticalLayoutPlot->addWidget(telemetryScrollBar);
-    ui->buttonRebuildPlot->setText(QStringLiteral("К последним данным"));
+    ui->buttonRebuildPlot->setText(uiText(localization::ui::telemetryTailButton));
 
     presenter.attachView(*this);
 

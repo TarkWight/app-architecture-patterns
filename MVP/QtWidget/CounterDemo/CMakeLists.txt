@@ -216,6 +216,7 @@ qt_add_executable(develop
   src/Localization/ShellStrings.hpp
   src/Localization/TelemetryStrings.hpp
   src/Localization/TestProtocolStrings.hpp
+  src/Localization/UiStrings.hpp
 
   src/Ui/MainWindowUiAdapter.hpp
   src/Ui/MainWindowUiAdapter.cpp

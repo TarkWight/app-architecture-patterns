@@ -3,6 +3,7 @@
 #include "../../Application/Services/ReadinessDiagnosticMessageBuilder.hpp"
 #include "../../Domain/TestModeStatePolicy.hpp"
 #include "../../Domain/TestProtocol.hpp"
+#include "../../Localization/ControlChartsStrings.hpp"
 
 #include <string>
 #include <utility>
@@ -52,7 +53,7 @@ void ControlChartsTabPresenter::onMinutesChanged(int minutes) {
     setControlChartsTabMinutesUseCase.execute(domain::DurationMinutes::required(minutes));
 
     if (view != nullptr) {
-        view->appendLog("ControlChartsTab minutes updated");
+        view->appendLog(localization::controlCharts::minutesUpdated);
     }
 }
 
@@ -61,7 +62,7 @@ void ControlChartsTabPresenter::onTestProtocolModeChanged(std::string mode) {
     onTimeSettingsChanged();
 
     if (view != nullptr) {
-        view->appendLog("Test mode updated");
+        view->appendLog(localization::controlCharts::testModeUpdated);
     }
 }
 
@@ -69,7 +70,7 @@ void ControlChartsTabPresenter::onTestProtocolProgramChanged(std::string program
     updateTestProtocolUseCase.updateProgram(std::move(program));
 
     if (view != nullptr) {
-        view->appendLog("Test program updated");
+        view->appendLog(localization::controlCharts::testProgramUpdated);
     }
 }
 
@@ -80,7 +81,7 @@ void ControlChartsTabPresenter::onBeaufortChanged(double value) {
                      stateData.control.windImpact.angleOfAttack.degrees());
 
     if (view != nullptr) {
-        view->appendLog("Beaufort value updated");
+        view->appendLog(localization::controlCharts::beaufortValueUpdated);
     }
 }
 
@@ -91,7 +92,7 @@ void ControlChartsTabPresenter::onDirectionChanged(double value) {
                      stateData.control.windImpact.angleOfAttack.degrees());
 
     if (view != nullptr) {
-        view->appendLog("Wind direction updated");
+        view->appendLog(localization::controlCharts::windDirectionUpdated);
     }
 }
 
@@ -102,7 +103,7 @@ void ControlChartsTabPresenter::onAngleOfAttackChanged(double value) {
                      value);
 
     if (view != nullptr) {
-        view->appendLog("Angle of attack updated");
+        view->appendLog(localization::controlCharts::angleOfAttackUpdated);
     }
 }
 
@@ -110,7 +111,7 @@ void ControlChartsTabPresenter::onUseAngleOfAttackModelChanged(bool enabled) {
     setUseAngleOfAttackModelUseCase.execute(enabled);
 
     if (view != nullptr) {
-        view->appendLog("Angle of attack model setting updated");
+        view->appendLog(localization::controlCharts::angleOfAttackModelSettingUpdated);
     }
 }
 
@@ -119,7 +120,7 @@ void ControlChartsTabPresenter::onRebuildPlotPressed() {
 
     if (view != nullptr) {
         view->refreshPlot();
-        view->appendLog("ControlChartsTab formula plot rebuilt");
+        view->appendLog(localization::controlCharts::controlPlotRebuilt);
     }
 }
 
@@ -170,15 +171,16 @@ void ControlChartsTabPresenter::refreshDurationDisplay() {
 
     switch (state.readiness().status) {
     case application::session::ReadinessStatus::Failed:
-        view->setEstimatedDurationText("Расчёт не выполнен");
+        view->setEstimatedDurationText(localization::controlCharts::estimatedDurationFailed);
         return;
     case application::session::ReadinessStatus::Unknown:
-        view->setEstimatedDurationText("Не рассчитано");
+        view->setEstimatedDurationText(localization::controlCharts::estimatedDurationUnknown);
         return;
     case application::session::ReadinessStatus::Ok:
     case application::session::ReadinessStatus::Warning:
     case application::session::ReadinessStatus::Dangerous:
-        view->setEstimatedDurationText(std::to_string(protocol.estimatedTestDuration.value()) + " мин");
+        view->setEstimatedDurationText(
+            localization::controlCharts::estimatedDurationMinutes(protocol.estimatedTestDuration.value()));
         return;
     }
 }

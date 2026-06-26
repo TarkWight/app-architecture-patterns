@@ -210,6 +210,7 @@ qt_add_executable(develop
   src/Presentation/TestProtocolTab/TestProtocolTabPresenter.hpp
   src/Presentation/TestProtocolTab/TestProtocolTabPresenter.cpp
   src/Presentation/ViewModels/TestTimeViewModel.hpp
+  src/Localization/ControlChartsStrings.hpp
   src/Localization/PlotStrings.hpp
   src/Localization/ShellStrings.hpp
 

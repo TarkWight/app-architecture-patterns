@@ -76,6 +76,8 @@ MainWindow::MainWindow(Dependencies deps, QWidget *parent)
     ui->comboBoxTestTimeSource->addItem(uiText(localization::ui::testTimeSourceAutoCalculated));
     ui->comboBoxTestTimeSource->addItem(uiText(localization::ui::testTimeSourceOperatorDefined));
     ui->comboBoxTestTimeSource->addItem(uiText(localization::ui::testTimeSourceFreeRun));
+    ui->buttonCreateTelemetryTemplate->setText(uiText(localization::ui::createTelemetryTemplateDialogTitle));
+    ui->buttonSelectTelemetryConfig->setText(uiText(localization::ui::selectTelemetryConfigDialogTitle));
 
     standImpactTransitionTimer = new QTimer(this);
     standImpactTransitionTimer->setInterval(100);

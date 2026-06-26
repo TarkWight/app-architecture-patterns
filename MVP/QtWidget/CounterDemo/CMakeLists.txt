@@ -213,6 +213,7 @@ qt_add_executable(develop
   src/Localization/ControlChartsStrings.hpp
   src/Localization/PlotStrings.hpp
   src/Localization/ShellStrings.hpp
+  src/Localization/TelemetryStrings.hpp
   src/Localization/TestProtocolStrings.hpp
 
   src/Ui/MainWindowUiAdapter.hpp

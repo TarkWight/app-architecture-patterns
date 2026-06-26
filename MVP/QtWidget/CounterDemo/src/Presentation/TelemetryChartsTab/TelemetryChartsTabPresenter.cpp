@@ -1,5 +1,7 @@
 #include "TelemetryChartsTabPresenter.hpp"
 
+#include "../../Localization/TelemetryStrings.hpp"
+
 namespace presentation::telemetryChartsTab {
 
 TelemetryChartsTabPresenter::TelemetryChartsTabPresenter(Dependencies deps)
@@ -27,7 +29,7 @@ void TelemetryChartsTabPresenter::onRebuildPlotPressed() {
 
     if (view != nullptr) {
         view->refreshPlot();
-        view->appendLog("Telemetry tail selected");
+        view->appendLog(localization::telemetry::telemetryTailSelected);
     }
 }
 

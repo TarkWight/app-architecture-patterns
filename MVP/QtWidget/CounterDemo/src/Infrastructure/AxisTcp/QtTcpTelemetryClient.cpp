@@ -14,6 +14,34 @@ void assertCurrentThreadOwns(const QObject &object) {
     Q_ASSERT(object.thread() == QThread::currentThread());
 }
 
+std::vector<std::uint8_t> bytesFromBuffer(const QByteArray &buffer, int offset, int size) {
+    std::vector<std::uint8_t> bytes{};
+    bytes.reserve(static_cast<std::size_t>(size));
+
+    for (int index = 0; index < size; ++index) {
+        bytes.push_back(static_cast<std::uint8_t>(buffer.at(offset + index)));
+    }
+
+    return bytes;
+}
+
+std::optional<int> findTelemetryHeader(const QByteArray &buffer, const application::ports::IAxisProtocolCodec &codec) {
+    const auto headerSize = static_cast<int>(codec.telemetryFrameHeaderSize());
+    if (headerSize <= 0 || buffer.size() < headerSize) {
+        return std::nullopt;
+    }
+
+    const auto bytes = bytesFromBuffer(buffer, 0, buffer.size());
+    const int lastPossibleOffset = buffer.size() - headerSize;
+    for (int offset = 0; offset <= lastPossibleOffset; ++offset) {
+        if (codec.hasTelemetryFrameHeader(bytes, static_cast<std::size_t>(offset))) {
+            return offset;
+        }
+    }
+
+    return std::nullopt;
+}
+
 } // namespace
 
 QtTcpTelemetryClient::QtTcpTelemetryClient(application::ports::IAxisProtocolCodec &codec, QObject *parent)
@@ -309,17 +337,50 @@ void QtTcpTelemetryClient::handleReadyRead(domain::AxisId axisId) {
 }
 
 void QtTcpTelemetryClient::processReadBuffer(domain::AxisId axisId, AxisConnection &connection) {
-    while (connection.readBuffer.size() >= expectedTelemetryResponseSize) {
-        const QByteArray frame = connection.readBuffer.left(expectedTelemetryResponseSize);
-        connection.readBuffer.remove(0, expectedTelemetryResponseSize);
+    const auto frameSize = static_cast<int>(codec.telemetryFrameSize());
+    const auto headerSize = static_cast<int>(codec.telemetryFrameHeaderSize());
+    if (frameSize <= 0 || headerSize <= 0 || frameSize < headerSize) {
+        return;
+    }
 
-        std::vector<std::uint8_t> bytes{};
-        bytes.reserve(static_cast<std::size_t>(frame.size()));
-
-        for (const auto byte : frame) {
-            bytes.push_back(static_cast<std::uint8_t>(byte));
+    while (connection.readBuffer.size() >= headerSize) {
+        const auto headerOffset = findTelemetryHeader(connection.readBuffer, codec);
+        if (!headerOffset.has_value()) {
+            const int discardCount = connection.readBuffer.size() - headerSize + 1;
+            if (discardCount > 0) {
+                connection.readBuffer.remove(0, discardCount);
+                emitTrace(formatStandLifecycleTrace(
+                    "RX-DISCARD", axisId,
+                    localization::transport::discardedRxBytes(static_cast<std::size_t>(discardCount))));
+            }
+            return;
         }
 
+        if (*headerOffset > 0) {
+            connection.readBuffer.remove(0, *headerOffset);
+            emitTrace(formatStandLifecycleTrace(
+                "RX-DISCARD", axisId,
+                localization::transport::discardedRxBytes(static_cast<std::size_t>(*headerOffset))));
+        }
+
+        if (connection.readBuffer.size() < frameSize) {
+            return;
+        }
+
+        const auto bytes = bytesFromBuffer(connection.readBuffer, 0, frameSize);
+        if (!codec.isTelemetryFrameStructurallyValid(bytes)) {
+            connection.readBuffer.remove(0, 1);
+            emitTrace(
+                formatStandLifecycleTrace("RX-DISCARD", axisId, localization::transport::invalidRxFrameDiscarded()));
+            continue;
+        }
+
+        if (!codec.isTelemetryFrameCrcConfirmed(bytes) && !connection.rxCrcWarningEmitted) {
+            connection.rxCrcWarningEmitted = true;
+            emitTrace(formatStandLifecycleTrace("RX-CRC", axisId, localization::transport::rxCrcNotConfirmed));
+        }
+
+        connection.readBuffer.remove(0, frameSize);
         const auto sample = codec.decodeTelemetry(axisId, bytes, nowSeconds());
         if (!sample.has_value()) {
             emitError(axisId, localization::transport::telemetryDecodeFailed);

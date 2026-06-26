@@ -56,6 +56,7 @@ class QtTcpTelemetryClient final : public QObject, public application::ports::IT
 
         bool configured{false};
         bool requestPending{false};
+        bool rxCrcWarningEmitted{false};
 
         qint64 lastRequestMs{0};
         qint64 lastReconnectAttemptMs{0};
@@ -76,7 +77,6 @@ class QtTcpTelemetryClient final : public QObject, public application::ports::IT
 
     static constexpr int responseTimeoutMs{2000};
     static constexpr int reconnectIntervalMs{3000};
-    static constexpr int expectedTelemetryResponseSize{30};
 
     AxisConnection *findAxis(domain::AxisId axisId);
 

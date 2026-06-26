@@ -1,6 +1,7 @@
 #ifndef TRANSPORTSTRINGS_HPP
 #define TRANSPORTSTRINGS_HPP
 
+#include <cstddef>
 #include <string>
 
 namespace localization::transport {
@@ -20,9 +21,20 @@ inline constexpr const char *axisCommandWriteFailed = "Не удалось по�
 inline constexpr const char *telemetryDecodeFailed = "Не удалось декодировать кадр телеметрии";
 inline constexpr const char *telemetryResponseTimeout = "Тайм-аут ответа телеметрии";
 inline constexpr const char *socketErrorPrefix = "Ошибка сокета: ";
+inline constexpr const char *rxCrcNotConfirmed =
+    "RX CRC не подтверждён существующей CRC-функцией; применяется проверка заголовка/длины и восстановление "
+    "синхронизации";
 
 inline std::string socketError(const std::string &details) {
     return std::string{socketErrorPrefix} + details;
+}
+
+inline std::string discardedRxBytes(std::size_t count) {
+    return "отброшены байты RX до следующего заголовка: " + std::to_string(count);
+}
+
+inline std::string invalidRxFrameDiscarded() {
+    return "невалидный RX-кадр отброшен, выполняется поиск следующего заголовка";
 }
 
 } // namespace localization::transport

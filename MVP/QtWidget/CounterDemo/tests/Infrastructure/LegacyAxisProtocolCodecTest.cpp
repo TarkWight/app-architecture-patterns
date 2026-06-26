@@ -44,6 +44,27 @@ void expectFloatLeAt(const std::vector<std::uint8_t> &bytes, std::size_t offset,
     }
 }
 
+std::vector<std::uint8_t> makeTelemetryFrame() {
+    std::vector<std::uint8_t> frame{0x03, 0x82, 0x00, 0x16};
+    appendFloatLe(frame, 1.25F);
+    appendFloatLe(frame, 90.0F);
+    appendFloatLe(frame, 3.5F);
+    appendFloatLe(frame, 4.5F);
+    appendFloatLe(frame, 28.3F);
+    appendFloatLe(frame, 0.75F);
+    frame.push_back(0x00);
+    frame.push_back(0x00);
+    return frame;
+}
+
+void writeCrc(std::vector<std::uint8_t> &frame) {
+    ASSERT_GE(frame.size(), 2U);
+    const std::vector<std::uint8_t> bytesWithoutCrc{frame.begin(), frame.end() - 2};
+    const std::uint16_t crc = crc16Ccitt(bytesWithoutCrc);
+    frame.at(frame.size() - 2) = static_cast<std::uint8_t>((crc >> 8U) & 0xFFU);
+    frame.at(frame.size() - 1) = static_cast<std::uint8_t>(crc & 0xFFU);
+}
+
 } // namespace
 
 TEST(LegacyAxisProtocolCodecTest, EncodesLegacyCommand_WhenAxisCommandProvided_ReturnsTwentyTwoBytePacketWithValidCrc) {
@@ -111,15 +132,7 @@ TEST(LegacyAxisProtocolCodecTest,
 TEST(LegacyAxisProtocolCodecTest, DecodesTelemetryFrame_WhenThirtyByteFrameProvided_ReturnsExpectedFields) {
     // Arrange
     const infrastructure::axisTcp::LegacyAxisProtocolCodec codec{};
-    std::vector<std::uint8_t> frame{0x03, 0x82, 0x00, 0x16};
-    appendFloatLe(frame, 1.25F);
-    appendFloatLe(frame, 90.0F);
-    appendFloatLe(frame, 3.5F);
-    appendFloatLe(frame, 4.5F);
-    appendFloatLe(frame, 28.3F);
-    appendFloatLe(frame, 0.75F);
-    frame.push_back(0x00);
-    frame.push_back(0x00);
+    const auto frame = makeTelemetryFrame();
     ASSERT_EQ(frame.size(), 30U);
 
     // Act
@@ -136,4 +149,46 @@ TEST(LegacyAxisProtocolCodecTest, DecodesTelemetryFrame_WhenThirtyByteFrameProvi
     EXPECT_FLOAT_EQ(sample->setTorque, 4.5F);
     EXPECT_FLOAT_EQ(sample->voltage, 28.3F);
     EXPECT_FLOAT_EQ(sample->current, 0.75F);
+}
+
+TEST(LegacyAxisProtocolCodecTest, RejectsTelemetryFrame_WhenHeaderIsBroken) {
+    // Arrange
+    const infrastructure::axisTcp::LegacyAxisProtocolCodec codec{};
+    auto frame = makeTelemetryFrame();
+    frame.at(0) = 0x00;
+
+    // Act
+    const auto sample = codec.decodeTelemetry(domain::axis1, frame, 12.5);
+
+    // Assert
+    EXPECT_FALSE(codec.hasTelemetryFrameHeader(frame, 0));
+    EXPECT_FALSE(codec.isTelemetryFrameStructurallyValid(frame));
+    EXPECT_FALSE(sample.has_value());
+}
+
+TEST(LegacyAxisProtocolCodecTest, RejectsTelemetryFrame_WhenLengthIsBroken) {
+    // Arrange
+    const infrastructure::axisTcp::LegacyAxisProtocolCodec codec{};
+    auto frame = makeTelemetryFrame();
+    frame.at(3) = 0x15;
+
+    // Act
+    const auto sample = codec.decodeTelemetry(domain::axis1, frame, 12.5);
+
+    // Assert
+    EXPECT_TRUE(codec.hasTelemetryFrameHeader(frame, 0));
+    EXPECT_FALSE(codec.isTelemetryFrameStructurallyValid(frame));
+    EXPECT_FALSE(sample.has_value());
+}
+
+TEST(LegacyAxisProtocolCodecTest, ReportsTelemetryCrcConfirmation_WhenFrameCrcMatchesExistingCrcFunction) {
+    // Arrange
+    const infrastructure::axisTcp::LegacyAxisProtocolCodec codec{};
+    auto frame = makeTelemetryFrame();
+    ASSERT_FALSE(codec.isTelemetryFrameCrcConfirmed(frame));
+    writeCrc(frame);
+
+    // Assert
+    EXPECT_TRUE(codec.isTelemetryFrameStructurallyValid(frame));
+    EXPECT_TRUE(codec.isTelemetryFrameCrcConfirmed(frame));
 }

@@ -30,7 +30,12 @@ constexpr std::array<std::uint16_t, 256> crc16Table{
 constexpr std::size_t requestPacketWithoutCrcSize = 20;
 constexpr std::size_t requestPacketWithCrcSize = 22;
 
-constexpr std::size_t minTelemetryResponseSize = 28;
+constexpr std::size_t telemetryResponseSize = 30;
+constexpr std::size_t telemetryHeaderSize = 4;
+constexpr std::uint8_t telemetryDeviceId = 0x03;
+constexpr std::uint8_t telemetryFunction = 0x82;
+constexpr std::uint8_t telemetryLengthHigh = 0x00;
+constexpr std::uint8_t telemetryLengthLow = 0x16;
 
 constexpr std::size_t positionOffset = 4;
 constexpr std::size_t setPositionOffset = 8;
@@ -71,10 +76,42 @@ std::vector<std::uint8_t> LegacyAxisProtocolCodec::encodeCommand(const domain::A
     return packet;
 }
 
+std::size_t LegacyAxisProtocolCodec::telemetryFrameSize() const {
+    return telemetryResponseSize;
+}
+
+std::size_t LegacyAxisProtocolCodec::telemetryFrameHeaderSize() const {
+    return telemetryHeaderSize;
+}
+
+bool LegacyAxisProtocolCodec::hasTelemetryFrameHeader(const std::vector<std::uint8_t> &bytes,
+                                                      std::size_t offset) const {
+    return offset + 1 < bytes.size() && bytes.at(offset) == telemetryDeviceId &&
+           bytes.at(offset + 1) == telemetryFunction;
+}
+
+bool LegacyAxisProtocolCodec::isTelemetryFrameStructurallyValid(const std::vector<std::uint8_t> &bytes) const {
+    return bytes.size() == telemetryResponseSize && hasTelemetryFrameHeader(bytes, 0) &&
+           bytes.at(2) == telemetryLengthHigh && bytes.at(3) == telemetryLengthLow;
+}
+
+bool LegacyAxisProtocolCodec::isTelemetryFrameCrcConfirmed(const std::vector<std::uint8_t> &bytes) const {
+    if (!isTelemetryFrameStructurallyValid(bytes)) {
+        return false;
+    }
+
+    const std::vector<std::uint8_t> bytesWithoutCrc{bytes.begin(), bytes.end() - 2};
+    const std::uint16_t expectedCrc = crc16(bytesWithoutCrc);
+    const std::uint16_t frameCrc =
+        static_cast<std::uint16_t>((static_cast<std::uint16_t>(bytes.at(bytes.size() - 2)) << 8U) |
+                                   static_cast<std::uint16_t>(bytes.at(bytes.size() - 1)));
+    return frameCrc == expectedCrc;
+}
+
 std::optional<domain::AxisTelemetrySample>
 LegacyAxisProtocolCodec::decodeTelemetry(domain::AxisId axisId, const std::vector<std::uint8_t> &bytes,
                                          double timestampSeconds) const {
-    if (bytes.size() < minTelemetryResponseSize) {
+    if (!isTelemetryFrameStructurallyValid(bytes)) {
         return std::nullopt;
     }
 

@@ -13,6 +13,16 @@ class LegacyAxisProtocolCodec final : public application::ports::IAxisProtocolCo
   public:
     std::vector<std::uint8_t> encodeCommand(const domain::AxisControlCommand &command) const override;
 
+    std::size_t telemetryFrameSize() const override;
+
+    std::size_t telemetryFrameHeaderSize() const override;
+
+    bool hasTelemetryFrameHeader(const std::vector<std::uint8_t> &bytes, std::size_t offset) const override;
+
+    bool isTelemetryFrameStructurallyValid(const std::vector<std::uint8_t> &bytes) const override;
+
+    bool isTelemetryFrameCrcConfirmed(const std::vector<std::uint8_t> &bytes) const override;
+
     std::optional<domain::AxisTelemetrySample> decodeTelemetry(domain::AxisId axisId,
                                                                const std::vector<std::uint8_t> &bytes,
                                                                double timestampSeconds) const override;

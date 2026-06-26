@@ -212,6 +212,7 @@ qt_add_executable(develop
   src/Presentation/ViewModels/TestTimeViewModel.hpp
   src/Localization/ControlChartsStrings.hpp
   src/Localization/PlotStrings.hpp
+  src/Localization/ReadinessStrings.hpp
   src/Localization/ShellStrings.hpp
   src/Localization/TelemetryStrings.hpp
   src/Localization/TestProtocolStrings.hpp

@@ -1,5 +1,7 @@
 #include "ReadinessDiagnosticMessageBuilder.hpp"
 
+#include "../../Localization/ReadinessStrings.hpp"
+
 #include <iomanip>
 #include <sstream>
 
@@ -15,18 +17,18 @@ std::string number(double value, int precision = 2) {
 std::string summaryFor(application::session::ReadinessStatus status) {
     switch (status) {
     case application::session::ReadinessStatus::Ok:
-        return "Расчёт готовности выполнен. Испытание допустимо.";
+        return localization::readiness::summaryOk;
     case application::session::ReadinessStatus::Warning:
-        return "Расчёт готовности выполнен. Есть предупреждения.";
+        return localization::readiness::summaryWarning;
     case application::session::ReadinessStatus::Dangerous:
-        return "Испытание потенциально опасно.";
+        return localization::readiness::summaryDangerous;
     case application::session::ReadinessStatus::Failed:
-        return "Расчёт готовности невозможен. Испытание потенциально опасно.";
+        return localization::readiness::summaryFailed;
     case application::session::ReadinessStatus::Unknown:
-        return "Расчёт готовности не выполнен.";
+        return localization::readiness::summaryUnknown;
     }
 
-    return "Расчёт готовности не выполнен.";
+    return localization::readiness::summaryUnknown;
 }
 
 } // namespace
@@ -47,9 +49,9 @@ ReadinessDiagnosticMessage ReadinessDiagnosticMessageBuilder::build(const sessio
     ReadinessDiagnosticMessage message{.summary = summaryFor(readiness.status)};
 
     if (readiness.calculatedForWorstCaseScenario && readiness.hasCalculatedForImpact) {
-        message.details.push_back("Расчёт выполнен по худшему участку сценария: Beaufort " +
-                                  number(readiness.calculatedForImpact.beaufort.value(), 1) + ", угол атаки " +
-                                  number(readiness.calculatedForImpact.angleOfAttack.degrees(), 1) + "°.");
+        message.details.push_back(localization::readiness::worstCaseScenarioImpact(
+            number(readiness.calculatedForImpact.beaufort.value(), 1),
+            number(readiness.calculatedForImpact.angleOfAttack.degrees(), 1)));
     }
 
     for (const auto &error : readiness.errors) {
@@ -61,13 +63,12 @@ ReadinessDiagnosticMessage ReadinessDiagnosticMessageBuilder::build(const sessio
     }
 
     if (readiness.safeLimits.status == domain::SafeWindImpactLimitStatus::Available) {
-        message.details.push_back("Безопасный предел по Бофорту: " + number(readiness.safeLimits.maxSafeBeaufort, 1) +
-                                  ".");
-        message.details.push_back("Безопасный предел угла атаки: ±" +
-                                  number(readiness.safeLimits.maxSafeAbsAngleOfAttack, 0) + "°.");
-    } else if (!readiness.safeLimits.diagnostics.empty()) {
         message.details.push_back(
-            "Безопасные пределы воздействия недоступны: не хватает критичных паспортных данных БАС.");
+            localization::readiness::safeBeaufortLimit(number(readiness.safeLimits.maxSafeBeaufort, 1)));
+        message.details.push_back(
+            localization::readiness::safeAngleOfAttackLimit(number(readiness.safeLimits.maxSafeAbsAngleOfAttack, 0)));
+    } else if (!readiness.safeLimits.diagnostics.empty()) {
+        message.details.push_back(localization::readiness::safeLimitsUnavailable);
     }
 
     return message;
@@ -78,51 +79,39 @@ ReadinessDiagnosticMessageBuilder::messageForDiagnostic(domain::TestDurationDiag
                                                         const domain::TestDurationDiagnosticValues &values) {
     switch (code) {
     case domain::TestDurationDiagnosticCode::TotalMassMissing:
-        return "Полная масса БАС не задана и не может быть рассчитана из полезной нагрузки, АКБ и двигателей. "
-               "Ожидается масса больше 0 кг; без неё нельзя оценить требуемую тягу.";
+        return localization::readiness::totalMassMissing;
     case domain::TestDurationDiagnosticCode::TotalMassEstimated:
-        return "Полная масса БАС не задана явно. Использована оценка по полезной нагрузке, АКБ и двигателям: " +
-               number(values.totalMassKg) + " кг; расчёт длительности менее точен.";
+        return localization::readiness::totalMassEstimated(number(values.totalMassKg));
     case domain::TestDurationDiagnosticCode::BatteryCapacityMissing:
-        return "Ёмкость АКБ отсутствует, пуста или равна 0 мА·ч. Ожидается значение больше 0; без него нельзя "
-               "оценить запас энергии.";
+        return localization::readiness::batteryCapacityMissing;
     case domain::TestDurationDiagnosticCode::BatteryCellCountMissing:
-        return "Число ячеек АКБ отсутствует, пусто или равно 0. Ожидается значение больше 0; без него нельзя "
-               "рассчитать напряжение батареи.";
+        return localization::readiness::batteryCellCountMissing;
     case domain::TestDurationDiagnosticCode::BatteryCellVoltageMissing:
-        return "Напряжение одной ячейки АКБ отсутствует, пусто или равно 0 В. Ожидается значение больше 0; без него "
-               "нельзя рассчитать мощность.";
+        return localization::readiness::batteryCellVoltageMissing;
     case domain::TestDurationDiagnosticCode::MotorCountMissing:
-        return "Количество двигателей отсутствует, пусто или равно 0. Ожидается значение больше 0; без него нельзя "
-               "распределить нагрузку по двигателям.";
+        return localization::readiness::motorCountMissing;
     case domain::TestDurationDiagnosticCode::MotorPeakCurrentMissing:
-        return "Пиковый ток двигателя отсутствует, пуст или равен 0 А. Ожидается значение больше 0; без него нельзя "
-               "проверить токовую нагрузку.";
+        return localization::readiness::motorPeakCurrentMissing;
     case domain::TestDurationDiagnosticCode::FrontalAreaFallbackUsed:
-        return "Фронтальная площадь БАС не задана или некорректна. Использовано fallback-значение " +
-               number(values.frontalAreaM2) + " м²; аэродинамическая нагрузка может быть оценена неточно.";
+        return localization::readiness::frontalAreaFallbackUsed(number(values.frontalAreaM2));
     case domain::TestDurationDiagnosticCode::DragCoefficientFallbackUsed:
-        return "Коэффициент сопротивления БАС не задан или некорректен. Использовано fallback-значение " +
-               number(values.dragCoefficient) + "; ветровая нагрузка может быть оценена неточно.";
+        return localization::readiness::dragCoefficientFallbackUsed(number(values.dragCoefficient));
     case domain::TestDurationDiagnosticCode::MotorMaxThrustMissing:
-        return "Максимальная тяга двигателя не задана. Проверка запаса тяги пропущена; испытание может превысить "
-               "возможности силовой установки.";
+        return localization::readiness::motorMaxThrustMissing;
     case domain::TestDurationDiagnosticCode::RequiredThrustExceedsAvailable:
-        return "Требуемая тяга " + number(values.requiredThrustKg) + " кг превышает доступную тягу " +
-               number(values.availableThrustKg) + " кг. Стендовый сценарий может требовать режим, недоступный для БАС.";
+        return localization::readiness::requiredThrustExceedsAvailable(number(values.requiredThrustKg),
+                                                                       number(values.availableThrustKg));
     case domain::TestDurationDiagnosticCode::MotorPeakCurrentExceeded:
-        return "Расчётный суммарный ток двигателей " + number(values.estimatedCurrentA) +
-               " А превышает допустимый пиковый ток двигателей " + number(values.maxMotorCurrentA) +
-               " А. Возможен перегрев или отказ силовой установки.";
+        return localization::readiness::motorPeakCurrentExceeded(number(values.estimatedCurrentA),
+                                                                 number(values.maxMotorCurrentA));
     case domain::TestDurationDiagnosticCode::BatteryDischargeCurrentExceeded:
-        return "Расчётный ток разряда " + number(values.estimatedCurrentA) + " А превышает допустимый ток АКБ " +
-               number(values.maxBatteryCurrentA) + " А. Возможна перегрузка аккумулятора.";
+        return localization::readiness::batteryDischargeCurrentExceeded(number(values.estimatedCurrentA),
+                                                                        number(values.maxBatteryCurrentA));
     case domain::TestDurationDiagnosticCode::AngleOfAttackClampedByMinCos:
-        return "Угол атаки приводит к слишком малому cos(angle). Применён защитный нижний предел коэффициента; "
-               "режим может быть физически некорректен для расчёта.";
+        return localization::readiness::angleOfAttackClampedByMinCos;
     }
 
-    return "Неизвестная диагностика расчёта готовности.";
+    return localization::readiness::unknownDiagnostic;
 }
 
 } // namespace application::services

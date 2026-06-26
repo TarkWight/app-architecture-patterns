@@ -131,7 +131,7 @@ TEST(ReadinessDiagnosticMessageBuilderTest, WorstCaseReadinessShowsScenarioImpac
 
     ASSERT_FALSE(message.details.empty());
     EXPECT_TRUE(contains(message.details.front(), "худшему участку сценария"));
-    EXPECT_TRUE(contains(message.details.front(), "Beaufort 6.0"));
+    EXPECT_TRUE(contains(message.details.front(), "Бофорт 6.0"));
     EXPECT_TRUE(contains(message.details.front(), "угол атаки -15.0°"));
 }
 

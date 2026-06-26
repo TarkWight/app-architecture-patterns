@@ -7,6 +7,7 @@
 #include "../Domain/TestProtocol.hpp"
 #include "../Domain/TestTimeSource.hpp"
 #include "../Domain/TestTimeDirection.hpp"
+#include "../Localization/ShellStrings.hpp"
 #include <exception>
 
 namespace presentation {
@@ -61,7 +62,7 @@ void ShellPresenter::onStartPressed() {
     refreshFromState();
 
     if (view != nullptr) {
-        view->appendLog("Test execution started");
+        view->appendLog(localization::shell::testExecutionStarted);
     }
 }
 
@@ -89,8 +90,9 @@ bool ShellPresenter::connectionAllowsStart() {
     }
 
     if (view != nullptr) {
-        view->showOperatorWarning("Стенд не подключён", "Перед запуском испытания необходимо подключить стенд.");
-        view->appendLog("Test execution start blocked: stand is not connected");
+        view->showOperatorWarning(localization::shell::standNotConnectedTitle,
+                                  localization::shell::standNotConnectedMessage);
+        view->appendLog(localization::shell::startBlockedStandDisconnected);
     }
 
     return false;
@@ -101,12 +103,12 @@ bool ShellPresenter::confirmDangerousReadinessStart(application::session::Readin
         return false;
     }
 
-    const std::string details =
-        status == application::session::ReadinessStatus::Failed
-            ? "Расчёт готовности невозможен. Проведение испытания может быть опасным."
-            : "Расчёт готовности содержит опасные диагностические сообщения. Проведение испытания может быть опасным.";
+    const std::string details = status == application::session::ReadinessStatus::Failed
+                                    ? localization::shell::readinessFailedStartDetails
+                                    : localization::shell::readinessDangerousStartDetails;
 
-    return view->confirmDangerousReadinessStart("Подтверждение запуска испытания", details + " Продолжить запуск?");
+    return view->confirmDangerousReadinessStart(localization::shell::dangerousStartConfirmationTitle,
+                                                details + localization::shell::continueStartQuestion);
 }
 
 void ShellPresenter::onPausePressed() {
@@ -115,7 +117,7 @@ void ShellPresenter::onPausePressed() {
 
     if (view != nullptr) {
         view->freezeStandImpactTransition();
-        view->appendLog("Test execution paused");
+        view->appendLog(localization::shell::testExecutionPaused);
     }
 }
 
@@ -124,7 +126,7 @@ void ShellPresenter::onResumePressed() {
     refreshFromState();
 
     if (view != nullptr) {
-        view->appendLog("Test execution resumed");
+        view->appendLog(localization::shell::testExecutionResumed);
     }
 }
 
@@ -146,7 +148,7 @@ void ShellPresenter::onStopPressed() {
 
     if (view != nullptr) {
         view->freezeStandImpactTransition();
-        view->appendLog("Test execution stopped");
+        view->appendLog(localization::shell::testExecutionStopped);
     }
 }
 
@@ -154,7 +156,7 @@ void ShellPresenter::onCalculatePressed() {
     calculateAndBuildControlPlotUseCase.execute();
 
     if (view != nullptr) {
-        view->appendLog("Readiness calculated and formula plot rebuilt");
+        view->appendLog(localization::shell::readinessAndPlotBuilt);
     }
 }
 
@@ -162,7 +164,7 @@ void ShellPresenter::onFunctionEdited(std::string expression) {
     setFunctionExpressionUseCase.execute(std::move(expression));
 
     if (view != nullptr) {
-        view->appendLog("Function expression updated");
+        view->appendLog(localization::shell::functionExpressionUpdated);
     }
 }
 
@@ -170,7 +172,7 @@ void ShellPresenter::onLineColorSelected(application::dto::RgbColor color) {
     setLineColorUseCase.execute(color);
 
     if (view != nullptr) {
-        view->appendLog("Line color updated");
+        view->appendLog(localization::shell::lineColorUpdated);
     }
 }
 
@@ -227,7 +229,8 @@ void ShellPresenter::refreshFromState() {
     view->setStartEnabled(canStart(session.execution.testExecutionStatus));
     view->setPauseResumeEnabled(canPause(session.execution.testExecutionStatus) ||
                                 canResume(session.execution.testExecutionStatus));
-    view->setPauseResumeText(canResume(session.execution.testExecutionStatus) ? "Продолжить" : "Пауза");
+    view->setPauseResumeText(canResume(session.execution.testExecutionStatus) ? localization::shell::resumeButton
+                                                                              : localization::shell::pauseButton);
     view->setStopEnabled(canStop(session.execution.testExecutionStatus));
     view->setFunctionExpression(session.control.functionExpression.value);
     view->setTestTimeSource(session.protocol.testTimeSource);
@@ -242,7 +245,7 @@ void ShellPresenter::onTestTimeSourceChanged(domain::TestTimeSource source) {
     refreshFromState();
 
     if (view != nullptr) {
-        view->appendLog("Test time source updated");
+        view->appendLog(localization::shell::testTimeSourceUpdated);
     }
 }
 
@@ -250,7 +253,7 @@ void ShellPresenter::onStandControlModeChanged(domain::StandControlMode mode) {
     setStandControlModeUseCase.execute(mode);
 
     if (view != nullptr) {
-        view->appendLog("Stand control mode updated");
+        view->appendLog(localization::shell::standControlModeUpdated);
     }
 }
 
@@ -261,7 +264,7 @@ void ShellPresenter::onConnectTelemetryPressed(std::string configPath) {
             disconnectStandUseCase.execute();
 
             if (view != nullptr) {
-                view->appendLog("Stand connection stopped");
+                view->appendLog(localization::shell::standConnectionStopped);
             }
 
             refreshFromState();
@@ -276,16 +279,15 @@ void ShellPresenter::onConnectTelemetryPressed(std::string configPath) {
         }
 
         if (view != nullptr) {
-            view->appendLog("Stand connection started");
+            view->appendLog(localization::shell::standConnectionStarted);
         }
 
         refreshFromState();
     } catch (const std::exception &e) {
         if (view != nullptr) {
-            const std::string message = std::string{"Stand connection failed: "} + e.what();
+            const std::string message = std::string{localization::shell::standConnectionFailedPrefix} + e.what();
             view->appendLog(message);
-            view->showOperatorWarning("Ошибка подключения стенда",
-                                      std::string{"Не удалось подключиться к стенду: "} + e.what());
+            view->showOperatorWarning(localization::shell::standConnectionErrorTitle, message);
         }
     }
 }
@@ -303,10 +305,10 @@ void ShellPresenter::refreshStandConnectionButton() {
     switch (domain::connectionButtonAction(state.get().connection.standConnectionStatus)) {
     case domain::StandConnectionButtonAction::ConfigureAndConnect:
     case domain::StandConnectionButtonAction::Connect:
-        view->setStandConnectionButtonText("Подключить стенд");
+        view->setStandConnectionButtonText(localization::shell::connectStandButton);
         break;
     case domain::StandConnectionButtonAction::Disconnect:
-        view->setStandConnectionButtonText("Отключить стенд");
+        view->setStandConnectionButtonText(localization::shell::disconnectStandButton);
         break;
     }
 }
@@ -318,25 +320,25 @@ void ShellPresenter::refreshStandConnectionStatusText() {
 
     switch (state.get().connection.standConnectionStatus) {
     case domain::StandConnectionStatus::Disconnected:
-        view->setStandConnectionStatusText("Стенд: отключен");
+        view->setStandConnectionStatusText(localization::shell::standDisconnectedStatus);
         break;
     case domain::StandConnectionStatus::Configured:
-        view->setStandConnectionStatusText("Стенд: настроен");
+        view->setStandConnectionStatusText(localization::shell::standConfiguredStatus);
         break;
     case domain::StandConnectionStatus::Connecting:
-        view->setStandConnectionStatusText("Стенд: подключение");
+        view->setStandConnectionStatusText(localization::shell::standConnectingStatus);
         break;
     case domain::StandConnectionStatus::Connected:
-        view->setStandConnectionStatusText("Стенд: подключен");
+        view->setStandConnectionStatusText(localization::shell::standConnectedStatus);
         break;
     case domain::StandConnectionStatus::Polling:
-        view->setStandConnectionStatusText("Стенд: обмен активен");
+        view->setStandConnectionStatusText(localization::shell::standPollingStatus);
         break;
     case domain::StandConnectionStatus::Disconnecting:
-        view->setStandConnectionStatusText("Стенд: отключение");
+        view->setStandConnectionStatusText(localization::shell::standDisconnectingStatus);
         break;
     case domain::StandConnectionStatus::Error:
-        view->setStandConnectionStatusText("Стенд: ошибка связи");
+        view->setStandConnectionStatusText(localization::shell::standErrorStatus);
         break;
     }
 }
@@ -355,11 +357,10 @@ void ShellPresenter::notifyStandConnectionStatusChanged(domain::StandConnectionS
         standConnectionWarningShown = true;
         lastStandConnectionStatus = status;
 
-        const std::string message = "Stand connection lost";
+        const std::string message = localization::shell::standConnectionLost;
         view->appendLog(message);
-        view->showOperatorWarning("Связь со стендом потеряна",
-                                  "Обмен телеметрией остановлен. Проверьте питание стенда, сеть и состояние mock/real "
-                                  "server.");
+        view->showOperatorWarning(localization::shell::standConnectionLostTitle,
+                                  localization::shell::standConnectionLostMessage);
     }
 
     lastStandConnectionStatus = status;

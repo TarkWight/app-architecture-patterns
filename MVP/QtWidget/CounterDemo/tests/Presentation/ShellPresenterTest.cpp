@@ -480,7 +480,7 @@ TEST(ShellPresenterTest, Start_WhenStandDisconnected_DoesNotStart) {
     EXPECT_EQ(fixture.state.execution().testExecutionStatus, domain::TestExecutionStatus::Idle);
     EXPECT_EQ(fixture.view.lastWarningTitle, "Стенд не подключён");
     ASSERT_FALSE(fixture.view.logs.empty());
-    EXPECT_EQ(fixture.view.logs.back(), "Test execution start blocked: stand is not connected");
+    EXPECT_EQ(fixture.view.logs.back(), "Запуск испытания заблокирован: стенд не подключён");
 }
 
 TEST(ShellPresenterTest, Start_WhenConnectionFailed_DoesNotStart) {
@@ -494,7 +494,7 @@ TEST(ShellPresenterTest, Start_WhenConnectionFailed_DoesNotStart) {
     EXPECT_EQ(fixture.scheduler.startCount, 0);
     EXPECT_EQ(fixture.state.execution().testExecutionStatus, domain::TestExecutionStatus::Idle);
     ASSERT_FALSE(fixture.view.logs.empty());
-    EXPECT_EQ(fixture.view.logs.back(), "Test execution start blocked: stand is not connected");
+    EXPECT_EQ(fixture.view.logs.back(), "Запуск испытания заблокирован: стенд не подключён");
 }
 
 TEST(ShellPresenterTest, Start_WhenConnected_AllowsStartForManualHybridAndAutomatic) {

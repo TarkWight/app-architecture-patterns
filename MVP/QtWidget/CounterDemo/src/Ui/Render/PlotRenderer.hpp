@@ -10,10 +10,19 @@
 
 namespace ui::render {
 
+struct AxisLabelStepRequest {
+    double minValue{0.0};
+    double maxValue{0.0};
+    double gridStep{1.0};
+    int axisPixels{0};
+    int minimumLabelSpacingPixels{1};
+};
+
 class PlotRenderer final {
   public:
     static void drawPlot(QPainter &painter, const QRect &rect, const application::dto::PlotModel &plot);
     static std::vector<application::dto::Series> splitDrawableSegments(const application::dto::Series &series);
+    static double selectLabelStep(const AxisLabelStepRequest &request);
 
   private:
     static bool hasRenderablePlot(const application::dto::PlotModel &plot);
@@ -27,7 +36,7 @@ class PlotRenderer final {
 
     static int tickCount(double minValue, double maxValue, double stepValue);
 
-    static QString formatTickValue(double value, const application::dto::AxisSpec &axis);
+    static QString formatTickValue(double value, const application::dto::AxisSpec &axis, double labelStep);
 
     static void drawFrame(QPainter &painter, const QRect &plotRect);
 

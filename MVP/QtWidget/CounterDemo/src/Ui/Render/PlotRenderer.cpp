@@ -15,6 +15,8 @@ constexpr int leftMargin = 50;
 constexpr int rightMargin = 20;
 constexpr int topMargin = 20;
 constexpr int bottomMargin = 45;
+constexpr int minimumXLabelSpacingPixels = 48;
+constexpr int minimumYLabelSpacingPixels = 28;
 
 QRect makeInnerPlotRect(const QRect &outerRect) {
     return QRect(outerRect.left() + leftMargin, outerRect.top() + topMargin,
@@ -126,12 +128,70 @@ int PlotRenderer::tickCount(double minValue, double maxValue, double stepValue) 
     return static_cast<int>(std::floor(span / stepValue)) + 1;
 }
 
-QString PlotRenderer::formatTickValue(double value, const application::dto::AxisSpec &axis) {
+double niceStep(double rawStep) {
+    if (!std::isfinite(rawStep) || rawStep <= 0.0) {
+        return 1.0;
+    }
+
+    const double exponent = std::floor(std::log10(rawStep));
+    const double scale = std::pow(10.0, exponent);
+    const double normalized = rawStep / scale;
+
+    if (normalized <= 1.0) {
+        return scale;
+    }
+    if (normalized <= 2.0) {
+        return 2.0 * scale;
+    }
+    if (normalized <= 5.0) {
+        return 5.0 * scale;
+    }
+
+    return 10.0 * scale;
+}
+
+int automaticPrecision(double step) {
+    if (std::abs(step - std::round(step)) < 0.000001) {
+        return 0;
+    }
+
+    if (std::abs((step * 10.0) - std::round(step * 10.0)) < 0.000001) {
+        return 1;
+    }
+
+    return 2;
+}
+
+bool isLabelTick(double value, double minValue, double labelStep) {
+    if (labelStep <= 0.0) {
+        return true;
+    }
+
+    const double tickIndex = (value - minValue) / labelStep;
+    return std::abs(tickIndex - std::round(tickIndex)) < 0.000001;
+}
+
+QString PlotRenderer::formatTickValue(double value, const application::dto::AxisSpec &axis, double labelStep) {
     if (axis.labelPrecision >= 0) {
         return QString::number(value, 'f', axis.labelPrecision);
     }
 
-    return QString::number(value);
+    return QString::number(value, 'f', automaticPrecision(labelStep));
+}
+
+double PlotRenderer::selectLabelStep(const AxisLabelStepRequest &request) {
+    if (request.gridStep <= 0.0 || request.maxValue <= request.minValue || request.axisPixels <= 0 ||
+        request.minimumLabelSpacingPixels <= 0) {
+        return request.gridStep;
+    }
+
+    const double span = request.maxValue - request.minValue;
+    const double maximumLabelCount = std::max(1.0, std::floor(static_cast<double>(request.axisPixels) /
+                                                              static_cast<double>(request.minimumLabelSpacingPixels)));
+    const double desiredStep = niceStep(span / maximumLabelCount);
+    const double multiplier = std::max(1.0, std::ceil((desiredStep / request.gridStep) - 0.000001));
+
+    return request.gridStep * multiplier;
 }
 
 void PlotRenderer::drawFrame(QPainter &painter, const QRect &plotRect) {
@@ -170,6 +230,13 @@ void PlotRenderer::drawXGrid(QPainter &painter, const QRect &plotRect, const app
         return;
     }
 
+    const double labelStep =
+        selectLabelStep(AxisLabelStepRequest{.minValue = plot.x.min,
+                                             .maxValue = plot.x.max,
+                                             .gridStep = plot.x.step,
+                                             .axisPixels = plotRect.width(),
+                                             .minimumLabelSpacingPixels = minimumXLabelSpacingPixels});
+
     painter.setPen(QPen(QColor(203, 213, 225), 1, Qt::DashLine));
 
     for (int index = 0; index < count; ++index) {
@@ -178,8 +245,13 @@ void PlotRenderer::drawXGrid(QPainter &painter, const QRect &plotRect, const app
 
         painter.drawLine(px, plotRect.top(), px, plotRect.bottom());
 
+        if (!isLabelTick(xValue, plot.x.min, labelStep)) {
+            continue;
+        }
+
         painter.setPen(QPen(QColor(30, 41, 59), 1));
-        painter.drawText(px - 15, plotRect.bottom() + 18, 30, 16, Qt::AlignCenter, formatTickValue(xValue, plot.x));
+        painter.drawText(px - 24, plotRect.bottom() + 18, 48, 16, Qt::AlignCenter,
+                         formatTickValue(xValue, plot.x, labelStep));
         painter.setPen(QPen(QColor(203, 213, 225), 1, Qt::DashLine));
     }
 }
@@ -191,6 +263,13 @@ void PlotRenderer::drawYGrid(QPainter &painter, const QRect &plotRect, const app
         return;
     }
 
+    const double labelStep =
+        selectLabelStep(AxisLabelStepRequest{.minValue = plot.y.min,
+                                             .maxValue = plot.y.max,
+                                             .gridStep = plot.y.step,
+                                             .axisPixels = plotRect.height(),
+                                             .minimumLabelSpacingPixels = minimumYLabelSpacingPixels});
+
     painter.setPen(QPen(QColor(203, 213, 225), 1, Qt::DashLine));
 
     for (int index = 0; index < count; ++index) {
@@ -199,9 +278,13 @@ void PlotRenderer::drawYGrid(QPainter &painter, const QRect &plotRect, const app
 
         painter.drawLine(plotRect.left(), py, plotRect.right(), py);
 
+        if (!isLabelTick(yValue, plot.y.min, labelStep)) {
+            continue;
+        }
+
         painter.setPen(QPen(QColor(30, 41, 59), 1));
         painter.drawText(plotRect.left() - leftMargin, py - 8, leftMargin - 5, 16, Qt::AlignRight | Qt::AlignVCenter,
-                         formatTickValue(yValue, plot.y));
+                         formatTickValue(yValue, plot.y, labelStep));
         painter.setPen(QPen(QColor(203, 213, 225), 1, Qt::DashLine));
     }
 }

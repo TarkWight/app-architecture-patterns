@@ -6,6 +6,8 @@
 
 #include <gtest/gtest.h>
 
+#include <cmath>
+
 namespace {
 
 constexpr int rightMargin = 20;
@@ -70,6 +72,28 @@ TEST(PlotRendererTest, ClipsSeriesPointsOutsideRightPlotBoundary) {
                 << "Unexpected series pixel outside plot area at " << x << "," << y;
         }
     }
+}
+
+TEST(PlotRendererTest, SelectsReadableXLabelStepForLongControlPlot) {
+    const double labelStep = ui::render::PlotRenderer::selectLabelStep(ui::render::AxisLabelStepRequest{
+        .minValue = 0.0, .maxValue = 60.0, .gridStep = 1.0, .axisPixels = 720, .minimumLabelSpacingPixels = 48});
+
+    EXPECT_GE(labelStep, 5.0);
+    EXPECT_DOUBLE_EQ(std::fmod(labelStep, 1.0), 0.0);
+}
+
+TEST(PlotRendererTest, SelectsWholeBeaufortLabelsWhenGridUsesHalfSteps) {
+    const double labelStep = ui::render::PlotRenderer::selectLabelStep(ui::render::AxisLabelStepRequest{
+        .minValue = 0.0, .maxValue = 7.0, .gridStep = 0.5, .axisPixels = 365, .minimumLabelSpacingPixels = 28});
+
+    EXPECT_DOUBLE_EQ(labelStep, 1.0);
+}
+
+TEST(PlotRendererTest, KeepsTelemetrySecondLabelsReadable) {
+    const double labelStep = ui::render::PlotRenderer::selectLabelStep(ui::render::AxisLabelStepRequest{
+        .minValue = 0.0, .maxValue = 60.0, .gridStep = 10.0, .axisPixels = 720, .minimumLabelSpacingPixels = 48});
+
+    EXPECT_DOUBLE_EQ(labelStep, 10.0);
 }
 
 } // namespace

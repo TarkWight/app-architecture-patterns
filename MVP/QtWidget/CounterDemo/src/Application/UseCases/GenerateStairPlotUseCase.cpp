@@ -1,5 +1,7 @@
 #include "GenerateStairPlotUseCase.hpp"
 
+#include "../../Presentation/Strings/PlotStrings.hpp"
+
 namespace application::useCases {
 
 GenerateStairPlotUseCase::GenerateStairPlotUseCase(application::session::SessionState &state) : state(state) {
@@ -9,12 +11,14 @@ application::dto::PlotModel GenerateStairPlotUseCase::execute() {
     const auto &session = state.get();
 
     application::dto::PlotModel plot{};
-    plot.title = "Stair plot";
+    plot.title = presentation::strings::plot::stairTitle;
     plot.color = session.control.lineColor;
 
-    plot.x = application::dto::AxisSpec{.min = 0.0, .max = 20.0, .step = 1.0, .label = "steps"};
+    plot.x = application::dto::AxisSpec{
+        .min = 0.0, .max = 20.0, .step = 1.0, .label = presentation::strings::plot::stepsAxis};
 
-    plot.y = application::dto::AxisSpec{.min = 0.0, .max = 7.5, .step = 0.5, .label = "Y"};
+    plot.y = application::dto::AxisSpec{
+        .min = 0.0, .max = 7.5, .step = 0.5, .label = presentation::strings::plot::valueAxis};
 
     constexpr int pointCount = 21;
     plot.series.points.reserve(pointCount);

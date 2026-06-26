@@ -123,7 +123,7 @@ TEST(PauseTestExecutionUseCaseTest, StopsTelemetryPollingAndKeepsPlots) {
     state.appendTelemetrySample(validSampleAt(10.0));
 
     application::dto::PlotModel controlPlot{};
-    controlPlot.title = "Control chart";
+    controlPlot.title = "Управляющее воздействие";
     controlPlot.series.points.push_back(application::dto::Point{.x = 0.0, .y = 1.0});
     state.setControlPlot(controlPlot);
 
@@ -139,7 +139,7 @@ TEST(PauseTestExecutionUseCaseTest, StopsTelemetryPollingAndKeepsPlots) {
     EXPECT_EQ(state.connection().standConnectionStatus, domain::StandConnectionStatus::Connected);
     EXPECT_EQ(state.execution().testExecutionStatus, domain::TestExecutionStatus::Paused);
     EXPECT_FALSE(state.telemetry().telemetryHistory.empty());
-    EXPECT_EQ(state.control().controlPlot.title, "Control chart");
+    EXPECT_EQ(state.control().controlPlot.title, "Управляющее воздействие");
     ASSERT_EQ(state.control().controlPlot.series.points.size(), 1U);
 }
 

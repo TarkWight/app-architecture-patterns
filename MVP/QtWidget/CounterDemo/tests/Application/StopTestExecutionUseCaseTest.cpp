@@ -126,7 +126,7 @@ TEST(StopTestExecutionUseCaseTest, KeepsTelemetryAndControlPlotsVisible) {
                                    .safeCommandValue = domain::makeWindImpact(3.0, 90.0, 0.0)});
 
     application::dto::PlotModel controlPlot{};
-    controlPlot.title = "Control chart";
+    controlPlot.title = "Управляющее воздействие";
     controlPlot.series.points.push_back(application::dto::Point{.x = 0.0, .y = 1.0});
     state.setControlPlot(controlPlot);
 
@@ -138,7 +138,7 @@ TEST(StopTestExecutionUseCaseTest, KeepsTelemetryAndControlPlotsVisible) {
 
     EXPECT_FALSE(state.telemetry().telemetryHistory.empty());
     EXPECT_EQ(state.control().controlTrace.size(), 1U);
-    EXPECT_EQ(state.control().controlPlot.title, "Control chart");
+    EXPECT_EQ(state.control().controlPlot.title, "Управляющее воздействие");
     ASSERT_EQ(state.control().controlPlot.series.points.size(), 1U);
     EXPECT_DOUBLE_EQ(state.control().controlPlot.series.points.front().y, 1.0);
 }

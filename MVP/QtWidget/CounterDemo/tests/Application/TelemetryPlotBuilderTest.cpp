@@ -22,17 +22,17 @@ TEST(TelemetryPlotBuilderTest, BuildsVisibleGridWhenHistoryIsEmpty) {
 
     const auto plot = builder.build(telemetry);
 
-    EXPECT_EQ(plot.title, "Telemetry");
+    EXPECT_EQ(plot.title, "Телеметрия");
     EXPECT_EQ(plot.renderMode, application::dto::PlotRenderMode::RealtimeTimeSeries);
     EXPECT_DOUBLE_EQ(plot.x.min, 0.0);
     EXPECT_DOUBLE_EQ(plot.x.max, 60.0);
     EXPECT_DOUBLE_EQ(plot.x.step, 10.0);
-    EXPECT_EQ(plot.x.label, "seconds");
+    EXPECT_EQ(plot.x.label, "секунды");
     EXPECT_EQ(plot.x.labelPrecision, 0);
     EXPECT_DOUBLE_EQ(plot.y.min, 0.0);
     EXPECT_DOUBLE_EQ(plot.y.max, 360.0);
     EXPECT_DOUBLE_EQ(plot.y.step, 45.0);
-    EXPECT_EQ(plot.y.label, "degrees");
+    EXPECT_EQ(plot.y.label, "градусы");
     ASSERT_EQ(plot.seriesList.size(), 2U);
     EXPECT_EQ(plot.seriesList.at(0).label, "Ось Y / тангаж");
     EXPECT_EQ(plot.seriesList.at(1).label, "Ось Z / направление");

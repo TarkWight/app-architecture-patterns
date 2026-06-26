@@ -263,7 +263,7 @@ TEST(StartTestExecutionUseCaseTest, StartBuildsControlPlotForManualMode) {
 
     useCase.execute();
 
-    EXPECT_EQ(state.control().controlPlot.title, "Control chart");
+    EXPECT_EQ(state.control().controlPlot.title, "Управляющее воздействие");
     EXPECT_GT(state.control().controlPlot.x.max, state.control().controlPlot.x.min);
 }
 

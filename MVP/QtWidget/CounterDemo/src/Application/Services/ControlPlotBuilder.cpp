@@ -2,6 +2,7 @@
 
 #include "../../Domain/ControlTrace.hpp"
 #include "../../Domain/TestTimeSource.hpp"
+#include "../../Presentation/Strings/PlotStrings.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -55,7 +56,7 @@ bool hasFormulaSeries(const application::dto::PlotModel &plot) {
 
 void addFormulaSeries(application::dto::PlotModel &plot) {
     application::dto::NamedSeries formula{};
-    formula.label = "Формула";
+    formula.label = presentation::strings::plot::formulaSeries;
     formula.color = plot.color;
     formula.series = std::move(plot.series);
     plot.seriesList.clear();
@@ -74,11 +75,11 @@ void addControlTraceSeries(application::dto::PlotModel &plot, const domain::Cont
     }
 
     application::dto::NamedSeries target{};
-    target.label = "Цель";
+    target.label = presentation::strings::plot::targetSeries;
     target.color = application::dto::RgbColor{220, 60, 50};
 
     application::dto::NamedSeries safeCommand{};
-    safeCommand.label = "Безопасная команда";
+    safeCommand.label = presentation::strings::plot::safeCommandSeries;
     safeCommand.color = application::dto::RgbColor{40, 110, 210};
 
     target.series.points.reserve(trace.size());
@@ -96,8 +97,10 @@ void addControlTraceSeries(application::dto::PlotModel &plot, const domain::Cont
 
     if (!overlayFormula) {
         const double maxSeconds = std::max(10.0, std::ceil(markerTimeSeconds));
-        plot.x = application::dto::AxisSpec{
-            .min = 0.0, .max = maxSeconds, .step = traceAxisStepSeconds(maxSeconds), .label = "seconds"};
+        plot.x = application::dto::AxisSpec{.min = 0.0,
+                                            .max = maxSeconds,
+                                            .step = traceAxisStepSeconds(maxSeconds),
+                                            .label = presentation::strings::plot::secondsAxis};
     }
 
     plot.series.points.clear();
@@ -105,7 +108,8 @@ void addControlTraceSeries(application::dto::PlotModel &plot, const domain::Cont
     plot.seriesList.push_back(std::move(safeCommand));
 
     if (overlayFormula) {
-        plot.marker = application::dto::PlotMarker{.x = markerX, .label = "Сейчас", .visible = true};
+        plot.marker = application::dto::PlotMarker{
+            .x = markerX, .label = presentation::strings::plot::currentMarker, .visible = true};
     }
 }
 
@@ -115,13 +119,15 @@ application::dto::PlotModel ControlPlotBuilder::build(const session::ProtocolSta
                                                       const session::ControlStateData &control,
                                                       const domain::WindControlProfile &profile) const {
     application::dto::PlotModel plot{};
-    plot.title = "Control chart";
+    plot.title = presentation::strings::plot::controlTitle;
     plot.color = control.lineColor;
 
     const int durationMinutes =
         profile.duration.value() > 0 ? profile.duration.value() : determineGridDuration(protocol, control).value();
-    plot.x = application::dto::AxisSpec{0.0, static_cast<double>(std::max(1, durationMinutes)), 1.0, "minutes"};
-    plot.y = application::dto::AxisSpec{0.0, domain::maxOperationalBeaufort, 0.5, "Beaufort"};
+    plot.x = application::dto::AxisSpec{0.0, static_cast<double>(std::max(1, durationMinutes)), 1.0,
+                                        presentation::strings::plot::minutesAxis};
+    plot.y =
+        application::dto::AxisSpec{0.0, domain::maxOperationalBeaufort, 0.5, presentation::strings::plot::beaufortAxis};
 
     plot.series.points.reserve(profile.samples.size());
     for (const auto &sample : profile.samples) {

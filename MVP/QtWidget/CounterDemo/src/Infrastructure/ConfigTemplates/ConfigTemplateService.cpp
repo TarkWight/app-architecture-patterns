@@ -1,5 +1,7 @@
 #include "ConfigTemplateService.hpp"
 
+#include "../../Localization/ConfigStrings.hpp"
+
 #include <filesystem>
 #include <fstream>
 #include <stdexcept>
@@ -74,7 +76,7 @@ void ConfigTemplateService::createTemplate(ConfigTemplateType type, const std::f
 
     std::ofstream stream{path};
     if (!stream.is_open()) {
-        throw std::runtime_error{"cannot create config template: " + path.string()};
+        throw std::runtime_error{localization::config::configTemplateCreateFailed(path.string())};
     }
 
     stream << templateContentFor(type);
@@ -96,7 +98,7 @@ const char *ConfigTemplateService::templateContentFor(ConfigTemplateType type) {
     case ConfigTemplateType::Telemetry:
         return telemetryTemplate;
     case ConfigTemplateType::PdfReport:
-        throw std::logic_error{"PDF report template is created by TestProtocolTab"};
+        throw std::logic_error{localization::config::pdfReportTemplateCreatedByProtocolTab};
     }
 
     return telemetryTemplate;

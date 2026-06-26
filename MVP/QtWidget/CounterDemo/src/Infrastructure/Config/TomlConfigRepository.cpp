@@ -1,5 +1,7 @@
 #include "TomlConfigRepository.hpp"
 
+#include "../../Localization/ConfigStrings.hpp"
+
 #include <toml++/toml.h>
 
 #include <fstream>
@@ -147,7 +149,7 @@ void TomlConfigRepository::savePdfReportTemplate(const std::string &path,
                                                  const application::dto::PdfReportConfig &config) {
     std::ofstream stream{path};
     if (!stream.is_open()) {
-        throw std::runtime_error{"cannot open PDF report TOML template for writing"};
+        throw std::runtime_error{localization::config::pdfReportTomlOpenForWriteFailed};
     }
 
     stream << "[pdf_report]\n";

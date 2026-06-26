@@ -21,7 +21,7 @@
 #include "../../Domain/WindControlProfile.hpp"
 #include "../../Domain/WindImpact.hpp"
 #include "../../Domain/Expression.hpp"
-#include "../../Presentation/Strings/PlotStrings.hpp"
+#include "../../Localization/PlotStrings.hpp"
 
 #include <vector>
 #include <optional>
@@ -32,11 +32,11 @@ enum class ReadinessStatus { Unknown, Ok, Warning, Dangerous, Failed };
 
 inline application::dto::PlotModel makeInitialTelemetryPlot() {
     application::dto::PlotModel plot{};
-    plot.title = presentation::strings::plot::telemetryTitle;
+    plot.title = localization::plot::telemetryTitle;
     plot.x = application::dto::AxisSpec{
-        .min = 0.0, .max = 60.0, .step = 10.0, .label = presentation::strings::plot::secondsAxis, .labelPrecision = 0};
-    plot.y = application::dto::AxisSpec{
-        .min = 0.0, .max = 360.0, .step = 45.0, .label = presentation::strings::plot::degreesAxis};
+        .min = 0.0, .max = 60.0, .step = 10.0, .label = localization::plot::secondsAxis, .labelPrecision = 0};
+    plot.y =
+        application::dto::AxisSpec{.min = 0.0, .max = 360.0, .step = 45.0, .label = localization::plot::degreesAxis};
     plot.renderMode = application::dto::PlotRenderMode::RealtimeTimeSeries;
     return plot;
 }

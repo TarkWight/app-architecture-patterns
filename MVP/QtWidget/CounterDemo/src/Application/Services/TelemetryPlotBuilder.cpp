@@ -1,7 +1,7 @@
 #include "TelemetryPlotBuilder.hpp"
 
 #include "../../Domain/AxisId.hpp"
-#include "../../Presentation/Strings/PlotStrings.hpp"
+#include "../../Localization/PlotStrings.hpp"
 
 #include <algorithm>
 #include <utility>
@@ -10,11 +10,11 @@ namespace application::services {
 
 application::dto::PlotModel TelemetryPlotBuilder::build(const session::TelemetryStateData &telemetry) const {
     application::dto::PlotModel plot{};
-    plot.title = presentation::strings::plot::telemetryTitle;
+    plot.title = localization::plot::telemetryTitle;
     plot.renderMode = application::dto::PlotRenderMode::RealtimeTimeSeries;
-    plot.x.label = presentation::strings::plot::secondsAxis;
-    plot.y = application::dto::AxisSpec{
-        .min = 0.0, .max = 360.0, .step = 45.0, .label = presentation::strings::plot::degreesAxis};
+    plot.x.label = localization::plot::secondsAxis;
+    plot.y =
+        application::dto::AxisSpec{.min = 0.0, .max = 360.0, .step = 45.0, .label = localization::plot::degreesAxis};
 
     const double windowSeconds = std::max(1.0, telemetry.telemetryWindowSeconds);
     const double endSeconds = std::max(windowSeconds, telemetry.telemetryWindowEndSeconds.seconds());
@@ -23,15 +23,15 @@ application::dto::PlotModel TelemetryPlotBuilder::build(const session::Telemetry
     plot.x = application::dto::AxisSpec{.min = startSeconds,
                                         .max = startSeconds + windowSeconds,
                                         .step = 10.0,
-                                        .label = presentation::strings::plot::secondsAxis,
+                                        .label = localization::plot::secondsAxis,
                                         .labelPrecision = 0};
 
     application::dto::NamedSeries axisY{};
-    axisY.label = presentation::strings::plot::telemetryAxisYPitch;
+    axisY.label = localization::plot::telemetryAxisYPitch;
     axisY.color = telemetry.telemetryAxisYColor;
 
     application::dto::NamedSeries axisZ{};
-    axisZ.label = presentation::strings::plot::telemetryAxisZDirection;
+    axisZ.label = localization::plot::telemetryAxisZDirection;
     axisZ.color = telemetry.telemetryAxisZColor;
     axisZ.series.breakOnLargeDelta = true;
     axisZ.series.wrapThreshold = 180.0;

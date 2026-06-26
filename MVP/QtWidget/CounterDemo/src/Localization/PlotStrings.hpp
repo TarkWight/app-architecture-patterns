@@ -1,7 +1,7 @@
 #ifndef PLOTSTRINGS_HPP
 #define PLOTSTRINGS_HPP
 
-namespace presentation::strings::plot {
+namespace localization::plot {
 
 inline constexpr const char *telemetryTitle = "Телеметрия";
 inline constexpr const char *controlTitle = "Управляющее воздействие";
@@ -22,6 +22,6 @@ inline constexpr const char *targetSeries = "Цель";
 inline constexpr const char *safeCommandSeries = "Безопасная команда";
 inline constexpr const char *currentMarker = "Сейчас";
 
-} // namespace presentation::strings::plot
+} // namespace localization::plot
 
 #endif // PLOTSTRINGS_HPP

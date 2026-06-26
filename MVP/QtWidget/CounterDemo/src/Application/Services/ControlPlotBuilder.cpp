@@ -2,7 +2,7 @@
 
 #include "../../Domain/ControlTrace.hpp"
 #include "../../Domain/TestTimeSource.hpp"
-#include "../../Presentation/Strings/PlotStrings.hpp"
+#include "../../Localization/PlotStrings.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -56,7 +56,7 @@ bool hasFormulaSeries(const application::dto::PlotModel &plot) {
 
 void addFormulaSeries(application::dto::PlotModel &plot) {
     application::dto::NamedSeries formula{};
-    formula.label = presentation::strings::plot::formulaSeries;
+    formula.label = localization::plot::formulaSeries;
     formula.color = plot.color;
     formula.series = std::move(plot.series);
     plot.seriesList.clear();
@@ -75,11 +75,11 @@ void addControlTraceSeries(application::dto::PlotModel &plot, const domain::Cont
     }
 
     application::dto::NamedSeries target{};
-    target.label = presentation::strings::plot::targetSeries;
+    target.label = localization::plot::targetSeries;
     target.color = application::dto::RgbColor{220, 60, 50};
 
     application::dto::NamedSeries safeCommand{};
-    safeCommand.label = presentation::strings::plot::safeCommandSeries;
+    safeCommand.label = localization::plot::safeCommandSeries;
     safeCommand.color = application::dto::RgbColor{40, 110, 210};
 
     target.series.points.reserve(trace.size());
@@ -100,7 +100,7 @@ void addControlTraceSeries(application::dto::PlotModel &plot, const domain::Cont
         plot.x = application::dto::AxisSpec{.min = 0.0,
                                             .max = maxSeconds,
                                             .step = traceAxisStepSeconds(maxSeconds),
-                                            .label = presentation::strings::plot::secondsAxis};
+                                            .label = localization::plot::secondsAxis};
     }
 
     plot.series.points.clear();
@@ -108,8 +108,8 @@ void addControlTraceSeries(application::dto::PlotModel &plot, const domain::Cont
     plot.seriesList.push_back(std::move(safeCommand));
 
     if (overlayFormula) {
-        plot.marker = application::dto::PlotMarker{
-            .x = markerX, .label = presentation::strings::plot::currentMarker, .visible = true};
+        plot.marker =
+            application::dto::PlotMarker{.x = markerX, .label = localization::plot::currentMarker, .visible = true};
     }
 }
 
@@ -119,15 +119,14 @@ application::dto::PlotModel ControlPlotBuilder::build(const session::ProtocolSta
                                                       const session::ControlStateData &control,
                                                       const domain::WindControlProfile &profile) const {
     application::dto::PlotModel plot{};
-    plot.title = presentation::strings::plot::controlTitle;
+    plot.title = localization::plot::controlTitle;
     plot.color = control.lineColor;
 
     const int durationMinutes =
         profile.duration.value() > 0 ? profile.duration.value() : determineGridDuration(protocol, control).value();
     plot.x = application::dto::AxisSpec{0.0, static_cast<double>(std::max(1, durationMinutes)), 1.0,
-                                        presentation::strings::plot::minutesAxis};
-    plot.y =
-        application::dto::AxisSpec{0.0, domain::maxOperationalBeaufort, 0.5, presentation::strings::plot::beaufortAxis};
+                                        localization::plot::minutesAxis};
+    plot.y = application::dto::AxisSpec{0.0, domain::maxOperationalBeaufort, 0.5, localization::plot::beaufortAxis};
 
     plot.series.points.reserve(profile.samples.size());
     for (const auto &sample : profile.samples) {
